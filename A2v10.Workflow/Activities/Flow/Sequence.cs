@@ -8,16 +8,15 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Sequence : Activity, IStorable, IHasVariables
+	public class Sequence : Activity, IStorable, IHasContext, IScriptable
 	{
 		public List<IActivity> Activities { get; set; }
-		public List<Variable> Variables { get; set; }
+		public List<IVariable> Variables { get; set; }
 
 		ExecutingAction _onComplete;
 		Int32 _next;
 
 		#region IStorable
-
 		const String ON_COMPLETE = "OnComplete";
 		const String NEXT = "Next";
 
@@ -34,6 +33,13 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
+		#region IScriptable
+		public virtual void BuildScript(IScriptBuilder builder)
+		{
+			builder.AddVariables(Variables);
+		}
+		#endregion
+
 		#region Traverse
 		public override async ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
 		{
@@ -43,17 +49,18 @@ namespace A2v10.Workflow
 			foreach (var act in Activities)
 				await onAction(act);
 		}
-		public override void Traverse(Action<IActivity> onAction)
+		public override void Traverse(TraverseArg traverse)
 		{
-			base.Traverse(onAction);
-			if (Activities == null)
-				return;
-			foreach (var act in Activities)
-				onAction(act);
+			traverse.Start?.Invoke(this);
+			traverse.Action?.Invoke(this);
+			if (Activities != null)
+				foreach (var act in Activities)
+					act.Traverse(traverse);
+			traverse.End?.Invoke(this);
 		}
 		#endregion
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			if (Activities == null || Activities.Count == 0)

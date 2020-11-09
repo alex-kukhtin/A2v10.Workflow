@@ -24,18 +24,17 @@ namespace A2v10.Workflow
 				await onAction(Else);
 		}
 
-		public override void Traverse(Action<IActivity> onAction)
+		public override void Traverse(TraverseArg traverse)
 		{
-			base.Traverse(onAction);
-			if (Then != null)
-				onAction(Then);
-			if (Else != null)
-				onAction(Else);
+			traverse.Start?.Invoke(this);
+			Then?.Traverse(traverse);
+			Else?.Traverse(traverse);
+			traverse.End?.Invoke(this);
 		}
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
-			var cond = context.Evaluate<Boolean>(Condition);
+			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
 			if (cond)
 			{
 				if (Then != null)

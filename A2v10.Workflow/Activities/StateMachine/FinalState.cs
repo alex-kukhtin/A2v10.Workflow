@@ -12,7 +12,7 @@ namespace A2v10.Workflow
 	{
 		public override Boolean IsFinal => false;
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			if (onComplete != null)
 				return onComplete.Invoke(context, this);

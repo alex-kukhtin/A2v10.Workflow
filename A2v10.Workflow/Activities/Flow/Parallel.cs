@@ -9,10 +9,11 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Parallel : Activity, IStorable
+	public class Parallel : Activity, IStorable, IHasContext, IScriptable
 	{
 		const String ON_COMPLETE = "OnComplete";
 
+		public List<IVariable> Variables { get; set; }
 		public List<IActivity> Branches { get; set; }
 
 		#region storable
@@ -31,6 +32,14 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
+
+		#region IScriptable
+		public virtual void BuildScript(IScriptBuilder builder)
+		{
+			builder.AddVariables(Variables);
+		}
+		#endregion
+
 		public async override ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
 		{
 			await base.TraverseAsync(onAction);
@@ -40,16 +49,16 @@ namespace A2v10.Workflow
 				await onAction(branch);
 		}
 
-		public override void Traverse(Action<IActivity> onAction)
+		public override void Traverse(TraverseArg traverse)
 		{
-			base.Traverse(onAction);
-			if (Branches == null)
-				return;
-			foreach (var branch in Branches)
-				onAction(branch);
+			traverse.Start?.Invoke(this);
+			if (Branches != null)
+				foreach (var branch in Branches)
+					branch.Traverse(traverse);
+			traverse.End?.Invoke(this);
 		}
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			if (Branches == null || Branches.Count == 0)

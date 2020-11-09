@@ -1,7 +1,14 @@
-﻿using System;
+﻿
+using A2v10.Workflow.Interfaces;
+using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Text;
+
+public class TraverseArg
+{
+	public Action<IActivity> Start;
+	public Action<IActivity> Action;
+	public Action<IActivity> End;
+}
 
 namespace A2v10.Workflow.Interfaces
 {
@@ -11,10 +18,11 @@ namespace A2v10.Workflow.Interfaces
 	{
 		String Ref { get; }
 
-		ValueTask Execute(IExecutionContext context, ExecutingAction onComplete);
-		ValueTask Cancel(IExecutionContext context);
+		ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete);
+		ValueTask CancelAsync(IExecutionContext context);
 
 		ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction);
-		void Traverse(Action<IActivity> onAction);
+		void Traverse(TraverseArg traverse);
 	}
 }
+

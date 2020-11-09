@@ -13,9 +13,9 @@ namespace A2v10.Workflow
 		public String Then { get; set; }
 		public String Else { get; set; }
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
-			var cond = context.Evaluate<Boolean>(Condition);
+			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
 			throw new NotImplementedException();
 		}
 	}

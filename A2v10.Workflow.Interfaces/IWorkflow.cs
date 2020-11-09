@@ -1,12 +1,13 @@
 ﻿
 using System;
+using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Interfaces
 {
 	public interface IWorkflow
 	{
-		ValueTask RunAsync();
-		ValueTask ResumeAsync(String bookmark);
+		ValueTask<ExpandoObject> RunAsync();
+		ValueTask<ExpandoObject> ResumeAsync(String bookmark, Object reply);
 	}
 }

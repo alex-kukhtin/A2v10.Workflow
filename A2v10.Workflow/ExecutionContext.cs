@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.IO;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
@@ -9,6 +11,7 @@ using Jint;
 namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
+	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
 
 	public class QueueItem
 	{
@@ -27,18 +30,60 @@ namespace A2v10.Workflow
 	public class ExecutionContext : IExecutionContext
 	{
 		private readonly Queue<QueueItem> _commandQueue = new Queue<QueueItem>();
-		private readonly Engine _engine = new Engine(EngineOptions);
+		private readonly ScriptEngine _script;
+		private readonly Dictionary<String, IActivity> _activities = new Dictionary<String, IActivity>();
+		private readonly Dictionary<String, ResumeAction> _bookmarks = new Dictionary<String, ResumeAction>();
+		private readonly IActivity _root;
 
-		private static void EngineOptions(Options opts)
+		public ExecutionContext(IActivity root, Object args = null)
 		{
-			opts.Strict(true);
+			_root = root;
+			// store all activites
+			var toMapArg = new TraverseArg()
+			{
+				Action = (activity) => _activities.Add(activity.Ref, activity)
+			};
+			_root.Traverse(toMapArg);
+
+			var sb = new ScriptBuilder();
+			var sbTraverseArg = new TraverseArg()
+			{
+				Start = (activity) => sb.Start(activity),
+				Action = (activity) => sb.Build(activity),
+				End = (activity) => sb.End(activity)
+			};
+			_root.Traverse(sbTraverseArg);
+			sb.EndScript();
+
+			_script = new ScriptEngine(null, _root, sb.Script, args);
+		}
+
+		public ExpandoObject GetResult()
+		{
+			return _script.GetResult();
 		}
 
 		#region IExecutionContext
 		public void Schedule(IActivity activity, ExecutingAction onComplete)
 		{
-			_commandQueue.Enqueue(new QueueItem(activity.Execute, activity, onComplete));
+			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete));
 		}
+
+		public void SetBookmark(String bookmark, ResumeAction onComplete)
+		{
+			_bookmarks.Add(bookmark, onComplete);
+		}
+
+		public T Evaluate<T>(String refer, String name)
+		{
+			return _script.Evaluate<T>(refer, name);
+		}
+
+		public void Execute(String refer, String name)
+		{
+			_script.Execute(refer, name);
+		}
+
 		#endregion
 
 		public async ValueTask RunAsync()
@@ -50,19 +95,13 @@ namespace A2v10.Workflow
 			}
 		}
 
-		public T Evaluate<T>(String expression)
+		public ValueTask ResumeAsync(String bookmark, Object result)
 		{
-			Console.WriteLine($"Evaluate: {expression}");
-			return default;
-		}
-
-		public void Execute(String expression)
-		{
-			Console.WriteLine(expression);
-		}
-
-		public void BuildScript(IActivity root)
-		{
+			if (_bookmarks.TryGetValue(bookmark, out ResumeAction action))
+			{
+				return action.Invoke(this, bookmark, result);
+			}
+			return new ValueTask();
 		}
 	}
 }

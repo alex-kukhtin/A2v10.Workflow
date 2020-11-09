@@ -12,7 +12,7 @@ namespace A2v10.Workflow
 	{
 		public override Boolean IsStart => true;
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			if (onComplete != null)
 				return onComplete(context, this);

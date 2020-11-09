@@ -9,9 +9,9 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class StateMachine : Activity, IStorable, IHasVariables
+	public class StateMachine : Activity, IStorable, IHasContext
 	{
-		public List<Variable> Variables { get; set; }
+		public List<IVariable> Variables { get; set; }
 	
 		public List<State> States { get; set; }
 
@@ -35,7 +35,7 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			var state = States.Find(s => s.IsStart);
@@ -50,9 +50,9 @@ namespace A2v10.Workflow
 		}
 
 		#region Traverse
-		public override void Traverse(Action<IActivity> onAction)
+		public override void Traverse(TraverseArg traverse)
 		{
-			base.Traverse(onAction);
+			throw new NotImplementedException(nameof(Traverse));
 		}
 
 		public override ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)

@@ -9,7 +9,7 @@ namespace A2v10.Workflow
 
 	public class Flowchart : Activity
 	{
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			throw new NotImplementedException();
 		}

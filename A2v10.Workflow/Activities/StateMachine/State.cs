@@ -16,7 +16,7 @@ namespace A2v10.Workflow
 		public IActivity Entry { get; set; }
 		public IActivity Exit { get; set; }
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			return new ValueTask();
 		}

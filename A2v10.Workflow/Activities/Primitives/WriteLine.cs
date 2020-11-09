@@ -8,13 +8,18 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class WriteLine : Activity
+	public class WriteLine : Activity, IScriptable
 	{
 		public String Expression { get; set; }
 
-		public override ValueTask Execute(IExecutionContext context, ExecutingAction onComplete)
+		public void BuildScript(IScriptBuilder builder)
 		{
-			var val = context.Evaluate<Object>(Expression);
+			builder.BuildExecute(nameof(Expression), Expression);
+		}
+
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		{
+			var val = context.Evaluate<Object>(Ref, nameof(Expression));
 			Console.WriteLine(val);
 			return onComplete(context, this);
 		}

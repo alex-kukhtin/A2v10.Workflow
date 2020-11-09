@@ -5,8 +5,8 @@ using System.Text;
 
 namespace A2v10.Workflow.Interfaces
 {
-	public interface IHasVariables
+	public interface IHasContext
 	{
-		List<Variable> Variables { get;}
+		List<IVariable> Variables { get;}
 	}
 }

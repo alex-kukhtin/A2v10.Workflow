@@ -13,22 +13,26 @@ namespace A2v10.Workflow
 		#region IActivity
 		public String Ref { get; set; }
 
-		public abstract ValueTask Execute(IExecutionContext context, ExecutingAction onComplete);
+		public abstract ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete);
+
+		public virtual void Traverse(TraverseArg traverse)
+		{
+			traverse.Start?.Invoke(this);
+			traverse.Action?.Invoke(this);
+			traverse.End?.Invoke(this);
+		}
 
 		public virtual ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
 		{
-			return onAction(this);
-		}
-
-		public virtual void Traverse(Action<IActivity> onAction)
-		{
-			onAction(this);
-		}
-
-		public ValueTask Cancel(IExecutionContext context)
-		{
-			Traverse(act => act.Cancel(context));
+			if (onAction != null)
+				return onAction(this);
 			return new ValueTask();
+		}
+
+
+		public ValueTask CancelAsync(IExecutionContext context)
+		{
+			return TraverseAsync(act => act.CancelAsync(context));
 		}
 
 		#endregion

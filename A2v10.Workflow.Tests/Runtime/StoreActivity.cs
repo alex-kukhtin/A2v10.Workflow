@@ -1,6 +1,7 @@
 ﻿using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Tests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,56 +11,35 @@ namespace A2v10.Workflow.Tests.Runtime
 {
 	[TestClass]
 	[TestCategory("Runtime.Store")]
-	public class StoreActivity : IActivity
+	public class StoreActivity
 	{
-		// fake implementation for target check
-		public String Ref => "Root";
-		public ValueTask Execute(IExecutionContext context, Func<IExecutionContext, IActivity, ValueTask> onComplete)
-		{
-			throw new NotImplementedException();
-		}
-
-		public ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
-		{
-			return new ValueTask();
-		}
-
-		public void Traverse(Action<IActivity> onAction)
-		{
-		}
-
-		public ValueTask Cancel(IExecutionContext context)
-		{
-			return new ValueTask();
-		}
-
-
-
 		[TestMethod]
-		public void StoreSequence()
+		public async Task StoreSequence()
 		{
-			var s = new Sequence()
+			var root = new Sequence()
 			{
 				Ref = "Ref0",
+				Variables = new List<IVariable>()
+				{
+					new Variable() {Name = "x", Dir= VariableDirection.InOut}
+				},
 				Activities = new List<IActivity>()
 				{
-					new Code() {Ref="Ref1", Script="print ref1"},
-					new Code() {Ref="Ref1", Script="print ref2"},
+					new Code() {Ref="Ref1", Script="x += 5"},
+					new Wait() {Ref="Ref2", Bookmark="Bookmark1"},
+					new Code() {Ref="Ref3", Script="x += 5"},
 				}
 			};
 
-			var context = new ExecutionContext();
-			s.Execute(context, OnElemComplete);
+			var rootJS = JsonConvert.SerializeObject(root, Formatting.Indented);
+			Console.WriteLine(rootJS);
 
-			var mockStorage = new ActivityStorageMock();
-			var storable = s as IStorable;
-			storable.Store(mockStorage);
-		}
+			IWorkflow wf = Workflow.Create(root, new { x = 5 });
+			var result = await wf.RunAsync();
+			Assert.AreEqual(10, result.Get<Int32>("x"));
 
-		[StoreName("OnComplete")]
-		private ValueTask OnElemComplete(IExecutionContext context, IActivity activity)
-		{
-			return new ValueTask();
+			result = await wf.ResumeAsync("Bookmark1", null);
+			Assert.AreEqual(15, result.Get<Int32>("x"));
 		}
 	}
 }
