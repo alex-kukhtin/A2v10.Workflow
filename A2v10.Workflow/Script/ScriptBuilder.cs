@@ -86,7 +86,12 @@ namespace A2v10.Workflow
 
 		public void BuildExecute(String name, String expression)
 		{
-			AddMethod(_activity.Ref, $"{name}: function() {{{expression};}}");
+			AddMethod(_activity.Ref, $"{name}: () => {{{expression};}}");
+		}
+
+		public void BuildEvaluate(String name, String expression)
+		{
+			AddMethod(_activity.Ref, $"{name}: () => {{ return {expression};}}");
 		}
 
 		public String Methods

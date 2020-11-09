@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
@@ -27,7 +28,7 @@ namespace A2v10.Workflow
 		public ExecutingAction OnComplete { get; }
 	}
 
-	public class ExecutionContext : IExecutionContext
+	public partial class ExecutionContext : IExecutionContext
 	{
 		private readonly Queue<QueueItem> _commandQueue = new Queue<QueueItem>();
 		private readonly ScriptEngine _script;
@@ -62,6 +63,7 @@ namespace A2v10.Workflow
 		{
 			return _script.GetResult();
 		}
+
 
 		#region IExecutionContext
 		public void Schedule(IActivity activity, ExecutingAction onComplete)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace A2v10.Workflow
+namespace A2v10.Workflow.Interfaces
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 

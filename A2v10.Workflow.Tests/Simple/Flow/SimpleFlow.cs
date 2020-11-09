@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using A2v10.Workflow.Interfaces;
 using System.Threading.Tasks;
 using System;
+using A2v10.Workflow.Storage;
 
 namespace A2v10.Workflow.Tests
 {
@@ -31,17 +32,17 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wf = Workflow.Create(root, new { X = 5 });
-			var result = await wf.RunAsync();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var inst = await wfe.StartAsync(root, new { X = 5 });
+			var result = inst.Result;
 			Assert.AreEqual(7, result.Get<Int32>("R"));
 
-			wf = Workflow.Create(root, new { X = 5 });
-			result = await wf.RunAsync();
-			Assert.AreEqual(7, result.Get<Int32>("R"));
+			inst = await wfe.StartAsync(root, new { X = 3 });
+			result = inst.Result;
+			Assert.AreEqual(5, result.Get<Int32>("R"));
 
-			var wf2 = Workflow.Create(root, new { X = 11 });
-			var result2 = await wf2.RunAsync();
-			Assert.AreEqual(13, result2.Get<Int32>("R"));
+			inst = await wfe.StartAsync(root, new { X = 11 });
+			Assert.AreEqual(13, inst.Result.Get<Int32>("R"));
 		}
 
 		[TestMethod]
@@ -58,8 +59,38 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wf = Workflow.Create(root);
-			var result = await wf.RunAsync();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var inst = await wfe.StartAsync(root);
+		}
+
+		[TestMethod]
+		public async Task If()
+		{
+			var root = new Sequence()
+			{
+				Ref = "Ref0",
+				Variables = new List<IVariable>
+				{
+					new Variable() {Name = "X", Dir = VariableDirection.In, Type=VariableType.Number},
+					new Variable() {Name = "R", Dir = VariableDirection.Out, Type=VariableType.String}
+				},
+				Activities = new List<IActivity>()
+				{
+					new If() {
+						Ref="Ref1",
+						Condition="X > 5",
+						Then = new Code() {Ref="Ref2", Script = "R = 'X > 5'"},
+						Else = new Code() {Ref="Ref3", Script = "R = 'X <= 5'"}
+					}
+				}
+			};
+
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var inst = await wfe.StartAsync(root, new { X = 4});
+			Assert.AreEqual("X <= 5", inst.Result.Get<String>("R"));
+
+			inst = await wfe.StartAsync(root, new { X = 23 });
+			Assert.AreEqual("X > 5", inst.Result.Get<String>("R"));
 		}
 	}
 }

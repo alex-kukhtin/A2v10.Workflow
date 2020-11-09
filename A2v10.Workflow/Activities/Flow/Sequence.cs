@@ -22,7 +22,8 @@ namespace A2v10.Workflow
 
 		public void Store(IActivityStorage storage)
 		{
-			storage.SetCallback(ON_COMPLETE, _onComplete);
+			if (_onComplete != null)
+				storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.Set<Int32>(NEXT, _next);
 		}
 

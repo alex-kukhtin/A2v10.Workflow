@@ -8,7 +8,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class If : Activity
+	public class If : Activity, IScriptable
 	{
 		public String Condition { get; set; }
 
@@ -27,6 +27,7 @@ namespace A2v10.Workflow
 		public override void Traverse(TraverseArg traverse)
 		{
 			traverse.Start?.Invoke(this);
+			traverse.Action?.Invoke(this);
 			Then?.Traverse(traverse);
 			Else?.Traverse(traverse);
 			traverse.End?.Invoke(this);
@@ -47,5 +48,12 @@ namespace A2v10.Workflow
 			}
 			return new ValueTask();
 		}
+
+		#region IScriptable
+		public void BuildScript(IScriptBuilder builder)
+		{
+			builder.BuildEvaluate(nameof(Condition), Condition);
+		}
+		#endregion
 	}
 }

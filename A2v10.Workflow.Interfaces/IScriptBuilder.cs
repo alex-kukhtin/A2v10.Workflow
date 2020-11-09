@@ -8,6 +8,7 @@ namespace A2v10.Workflow.Interfaces
 	{
 		void AddVariables(IEnumerable<IVariable> variables);
 		void BuildExecute(String name, String expression);
+		void BuildEvaluate(String name, String expression);
 	}
 
 	public interface IScriptable

@@ -46,6 +46,14 @@ namespace A2v10.Workflow
 			func(JsValue.Undefined, new JsValue[] { JsValue.FromObject(_engine, args) });
 		}
 
+		public void Restore(String refer, Object args)
+		{
+			var func = GetFunc(refer, "Restore");
+			if (func == null)
+				throw new WorkflowExecption($"Script element {refer}.Restore not found");
+			func(JsValue.Undefined, new JsValue[] { JsValue.FromObject(_engine, args) });
+		}
+
 		public ExpandoObject GetResult()
 		{
 			var func = GetFunc(_root.Ref, "Result");
@@ -60,8 +68,9 @@ namespace A2v10.Workflow
 			if (func == null)
 				throw new WorkflowExecption($"Script element {refer}.{name} not found");
 			var obj = func(JsValue.Undefined, null).ToObject();
-			Console.WriteLine($"Evaluate: {refer}.{name}");
-			return default;
+			if (obj is T objT)
+				return objT;
+			return (T) Convert.ChangeType(obj, typeof(T));
 		}
 
 		private Func<JsValue, JsValue[], JsValue> GetFunc(String refer, String name)
@@ -71,7 +80,7 @@ namespace A2v10.Workflow
 				if (activityData is IDictionary<String, Object> expData)
 				{
 					if (expData.TryGetValue(name, out Object objVal))
-						return (Func<JsValue, JsValue[], JsValue>)objVal;
+						return (Func<JsValue, JsValue[], JsValue>) objVal;
 				}
 			}
 			return null;

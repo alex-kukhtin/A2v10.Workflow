@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="A2v10.Data.Core" Version="10.0.7247" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\A2v10.Workflow.Interfaces\A2v10.Workflow.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

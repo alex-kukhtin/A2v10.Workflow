@@ -6,7 +6,7 @@ namespace A2v10.Workflow.Interfaces
 {
 	public interface IWorkflowEngine
 	{
-		ValueTask<IInstance> StartAsync();
-		ValueTask<IInstance> ResumeAsync(Guid instanceId, String bookmark);
+		ValueTask<IInstance> StartAsync(IActivity root, Object args = null);
+		ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null);
 	}
 }

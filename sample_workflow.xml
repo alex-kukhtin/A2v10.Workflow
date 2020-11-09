@@ -1,9 +1,7 @@
 ﻿<Flowchart>
-	<Flowchart.Arguments>
-	</Flowchart.Arguments>
 	<Flowchart.Variables>
 		<Variable Name="Arg" Type="Number" Dir="In"/>
-		<Variable Name="Mode" Value="Prod" Type="String"/>
+		<Variable Name="Mode" Value="Prod" Type="String" Dir="InOut"/>
 		<Variable Name="Data" Value="{x:5, y:7}" Type="Object"/>
 		<Variable Name="Result" Dir="Out" Type="String"/>
 	</Flowchart.Variables>
