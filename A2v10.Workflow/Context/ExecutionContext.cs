@@ -68,6 +68,8 @@ namespace A2v10.Workflow
 		#region IExecutionContext
 		public void Schedule(IActivity activity, ExecutingAction onComplete)
 		{
+			if (activity == null)
+				return;
 			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete));
 		}
 

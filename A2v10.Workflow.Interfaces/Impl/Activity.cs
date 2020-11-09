@@ -1,6 +1,7 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +21,14 @@ namespace A2v10.Workflow.Interfaces
 			traverse.Start?.Invoke(this);
 			traverse.Action?.Invoke(this);
 			traverse.End?.Invoke(this);
+
+			/*
+			traverse.Start?.Invoke(this);
+			traverse.Action?.Invoke(this);
+			foreach (var a in EnumChildren())
+				a.Traverse(traverse);
+			traverse.End?.Invoke(this);
+			*/
 		}
 
 		public virtual ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
@@ -29,6 +38,10 @@ namespace A2v10.Workflow.Interfaces
 			return new ValueTask();
 		}
 
+		public virtual IEnumerable<IActivity> EnumChildren()
+		{
+			return Enumerable.Empty<IActivity>();
+		}
 
 		public ValueTask CancelAsync(IExecutionContext context)
 		{

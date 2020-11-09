@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
@@ -24,6 +25,13 @@ namespace A2v10.Workflow
 				await onAction(Else);
 		}
 
+		public override IEnumerable<IActivity> EnumChildren()
+		{
+			if (Then != null)
+				yield return Then;
+			if (Else != null)
+				yield return Else;
+		}
 		public override void Traverse(TraverseArg traverse)
 		{
 			traverse.Start?.Invoke(this);
@@ -37,15 +45,9 @@ namespace A2v10.Workflow
 		{
 			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
 			if (cond)
-			{
-				if (Then != null)
-					context.Schedule(Then, onComplete);
-			}
+				context.Schedule(Then, onComplete);
 			else
-			{
-				if (Else != null)
-					context.Schedule(Else, onComplete);
-			}
+				context.Schedule(Else, onComplete);
 			return new ValueTask();
 		}
 

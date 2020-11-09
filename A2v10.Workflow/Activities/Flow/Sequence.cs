@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using A2v10.Workflow.Interfaces;
 
@@ -22,8 +23,7 @@ namespace A2v10.Workflow
 
 		public void Store(IActivityStorage storage)
 		{
-			if (_onComplete != null)
-				storage.SetCallback(ON_COMPLETE, _onComplete);
+			storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.Set<Int32>(NEXT, _next);
 		}
 
@@ -42,6 +42,16 @@ namespace A2v10.Workflow
 		#endregion
 
 		#region Traverse
+
+		public override IEnumerable<IActivity> EnumChildren()
+		{
+			if (Activities != null)
+			{
+				foreach (var a in Activities)
+					yield return a;
+			}
+		}
+
 		public override async ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
 		{
 			await base.TraverseAsync(onAction);

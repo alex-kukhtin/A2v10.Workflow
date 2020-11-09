@@ -46,6 +46,8 @@ namespace A2v10.Workflow
 
 		public void SetCallback(String name, ExecutingAction callback)
 		{
+			if (callback == null)
+				return;
 			_expando.Set(name, CallbackItem.CreateFrom(callback));
 		}
 	}

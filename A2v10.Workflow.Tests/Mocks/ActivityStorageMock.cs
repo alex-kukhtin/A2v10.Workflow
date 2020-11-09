@@ -11,7 +11,7 @@ namespace A2v10.Workflow.Tests.Mocks
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class CallbackItem
+	public class CallbackItem234
 	{
 		public String Ref;
 		public String CallbackName;
@@ -26,7 +26,7 @@ namespace A2v10.Workflow.Tests.Mocks
 		}
 	}
 
-	public class ActivityStorageMock : IActivityStorage
+	public class ActivityStorageMock234 : IActivityStorage
 	{
 		Dictionary<String, Object> _storage = new Dictionary<String, Object>();
 
