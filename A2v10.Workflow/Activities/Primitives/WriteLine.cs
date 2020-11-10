@@ -21,7 +21,9 @@ namespace A2v10.Workflow
 		{
 			var val = context.Evaluate<Object>(Ref, nameof(Expression));
 			Console.WriteLine(val);
-			return onComplete(context, this);
+			if (onComplete != null)
+				return onComplete(context, this);
+			return new ValueTask();
 		}
 	}
 }

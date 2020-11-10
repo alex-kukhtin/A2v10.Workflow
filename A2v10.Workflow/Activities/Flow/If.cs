@@ -16,13 +16,24 @@ namespace A2v10.Workflow
 		public IActivity Then { get; set; }
 		public IActivity Else { get; set; }
 
-		public override async ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
+		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
-			await base.TraverseAsync(onAction);
-			if (Then != null)
-				await onAction(Then);
-			if (Else != null)
-				await onAction(Else);
+			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
+			if (cond)
+			{
+				if (Then != null)
+					context.Schedule(Then, onComplete);
+				else if (onComplete != null)
+					return onComplete(context, this);
+			}
+			else
+			{
+				if (Else != null)
+					context.Schedule(Else, onComplete);
+				else if (onComplete != null)
+					return onComplete(context, this);
+			}
+			return new ValueTask();
 		}
 
 		public override IEnumerable<IActivity> EnumChildren()
@@ -31,24 +42,6 @@ namespace A2v10.Workflow
 				yield return Then;
 			if (Else != null)
 				yield return Else;
-		}
-		public override void Traverse(TraverseArg traverse)
-		{
-			traverse.Start?.Invoke(this);
-			traverse.Action?.Invoke(this);
-			Then?.Traverse(traverse);
-			Else?.Traverse(traverse);
-			traverse.End?.Invoke(this);
-		}
-
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
-		{
-			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
-			if (cond)
-				context.Schedule(Then, onComplete);
-			else
-				context.Schedule(Else, onComplete);
-			return new ValueTask();
 		}
 
 		#region IScriptable

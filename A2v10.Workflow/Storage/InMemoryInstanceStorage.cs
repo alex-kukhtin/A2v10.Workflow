@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,11 +35,14 @@ namespace A2v10.Workflow.Storage
 		public Task Save(IInstance instance)
 		{
 			Console.WriteLine("Save Instance");
-			Console.WriteLine(JsonConvert.SerializeObject(instance.State));
+			Console.WriteLine(JsonConvert.SerializeObject(instance.State, new DoubleConverter()));
 			var si = new SavedInstance();
 			si.Root = instance.Root;
 			si.State = JsonConvert.SerializeObject(instance.State);
-			_memory.Add(instance.Id, si);
+			if (_memory.ContainsKey(instance.Id))
+				_memory[instance.Id] = si;
+			else
+				_memory.Add(instance.Id, si);
 			return Task.CompletedTask;
 		}
 	}

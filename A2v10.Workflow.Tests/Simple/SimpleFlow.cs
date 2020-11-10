@@ -92,5 +92,38 @@ namespace A2v10.Workflow.Tests
 			inst = await wfe.StartAsync(root, new { X = 23 });
 			Assert.AreEqual("X > 5", inst.Result.Get<String>("R"));
 		}
+
+
+		[TestMethod]
+		public async Task NestedContext()
+		{
+			var root = new Sequence()
+			{
+				Ref = "Ref0",
+				Variables = new List<IVariable>
+				{
+					new Variable() {Name = "X", Dir = VariableDirection.In, Type=VariableType.Number},
+					new Variable() {Name = "R", Dir = VariableDirection.Out, Type=VariableType.Number},
+				},
+				Activities = new List<IActivity>()
+				{
+					new Code() {Ref="Ref1", Script="X = X + 1"},
+					new Code() {Ref="Ref2", Script="X = X + 1"},
+					new Sequence() { Ref="Ref3",
+						Activities = new List<IActivity>()
+						{
+							new Code() {Ref="Ref4", Script="X = X + 1"},
+							new Code() {Ref="Ref5", Script="X = X + 1"},
+						}
+					},
+					new Code() {Ref="Ref7", Script="R = X"},
+				}
+			};
+
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var inst = await wfe.StartAsync(root, new { X = 5 });
+			var result = inst.Result;
+			Assert.AreEqual(9, result.Get<Int32>("R"));
+		}
 	}
 }

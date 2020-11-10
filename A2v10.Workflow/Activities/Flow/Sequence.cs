@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using A2v10.Workflow.Interfaces;
 
@@ -9,7 +8,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Sequence : Activity, IStorable, IHasContext, IScriptable
+	public class Sequence : Activity, IStorable, IHasContext
 	{
 		public List<IActivity> Activities { get; set; }
 		public List<IVariable> Variables { get; set; }
@@ -41,7 +40,6 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
-		#region Traverse
 
 		public override IEnumerable<IActivity> EnumChildren()
 		{
@@ -51,25 +49,6 @@ namespace A2v10.Workflow
 					yield return a;
 			}
 		}
-
-		public override async ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
-		{
-			await base.TraverseAsync(onAction);
-			if (Activities == null)
-				return;
-			foreach (var act in Activities)
-				await onAction(act);
-		}
-		public override void Traverse(TraverseArg traverse)
-		{
-			traverse.Start?.Invoke(this);
-			traverse.Action?.Invoke(this);
-			if (Activities != null)
-				foreach (var act in Activities)
-					act.Traverse(traverse);
-			traverse.End?.Invoke(this);
-		}
-		#endregion
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{

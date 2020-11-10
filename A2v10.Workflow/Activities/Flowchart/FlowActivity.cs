@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace A2v10.Workflow
+namespace A2v10.Workflow.Activities
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Wait : Activity, IStorable
+	public class FlowActivity : FlowNode, IStorable
 	{
-		public String Bookmark { get; set; }
+		public IActivity Activity { get; set; }
 
 		ExecutingAction _onComplete;
 
@@ -28,23 +28,26 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
-
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
-			context.SetBookmark(Bookmark, OnBookmarkComplete);
+			context.Schedule(Activity, OnChildComplete);
 			return new ValueTask();
 		}
 
-
-		[StoreName("OnBookmarkComplete")]
-		ValueTask OnBookmarkComplete(IExecutionContext context, String bookmark, Object result)
+		public override IEnumerable<IActivity> EnumChildren()
 		{
-			context.RemoveBookmark(bookmark);
-			if (_onComplete != null)
+			yield return Activity;
+		}
+
+		[StoreName("OnChildComplete")]
+		ValueTask OnChildComplete(IExecutionContext context, IActivity activity)
+		{
+			if (Next != null)
+				context.Schedule(Parent.FindNode(Next), _onComplete);
+			else if (_onComplete != null)
 				return _onComplete(context, this);
 			return new ValueTask();
 		}
-
 	}
 }

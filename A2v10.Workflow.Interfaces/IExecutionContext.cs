@@ -11,6 +11,7 @@ namespace A2v10.Workflow.Interfaces
 	{
 		void Schedule(IActivity activity, ExecutingAction onComplete);
 		void SetBookmark(String bookmark, ResumeAction onComplete);
+		void RemoveBookmark(String bookmark);
 
 		T Evaluate<T>(String refer, String name);
 		void Execute(String refer, String name);

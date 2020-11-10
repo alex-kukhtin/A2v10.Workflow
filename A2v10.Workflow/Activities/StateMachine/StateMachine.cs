@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
@@ -11,8 +12,7 @@ namespace A2v10.Workflow
 
 	public class StateMachine : Activity, IStorable, IHasContext
 	{
-		public List<IVariable> Variables { get; set; }
-	
+		public List<IVariable> Variables { get; set; }	
 		public List<State> States { get; set; }
 
 		String _currentState;
@@ -35,10 +35,18 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
+		public override IEnumerable<IActivity> EnumChildren()
+		{
+			return Enumerable.Empty<IActivity>();
+		}
+
+
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			var state = States.Find(s => s.IsStart);
+			if (state == null)
+				throw new WorkflowExecption("Flowchart. Start node not found");
 			_currentState = state.Ref;
 			context.Schedule(state, OnNextState);
 			return new ValueTask();
@@ -49,15 +57,10 @@ namespace A2v10.Workflow
 			return new ValueTask();
 		}
 
-		#region Traverse
-		public override void Traverse(TraverseArg traverse)
+		#region IScriptable
+		public virtual void BuildScript(IScriptBuilder builder)
 		{
-			throw new NotImplementedException(nameof(Traverse));
-		}
-
-		public override ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
-		{
-			return base.TraverseAsync(onAction);
+			builder.AddVariables(Variables);
 		}
 		#endregion
 	}

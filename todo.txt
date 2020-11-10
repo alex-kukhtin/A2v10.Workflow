@@ -1,10 +1,15 @@
 
 4. IWorkflowStorage
 5. StateMachine implementation
+
 6. SqlServerStorage
 7. Activity ctor: DI
 8. Bindings ????
-9. Flowchart
 10. Bookmark reply (result)?
-11. EnumChildren() for traverse
-
+12. RemoveBookmak for Cancel activity
+13. Tracker
+14. Activity.Id - Guid?
+17. SaveInstance - Bookmarks field
+18. Timer
+19. ActivityName for designer and tools
+20. IInstance.State - New, Complete, Idle, Fail,

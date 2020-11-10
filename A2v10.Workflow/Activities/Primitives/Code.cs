@@ -15,7 +15,9 @@ namespace A2v10.Workflow
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			context.Execute(Ref, nameof(Script));
-			return onComplete.Invoke(context, this);
+			if (onComplete != null)
+				return onComplete(context, this);
+			return new ValueTask();
 		}
 
 		#region IScriptable

@@ -29,11 +29,11 @@ namespace A2v10.Workflow
 			// declare
 			var sb = new StringBuilder();
 			foreach (var v in variables)
-				sb.AppendLine(
+				sb.Append(
 					v.Dir switch
 					{
-						VariableDirection.Const => $"const {v.Name};",
-						_ => $"let {v.Name};"
+						VariableDirection.Const => $"const {v.Name}; ",
+						_ => $"let {v.Name}; "
 					}
 				);
 
@@ -107,7 +107,7 @@ namespace A2v10.Workflow
 				}
 
 				foreach (var (k, v) in _methods)
-					sb.Append($"{FMAP}.{k} = {_methodsText(v)}");
+					sb.Append($"{FMAP}['{k}'] = {_methodsText(v)}");
 				return sb.ToString();
 			}
 		}
@@ -175,7 +175,8 @@ namespace A2v10.Workflow
 
 		public void Append(String text)
 		{
-			_textBuilder.AppendLine(text);
+			if (!String.IsNullOrEmpty(text))
+				_textBuilder.AppendLine(text);
 		}
 
 		public void End(IActivity activity)
@@ -184,6 +185,7 @@ namespace A2v10.Workflow
 			if (ascript.Ref == activity.Ref)
 			{
 				_textBuilder.AppendLine("})();");
+				_stack.Pop();
 			}
 		}
 

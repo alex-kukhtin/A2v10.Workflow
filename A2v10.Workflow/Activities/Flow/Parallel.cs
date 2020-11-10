@@ -40,22 +40,11 @@ namespace A2v10.Workflow
 		}
 		#endregion
 
-		public async override ValueTask TraverseAsync(Func<IActivity, ValueTask> onAction)
+		public override IEnumerable<IActivity> EnumChildren()
 		{
-			await base.TraverseAsync(onAction);
-			if (Branches == null)
-				return;
-			foreach (var branch in Branches)
-				await onAction(branch);
-		}
-
-		public override void Traverse(TraverseArg traverse)
-		{
-			traverse.Start?.Invoke(this);
 			if (Branches != null)
 				foreach (var branch in Branches)
-					branch.Traverse(traverse);
-			traverse.End?.Invoke(this);
+					yield return branch;
 		}
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)

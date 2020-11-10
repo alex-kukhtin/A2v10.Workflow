@@ -50,7 +50,7 @@ namespace A2v10.Workflow
 		{
 			var func = GetFunc(refer, "Restore");
 			if (func == null)
-				throw new WorkflowExecption($"Script element {refer}.Restore not found");
+				return;
 			func(JsValue.Undefined, new JsValue[] { JsValue.FromObject(_engine, args) });
 		}
 
@@ -66,7 +66,7 @@ namespace A2v10.Workflow
 		{
 			var func = GetFunc(refer, name);
 			if (func == null)
-				throw new WorkflowExecption($"Script element {refer}.{name} not found");
+				return default;
 			var obj = func(JsValue.Undefined, null).ToObject();
 			if (obj is T objT)
 				return objT;

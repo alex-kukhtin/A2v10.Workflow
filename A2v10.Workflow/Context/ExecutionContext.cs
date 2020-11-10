@@ -78,6 +78,12 @@ namespace A2v10.Workflow
 			_bookmarks.Add(bookmark, onComplete);
 		}
 
+		public void RemoveBookmark(String bookmark)
+		{
+			if (_bookmarks.ContainsKey(bookmark))
+				_bookmarks.Remove(bookmark);
+		}
+
 		public T Evaluate<T>(String refer, String name)
 		{
 			return _script.Evaluate<T>(refer, name);
