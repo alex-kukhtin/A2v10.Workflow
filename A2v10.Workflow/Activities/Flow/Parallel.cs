@@ -9,7 +9,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Parallel : Activity, IStorable, IHasContext, IScriptable
+	public class Parallel : Activity, IStorable, IHasContext
 	{
 		const String ON_COMPLETE = "OnComplete";
 

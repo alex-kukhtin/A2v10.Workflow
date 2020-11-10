@@ -1,7 +1,7 @@
 
+
 4. IWorkflowStorage
 5. StateMachine implementation
-
 6. SqlServerStorage
 7. Activity ctor: DI
 8. Bindings ????
@@ -13,3 +13,4 @@
 18. Timer
 19. ActivityName for designer and tools
 20. IInstance.State - New, Complete, Idle, Fail,
+21. Parallel => CompletionCondition: Any|All
