@@ -2,20 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Tracker;
-using Jint;
 
 namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
 
-	public class QueueItem
+	public record QueueItem
 	{
 		public QueueItem(Func<IExecutionContext, ExecutingAction, ValueTask> action, IActivity activity, ExecutingAction onComplete)
 		{
@@ -32,11 +29,11 @@ namespace A2v10.Workflow
 	public partial class ExecutionContext : IExecutionContext
 	{
 		private readonly Queue<QueueItem> _commandQueue = new Queue<QueueItem>();
-		private readonly ScriptEngine _script;
 		private readonly Dictionary<String, IActivity> _activities = new Dictionary<String, IActivity>();
 		private readonly Dictionary<String, ResumeAction> _bookmarks = new Dictionary<String, ResumeAction>();
 		private readonly IActivity _root;
 
+		private readonly ScriptEngine _script;
 		private readonly ITracker _tracker;
 
 		public ExecutionContext(ITracker tracker, IActivity root, Object args = null)
