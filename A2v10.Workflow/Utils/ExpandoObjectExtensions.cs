@@ -21,6 +21,14 @@ namespace A2v10.Workflow
 			d.Add(name, value);
 		}
 
+		public static void SetNotNull<T>(this ExpandoObject expobj, String name, T value) where T:class
+		{
+			if (value == null)
+				return;
+			var d = expobj as IDictionary<String, Object>;
+			d.Add(name, value);
+		}
+
 		public static void SetOrReplace<T>(this ExpandoObject expobj, String name, T value)
 		{
 			var d = expobj as IDictionary<String, Object>;

@@ -55,11 +55,13 @@ namespace A2v10.Workflow.Tests.Runtime
 			Console.WriteLine(rootJS);
 
 			var instStorage = new InMemoryInstanceStorage();
-			var wfe = new WorkflowEngine(instStorage);
+			var tracker = new ConsoleTracker();
+
+			var wfe = new WorkflowEngine(instStorage, tracker);
 			var inst = await wfe.StartAsync(root, new { x = 5 });
 			Assert.AreEqual(10, inst.Result.Get<Int32>("x"));
 
-			var resume = new WorkflowEngine(instStorage);
+			var resume = new WorkflowEngine(instStorage, tracker);
 			var resInst = await wfe.ResumeAsync(inst.Id, "Bookmark1");
 			Assert.AreEqual(15, resInst.Result.Get<Int32>("x"));
 		}

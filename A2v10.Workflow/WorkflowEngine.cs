@@ -7,10 +7,12 @@ namespace A2v10.Workflow
 	public class WorkflowEngine : IWorkflowEngine
 	{
 		IInstanceStorage _instanceStorage;
+		ITracker _tracker;
 		
-		public WorkflowEngine(IInstanceStorage instanceStorage)
+		public WorkflowEngine(IInstanceStorage instanceStorage, ITracker tracker)
 		{
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
 		}
 
 		public async ValueTask<IInstance> StartAsync(IActivity root, Object args = null)
@@ -21,7 +23,7 @@ namespace A2v10.Workflow
 				Root = root
 			};
 			root.OnEndInit();
-			var context = new ExecutionContext(inst.Root, args);
+			var context = new ExecutionContext(_tracker, inst.Root, args);
 			context.Schedule(inst.Root, null);
 			await context.RunAsync();
 			inst.Result = context.GetResult();
@@ -34,7 +36,7 @@ namespace A2v10.Workflow
 		{
 			var inst = await _instanceStorage.Load(id);
 			inst.Root.OnEndInit();
-			var context = new ExecutionContext(inst.Root);
+			var context = new ExecutionContext(_tracker, inst.Root);
 			context.SetState(inst.State);
 			await context.ResumeAsync(bookmark, reply);
 			await context.RunAsync();

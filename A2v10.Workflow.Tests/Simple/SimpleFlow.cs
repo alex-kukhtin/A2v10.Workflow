@@ -32,7 +32,8 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var tracker = new ConsoleTracker();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
 			var inst = await wfe.StartAsync(root, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(7, result.Get<Int32>("R"));
@@ -59,7 +60,8 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var tracker = new ConsoleTracker();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
 			var inst = await wfe.StartAsync(root);
 		}
 
@@ -85,7 +87,8 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var tracker = new ConsoleTracker();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
 			var inst = await wfe.StartAsync(root, new { X = 4});
 			Assert.AreEqual("X <= 5", inst.Result.Get<String>("R"));
 
@@ -120,7 +123,8 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage());
+			var tracker = new ConsoleTracker();
+			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
 			var inst = await wfe.StartAsync(root, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(9, result.Get<Int32>("R"));

@@ -10,15 +10,25 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
+	public enum StorageState
+	{
+		Loading,
+		Storing
+	}
+
 	public class ActivityStorage : IActivityStorage
 	{
 		private readonly ExpandoObject _expando;
 		private readonly IDictionary<String, IActivity> _activities;
 
+		public Boolean IsLoading { get; set; }
+		public Boolean IsStoring => !IsLoading;
+
 		public ExpandoObject Value => _expando;
 
-		public ActivityStorage(IDictionary<String, IActivity> activities, ExpandoObject obj = null)
+		public ActivityStorage(StorageState state, IDictionary<String, IActivity> activities, ExpandoObject obj = null)
 		{
+			IsLoading = state == StorageState.Loading;
 			_activities = activities;
 			_expando = obj ?? new ExpandoObject();
 		}

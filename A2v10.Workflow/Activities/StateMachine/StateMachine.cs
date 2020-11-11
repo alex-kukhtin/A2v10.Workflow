@@ -12,14 +12,14 @@ namespace A2v10.Workflow
 
 	public class StateMachine : Activity, IStorable, IHasContext
 	{
-		public List<IVariable> Variables { get; set; }	
-		public List<State> States { get; set; }
+		public List<IVariable> Variables { get; set; }
 
-		String _currentState;
+		public List<StateBase> States { get; set; }
+
+		String _currentState; // for debug only
 		ExecutingAction _onComplete;
 
 		#region IStorable
-
 		const String ON_COMPLETE = "OnComplete";
 		const String CURRENT_STATE = "CurrentState";
 
@@ -37,23 +37,35 @@ namespace A2v10.Workflow
 
 		public override IEnumerable<IActivity> EnumChildren()
 		{
-			return Enumerable.Empty<IActivity>();
+			if (States != null)
+				foreach (var state in States)
+					yield return state;
 		}
-
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
-			var state = States.Find(s => s.IsStart);
-			if (state == null)
+			var startNode = States.Find(s => s.IsStart);
+			if (startNode == null)
 				throw new WorkflowExecption("Flowchart. Start node not found");
-			_currentState = state.Ref;
-			context.Schedule(state, OnNextState);
+			_currentState = startNode.Ref;
+			context.Schedule(startNode, OnNextState);
 			return new ValueTask();
 		}
 
+		[StoreName("OnNextState")]
 		ValueTask OnNextState(IExecutionContext context, IActivity activity)
 		{
+			if (!(activity is StateBase stateBase))
+				throw new InvalidProgramException("Invalid cast 'StateBase'");
+			var nextState = States.Find(st => st.Ref == stateBase.NextState);
+			if (nextState != null)
+			{
+				_currentState = nextState.NextState;
+				context.Schedule(nextState, OnNextState);
+			}
+			else if (_onComplete != null)
+				return _onComplete(context, this);
 			return new ValueTask();
 		}
 

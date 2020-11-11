@@ -17,21 +17,25 @@ namespace A2v10.Workflow
 			{
 				if (activity is IStorable storable)
 				{
-					ActivityStorage storage = new ActivityStorage(_activities);
+					ActivityStorage storage = new ActivityStorage(StorageState.Storing, _activities);
 					storable.Store(storage);
 					actStateD.Add(refer, storage.Value);
 				}
 			}
+			if (actStateD.Count == 0)
+				return null;
 			return actState;
 		}
 
 		void SetActivityStates(ExpandoObject state)
 		{
+			if (state == null)
+				return;
 			foreach (var refer in state.Keys())
 			{
 				if (_activities.TryGetValue(refer, out IActivity activity))
 					if (activity is IStorable storable) {
-						var storage = new ActivityStorage(_activities, state.Get<ExpandoObject>(refer));
+						var storage = new ActivityStorage(StorageState.Loading, _activities, state.Get<ExpandoObject>(refer));
 						storable.Restore(storage);
 					}
 			}
@@ -46,11 +50,15 @@ namespace A2v10.Workflow
 				if (activity is IHasContext)
 					varsD.Add(refer, _script.Evaluate<ExpandoObject>(refer, "Store"));
 			}
+			if (varsD.Count == 0)
+				return null;
 			return vars;
 		}
 
 		void SetScriptVariables(ExpandoObject vars)
 		{
+			if (vars == null)
+				return;
 			foreach (var refer in vars.Keys())
 			{
 				if (_activities.TryGetValue(refer, out IActivity activity))
@@ -61,6 +69,8 @@ namespace A2v10.Workflow
 
 		ExpandoObject GetBookmarks()
 		{
+			if (_bookmarks == null || _bookmarks.Count == 0)
+				return null;
 			var res = new ExpandoObject();
 			foreach (var b in _bookmarks)
 				res.Set(b.Key, CallbackItem.CreateFrom(b.Value));
@@ -69,6 +79,8 @@ namespace A2v10.Workflow
 
 		void SetBookmarks(ExpandoObject marks)
 		{
+			if (marks == null)
+				return;
 			foreach (var k in marks.Keys())
 			{
 				var ebm = marks.Get<ExpandoObject>(k);
@@ -84,9 +96,9 @@ namespace A2v10.Workflow
 		public ExpandoObject GetState()
 		{
 			var res = new ExpandoObject();
-			res.Set("State", GetActivityStates());
-			res.Set("Variables", GetScriptVariables());
-			res.Set("Bookmarks", GetBookmarks());
+			res.SetNotNull("State", GetActivityStates());
+			res.SetNotNull("Variables", GetScriptVariables());
+			res.SetNotNull("Bookmarks", GetBookmarks());
 			return res;
 		}
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Tracker;
 using Jint;
 
 namespace A2v10.Workflow
@@ -36,8 +37,11 @@ namespace A2v10.Workflow
 		private readonly Dictionary<String, ResumeAction> _bookmarks = new Dictionary<String, ResumeAction>();
 		private readonly IActivity _root;
 
-		public ExecutionContext(IActivity root, Object args = null)
+		private readonly ITracker _tracker;
+
+		public ExecutionContext(ITracker tracker, IActivity root, Object args = null)
 		{
+			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
 			_root = root;
 			// store all activites
 			var toMapArg = new TraverseArg()
@@ -70,6 +74,7 @@ namespace A2v10.Workflow
 		{
 			if (activity == null)
 				return;
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Schedule, activity));
 			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete));
 		}
 
@@ -101,6 +106,7 @@ namespace A2v10.Workflow
 			while (_commandQueue.Count > 0)
 			{
 				var queueItem = _commandQueue.Dequeue();
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, queueItem.Activity));
 				await queueItem.Action.Invoke(this, queueItem.OnComplete);
 			}
 		}
