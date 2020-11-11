@@ -50,7 +50,7 @@ namespace A2v10.Workflow.Tests.Runtime
 			};
 
 			var rootJS = JsonConvert.SerializeObject(wrap, jsonSettings);
-			var act = JsonConvert.DeserializeObject<ActivityWrapper>(rootJS, jsonSettings);
+			//var act = JsonConvert.DeserializeObject<ActivityWrapper>(rootJS, jsonSettings);
 
 			Console.WriteLine(rootJS);
 
@@ -62,7 +62,7 @@ namespace A2v10.Workflow.Tests.Runtime
 			Assert.AreEqual(10, inst.Result.Get<Int32>("x"));
 
 			var resume = new WorkflowEngine(instStorage, tracker);
-			var resInst = await wfe.ResumeAsync(inst.Id, "Bookmark1");
+			var resInst = await resume.ResumeAsync(inst.Id, "Bookmark1");
 			Assert.AreEqual(15, resInst.Result.Get<Int32>("x"));
 		}
 	}

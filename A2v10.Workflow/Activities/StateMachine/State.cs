@@ -87,7 +87,7 @@ namespace A2v10.Workflow
 		[StoreName("OnTransitionComplete")]
 		ValueTask OnTransitionComplete(IExecutionContext context, IActivity activity)
 		{
-			if (!(activity is Transition tr))
+			if (activity is not Transition tr)
 				throw new InvalidProgramException("Invalid cast 'Transition'");
 			if (tr.NextState != null)
 			{

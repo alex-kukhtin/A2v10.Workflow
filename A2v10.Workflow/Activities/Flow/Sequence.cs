@@ -8,7 +8,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Sequence : Activity, IStorable, IHasContext
+	public class Sequence : Activity, IStorable, IScoped
 	{
 		public List<IActivity> Activities { get; set; }
 		public List<IVariable> Variables { get; set; }

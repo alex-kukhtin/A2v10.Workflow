@@ -77,7 +77,7 @@ namespace A2v10.Workflow.Tests
 			var inst = await wfe.StartAsync(root, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(5, result.Get<Int32>("X"));
-			var id = inst.Id;
+			//var id = inst.Id;
 
 			int x = result.Get<Int32>("X");
 			while (x > 0)

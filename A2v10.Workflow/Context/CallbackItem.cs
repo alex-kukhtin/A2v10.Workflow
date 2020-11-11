@@ -23,23 +23,26 @@ namespace A2v10.Workflow
 		{
 			if (eobj == null)
 				return null;
-			var cb = new CallbackItem();
-			cb.Ref = eobj.Get<String>(nameof(Ref));
-			cb.CallbackName = eobj.Get<String>(nameof(CallbackName));
+			var cb = new CallbackItem() {
+				Ref = eobj.Get<String>(nameof(Ref)),
+				CallbackName = eobj.Get<String>(nameof(CallbackName))
+			};
 			return cb;
 		}
 
 		public static ExpandoObject CreateFrom(Delegate callback)
 		{
-			if (!(callback.Target is IActivity activityTarget))
-				throw new ArgumentOutOfRangeException("callback.Target must be an IActivity");
+			if (callback.Target is not IActivity activityTarget)
+				throw new ArgumentException("callback.Target must be an IActivity");
+
 			var refer = activityTarget.Ref;
 
 			var custAttr = callback.Method.GetCustomAttributes(inherit: true)
 				?.FirstOrDefault(attr => attr is StoreNameAttribute);
 
 			if (custAttr == null)
-				throw new ArgumentOutOfRangeException("callback.Method has no StoreName attribute");
+				throw new ArgumentException("callback.Method has no StoreName attribute");
+
 			var callbackName = (custAttr as StoreNameAttribute).Name;
 
 			var cb = new CallbackItem()

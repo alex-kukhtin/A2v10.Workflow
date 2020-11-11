@@ -16,7 +16,7 @@ namespace A2v10.Workflow
 
 		public void Track(ITrackRecord record)
 		{
-			Console.WriteLine($"{_no++}: {record.ToString()}");
+			Console.WriteLine($"{_no++}: {record}");
 		}
 	}
 }

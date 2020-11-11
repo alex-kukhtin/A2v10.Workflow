@@ -62,7 +62,7 @@ namespace A2v10.Workflow.Tests
 
 			var tracker = new ConsoleTracker();
 			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
-			var inst = await wfe.StartAsync(root);
+			await wfe.StartAsync(root);
 		}
 
 		[TestMethod]

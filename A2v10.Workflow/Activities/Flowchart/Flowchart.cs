@@ -8,7 +8,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Flowchart : Activity, IHasContext
+	public class Flowchart : Activity, IScoped
 	{
 		public List<FlowNode> Nodes { get; set; }
 		public List<IVariable> Variables { get; set; }

@@ -60,7 +60,7 @@ namespace A2v10.Workflow
 			_root.Traverse(sbTraverseArg);
 			sb.EndScript();
 
-			_script = new ScriptEngine(null, _root, sb.Script, args);
+			_script = new ScriptEngine(_root, sb.Script, args);
 		}
 
 		public ExpandoObject GetResult()
@@ -107,7 +107,7 @@ namespace A2v10.Workflow
 			{
 				var queueItem = _commandQueue.Dequeue();
 				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, queueItem.Activity));
-				await queueItem.Action.Invoke(this, queueItem.OnComplete);
+				await queueItem.Action(this, queueItem.OnComplete);
 			}
 		}
 

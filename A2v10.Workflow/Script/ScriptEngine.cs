@@ -12,16 +12,14 @@ namespace A2v10.Workflow
 {
 	public class ScriptEngine
 	{
-		private readonly IServiceProvider _serviceProvider;
 		private readonly Engine _engine;
 		private readonly ExpandoObject _scriptData;
 		private readonly IActivity _root;
 		
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
-		public ScriptEngine(IServiceProvider serviceProvider, IActivity root, String script, Object args = null)
+		public ScriptEngine(IActivity root, String script, Object args = null)
 		{
-			_serviceProvider = serviceProvider;
 			_root = root;
 			_engine = new Engine(EngineOptions);
 			_engine.AddNativeObjects();

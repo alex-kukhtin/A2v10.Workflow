@@ -23,7 +23,7 @@ namespace A2v10.Workflow.SqlServer.Activities
 		public override async ValueTask ExecuteAsync(IExecutionContext context, Func<IExecutionContext, IActivity, ValueTask> onComplete)
 		{
 			var prms = new ExpandoObject();
-			var result = await _dbContext.ExecuteAndLoadAsync<ExpandoObject, ExpandoObject>(DataSource, Procedure, prms);
+			await _dbContext.ExecuteAndLoadAsync<ExpandoObject, ExpandoObject>(DataSource, Procedure, prms);
 			// TODO result
 			if (onComplete != null)
 				await onComplete(context, this);

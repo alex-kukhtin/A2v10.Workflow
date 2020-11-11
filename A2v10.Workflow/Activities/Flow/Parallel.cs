@@ -9,29 +9,19 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class Parallel : Activity, IStorable, IHasContext
+	public enum CompletionCondition
 	{
-		const String ON_COMPLETE = "OnComplete";
+		Any,
+		All
+	}
+
+	public class Parallel : ActivityWithComplete, IScoped
+	{
 
 		public List<IVariable> Variables { get; set; }
 		public List<IActivity> Branches { get; set; }
 
-		#region storable
-		ExecutingAction _onComplete;
-		#endregion
-
-		#region IStorable
-		public void Store(IActivityStorage storage)
-		{
-			storage.SetCallback(ON_COMPLETE, _onComplete);
-		}
-
-		public void Restore(IActivityStorage storage)
-		{
-			_onComplete = storage.GetCallback(ON_COMPLETE);
-		}
-		#endregion
-
+		public CompletionCondition CompletionCondition { get; set; }
 
 		#region IScriptable
 		public virtual void BuildScript(IScriptBuilder builder)
@@ -64,6 +54,7 @@ namespace A2v10.Workflow
 		[StoreName("OnBranchComplete")]
 		ValueTask OnBranchComplete(IExecutionContext context, IActivity activity)
 		{
+			// TODO: CompletionCondition
 			// TODO: cancel
 			if (_onComplete != null)
 				return _onComplete(context, this);

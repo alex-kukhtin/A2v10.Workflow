@@ -17,16 +17,17 @@ namespace A2v10.Workflow.Storage
 
 	public class InMemoryInstanceStorage : IInstanceStorage
 	{
-		private Dictionary<Guid, SavedInstance> _memory = new Dictionary<Guid, SavedInstance>();
+		private readonly Dictionary<Guid, SavedInstance> _memory = new Dictionary<Guid, SavedInstance>();
 
 		public Task<IInstance> Load(Guid id)
 		{
 			if (_memory.TryGetValue(id, out SavedInstance saved))
 			{
-				var inst = new Instance();
-				inst.Id = id;
-				inst.Root = saved.Root;
-				inst.State = JsonConvert.DeserializeObject<ExpandoObject>(saved.State);
+				var inst = new Instance() {
+					Id = id,
+					Root = saved.Root,
+					State = JsonConvert.DeserializeObject<ExpandoObject>(saved.State)
+				};
 				return Task.FromResult(inst as IInstance);
 			}
 			throw new NotImplementedException();
@@ -36,9 +37,11 @@ namespace A2v10.Workflow.Storage
 		{
 			Console.WriteLine("Save Instance");
 			Console.WriteLine(JsonConvert.SerializeObject(instance.State, new DoubleConverter()));
-			var si = new SavedInstance();
-			si.Root = instance.Root;
-			si.State = JsonConvert.SerializeObject(instance.State);
+			var si = new SavedInstance()
+			{
+				Root = instance.Root,
+				State = JsonConvert.SerializeObject(instance.State)
+			};
 			if (_memory.ContainsKey(instance.Id))
 				_memory[instance.Id] = si;
 			else

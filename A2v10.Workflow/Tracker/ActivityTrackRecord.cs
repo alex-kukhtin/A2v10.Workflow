@@ -13,7 +13,7 @@ namespace A2v10.Workflow.Tracker
 
 	public class ActivityTrackRecord : TrackRecord
 	{
-		String _message;
+		private readonly String _message;
 		public ActivityTrackRecord(ActivityTrackAction action, IActivity activity)
 			: base()
 		{

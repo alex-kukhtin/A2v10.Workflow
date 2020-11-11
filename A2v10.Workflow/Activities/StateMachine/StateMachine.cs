@@ -10,7 +10,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class StateMachine : Activity, IStorable, IHasContext
+	public class StateMachine : Activity, IStorable, IScoped
 	{
 		public List<IVariable> Variables { get; set; }
 
@@ -56,7 +56,7 @@ namespace A2v10.Workflow
 		[StoreName("OnNextState")]
 		ValueTask OnNextState(IExecutionContext context, IActivity activity)
 		{
-			if (!(activity is StateBase stateBase))
+			if (activity is not StateBase stateBase)
 				throw new InvalidProgramException("Invalid cast 'StateBase'");
 			var nextState = States.Find(st => st.Ref == stateBase.NextState);
 			if (nextState != null)

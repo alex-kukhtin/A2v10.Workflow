@@ -47,7 +47,7 @@ namespace A2v10.Workflow
 			var varsD = vars as IDictionary<String, Object>;
 			foreach (var (refer, activity) in _activities)
 			{
-				if (activity is IHasContext)
+				if (activity is IScoped)
 					varsD.Add(refer, _script.Evaluate<ExpandoObject>(refer, "Store"));
 			}
 			if (varsD.Count == 0)
@@ -62,7 +62,7 @@ namespace A2v10.Workflow
 			foreach (var refer in vars.Keys())
 			{
 				if (_activities.TryGetValue(refer, out IActivity activity))
-					if (activity is IHasContext contextActivity)
+					if (activity is IScoped)
 						_script.Restore(refer, vars.Get<ExpandoObject>(refer));
 			}
 		}

@@ -23,8 +23,8 @@ namespace A2v10.Workflow.SqlServer
 		{
 			ExpandoObject prms = null;
 			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms);
-			//if (eo == null)
-				//throw new StorageException($"Instance '{instanceId}' not found");
+			if (eo == null)
+				throw new SqlServerStorageException($"Instance '{instanceId}' not found");
 			return null;
 		}
 

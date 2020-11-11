@@ -99,7 +99,7 @@ namespace A2v10.Workflow
 			get
 			{
 				var sb = new StringBuilder();
-				String _methodsText(List<String> methods)
+				static String _methodsText(List<String> methods)
 				{
 					if (methods == null || methods.Count == 0)
 						return "null";
@@ -165,7 +165,7 @@ namespace A2v10.Workflow
 
 		public void Start(IActivity activity)
 		{
-			if (activity is IHasContext activityWithContext)
+			if (activity is IScoped)
 			{
 				var ascript = new ActivityScript(this, activity);
 				_stack.Push(ascript);

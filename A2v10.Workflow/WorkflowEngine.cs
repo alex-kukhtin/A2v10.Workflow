@@ -6,8 +6,8 @@ namespace A2v10.Workflow
 {
 	public class WorkflowEngine : IWorkflowEngine
 	{
-		IInstanceStorage _instanceStorage;
-		ITracker _tracker;
+		private readonly IInstanceStorage _instanceStorage;
+		private readonly ITracker _tracker;
 		
 		public WorkflowEngine(IInstanceStorage instanceStorage, ITracker tracker)
 		{
