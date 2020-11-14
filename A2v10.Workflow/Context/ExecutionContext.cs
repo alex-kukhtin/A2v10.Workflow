@@ -13,18 +13,11 @@ namespace A2v10.Workflow
 	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
 
 	public record QueueItem
-	{
-		public QueueItem(Func<IExecutionContext, ExecutingAction, ValueTask> action, IActivity activity, ExecutingAction onComplete)
-		{
-			Action = action;
-			Activity = activity;
-			OnComplete = onComplete;
-		}
-
-		public Func<IExecutionContext, ExecutingAction, ValueTask> Action { get; }
-		public IActivity Activity { get; }
-		public ExecutingAction OnComplete { get; }
-	}
+	(
+		Func<IExecutionContext, ExecutingAction, ValueTask> Action, 
+		IActivity Activity, 
+		ExecutingAction OnComplete
+	);
 
 	public partial class ExecutionContext : IExecutionContext
 	{
@@ -112,7 +105,7 @@ namespace A2v10.Workflow
 		{
 			if (_bookmarks.TryGetValue(bookmark, out ResumeAction action))
 			{
-				return action.Invoke(this, bookmark, result);
+				return action(this, bookmark, result);
 			}
 			return new ValueTask();
 		}

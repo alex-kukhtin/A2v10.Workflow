@@ -9,11 +9,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Storage
 {
-	internal class SavedInstance
-	{
-		public IActivity Root { get; set; }
-		public String State { get; set; }
-	}
+	internal record SavedInstance(IActivity Root, String State);
 
 	public class InMemoryInstanceStorage : IInstanceStorage
 	{
@@ -23,25 +19,22 @@ namespace A2v10.Workflow.Storage
 		{
 			if (_memory.TryGetValue(id, out SavedInstance saved))
 			{
-				var inst = new Instance() {
+				IInstance inst = new Instance() {
 					Id = id,
 					Root = saved.Root,
 					State = JsonConvert.DeserializeObject<ExpandoObject>(saved.State)
 				};
-				return Task.FromResult(inst as IInstance);
+				return Task.FromResult(inst);
 			}
 			throw new NotImplementedException();
 		}
 
 		public Task Save(IInstance instance)
 		{
-			Console.WriteLine("Save Instance");
 			Console.WriteLine(JsonConvert.SerializeObject(instance.State, new DoubleConverter()));
-			var si = new SavedInstance()
-			{
-				Root = instance.Root,
-				State = JsonConvert.SerializeObject(instance.State)
-			};
+			
+			var si = new SavedInstance(instance.Root, JsonConvert.SerializeObject(instance.State));
+
 			if (_memory.ContainsKey(instance.Id))
 				_memory[instance.Id] = si;
 			else

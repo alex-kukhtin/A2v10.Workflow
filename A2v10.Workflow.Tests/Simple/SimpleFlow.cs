@@ -19,11 +19,11 @@ namespace A2v10.Workflow.Tests
 			var root = new Sequence()
 			{
 				Ref = "Ref0",
-				Variables = {
+				Variables = new List<IVariable>{
 					new Variable() {Name = "X", Dir = VariableDirection.In, Type=VariableType.Number},
 					new Variable() {Name = "R", Dir = VariableDirection.Out, Type=VariableType.Number}
 				},
-				Activities = {
+				Activities = new List<IActivity> {
 					new Code() {Ref="Ref1", Script="X = X + 1"},
 					new Code() {Ref="Ref2", Script="X = X + 1"},
 					new Code() {Ref="Ref3", Script="R = X"},
@@ -50,7 +50,7 @@ namespace A2v10.Workflow.Tests
 			var root = new Parallel()
 			{
 				Ref = "Ref0",
-				Branches = {
+				Branches = new List<IActivity>{
 					new Code() {Ref="Ref1", Script="console.log('ref1')"},
 					new Code() {Ref="Ref2", Script="console.log('ref2')"},
 					new Code() {Ref="Ref3", Script="console.log('ref3')"},
@@ -68,11 +68,11 @@ namespace A2v10.Workflow.Tests
 			var root = new Sequence()
 			{
 				Ref = "Ref0",
-				Variables = {
+				Variables = new List<IVariable> {
 					new Variable() {Name = "X", Dir = VariableDirection.In, Type=VariableType.Number},
 					new Variable() {Name = "R", Dir = VariableDirection.Out, Type=VariableType.String}
 				},
-				Activities = {
+				Activities = new List<IActivity>{
 					new If() {
 						Ref="Ref1",
 						Condition="X > 5",
@@ -98,15 +98,15 @@ namespace A2v10.Workflow.Tests
 			var root = new Sequence()
 			{
 				Ref = "Ref0",
-				Variables = {
+				Variables = new List<IVariable>{
 					new Variable() {Name = "X", Dir = VariableDirection.In, Type=VariableType.Number},
 					new Variable() {Name = "R", Dir = VariableDirection.Out, Type=VariableType.Number},
 				},
-				Activities = {
+				Activities = new List<IActivity> {
 					new Code() {Ref="Ref1", Script="X = X + 1"},
 					new Code() {Ref="Ref2", Script="X = X + 1"},
 					new Sequence() { Ref="Ref3",
-						Activities = {
+						Activities = new List<IActivity> {
 							new Code() {Ref="Ref4", Script="X = X + 1"},
 							new Code() {Ref="Ref5", Script="X = X + 1"},
 						}
