@@ -21,6 +21,8 @@ namespace A2v10.System.Xaml.Tests
 ";
 			var obj = XamlServices.Parse(xaml);
 
+			Assert.AreEqual(typeof(A2v10.Workflow.Sequence), obj.GetType());
+
 			int z = 55;
 		}
 	}

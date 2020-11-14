@@ -12,7 +12,7 @@ namespace A2v10.System.Xaml
 		private readonly XamlNode _root = new XamlNode() { Name = "Root" };
 		private readonly XmlReader _rdr;
 
-		private Stack<XamlNode> _elemStack = new Stack<XamlNode>();
+		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
 		
 		public XamlReader(XmlReader rdr)
 		{

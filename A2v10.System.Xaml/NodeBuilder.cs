@@ -31,7 +31,7 @@ namespace A2v10.System.Xaml
 			var className = $"A2v10.Workflow.{node.Name}";
 			var nodeType = _assembly.GetType(className);
 			var param = Expression.Parameter(typeof(XamlNode));
-			var ctor = nodeType.GetConstructor(new Type[0]);
+			var ctor = nodeType.GetConstructor(Array.Empty<Type>());
 			var props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 			var inits = new List<MemberAssignment>();
 			foreach (var prop in props) {
