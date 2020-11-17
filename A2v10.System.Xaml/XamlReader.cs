@@ -27,7 +27,7 @@ namespace A2v10.System.Xaml
 			{
 				if (_rdr.NodeType == XmlNodeType.Comment)
 					continue;
-				ReadNode();
+				ReadNode(nodeBuilder);
 			}
 			if (!_root.Children.IsValueCreated)
 				return null;
@@ -39,31 +39,36 @@ namespace A2v10.System.Xaml
 			return nodeBuilder.BuildNode(r);
 		}
 
-		void ReadNode()
+		void ReadNode(NodeBuilder builder)
 		{
 			switch (_rdr.NodeType)
 			{
 				case XmlNodeType.Element:
 					{
-						var node = new XamlNode() { Name = _rdr.LocalName };
+						var node = new XamlNode() {
+							Name = _rdr.LocalName 
+						};
 						StartNode(node);
 						if (_rdr.IsEmptyElement)
-							EndNode();
-						ReadAttributes(node);
+							EndNode(builder);
+						ReadAttributes(node, builder);
 					}
 					break;
 				case XmlNodeType.EndElement:
-					EndNode();
+					EndNode(builder);
+					break;
+				case XmlNodeType.Text:
+					AddContent();
 					break;
 			}
 		}
 
-		void ReadAttributes(XamlNode node)
+		void ReadAttributes(XamlNode node, NodeBuilder builder)
 		{
 			for (var i = 0; i< _rdr.AttributeCount; i++)
 			{
 				_rdr.MoveToAttribute(i);
-				node.AddAttribute(_rdr.Name, _rdr.Value);
+				node.AddAttribute(builder, _rdr.Name, _rdr.Value);
 			}
 		}
 
@@ -72,11 +77,17 @@ namespace A2v10.System.Xaml
 			_elemStack.Push(node);
 		}
 
-		void EndNode()
+		void AddContent()
+		{
+			var node = _elemStack.Peek();
+			node.SetContent(_rdr.Value);
+		}
+
+		void EndNode(NodeBuilder builder)
 		{
 			var ch = _elemStack.Pop();
 			var parent = _elemStack.Peek();
-			parent.AddChildren(ch);
+			parent.AddChildren(ch, builder);
 		}
 	}
 }

@@ -1,47 +1,37 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace A2v10.System.Xaml
 {
-	public record XamlAttribute
-	{
-		public String Name { get; init; }
-		public String Value { get; init; }
-	}
-
-	public record XamlProperty
-	{
-		public String Name { get; init; }
-	}
-
-	public record PlainProperty : XamlProperty
-	{
-		public String Value { get; init; }
-	}
-
-	public record NodeProperty : XamlProperty
-	{
-		public XamlNode Node { get; init; }
-	}
-
 	public class XamlNode
 	{
 		public String Name { get; init; }
 
 		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
-		public Dictionary<String, Object> Properties = new Dictionary<String, Object>();
+		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
 
-		public Object GetPropertyValue(String propName)
+		public Object GetPropertyValue(String propName, Type propType)
 		{
 			if (Properties.TryGetValue(propName, out Object val))
-				return val;
+			{
+				if (val == null)
+					return null;
+				if (val.GetType() == propType)
+					return val;
+				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
+			}
+			if (propType.IsEnum)
+				return 0; // default value for enum
 			return null;
 		}
 
-		public void AddChildren(XamlNode node)
+		public void SetContent(String text)
+		{
+			Console.WriteLine($"Set content: {text}");
+		}
+
+		public void AddChildren(XamlNode node, NodeBuilder builder)
 		{
 			if (node.Name.Contains("."))
 			{
@@ -52,7 +42,7 @@ namespace A2v10.System.Xaml
 				if (parts[0] == this.Name)
 				{
 					// nested property
-					AddProperty(parts[1], node);
+					AddProperty(builder, parts[1], node);
 				}
 				else
 				{
@@ -66,27 +56,33 @@ namespace A2v10.System.Xaml
 			}
 		}
 
-		public void AddProperty(String name, XamlNode node)
+		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
-			Properties.Add(name, null);
+			var nd = builder.GetNodeDefinition(Name);
+			Properties.Add(name, nd.BuildPropertyNode(builder, name, node));
 		}
 
-		public void AddAttribute(String name, String value)
+		public void AddProperty(NodeBuilder builder, String name, String value)
+		{
+			var nd = builder.GetNodeDefinition(Name);
+			Properties.Add(name, nd.BuildProperty(name, value));
+		}
+
+		public void AddAttribute(NodeBuilder builder, String name, String value)
 		{
 			if (name.StartsWith("xmlns"))
-				AddNamespace(name, value);
+				AddNamespace(builder, name, value);
 			else
-				Properties.Add(name, value);
+				AddProperty(builder, name, value);
 		}
 
-		void AddNamespace(String name, String value)
+		static void AddNamespace(NodeBuilder builder, String name, String value)
 		{
-			Console.WriteLine($"namespace {name}='{value}' to {this.Name}");
-		}
-
-		public String ToCSharpCode(int level = 0)
-		{
-			return null;
+			// xmlns:x;
+			var prefix = name[5..];
+			if (prefix.StartsWith(':'))
+				prefix = prefix[1..] + ":";
+			builder.AddNamespace(prefix, value);
 		}
 	}
 }
