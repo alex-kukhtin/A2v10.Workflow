@@ -46,7 +46,7 @@ namespace A2v10.System.Xaml
 				case XmlNodeType.Element:
 					{
 						var node = new XamlNode() {
-							Name = _rdr.LocalName 
+							Name = _rdr.Name 
 						};
 						StartNode(node);
 						if (_rdr.IsEmptyElement)
@@ -80,7 +80,7 @@ namespace A2v10.System.Xaml
 		void AddContent()
 		{
 			var node = _elemStack.Peek();
-			node.SetContent(_rdr.Value);
+			node.SetContent(_rdr.Value?.Trim());
 		}
 
 		void EndNode(NodeBuilder builder)

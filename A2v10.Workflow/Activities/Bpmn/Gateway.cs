@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class Gateway
+	public abstract class Gateway : BpmnElement
 	{
+		public List<String> Incoming { get; set; }
+		public List<String> Outgoing { get; set; }
+
+		public String Default { get; set; }
 	}
 }

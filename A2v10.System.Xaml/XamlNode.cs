@@ -7,28 +7,56 @@ namespace A2v10.System.Xaml
 	public class XamlNode
 	{
 		public String Name { get; init; }
+		public String TextContent { get; set; }
 
 		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
 		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
 
-		public Object GetPropertyValue(String propName, Type propType)
+		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
+
+		public Object GetPropertyValue(String propName, Type propType, NodeDefinition nodeDef)
 		{
 			if (Properties.TryGetValue(propName, out Object val))
 			{
 				if (val == null)
 					return null;
-				if (val.GetType() == propType)
+				if (val.GetType() ==  (Nullable.GetUnderlyingType(propType) ?? propType))
 					return val;
 				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
 			}
 			if (propType.IsEnum)
 				return 0; // default value for enum
+			// try to get ContentProperty
+			if (nodeDef.ContentProperty == propName)
+			{
+				return GetContentProperty(nodeDef);
+			}
 			return null;
+		}
+
+		public Object GetContentProperty(NodeDefinition nodeDef)
+		{
+			// set children as content
+			if (!nodeDef.Properties.TryGetValue(nodeDef.ContentProperty, out PropDefinition propDef))
+				throw new XamlReadException($"Property definition for property '{nodeDef.ContentProperty}' not found.");
+
+			if (propDef.Constructor == null)
+			{
+				// ContentProperty for text
+				return TextContent;
+			}
+
+			if (!HasChildren)
+				return null;
+			var propObj = propDef.Constructor();
+			foreach (var c in Children.Value)
+				propDef.AddMethod(propObj, nodeDef.BuildNode(c));
+			return propObj;
 		}
 
 		public void SetContent(String text)
 		{
-			Console.WriteLine($"Set content: {text}");
+			TextContent = text;
 		}
 
 		public void AddChildren(XamlNode node, NodeBuilder builder)
@@ -51,7 +79,6 @@ namespace A2v10.System.Xaml
 			}
 			else
 			{
-				Console.WriteLine($"AddChildren: {node.Name} to {this.Name}");
 				Children.Value.Add(node);
 			}
 		}
@@ -81,7 +108,7 @@ namespace A2v10.System.Xaml
 			// xmlns:x;
 			var prefix = name[5..];
 			if (prefix.StartsWith(':'))
-				prefix = prefix[1..] + ":";
+				prefix = prefix[1..];
 			builder.AddNamespace(prefix, value);
 		}
 	}

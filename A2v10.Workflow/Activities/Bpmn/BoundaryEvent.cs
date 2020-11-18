@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class Task : BpmnElement
+	public class BoundaryEvent : Event
 	{
-		public List<String> Incoming { get; set; }
 	}
 }

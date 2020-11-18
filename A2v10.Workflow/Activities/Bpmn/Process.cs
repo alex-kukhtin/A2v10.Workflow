@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class Task : BpmnElement
+	public class Process : BpmnElement
 	{
-		public List<String> Incoming { get; set; }
+		public Boolean IsExecutable { get; set; }
 	}
 }
