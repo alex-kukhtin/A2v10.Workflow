@@ -8,7 +8,7 @@ namespace A2v10.Workflow.Bpmn
 {
 	public class SequenceFlow : BpmnElement
 	{
-		public String SourceRef { get; set; }
-		public String TargetRef { get; set; }
+		public String SourceRef { get; init; }
+		public String TargetRef { get; init; }
 	}
 }

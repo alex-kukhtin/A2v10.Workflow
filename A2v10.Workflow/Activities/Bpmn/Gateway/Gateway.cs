@@ -8,9 +8,9 @@ namespace A2v10.Workflow.Bpmn
 {
 	public abstract class Gateway : BpmnElement
 	{
-		public List<String> Incoming { get; set; }
-		public List<String> Outgoing { get; set; }
+		public List<String> Incoming { get; init; }
+		public List<String> Outgoing { get; init; }
 
-		public String Default { get; set; }
+		public String Default { get; init; }
 	}
 }

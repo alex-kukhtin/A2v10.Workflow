@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public abstract class BpmnElement
+	public class Task : BpmnElement
 	{
-		public String Id { get; init; }
-		public String Name { get; init; }
+		public List<String> Incoming { get; init; }
 	}
 }

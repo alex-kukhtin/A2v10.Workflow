@@ -8,6 +8,8 @@ namespace A2v10.Workflow.Bpmn
 {
 	public class Process : BpmnElement
 	{
-		public Boolean IsExecutable { get; set; }
+		public Boolean IsExecutable { get; init; }
+
+		public List<BpmnElement> Elements { get; init; }
 	}
 }

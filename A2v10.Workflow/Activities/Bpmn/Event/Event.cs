@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class Task : BpmnElement
+	public abstract class Event : BpmnElement
 	{
-		public List<String> Incoming { get; set; }
+		public virtual Boolean IsStart => false;
 	}
 }

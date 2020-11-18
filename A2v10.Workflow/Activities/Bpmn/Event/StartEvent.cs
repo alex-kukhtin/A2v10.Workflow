@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class BoundaryEvent : Event
+	public class StartEvent : Event
 	{
+		public override Boolean IsStart => true;
 	}
 }

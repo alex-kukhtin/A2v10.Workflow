@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public abstract class BpmnElement
+	public class InclusiveGateway : Gateway
 	{
-		public String Id { get; init; }
-		public String Name { get; init; }
 	}
 }
