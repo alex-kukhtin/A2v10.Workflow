@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace A2v10.Workflow.Bpmn
+﻿namespace A2v10.Workflow.Bpmn
 {
-	public class ScriptTask : Task
+	public class ScriptTask : BpmnTask
 	{
 	}
 }

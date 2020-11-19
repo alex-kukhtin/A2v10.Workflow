@@ -1,12 +1,11 @@
 ﻿
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using A2v10.Workflow.Interfaces;
-using System.Threading.Tasks;
-using System;
-using A2v10.Workflow.Storage;
 using A2v10.Workflow.Activities;
+using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Storage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Tests
 {
@@ -19,17 +18,17 @@ namespace A2v10.Workflow.Tests
 		{
 			var root = new Flowchart()
 			{
-				Ref = "Ref0",
+				Id = "Ref0",
 				Variables = new List<IVariable>
 				{
 					new Variable() {Name = "X", Dir = VariableDirection.InOut, Type=VariableType.Number},
 				},
 				Nodes = new List<FlowNode>()
 				{
-					new FlowStart() {Ref="Ref1", Next="Ref2"},
-					new FlowDecision() {Ref="Ref2", Condition="X > 0", Then = "Ref3"},
-					new FlowActivity() {Ref = "Ref3", Next="Ref2",
-						Activity = new Code() {Ref="Ref4", Script="X -= 1" }
+					new FlowStart() {Id="Ref1", Next="Ref2"},
+					new FlowDecision() {Id="Ref2", Condition="X > 0", Then = "Ref3"},
+					new FlowActivity() {Id = "Ref3", Next="Ref2",
+						Activity = new Code() {Id="Ref4", Script="X -= 1" }
 					}
 				}
 			};
@@ -50,21 +49,21 @@ namespace A2v10.Workflow.Tests
 		{
 			var root = new Flowchart()
 			{
-				Ref = "Ref0",
+				Id = "Ref0",
 				Variables = new List<IVariable>
 				{
 					new Variable() {Name = "X", Dir = VariableDirection.InOut, Type=VariableType.Number},
 				},
 				Nodes = new List<FlowNode>()
 				{
-					new FlowStart() {Ref="Ref1", Next="Ref2"},
-					new FlowDecision() {Ref="Ref2", Condition="X > 0", Then = "Ref3"},
-					new FlowActivity() {Ref = "Ref3", Next="Ref2",
+					new FlowStart() {Id="Ref1", Next="Ref2"},
+					new FlowDecision() {Id="Ref2", Condition="X > 0", Then = "Ref3"},
+					new FlowActivity() {Id = "Ref3", Next="Ref2",
 						Activity = new Sequence() {
-							Ref="Ref4", 
+							Id="Ref4",
 							Activities = new List<IActivity>() {
-								new Wait() {Ref="Ref5", Bookmark="BM1" },
-								new Code() {Ref="Ref6", Script="X -= 1" }
+								new Wait() {Id="Ref5", Bookmark="BM1" },
+								new Code() {Id="Ref6", Script="X -= 1" }
 							}
 						}
 					}

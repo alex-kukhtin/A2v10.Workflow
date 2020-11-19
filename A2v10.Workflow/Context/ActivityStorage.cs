@@ -1,10 +1,9 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -32,7 +31,7 @@ namespace A2v10.Workflow
 			_activities = activities;
 			_expando = obj ?? new ExpandoObject();
 		}
-		
+
 		public T Get<T>(String name)
 		{
 			return _expando.Get<T>(name);
@@ -60,5 +59,16 @@ namespace A2v10.Workflow
 				return;
 			_expando.Set(name, CallbackItem.CreateFrom(callback));
 		}
+
+		public void SetToken(String name, IToken value)
+		{
+
+		}
+
+		public IToken GetToken(String name)
+		{
+			return null;
+		}
+
 	}
 }

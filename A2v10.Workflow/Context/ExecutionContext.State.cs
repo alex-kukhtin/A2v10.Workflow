@@ -1,9 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -34,13 +33,14 @@ namespace A2v10.Workflow
 			foreach (var refer in state.Keys())
 			{
 				if (_activities.TryGetValue(refer, out IActivity activity))
-					if (activity is IStorable storable) {
+					if (activity is IStorable storable)
+					{
 						var storage = new ActivityStorage(StorageState.Loading, _activities, state.Get<ExpandoObject>(refer));
 						storable.Restore(storage);
 					}
 			}
 		}
-		
+
 		ExpandoObject GetScriptVariables()
 		{
 			var vars = new ExpandoObject();

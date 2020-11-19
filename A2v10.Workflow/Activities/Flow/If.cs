@@ -1,9 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -16,20 +15,20 @@ namespace A2v10.Workflow
 		public IActivity Then { get; set; }
 		public IActivity Else { get; set; }
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
+			var cond = context.Evaluate<Boolean>(Id, nameof(Condition));
 			if (cond)
 			{
 				if (Then != null)
-					context.Schedule(Then, onComplete);
+					context.Schedule(Then, onComplete, token);
 				else if (onComplete != null)
 					return onComplete(context, this);
 			}
 			else
 			{
 				if (Else != null)
-					context.Schedule(Else, onComplete);
+					context.Schedule(Else, onComplete, token);
 				else if (onComplete != null)
 					return onComplete(context, this);
 			}

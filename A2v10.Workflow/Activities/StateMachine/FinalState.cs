@@ -1,9 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
-using Microsoft.VisualBasic;
 
 namespace A2v10.Workflow
 {
@@ -15,9 +14,9 @@ namespace A2v10.Workflow
 
 		public IActivity Entry { get; set; }
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			context.Schedule(Entry, onComplete);
+			context.Schedule(Entry, onComplete, token);
 			return new ValueTask();
 		}
 

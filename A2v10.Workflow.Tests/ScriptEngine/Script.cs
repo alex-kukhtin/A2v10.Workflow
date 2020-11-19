@@ -1,13 +1,9 @@
 ﻿
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using A2v10.Workflow.Interfaces;
-using System.Threading.Tasks;
-using System;
 using Jint;
-using System.Runtime.InteropServices.ComTypes;
 using Jint.Native;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace A2v10.Workflow.Tests
 {
@@ -31,14 +27,14 @@ namespace A2v10.Workflow.Tests
 		[TestMethod]
 		public void ScriptEngine()
 		{
-			var eng = new Engine(opts => 
+			var eng = new Engine(opts =>
 			{
 				opts.Strict(true);
 			});
 
 
 			var obj = eng.Execute(program).GetCompletionValue().ToObject();
-			var func = obj as Func<JsValue, JsValue[], JsValue>; 
+			var func = obj as Func<JsValue, JsValue[], JsValue>;
 
 			var val = func.Invoke(JsValue.Undefined, null).ToObject();
 
@@ -47,7 +43,8 @@ namespace A2v10.Workflow.Tests
 				var x = dict["Ref0"] as IDictionary<String, Object>;
 				var res = JsValue.FromObject(eng, x["Script"]).Invoke();
 				Assert.AreEqual("7", res.ToString());
-			} else
+			}
+			else
 			{
 				Assert.Fail("Ref0 not found");
 			}

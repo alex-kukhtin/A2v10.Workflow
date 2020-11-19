@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace A2v10.Workflow.Interfaces
+﻿namespace A2v10.Workflow.Interfaces
 {
 	public interface IStorable
 	{

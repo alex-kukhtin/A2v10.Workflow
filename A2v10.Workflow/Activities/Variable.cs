@@ -1,7 +1,7 @@
 ﻿
-using System;
 using A2v10.Workflow.Interfaces;
 using Newtonsoft.Json;
+using System;
 
 namespace A2v10.Workflow
 {

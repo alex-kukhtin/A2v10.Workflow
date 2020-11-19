@@ -1,6 +1,6 @@
-﻿using System;
+﻿using A2v10.Workflow.Interfaces;
+using System;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -8,7 +8,7 @@ namespace A2v10.Workflow
 	{
 		private readonly IInstanceStorage _instanceStorage;
 		private readonly ITracker _tracker;
-		
+
 		public WorkflowEngine(IInstanceStorage instanceStorage, ITracker tracker)
 		{
 			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
@@ -24,7 +24,7 @@ namespace A2v10.Workflow
 			};
 			root.OnEndInit();
 			var context = new ExecutionContext(_tracker, inst.Root, args);
-			context.Schedule(inst.Root, null);
+			context.Schedule(inst.Root, null, null);
 			await context.RunAsync();
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();

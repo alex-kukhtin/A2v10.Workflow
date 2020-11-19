@@ -1,10 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -18,20 +16,24 @@ namespace A2v10.Workflow
 
 		String _currentState; // for debug only
 		ExecutingAction _onComplete;
+		IToken _token;
 
 		#region IStorable
 		const String ON_COMPLETE = "OnComplete";
 		const String CURRENT_STATE = "CurrentState";
+		const String TOKEN = "Token";
 
 		public void Store(IActivityStorage storage)
 		{
 			storage.Set(CURRENT_STATE, _currentState);
 			storage.SetCallback(ON_COMPLETE, _onComplete);
+			storage.SetToken(TOKEN, _token);
 		}
 		public void Restore(IActivityStorage storage)
 		{
 			_currentState = storage.Get<String>(CURRENT_STATE);
 			_onComplete = storage.GetCallback(ON_COMPLETE);
+			_token = storage.GetToken(TOKEN);
 		}
 		#endregion
 
@@ -42,14 +44,14 @@ namespace A2v10.Workflow
 					yield return state;
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			var startNode = States.Find(s => s.IsStart);
 			if (startNode == null)
 				throw new WorkflowExecption("Flowchart. Start node not found");
-			_currentState = startNode.Ref;
-			context.Schedule(startNode, OnNextState);
+			_currentState = startNode.Id;
+			context.Schedule(startNode, OnNextState, token);
 			return new ValueTask();
 		}
 
@@ -58,11 +60,11 @@ namespace A2v10.Workflow
 		{
 			if (activity is not StateBase stateBase)
 				throw new InvalidProgramException("Invalid cast 'StateBase'");
-			var nextState = States.Find(st => st.Ref == stateBase.NextState);
+			var nextState = States.Find(st => st.Id == stateBase.NextState);
 			if (nextState != null)
 			{
 				_currentState = nextState.NextState;
-				context.Schedule(nextState, OnNextState);
+				context.Schedule(nextState, OnNextState, _token);
 			}
 			else if (_onComplete != null)
 				return _onComplete(context, this);

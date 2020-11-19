@@ -11,7 +11,7 @@ namespace A2v10.Workflow
 		{
 			var d = expobj as IDictionary<String, Object>;
 			if (d.TryGetValue(name, out Object res))
-				return (T) Convert.ChangeType(res, typeof(T));
+				return (T)Convert.ChangeType(res, typeof(T));
 			return default;
 		}
 
@@ -21,7 +21,7 @@ namespace A2v10.Workflow
 			d.Add(name, value);
 		}
 
-		public static void SetNotNull<T>(this ExpandoObject expobj, String name, T value) where T:class
+		public static void SetNotNull<T>(this ExpandoObject expobj, String name, T value) where T : class
 		{
 			if (value == null)
 				return;

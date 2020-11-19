@@ -20,13 +20,13 @@ namespace A2v10.System.Xaml
 			{
 				if (val == null)
 					return null;
-				if (val.GetType() ==  (Nullable.GetUnderlyingType(propType) ?? propType))
+				if (val.GetType() == (Nullable.GetUnderlyingType(propType) ?? propType))
 					return val;
 				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
 			}
 			if (propType.IsEnum)
 				return 0; // default value for enum
-			// try to get ContentProperty
+						  // try to get ContentProperty
 			if (nodeDef.ContentProperty == propName)
 			{
 				return GetContentProperty(nodeDef);

@@ -13,8 +13,10 @@ namespace A2v10.Workflow.Interfaces
 
 		void Set<T>(String name, T value);
 		void SetCallback(String name, ExecutingAction callback);
+		void SetToken(String name, IToken value);
 
 		ExecutingAction GetCallback(String name);
 		T Get<T>(String name);
+		IToken GetToken(String name);
 	}
 }

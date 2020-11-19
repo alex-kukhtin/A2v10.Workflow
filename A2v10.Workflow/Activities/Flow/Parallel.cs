@@ -1,9 +1,8 @@
 ﻿
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-
 using A2v10.Workflow.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace A2v10.Workflow
 {
@@ -37,7 +36,7 @@ namespace A2v10.Workflow
 					yield return branch;
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			if (Branches == null || Branches.Count == 0)
@@ -47,7 +46,7 @@ namespace A2v10.Workflow
 				return new ValueTask();
 			}
 			foreach (var br in Branches)
-				context.Schedule(br, OnBranchComplete);
+				context.Schedule(br, OnBranchComplete, token);
 			return new ValueTask();
 		}
 

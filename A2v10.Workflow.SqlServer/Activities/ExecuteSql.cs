@@ -1,13 +1,14 @@
 ﻿
+using A2v10.Data.Interfaces;
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Dynamic;
 using System.Threading.Tasks;
 
-using A2v10.Data.Interfaces;
-using A2v10.Workflow.Interfaces;
-
 namespace A2v10.Workflow.SqlServer.Activities
 {
+	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
+
 	public class ExecuteSql : Activity
 	{
 		private readonly IDbContext _dbContext;
@@ -20,7 +21,7 @@ namespace A2v10.Workflow.SqlServer.Activities
 			_dbContext = dbContext;
 		}
 
-		public override async ValueTask ExecuteAsync(IExecutionContext context, Func<IExecutionContext, IActivity, ValueTask> onComplete)
+		public override async ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			var prms = new ExpandoObject();
 			await _dbContext.ExecuteAndLoadAsync<ExpandoObject, ExpandoObject>(DataSource, Procedure, prms);

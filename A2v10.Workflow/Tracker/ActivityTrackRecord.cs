@@ -1,7 +1,5 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace A2v10.Workflow.Tracker
 {
@@ -14,10 +12,12 @@ namespace A2v10.Workflow.Tracker
 	public class ActivityTrackRecord : TrackRecord
 	{
 		private readonly String _message;
-		public ActivityTrackRecord(ActivityTrackAction action, IActivity activity)
+
+		public ActivityTrackRecord(ActivityTrackAction action, IActivity activity, IToken token)
 			: base()
 		{
-			_message = $"{action} activity: {activity.GetType().Name}[{activity.Ref}]";
+			String strToken = token != null ? $", token:'{token}'" : null;
+			_message = $"{action} activity: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
 		}
 
 		public override string ToString()

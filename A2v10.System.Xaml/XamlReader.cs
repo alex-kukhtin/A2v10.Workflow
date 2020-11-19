@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace A2v10.System.Xaml
@@ -13,7 +10,7 @@ namespace A2v10.System.Xaml
 		private readonly XmlReader _rdr;
 
 		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
-		
+
 		public XamlReader(XmlReader rdr)
 		{
 			_rdr = rdr;
@@ -45,8 +42,9 @@ namespace A2v10.System.Xaml
 			{
 				case XmlNodeType.Element:
 					{
-						var node = new XamlNode() {
-							Name = _rdr.Name 
+						var node = new XamlNode()
+						{
+							Name = _rdr.Name
 						};
 						StartNode(node);
 						if (_rdr.IsEmptyElement)
@@ -65,7 +63,7 @@ namespace A2v10.System.Xaml
 
 		void ReadAttributes(XamlNode node, NodeBuilder builder)
 		{
-			for (var i = 0; i< _rdr.AttributeCount; i++)
+			for (var i = 0; i < _rdr.AttributeCount; i++)
 			{
 				_rdr.MoveToAttribute(i);
 				node.AddAttribute(builder, _rdr.Name, _rdr.Value);

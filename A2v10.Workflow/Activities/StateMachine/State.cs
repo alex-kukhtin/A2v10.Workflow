@@ -1,8 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -16,18 +16,22 @@ namespace A2v10.Workflow
 		public List<Transition> Transitions { get; set; }
 
 		ExecutingAction _onComplete;
+		IToken _token;
 
 		#region IStorable
 		const String ON_COMPLETE = "OnComplete";
+		const String TOKEN = "Token";
 
 		public void Store(IActivityStorage storage)
 		{
 			storage.SetCallback(ON_COMPLETE, _onComplete);
+			storage.SetToken(TOKEN, _token);
 		}
 
 		public void Restore(IActivityStorage storage)
 		{
 			_onComplete = storage.GetCallback(ON_COMPLETE);
+			_token = storage.GetToken(TOKEN);
 		}
 		#endregion
 
@@ -42,12 +46,12 @@ namespace A2v10.Workflow
 				yield return Exit;
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			NextState = null;
 			if (Entry != null)
-				context.Schedule(Entry, OnEntryComplete);
+				context.Schedule(Entry, OnEntryComplete, token);
 			else if (ScheduleTransitions(context))
 				return new ValueTask();
 			else
@@ -61,7 +65,7 @@ namespace A2v10.Workflow
 			if (Transitions == null || Transitions.Count == 0)
 				return false;
 			foreach (var tr in Transitions)
-				context.Schedule(tr, OnTransitionComplete);
+				context.Schedule(tr, OnTransitionComplete, _token);
 			return true;
 		}
 
@@ -69,7 +73,7 @@ namespace A2v10.Workflow
 		{
 			NextState = nextState;
 			if (Exit != null)
-				context.Schedule(Exit, _onComplete);
+				context.Schedule(Exit, _onComplete, _token);
 			else if (_onComplete != null)
 				return _onComplete(context, this);
 			return new ValueTask();

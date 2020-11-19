@@ -1,8 +1,7 @@
-﻿using System;
+﻿using A2v10.Workflow.Interfaces;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -19,12 +18,13 @@ namespace A2v10.Workflow
 
 		internal String NextState { get; set; }
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
+			_token = token;
 			NextState = null;
 			if (Trigger != null)
-				context.Schedule(Trigger, OnTriggerComplete);
+				context.Schedule(Trigger, OnTriggerComplete, token);
 			else
 				return ContinueExecute(context);
 			return new ValueTask();
@@ -38,16 +38,16 @@ namespace A2v10.Workflow
 
 		ValueTask ContinueExecute(IExecutionContext context)
 		{
-			var cond = context.Evaluate<Boolean>(Ref, nameof(Condition));
+			var cond = context.Evaluate<Boolean>(Id, nameof(Condition));
 			if (cond)
 			{
 				NextState = Destination;
 				if (Action != null)
 				{
-					context.Schedule(Action, _onComplete);
+					context.Schedule(Action, _onComplete, _token);
 					return new ValueTask();
 				}
-			} 
+			}
 			if (_onComplete != null)
 			{
 				return _onComplete(context, this);

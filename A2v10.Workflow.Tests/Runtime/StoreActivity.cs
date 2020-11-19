@@ -1,12 +1,10 @@
 ﻿using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Storage;
-using A2v10.Workflow.Tests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Tests.Runtime
@@ -25,20 +23,20 @@ namespace A2v10.Workflow.Tests.Runtime
 		{
 			IActivity root = new Sequence()
 			{
-				Ref = "Ref0",
+				Id = "Ref0",
 				Variables = new List<IVariable>()
 				{
 					new Variable() {Name = "x", Dir= VariableDirection.InOut}
 				},
 				Activities = new List<IActivity>()
 				{
-					new Code() {Ref="Ref1", Script="x += 5"},
-					new Wait() {Ref="Ref2", Bookmark="Bookmark1"},
-					new Code() {Ref="Ref3", Script="x += 5"},
+					new Code() {Id="Ref1", Script="x += 5"},
+					new Wait() {Id="Ref2", Bookmark="Bookmark1"},
+					new Code() {Id="Ref3", Script="x += 5"},
 				}
 			};
 
-			var wrap = new ActivityWrapper() { Root = root};
+			var wrap = new ActivityWrapper() { Root = root };
 
 			var jsonSettings = new JsonSerializerSettings()
 			{

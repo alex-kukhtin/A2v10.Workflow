@@ -5,9 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace A2v10.System.Xaml
 {
@@ -74,7 +72,7 @@ namespace A2v10.System.Xaml
 				return GetNodeValue(builder, node);
 		}
 
-		Object GetNodeValue(NodeBuilder builder, XamlNode node)
+		static Object GetNodeValue(NodeBuilder builder, XamlNode node)
 		{
 			if (!node.HasChildren)
 				return node.TextContent;
@@ -82,7 +80,7 @@ namespace A2v10.System.Xaml
 			{
 				var ch = node.Children.Value[0];
 				return builder.BuildNode(ch);
-			} 
+			}
 			return node.TextContent;
 		}
 	}
@@ -102,12 +100,12 @@ namespace A2v10.System.Xaml
 
 	public class NodeBuilder
 	{
-		private static readonly MethodInfo _getNodePropertyValue = 
+		private static readonly MethodInfo _getNodePropertyValue =
 			typeof(XamlNode).GetMethod("GetPropertyValue", BindingFlags.Public | BindingFlags.Instance);
-		private static readonly MethodInfo _enumParse = 
-			typeof(Enum).GetMethod("Parse", new Type[] { typeof(Type), typeof(String)});
-		private static readonly MethodInfo _convertChangeType = 
-			typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(Object), typeof(Type), typeof(CultureInfo)});
+		private static readonly MethodInfo _enumParse =
+			typeof(Enum).GetMethod("Parse", new Type[] { typeof(Type), typeof(String) });
+		private static readonly MethodInfo _convertChangeType =
+			typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(Object), typeof(Type), typeof(CultureInfo) });
 
 		private static readonly ConcurrentDictionary<ClassNamePair, NodeDefinition> _typeCache = new ConcurrentDictionary<ClassNamePair, NodeDefinition>();
 
@@ -147,7 +145,7 @@ namespace A2v10.System.Xaml
 			{
 				var parsePrm = Expression.Parameter(typeof(String));
 				enumConvert = Expression.Lambda<Func<String, Object>>(
-					Expression.Call(_enumParse, 
+					Expression.Call(_enumParse,
 						Expression.Constant(propType),
 						parsePrm
 					),
@@ -300,7 +298,7 @@ namespace A2v10.System.Xaml
 				return GetSimpleTypeValue(nd, node);
 		}
 
-		Object GetSimpleTypeValue(NodeDefinition nd, XamlNode node)
+		static Object GetSimpleTypeValue(NodeDefinition nd, XamlNode node)
 		{
 			if (nd.NodeType == typeof(String))
 				return node.TextContent;

@@ -1,8 +1,8 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -15,21 +15,25 @@ namespace A2v10.Workflow
 
 		ExecutingAction _onComplete;
 		Int32 _next;
+		IToken _token;
 
 		#region IStorable
 		const String ON_COMPLETE = "OnComplete";
 		const String NEXT = "Next";
+		const String TOKEN = "Token";
 
 		public void Store(IActivityStorage storage)
 		{
 			storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.Set<Int32>(NEXT, _next);
+			storage.SetToken(TOKEN, _token);
 		}
 
 		public void Restore(IActivityStorage storage)
 		{
 			_onComplete = storage.GetCallback(ON_COMPLETE);
 			_next = storage.Get<Int32>(NEXT);
+			_token = storage.GetToken(TOKEN);
 		}
 		#endregion
 
@@ -50,9 +54,10 @@ namespace A2v10.Workflow
 			}
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
+			_token = token;
 			if (Activities == null || Activities.Count == 0)
 			{
 				if (onComplete != null)
@@ -61,7 +66,7 @@ namespace A2v10.Workflow
 			}
 			_next = 0;
 			var first = Activities[_next++];
-			context.Schedule(first, OnChildComplete);
+			context.Schedule(first, OnChildComplete, token);
 			return new ValueTask();
 		}
 
@@ -76,7 +81,7 @@ namespace A2v10.Workflow
 			else
 			{
 				var next = Activities[_next++];
-				context.Schedule(next, OnChildComplete);
+				context.Schedule(next, OnChildComplete, _token);
 			}
 			return new ValueTask();
 		}

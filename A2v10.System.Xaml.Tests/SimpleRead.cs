@@ -1,6 +1,5 @@
 using A2v10.System.Xaml.Tests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace A2v10.System.Xaml.Tests
 {

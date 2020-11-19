@@ -1,9 +1,8 @@
-﻿using System;
+﻿using A2v10.Data.Interfaces;
+using A2v10.Workflow.Interfaces;
+using System;
 using System.Dynamic;
 using System.Threading.Tasks;
-
-using A2v10.Data.Interfaces;
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.SqlServer
 {

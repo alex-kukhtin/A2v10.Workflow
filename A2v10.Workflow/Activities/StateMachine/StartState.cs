@@ -1,8 +1,7 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Threading.Tasks;
-using A2v10.Workflow.Interfaces;
-using Microsoft.VisualBasic;
 
 namespace A2v10.Workflow
 {
@@ -12,7 +11,7 @@ namespace A2v10.Workflow
 	{
 		public override Boolean IsStart => true;
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			NextState = Next;
 			if (onComplete != null)

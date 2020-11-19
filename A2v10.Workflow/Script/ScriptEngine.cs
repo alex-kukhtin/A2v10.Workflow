@@ -1,12 +1,10 @@
 ﻿
+using A2v10.Workflow.Interfaces;
+using Jint;
+using Jint.Native;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-
-using Jint;
-using Jint.Native;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -15,7 +13,7 @@ namespace A2v10.Workflow
 		private readonly Engine _engine;
 		private readonly ExpandoObject _scriptData;
 		private readonly IActivity _root;
-		
+
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
 		public ScriptEngine(IActivity root, String script, Object args = null)
@@ -38,9 +36,9 @@ namespace A2v10.Workflow
 
 		void SetArguments(Object args)
 		{
-			var func = GetFunc(_root.Ref, "Arguments");
+			var func = GetFunc(_root.Id, "Arguments");
 			if (func == null)
-				throw new WorkflowExecption($"Script element {_root.Ref}.Arguments not found");
+				throw new WorkflowExecption($"Script element {_root.Id}.Arguments not found");
 			func(JsValue.Undefined, new JsValue[] { JsValue.FromObject(_engine, args) });
 		}
 
@@ -54,7 +52,7 @@ namespace A2v10.Workflow
 
 		public ExpandoObject GetResult()
 		{
-			var func = GetFunc(_root.Ref, "Result");
+			var func = GetFunc(_root.Id, "Result");
 			if (func == null)
 				return null;
 			return func(JsValue.Undefined, null).ToObject() as ExpandoObject;
@@ -68,7 +66,7 @@ namespace A2v10.Workflow
 			var obj = func(JsValue.Undefined, null).ToObject();
 			if (obj is T objT)
 				return objT;
-			return (T) Convert.ChangeType(obj, typeof(T));
+			return (T)Convert.ChangeType(obj, typeof(T));
 		}
 
 		private Func<JsValue, JsValue[], JsValue> GetFunc(String refer, String name)
@@ -78,7 +76,7 @@ namespace A2v10.Workflow
 				if (activityData is IDictionary<String, Object> expData)
 				{
 					if (expData.TryGetValue(name, out Object objVal))
-						return (Func<JsValue, JsValue[], JsValue>) objVal;
+						return (Func<JsValue, JsValue[], JsValue>)objVal;
 				}
 			}
 			return null;

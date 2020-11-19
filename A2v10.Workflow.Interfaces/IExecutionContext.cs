@@ -9,7 +9,7 @@ namespace A2v10.Workflow.Interfaces
 
 	public interface IExecutionContext
 	{
-		void Schedule(IActivity activity, ExecutingAction onComplete);
+		void Schedule(IActivity activity, ExecutingAction onComplete, IToken token);
 		void SetBookmark(String bookmark, ResumeAction onComplete);
 		void RemoveBookmark(String bookmark);
 

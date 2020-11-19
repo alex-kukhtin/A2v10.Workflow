@@ -1,7 +1,5 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow
@@ -12,9 +10,9 @@ namespace A2v10.Workflow
 	{
 		public String Script { get; set; }
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			context.Execute(Ref, nameof(Script));
+			context.Execute(Id, nameof(Script));
 			if (onComplete != null)
 				return onComplete(context, this);
 			return new ValueTask();

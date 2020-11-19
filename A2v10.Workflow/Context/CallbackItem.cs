@@ -1,18 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Reflection;
-
-using System.Collections.Generic;
-using System.Text;
-using A2v10.Workflow.Interfaces;
+﻿using A2v10.Workflow.Interfaces;
+using System;
 using System.Dynamic;
-using System.Transactions;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace A2v10.Workflow
 {
-	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
+	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
 
 	public class CallbackItem
 	{
@@ -23,7 +19,8 @@ namespace A2v10.Workflow
 		{
 			if (eobj == null)
 				return null;
-			var cb = new CallbackItem() {
+			var cb = new CallbackItem()
+			{
 				Ref = eobj.Get<String>(nameof(Ref)),
 				CallbackName = eobj.Get<String>(nameof(CallbackName))
 			};
@@ -35,7 +32,7 @@ namespace A2v10.Workflow
 			if (callback.Target is not IActivity activityTarget)
 				throw new ArgumentException("callback.Target must be an IActivity");
 
-			var refer = activityTarget.Ref;
+			var refer = activityTarget.Id;
 
 			var custAttr = callback.Method.GetCustomAttributes(inherit: true)
 				?.FirstOrDefault(attr => attr is StoreNameAttribute);

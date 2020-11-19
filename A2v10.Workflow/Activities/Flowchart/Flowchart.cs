@@ -1,8 +1,7 @@
-﻿using System;
+﻿using A2v10.Workflow.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -28,10 +27,10 @@ namespace A2v10.Workflow
 
 		public FlowNode FindNode(String refer)
 		{
-			return Nodes?.Find(node => node.Ref == refer);
+			return Nodes?.Find(node => node.Id == refer);
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			if (Nodes == null)
 			{
@@ -41,8 +40,8 @@ namespace A2v10.Workflow
 			}
 			var start = Nodes.Find(n => n.IsStart);
 			if (start == null)
-				throw new WorkflowExecption($"Flowchart (Ref={Ref}. Start node not found");
-			context.Schedule(start, onComplete);
+				throw new WorkflowExecption($"Flowchart (Ref={Id}. Start node not found");
+			context.Schedule(start, onComplete, token);
 			return new ValueTask();
 		}
 

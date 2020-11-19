@@ -3,8 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Storage
@@ -19,7 +17,8 @@ namespace A2v10.Workflow.Storage
 		{
 			if (_memory.TryGetValue(id, out SavedInstance saved))
 			{
-				IInstance inst = new Instance() {
+				IInstance inst = new Instance()
+				{
 					Id = id,
 					Root = saved.Root,
 					State = JsonConvert.DeserializeObject<ExpandoObject>(saved.State)
@@ -32,7 +31,7 @@ namespace A2v10.Workflow.Storage
 		public Task Save(IInstance instance)
 		{
 			Console.WriteLine(JsonConvert.SerializeObject(instance.State, new DoubleConverter()));
-			
+
 			var si = new SavedInstance(instance.Root, JsonConvert.SerializeObject(instance.State));
 
 			if (_memory.ContainsKey(instance.Id))

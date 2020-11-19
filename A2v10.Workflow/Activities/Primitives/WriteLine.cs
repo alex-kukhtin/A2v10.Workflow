@@ -1,7 +1,5 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow
@@ -17,9 +15,9 @@ namespace A2v10.Workflow
 			builder.BuildExecute(nameof(Expression), Expression);
 		}
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			var val = context.Evaluate<Object>(Ref, nameof(Expression));
+			var val = context.Evaluate<Object>(Id, nameof(Expression));
 			Console.WriteLine(val);
 			if (onComplete != null)
 				return onComplete(context, this);

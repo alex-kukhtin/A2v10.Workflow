@@ -1,10 +1,9 @@
 ﻿
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
-
 using A2v10.Workflow.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace A2v10.Workflow
 {
@@ -64,7 +63,7 @@ namespace A2v10.Workflow
 
 			if (mtds.Count > 0)
 			{
-				AddMethods(_activity.Ref, mtds);
+				AddMethods(_activity.Id, mtds);
 			}
 		}
 
@@ -86,12 +85,12 @@ namespace A2v10.Workflow
 
 		public void BuildExecute(String name, String expression)
 		{
-			AddMethod(_activity.Ref, $"{name}: () => {{{expression};}}");
+			AddMethod(_activity.Id, $"{name}: () => {{{expression};}}");
 		}
 
 		public void BuildEvaluate(String name, String expression)
 		{
-			AddMethod(_activity.Ref, $"{name}: () => {{ return {expression};}}");
+			AddMethod(_activity.Id, $"{name}: () => {{ return {expression};}}");
 		}
 
 		public String Methods
@@ -126,7 +125,7 @@ namespace A2v10.Workflow
 			_builder = builder;
 		}
 
-		public String Ref => _activity.Ref;
+		public String Ref => _activity.Id;
 
 		public void Build(IActivity activity)
 		{
@@ -182,7 +181,7 @@ namespace A2v10.Workflow
 		public void End(IActivity activity)
 		{
 			var ascript = _stack.Peek();
-			if (ascript.Ref == activity.Ref)
+			if (ascript.Ref == activity.Id)
 			{
 				_textBuilder.AppendLine("})();");
 				_stack.Pop();

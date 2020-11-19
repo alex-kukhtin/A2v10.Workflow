@@ -1,11 +1,10 @@
 ﻿
+using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Tracker;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
-
-using A2v10.Workflow.Interfaces;
-using A2v10.Workflow.Tracker;
 
 namespace A2v10.Workflow
 {
@@ -14,10 +13,12 @@ namespace A2v10.Workflow
 
 	public record QueueItem
 	(
-		Func<IExecutionContext, ExecutingAction, ValueTask> Action, 
-		IActivity Activity, 
-		ExecutingAction OnComplete
+		Func<IExecutionContext, IToken, ExecutingAction, ValueTask> Action,
+		IActivity Activity,
+		ExecutingAction OnComplete,
+		IToken Token
 	);
+
 
 	public partial class ExecutionContext : IExecutionContext
 	{
@@ -33,13 +34,21 @@ namespace A2v10.Workflow
 		{
 			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
 			_root = root;
+
 			// store all activites
 			var toMapArg = new TraverseArg()
 			{
-				Action = (activity) => _activities.Add(activity.Ref, activity)
+				Action = (activity) => _activities.Add(activity.Id, activity)
 			};
 			_root.Traverse(toMapArg);
 
+			_script = BuildScript(args);
+		}
+
+		ScriptEngine BuildScript(Object args)
+		{
+			if (_root is not IScoped)
+				return null;
 			var sb = new ScriptBuilder();
 			var sbTraverseArg = new TraverseArg()
 			{
@@ -50,22 +59,21 @@ namespace A2v10.Workflow
 			_root.Traverse(sbTraverseArg);
 			sb.EndScript();
 
-			_script = new ScriptEngine(_root, sb.Script, args);
+			return new ScriptEngine(_root, sb.Script, args);
 		}
 
 		public ExpandoObject GetResult()
 		{
-			return _script.GetResult();
+			return _script?.GetResult();
 		}
 
-
 		#region IExecutionContext
-		public void Schedule(IActivity activity, ExecutingAction onComplete)
+		public void Schedule(IActivity activity, ExecutingAction onComplete, IToken token)
 		{
 			if (activity == null)
 				return;
-			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Schedule, activity));
-			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete));
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Schedule, activity, token));
+			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete, token));
 		}
 
 		public void SetBookmark(String bookmark, ResumeAction onComplete)
@@ -96,8 +104,8 @@ namespace A2v10.Workflow
 			while (_commandQueue.Count > 0)
 			{
 				var queueItem = _commandQueue.Dequeue();
-				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, queueItem.Activity));
-				await queueItem.Action(this, queueItem.OnComplete);
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, queueItem.Activity, queueItem.Token));
+				await queueItem.Action(this, queueItem.Token, queueItem.OnComplete);
 			}
 		}
 
