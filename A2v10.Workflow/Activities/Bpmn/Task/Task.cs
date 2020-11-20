@@ -10,24 +10,24 @@ namespace A2v10.Workflow.Bpmn
 	public class BpmnTask : BpmnElement
 	{
 		public List<String> Incoming { get; init; }
-		public List<String> Outgouing { get; init; }
+		public List<String> Outgoing { get; init; }
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			if (Outgouing == null)
+			if (Outgoing == null)
 				return onComplete(context, this);
-			if (Outgouing.Count == 1)
+			if (Outgoing.Count == 1)
 			{
 				// simple outgouning - same token
-				var targetFlow = Parent.FindElement<SequenceFlow>(Outgouing[0]);
+				var targetFlow = Parent.FindElement<SequenceFlow>(Outgoing[0]);
 				context.Schedule(targetFlow, onComplete, token);
 			}
 			else
 			{
 				// same as Task + parallelGateway
-				foreach (var flowId in Outgouing)
+				Parent.KillToken(token);
+				foreach (var flowId in Outgoing)
 				{
-					Parent.KillToken(token);
 					var targetFlow = Parent.FindElement<SequenceFlow>(flowId);
 					context.Schedule(targetFlow, onComplete, Parent.NewToken());
 				}
