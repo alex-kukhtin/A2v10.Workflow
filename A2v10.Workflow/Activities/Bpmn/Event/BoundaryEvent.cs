@@ -10,6 +10,8 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public String AttachedToRef { get; init; }
 
+		public Boolean CancelActivity { get; init; }
+
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			throw new NotImplementedException();
