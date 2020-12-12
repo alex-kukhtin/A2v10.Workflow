@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using A2v10.Data.Interfaces;
 using A2v10.Workflow.Interfaces;
 
@@ -33,6 +34,11 @@ namespace A2v10.Workflow.SqlServer
 				},
 				Root = null
 			};
+		}
+
+		public ValueTask<IIdentity> PublishAsync(String id, String text, String format)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

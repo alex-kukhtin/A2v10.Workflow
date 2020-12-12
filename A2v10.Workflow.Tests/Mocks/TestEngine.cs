@@ -20,19 +20,19 @@ namespace A2v10.Workflow.Tests
 
 		private static IServiceProvider _provider;
 
-		private static IServiceProvider ServiceProvider()
+		public static IServiceProvider ServiceProvider()
 		{
 			if (_provider != null)
 				return _provider;
 
 			var collection = new ServiceCollection();
 
-			collection.AddTransient<IRepository, InMemoryRepository>();
+			collection.AddSingleton<IRepository, InMemoryRepository>();
+			collection.AddSingleton<IWorkflowStorage, InMemoryWorkflowStorage>();
+			collection.AddSingleton<IInstanceStorage, InMemoryInstanceStorage>();
+			collection.AddSingleton<ISerializer, Serializer>();
 			collection.AddTransient<IWorkflowEngine, WorkflowEngine>();
-			collection.AddTransient<IWorkflowStorage, InMemoryWorkflowStorage>();
-			collection.AddTransient<IInstanceStorage, InMemoryInstanceStorage>();
 			collection.AddTransient<ITracker, ConsoleTracker>();
-			collection.AddTransient<ISerializer, Serializer>();
 
 			_provider = collection.BuildServiceProvider();
 			return _provider;

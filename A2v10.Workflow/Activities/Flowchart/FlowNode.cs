@@ -7,8 +7,8 @@ namespace A2v10.Workflow
 	{
 		public virtual Boolean IsStart => false;
 
-		public Flowchart Parent { get; set; }
-
 		public String Next { get; set; }
+
+		internal Flowchart Parent { get; set; }
 	}
 }

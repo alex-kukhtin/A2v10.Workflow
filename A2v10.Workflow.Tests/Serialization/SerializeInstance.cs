@@ -14,7 +14,7 @@ namespace A2v10.Workflow.Tests.Serialization
 {
 	[TestClass]
 	[TestCategory("Serialization.Instance")]
-	public class JsonSerialization
+	public class SerializeInstance
 	{
 		[TestMethod]
 		public void SimpleProcessJson()

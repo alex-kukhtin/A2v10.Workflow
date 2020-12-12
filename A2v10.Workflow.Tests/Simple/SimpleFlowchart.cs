@@ -1,11 +1,10 @@
 ﻿
-using A2v10.Workflow.Activities;
-using A2v10.Workflow.Interfaces;
-using A2v10.Workflow.Storage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Tests
 {

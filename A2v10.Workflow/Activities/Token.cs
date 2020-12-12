@@ -1,5 +1,7 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -17,9 +19,14 @@ namespace A2v10.Workflow
 			return new Token(Guid.NewGuid());
 		}
 
-		public override string ToString()
+		public override String ToString()
 		{
 			return Id.ToString();
+		}
+
+		public static IToken FromString(String str)
+		{
+			return new Token(Guid.Parse(str));
 		}
 	}
 }
