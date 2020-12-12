@@ -7,9 +7,10 @@ namespace A2v10.Workflow
 {
 	public class Instance : IInstance
 	{
-		public Guid Id { get; set; }
-		public Guid Parent { get; set; }
-		public IActivity Root { get; set; }
+		public IWorkflow Workflow { get; init; }
+
+		public Guid Id { get; init; }
+		public Guid Parent { get; init; }
 
 		public ExpandoObject Result { get; set; }
 		public ExpandoObject State { get; set; }

@@ -32,8 +32,7 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var tracker = new ConsoleTracker();
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
+			var wfe = TestEngine.CreateInMemoryEngine();
 			var inst = await wfe.StartAsync(root, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(6, result.Get<Int32>("X"));
@@ -62,8 +61,7 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var tracker = new ConsoleTracker();
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
+			var wfe = TestEngine.CreateInMemoryEngine();
 			var inst = await wfe.StartAsync(root, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(0, result.Get<Int32>("X"));

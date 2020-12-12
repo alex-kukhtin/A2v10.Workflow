@@ -1,5 +1,4 @@
 ﻿using A2v10.Workflow.Interfaces;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -11,7 +10,14 @@ namespace A2v10.Workflow.Storage
 
 	public class InMemoryInstanceStorage : IInstanceStorage
 	{
+
 		private readonly Dictionary<Guid, SavedInstance> _memory = new Dictionary<Guid, SavedInstance>();
+
+		private readonly ISerializer _serializer;
+		public InMemoryInstanceStorage(ISerializer serializer)
+		{
+			_serializer = serializer;
+		}
 
 		public Task<IInstance> Load(Guid id)
 		{
@@ -20,8 +26,8 @@ namespace A2v10.Workflow.Storage
 				IInstance inst = new Instance()
 				{
 					Id = id,
-					Root = saved.Root,
-					State = JsonConvert.DeserializeObject<ExpandoObject>(saved.State)
+					Workflow = new Workflow() { Root = saved.Root },
+					State = _serializer.Deserialize(saved.State)
 				};
 				return Task.FromResult(inst);
 			}
@@ -30,10 +36,7 @@ namespace A2v10.Workflow.Storage
 
 		public Task Save(IInstance instance)
 		{
-			Console.WriteLine(JsonConvert.SerializeObject(instance.State, new DoubleConverter()));
-
-			var si = new SavedInstance(instance.Root, JsonConvert.SerializeObject(instance.State));
-
+			var si = new SavedInstance(instance.Workflow.Root, _serializer.Serialize(instance.State));
 			if (_memory.ContainsKey(instance.Id))
 				_memory[instance.Id] = si;
 			else

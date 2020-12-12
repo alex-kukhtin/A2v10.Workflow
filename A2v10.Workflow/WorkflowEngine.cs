@@ -1,17 +1,19 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
 using System.Threading.Tasks;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
 	public class WorkflowEngine : IWorkflowEngine
 	{
-		private readonly IInstanceStorage _instanceStorage;
+		private readonly IRepository _repository;
 		private readonly ITracker _tracker;
 
-		public WorkflowEngine(IInstanceStorage instanceStorage, ITracker tracker)
+		public WorkflowEngine(IRepository repository, ITracker tracker)
 		{
-			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
+			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
 		}
 
@@ -20,29 +22,36 @@ namespace A2v10.Workflow
 			var inst = new Instance()
 			{
 				Id = Guid.NewGuid(),
-				Root = root
+				Workflow = new Workflow() { Root = root}
 			};
 			root.OnEndInit();
-			var context = new ExecutionContext(_tracker, inst.Root, args);
-			context.Schedule(inst.Root, null, null);
+			var context = new ExecutionContext(_tracker, inst.Workflow.Root, args);
+			context.Schedule(inst.Workflow.Root, null, null);
 			await context.RunAsync();
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
-			await _instanceStorage.Save(inst);
+			await _repository.InstanceStorage.Save(inst);
 			return inst;
 		}
 
+		public async ValueTask<IInstance> StartAsync(IIdentity identity, Object args = null)
+		{
+			var wf = await _repository.WorkflowStorage.LoadAsync(identity);
+			return await StartAsync(wf.Root, args);
+		}
+
+
 		public async ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null)
 		{
-			var inst = await _instanceStorage.Load(id);
-			inst.Root.OnEndInit();
-			var context = new ExecutionContext(_tracker, inst.Root);
+			var inst = await _repository.InstanceStorage.Load(id);
+			inst.Workflow.Root.OnEndInit();
+			var context = new ExecutionContext(_tracker, inst.Workflow.Root);
 			context.SetState(inst.State);
 			await context.ResumeAsync(bookmark, reply);
 			await context.RunAsync();
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
-			await _instanceStorage.Save(inst);
+			await _repository.InstanceStorage.Save(inst);
 			return inst;
 		}
 	}

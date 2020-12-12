@@ -1,8 +1,9 @@
 ﻿
-using Newtonsoft.Json;
 using System;
 
-namespace A2v10.Workflow
+using Newtonsoft.Json;
+
+namespace A2v10.Workflow.Serialization
 {
 	public class DoubleConverter : JsonConverter<Double>
 	{

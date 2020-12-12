@@ -1,8 +1,9 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
@@ -69,12 +70,12 @@ namespace A2v10.Workflow.Bpmn
 		[StoreName("OnElemComplete")]
 		ValueTask OnElemComplete(IExecutionContext context, IActivity activity)
 		{
-			if (activity is EndEvent endEvent)
-				return ProcessComplete(context, endEvent);
+			if (activity is EndEvent)
+				return ProcessComplete(context);
 			return new ValueTask();
 		}
 
-		ValueTask ProcessComplete(IExecutionContext context, EndEvent endEvent)
+		ValueTask ProcessComplete(IExecutionContext context)
 		{
 			if (_onComplete != null)
 				return _onComplete(context, this);
@@ -97,6 +98,13 @@ namespace A2v10.Workflow.Bpmn
 			if (elem is T elemT)
 				return elemT;
 			throw new WorkflowExecption($"BPMN. Invalid type for element (Id = {id}). Expected: '{typeof(T).Name}', Actual: '{elem.GetType().Name}'");
+		}
+
+		public IEnumerable<T> FindAll<T>(Predicate<T> predicate) where T : BpmnElement
+		{
+			var list = Elements?.FindAll(elem => elem is T && predicate(elem as T));
+			foreach (var el in list)
+				yield return el as T;
 		}
 
 		public IToken NewToken()

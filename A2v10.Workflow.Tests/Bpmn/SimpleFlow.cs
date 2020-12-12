@@ -2,8 +2,6 @@
 using A2v10.Workflow.Bpmn;
 using A2v10.Workflow.Storage;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,15 +12,6 @@ namespace A2v10.Workflow.Tests
 	[TestCategory("Bmpn.Simple")]
 	public class BpmnSimle
 	{
-
-		DefaultContractResolver contractResolver = new DefaultContractResolver
-		{
-			NamingStrategy = new CamelCaseNamingStrategy
-			{
-				OverrideSpecifiedNames = false
-			}
-		};
-
 		[TestMethod]
 		public async Task Sequence()
 		{
@@ -63,24 +52,8 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var tracker = new ConsoleTracker();
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
+			var wfe = TestEngine.CreateInMemoryEngine();
 			await wfe.StartAsync(process, null);
-
-			var jsSettings = new JsonSerializerSettings()
-			{
-				Formatting = Formatting.Indented,
-				NullValueHandling = NullValueHandling.Ignore,
-				ContractResolver = contractResolver,
-				TypeNameHandling = TypeNameHandling.Auto
-			};
-
-			var json = JsonConvert.SerializeObject(process, jsSettings); 
-
-			Console.WriteLine(json);
-
-			var result = JsonConvert.DeserializeObject<Process>(json, jsSettings);
-			Assert.AreEqual(process.Elements.Count, result.Elements.Count);
 		}
 
 
@@ -136,8 +109,7 @@ namespace A2v10.Workflow.Tests
 				}
 			};
 
-			var tracker = new ConsoleTracker();
-			var wfe = new WorkflowEngine(new InMemoryInstanceStorage(), tracker);
+			var wfe = TestEngine.CreateInMemoryEngine();
 			await wfe.StartAsync(process, null);
 		}
 	}

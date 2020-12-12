@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
 {
-	public class TimerEventDefinition : EventDefinition
+	public class EventDefinition
 	{
 	}
 }

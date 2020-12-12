@@ -14,8 +14,15 @@ namespace A2v10.Workflow.Bpmn
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
+			// boundary events
+			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
+			{
+
+			}
+
 			if (Outgoing == null)
 				return onComplete(context, this);
+
 			if (Outgoing.Count == 1)
 			{
 				// simple outgouning - same token
@@ -24,7 +31,7 @@ namespace A2v10.Workflow.Bpmn
 			}
 			else
 			{
-				// same as Task + parallelGateway
+				// same as task + parallelGateway
 				Parent.KillToken(token);
 				foreach (var flowId in Outgoing)
 				{
