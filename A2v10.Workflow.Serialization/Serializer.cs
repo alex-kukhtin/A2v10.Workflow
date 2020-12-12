@@ -29,12 +29,17 @@ namespace A2v10.Workflow.Serialization
 				}
 			},
 			TypeNameHandling = TypeNameHandling.Auto,
-			Converters = new List<JsonConverter>() { new StringEnumConverter(), new DoubleConverter() }
+			Converters = new JsonConverter[] { 
+				new StringEnumConverter(), 
+				new ExpandoObjectConverter(),
+				new DoubleConverter() }
 		};
 
 		private readonly JsonConverter[] _jsonConverters = new JsonConverter[]
 		{
-			new DoubleConverter()
+			new DoubleConverter(),
+			new StringEnumConverter(),
+			new ExpandoObjectConverter()
 		};
 
 
