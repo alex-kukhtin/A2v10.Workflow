@@ -10,7 +10,7 @@ namespace A2v10.Workflow.Tests
 {
 	[TestClass]
 	[TestCategory("Bmpn.Simple")]
-	public class BpmnSimle
+	public class BpmnSimple
 	{
 		[TestMethod]
 		public async Task Sequence()
@@ -24,18 +24,20 @@ namespace A2v10.Workflow.Tests
 					new StartEvent()
 					{
 						Id = "start",
-						Outgoing = new List<String>() { "start->script" }
+						Children = new List<BpmnItem>() { new Outgoing() {Text = "start->script" } }
 					},
 					new ScriptTask()
 					{
 						Id = "script",
-						Incoming  = new List<String>() { "start->script" },
-						Outgoing = new List<String>() { "script->end" }
+						Children  = new List<FlowDirection>() { 
+							new Incoming() { Text = "start->script" },
+							new Outgoing() { Text = "script->end" }
+						}
 					},
 					new EndEvent()
 					{
 						Id = "end",
-						Incoming = new List<String>() {"script->end"}
+						Children = new List<BpmnItem>() { new Incoming() { Text = "script->end" } }
 					},
 					new SequenceFlow()
 					{
@@ -69,36 +71,46 @@ namespace A2v10.Workflow.Tests
 					new StartEvent()
 					{
 						Id = "start",
-						Outgoing = new List<String>() { "start->gate1" }
+						Children = new List<BpmnItem>() { new Outgoing() {Text = "start->gate1" } }
 					},
 					new ParallelGateway()
 					{
 						Id = "gate1",
-						Incoming  = new List<String>() { "start->gate1" },
-						Outgoing = new List<String>() { "gate1->task1", "gate1->task2" }
+						Children  = new List<FlowDirection>() { 
+							new Incoming() {Text = "start->gate1" },
+							new Outgoing() { Text = "gate1->task1" }, 
+							new Outgoing() { Text = "gate1->task2" } 
+						}
 					},
 					new ScriptTask()
 					{
 						Id = "task1",
-						Incoming  = new List<String>() { "gate1->task1" },
-						Outgoing = new List<String>() { "task1->gate2" }
+						Children  = new List<FlowDirection>() { 
+							new Incoming() {Text = "gate1->task1" },
+							new Outgoing() { Text = "task1->gate2" } 
+						}
 					},
 					new ScriptTask()
 					{
 						Id = "task2",
-						Incoming  = new List<String>() { "gate1->task2" },
-						Outgoing = new List<String>() { "task2->gate2" }
+						Children  = new List<FlowDirection>() { 
+							new Incoming() {Text ="gate1->task2" },
+							new Outgoing() {Text = "task2->gate2" } 
+						}
 					},
 					new ParallelGateway()
 					{
 						Id = "gate2",
-						Incoming  = new List<String>() { "task1->gate2", "task2->gate2" },
-						Outgoing = new List<String>() { "gate2->end", }
+						Children  = new List<FlowDirection>() { 
+							new Incoming() { Text = "task1->gate2" }, 
+							new Incoming() {Text = "task2->gate2" },
+							new Outgoing() {Text = "gate2->end", } 
+						},
 					},
 					new EndEvent()
 					{
 						Id = "end",
-						Incoming = new List<String>() {"script->end"}
+						Children = new List<BpmnItem>() {new Incoming() {Text ="script->end"} }
 					},
 					new SequenceFlow() {Id = "start->gate1", SourceRef = "start", TargetRef = "gate1"},
 					new SequenceFlow() {Id = "gate1->task1", SourceRef = "gate1", TargetRef = "task1"},

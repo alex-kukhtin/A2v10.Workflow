@@ -1,7 +1,9 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
+using System.Linq;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
@@ -15,7 +17,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			// waits for all incoming tokens
 			_tokens.Add(token);
-			if (HasIncoming && _tokens.Count == Incoming.Count)
+			if (HasIncoming && _tokens.Count == Incoming.Count())
 				return DoOutgoing(context, onComplete);
 			else
 				return new ValueTask();
@@ -29,7 +31,7 @@ namespace A2v10.Workflow.Bpmn
 			if (HasOutgoing)
 			{
 				foreach (var og in Outgoing) {
-					var flow = Parent.FindElement<SequenceFlow>(og);
+					var flow = Parent.FindElement<SequenceFlow>(og.Text);
 					context.Schedule(flow, onComplete, Parent.NewToken());
 				}
 			}

@@ -30,12 +30,12 @@ namespace A2v10.Workflow.Tests.Serialization
 					new StartEvent()
 					{
 						Id = "start",
-						Outgoing = new List<String>() { "start->end" }
+						Children = new List<BpmnItem>() { new Outgoing() {Text = "start->end" } }
 					},
 					new EndEvent()
 					{
 						Id = "end",
-						Incoming = new List<String>() {"script->end"}
+						Children = new List<BpmnItem>() { new Incoming() { Text = "script->end"} }
 					},
 					new SequenceFlow()
 					{

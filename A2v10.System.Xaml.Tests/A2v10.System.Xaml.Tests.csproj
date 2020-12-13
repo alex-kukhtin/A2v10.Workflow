@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\A2v10.System.Xaml\A2v10.System.Xaml.csproj" />
+    <ProjectReference Include="..\A2v10.Workflow\A2v10.Workflow.csproj" />
   </ItemGroup>
 
 </Project>

@@ -21,16 +21,19 @@ namespace A2v10.System.Xaml
 
 	public record NodeDefinition
 	{
+		public String ClassName { get; init; }
 		public Func<XamlNode, NodeDefinition, Object> Lambda { get; init; }
 		public Dictionary<String, PropDefinition> Properties { get; init; }
 		public String ContentProperty { get; init; }
 		public Func<XamlNode, Object> BuildNode { get; init; }
 		public Type NodeType { get; init; }
+		public Boolean IsCamelCase { get; init; }
 
 		public Object BuildProperty(String name, Object value)
 		{
+			name = MakeName(name);
 			if (!Properties.TryGetValue(name, out PropDefinition propDef))
-				throw new XamlReadException($"Property {name} not found");
+				throw new XamlReadException($"Property {name} not found in type {ClassName}");
 			if (value == null)
 				return null;
 			if (value.GetType() == propDef.Type)
@@ -83,20 +86,35 @@ namespace A2v10.System.Xaml
 			}
 			return node.TextContent;
 		}
+
+		public String MakeName(String name)
+		{
+			if (IsCamelCase)
+			{
+				// source: camelCase
+				// code: PascalCase
+				return name.ToPascalCase();
+			}
+			return name;
+		}
 	}
 
 	public class NamespaceDefinition
 	{
 		public String Namespace { get; init; }
 		public Assembly Assembly { get; init; }
+		public Boolean IsCamelCase { get; init; }
 	}
 
 	public record ClassNamePair
 	{
 		public String Prefix { get; init; }
 		public String Namespace { get; init; }
-		public String ClassName { get; set; }
+		public String ClassName { get; init; }
+		public Boolean IsCamelCase { get; init; }
 	}
+
+	public record NamespaceDef(String Name, Boolean IsCamelCase);
 
 	public class NodeBuilder
 	{
@@ -111,6 +129,16 @@ namespace A2v10.System.Xaml
 
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 
+		private readonly NamespaceDef[] BPMNNamespaces = new NamespaceDef[] { 
+			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true),
+			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/di", false)
+		};
+
+		NamespaceDef IsBpmnNamespace(String value)
+		{
+			value = value.ToLowerInvariant();
+			return BPMNNamespaces.FirstOrDefault(x => x.Name == value);
+		}
 
 		private static readonly Regex _namespaceRegEx = new Regex(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
 
@@ -119,6 +147,18 @@ namespace A2v10.System.Xaml
 			if (value == "http://schemas.microsoft.com/winfx/2006/xaml")
 			{
 				// xaml namespace for x:Key, etc
+				return;
+			}
+			var nsddef = IsBpmnNamespace(value);
+			if (nsddef != null)
+			{
+				var nsd = new NamespaceDefinition()
+				{
+					Namespace = "A2v10.Workflow.Bpmn",
+					Assembly = Assembly.Load("A2v10.Workflow"),
+					IsCamelCase = nsddef.IsCamelCase
+				};
+				_namespaces.Add(prefix, nsd);
 				return;
 			}
 			var match = _namespaceRegEx.Match(value);
@@ -217,6 +257,8 @@ namespace A2v10.System.Xaml
 			if (!_namespaces.TryGetValue(namePair.Prefix, out NamespaceDefinition nsd))
 				throw new XamlReadException($"Namespace {namePair.Namespace} not found");
 			var nodeType = nsd.Assembly.GetType($"{namePair.Namespace}.{namePair.ClassName}");
+			if (nodeType == null)
+				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
 			var param = Expression.Parameter(typeof(XamlNode));
 			var nodeDef = Expression.Parameter(typeof(NodeDefinition));
 			var ctor = nodeType.GetConstructor(Array.Empty<Type>());
@@ -256,11 +298,13 @@ namespace A2v10.System.Xaml
 
 			return new NodeDefinition()
 			{
+				ClassName = namePair.ClassName,
 				Lambda = lambda,
 				Properties = propDefs,
 				ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
 				BuildNode = this.BuildNode,
-				NodeType = nodeType
+				NodeType = nodeType,
+				IsCamelCase = namePair.IsCamelCase
 			};
 		}
 
@@ -277,11 +321,18 @@ namespace A2v10.System.Xaml
 			}
 			if (_namespaces.TryGetValue(nsKey, out NamespaceDefinition nsd))
 			{
+				if (nsd.IsCamelCase)
+				{
+					// file: camelCase
+					// code: PascalCase
+					typeName = typeName.ToPascalCase();
+				}
 				var className = new ClassNamePair()
 				{
 					Prefix = nsKey,
 					Namespace = nsd.Namespace,
-					ClassName = typeName
+					ClassName = typeName,
+					IsCamelCase = nsd.IsCamelCase
 				};
 				return _typeCache.GetOrAdd(className, BuildNodeDefinition);
 			}

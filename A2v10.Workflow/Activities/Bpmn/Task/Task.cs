@@ -1,17 +1,15 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class BpmnTask : BpmnElement
+	public class BpmnTask : FlowElement
 	{
-		public List<String> Incoming { get; init; }
-		public List<String> Outgoing { get; init; }
-
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			// boundary events
@@ -23,10 +21,10 @@ namespace A2v10.Workflow.Bpmn
 			if (Outgoing == null)
 				return onComplete(context, this);
 
-			if (Outgoing.Count == 1)
+			if (Outgoing.Count() == 1)
 			{
 				// simple outgouning - same token
-				var targetFlow = Parent.FindElement<SequenceFlow>(Outgoing[0]);
+				var targetFlow = Parent.FindElement<SequenceFlow>(Outgoing.First().Text);
 				context.Schedule(targetFlow, onComplete, token);
 			}
 			else
@@ -35,7 +33,7 @@ namespace A2v10.Workflow.Bpmn
 				Parent.KillToken(token);
 				foreach (var flowId in Outgoing)
 				{
-					var targetFlow = Parent.FindElement<SequenceFlow>(flowId);
+					var targetFlow = Parent.FindElement<SequenceFlow>(flowId.Text);
 					context.Schedule(targetFlow, onComplete, Parent.NewToken());
 				}
 			}

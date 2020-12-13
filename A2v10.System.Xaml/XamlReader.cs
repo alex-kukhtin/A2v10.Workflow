@@ -22,7 +22,7 @@ namespace A2v10.System.Xaml
 			var nodeBuilder = new NodeBuilder();
 			while (_rdr.Read())
 			{
-				if (_rdr.NodeType == XmlNodeType.Comment)
+				if (_rdr.NodeType == XmlNodeType.Comment || _rdr.NodeType == XmlNodeType.Whitespace)
 					continue;
 				ReadNode(nodeBuilder);
 			}
@@ -58,6 +58,9 @@ namespace A2v10.System.Xaml
 				case XmlNodeType.Text:
 					AddContent();
 					break;
+				case XmlNodeType.XmlDeclaration:
+					AddDeclaration();
+					break;
 			}
 		}
 
@@ -66,7 +69,17 @@ namespace A2v10.System.Xaml
 			for (var i = 0; i < _rdr.AttributeCount; i++)
 			{
 				_rdr.MoveToAttribute(i);
-				node.AddAttribute(builder, _rdr.Name, _rdr.Value);
+				if (_rdr.Name.StartsWith("xmlns"))
+				{
+					var prefix = _rdr.Name[5..];
+					if (prefix.StartsWith(':'))
+						prefix = prefix[1..];
+					builder.AddNamespace(prefix, _rdr.Value);
+				}
+				else
+				{
+					node.AddProperty(builder, _rdr.Name, _rdr.Value);
+				}
 			}
 		}
 
@@ -87,5 +100,11 @@ namespace A2v10.System.Xaml
 			var parent = _elemStack.Peek();
 			parent.AddChildren(ch, builder);
 		}
+
+		void AddDeclaration()
+		{
+
+		}
+
 	}
 }

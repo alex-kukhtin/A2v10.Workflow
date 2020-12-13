@@ -28,9 +28,7 @@ namespace A2v10.System.Xaml
 				return 0; // default value for enum
 						  // try to get ContentProperty
 			if (nodeDef.ContentProperty == propName)
-			{
 				return GetContentProperty(nodeDef);
-			}
 			return null;
 		}
 
@@ -39,7 +37,11 @@ namespace A2v10.System.Xaml
 			// set children as content
 			if (!nodeDef.Properties.TryGetValue(nodeDef.ContentProperty, out PropDefinition propDef))
 				throw new XamlReadException($"Property definition for property '{nodeDef.ContentProperty}' not found.");
+			return GetPropertyValue(nodeDef, propDef);
+		}
 
+		private Object GetPropertyValue(NodeDefinition nodeDef, PropDefinition propDef)
+		{ 
 			if (propDef.Constructor == null)
 			{
 				// ContentProperty for text
@@ -50,7 +52,9 @@ namespace A2v10.System.Xaml
 				return null;
 			var propObj = propDef.Constructor();
 			foreach (var c in Children.Value)
+			{
 				propDef.AddMethod(propObj, nodeDef.BuildNode(c));
+			}
 			return propObj;
 		}
 
@@ -86,30 +90,13 @@ namespace A2v10.System.Xaml
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			var nd = builder.GetNodeDefinition(Name);
-			Properties.Add(name, nd.BuildPropertyNode(builder, name, node));
+			Properties.Add(nd.MakeName(name), nd.BuildPropertyNode(builder, name, node));
 		}
 
 		public void AddProperty(NodeBuilder builder, String name, String value)
 		{
 			var nd = builder.GetNodeDefinition(Name);
-			Properties.Add(name, nd.BuildProperty(name, value));
-		}
-
-		public void AddAttribute(NodeBuilder builder, String name, String value)
-		{
-			if (name.StartsWith("xmlns"))
-				AddNamespace(builder, name, value);
-			else
-				AddProperty(builder, name, value);
-		}
-
-		static void AddNamespace(NodeBuilder builder, String name, String value)
-		{
-			// xmlns:x;
-			var prefix = name[5..];
-			if (prefix.StartsWith(':'))
-				prefix = prefix[1..];
-			builder.AddNamespace(prefix, value);
+			Properties.Add(nd.MakeName(name), nd.BuildProperty(name, value));
 		}
 	}
 }

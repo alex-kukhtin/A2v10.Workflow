@@ -11,15 +11,13 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public override Boolean IsStart => true;
 
-		public List<String> Outgoing { get; set; }
-
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			if (Outgoing == null)
+			if (Children == null)
 				return onComplete(context, this);
 			foreach (var flow in Outgoing)
 			{
-				var flowElem = Parent.FindElement<SequenceFlow>(flow);
+				var flowElem = Parent.FindElement<SequenceFlow>(flow.Text);
 				if (flowElem.SourceRef != Id)
 					throw new WorkflowExecption($"BPMN. Invalid SequenceFlow (Id={Id}. SourceRef does not match");
 				// generate new token for every outogoing flow!

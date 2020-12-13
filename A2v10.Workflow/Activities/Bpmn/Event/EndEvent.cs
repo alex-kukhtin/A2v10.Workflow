@@ -9,8 +9,6 @@ namespace A2v10.Workflow.Bpmn
 
 	public class EndEvent : Event
 	{
-		public List<String> Incoming { get; set; }
-
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			Parent.KillToken(token);
