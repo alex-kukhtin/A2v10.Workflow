@@ -114,7 +114,7 @@ namespace A2v10.System.Xaml
 		public Boolean IsCamelCase { get; init; }
 	}
 
-	public record NamespaceDef(String Name, Boolean IsCamelCase);
+	public record NamespaceDef(String Name, Boolean IsCamelCase, String Namespace, String Assembly);
 
 	public class NodeBuilder
 	{
@@ -130,8 +130,10 @@ namespace A2v10.System.Xaml
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 
 		private readonly NamespaceDef[] BPMNNamespaces = new NamespaceDef[] { 
-			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true),
-			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/di", false)
+			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true, "A2v10.Workflow.Bpmn", "A2v10.Workflow"),
+			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
+			new NamespaceDef("http://www.omg.org/spec/dd/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
+			new NamespaceDef("http://www.omg.org/spec/dd/20100524/dc", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow")
 		};
 
 		NamespaceDef IsBpmnNamespace(String value)
@@ -154,8 +156,8 @@ namespace A2v10.System.Xaml
 			{
 				var nsd = new NamespaceDefinition()
 				{
-					Namespace = "A2v10.Workflow.Bpmn",
-					Assembly = Assembly.Load("A2v10.Workflow"),
+					Namespace = nsddef.Namespace,
+					Assembly = Assembly.Load(nsddef.Assembly),
 					IsCamelCase = nsddef.IsCamelCase
 				};
 				_namespaces.Add(prefix, nsd);

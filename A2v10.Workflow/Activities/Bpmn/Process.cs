@@ -65,8 +65,8 @@ namespace A2v10.Workflow.Bpmn
 			return new ValueTask();
 		}
 
-		public IEnumerable<T> Elems<T>() where T : BpmnElement
-			=> Elements.Where(e => e is T).Select(e => (T)e);
+		public IEnumerable<T> Elems<T>() where T : BpmnElement => Elements.OfType<T>();
+		public T Elem<T>() where T : BpmnElement => Elements.OfType<T>().FirstOrDefault();
 
 		[StoreName("OnElemComplete")]
 		ValueTask OnElemComplete(IExecutionContext context, IActivity activity)

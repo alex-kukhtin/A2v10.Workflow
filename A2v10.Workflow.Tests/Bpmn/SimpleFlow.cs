@@ -29,7 +29,7 @@ namespace A2v10.Workflow.Tests
 					new ScriptTask()
 					{
 						Id = "script",
-						Children  = new List<FlowDirection>() { 
+						Children  = new List<BpmnItem>() { 
 							new Incoming() { Text = "start->script" },
 							new Outgoing() { Text = "script->end" }
 						}
@@ -76,7 +76,7 @@ namespace A2v10.Workflow.Tests
 					new ParallelGateway()
 					{
 						Id = "gate1",
-						Children  = new List<FlowDirection>() { 
+						Children  = new List<BpmnItem>() { 
 							new Incoming() {Text = "start->gate1" },
 							new Outgoing() { Text = "gate1->task1" }, 
 							new Outgoing() { Text = "gate1->task2" } 
@@ -85,7 +85,7 @@ namespace A2v10.Workflow.Tests
 					new ScriptTask()
 					{
 						Id = "task1",
-						Children  = new List<FlowDirection>() { 
+						Children  = new List<BpmnItem>() { 
 							new Incoming() {Text = "gate1->task1" },
 							new Outgoing() { Text = "task1->gate2" } 
 						}
@@ -93,7 +93,7 @@ namespace A2v10.Workflow.Tests
 					new ScriptTask()
 					{
 						Id = "task2",
-						Children  = new List<FlowDirection>() { 
+						Children  = new List<BpmnItem>() { 
 							new Incoming() {Text ="gate1->task2" },
 							new Outgoing() {Text = "task2->gate2" } 
 						}
@@ -101,7 +101,7 @@ namespace A2v10.Workflow.Tests
 					new ParallelGateway()
 					{
 						Id = "gate2",
-						Children  = new List<FlowDirection>() { 
+						Children  = new List<BpmnItem>() { 
 							new Incoming() { Text = "task1->gate2" }, 
 							new Incoming() {Text = "task2->gate2" },
 							new Outgoing() {Text = "gate2->end", } 

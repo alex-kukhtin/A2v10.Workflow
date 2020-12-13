@@ -15,6 +15,8 @@ namespace A2v10.Workflow.Bpmn
 		public String Exporter { get; set; }
 		public String ExporterVersion { get; set; }
 
-		public List<BpmnElement> Children { get; init; }
+		public List<Object> Children { get; init; }
+
+		public Process Process => Children.OfType<Process>().FirstOrDefault();
 	}
 }

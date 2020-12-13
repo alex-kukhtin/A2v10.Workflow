@@ -45,8 +45,29 @@ namespace A2v10.System.Xaml.Tests
 
 			var og = sev.Children[0] as Outgoing;
 			Assert.AreEqual("SequenceFlow_0h21x7r", og.Text);
+		}
 
+		[TestMethod]
+		public void ParallelBmpn()
+		{
+			var xaml = File.ReadAllText("..\\..\\..\\TestFiles\\parallel.bpmn");
 
+			var obj = XamlServices.Parse(xaml);
+
+			Assert.AreEqual(typeof(Definitions), obj.GetType());
+			var defs = obj as Definitions;
+			var proc = defs.Process;
+			Assert.AreEqual("Process_1", proc.Id);
+			Assert.AreEqual("Parallel Process", proc.Name);
+			Assert.AreEqual(true, proc.IsExecutable);
+
+			var se = proc.Elem<StartEvent>();
+			Assert.IsNotNull(se);
+			Assert.AreEqual("StartEvent_1", se.Id);
+
+			var ee = proc.Elem<EndEvent>();
+			Assert.IsNotNull(ee);
+			Assert.AreEqual("EndEvent_0zk83sa", ee.Id);
 		}
 	}
 }

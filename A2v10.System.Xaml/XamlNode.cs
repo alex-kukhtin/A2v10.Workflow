@@ -50,6 +50,11 @@ namespace A2v10.System.Xaml
 
 			if (!HasChildren)
 				return null;
+			if (propDef.AddMethod == null)
+			{
+				foreach (var c in Children.Value)
+					return nodeDef.BuildNode(c); // return first chilren
+			}
 			var propObj = propDef.Constructor();
 			foreach (var c in Children.Value)
 			{

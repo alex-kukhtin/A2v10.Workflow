@@ -8,14 +8,14 @@ namespace A2v10.Workflow.Bpmn
 	[ContentProperty("Children")]
 	public abstract class FlowElement : BpmnElement
 	{
-		public List<FlowDirection> Children { get; init; }
+		public List<BpmnItem> Children { get; init; }
 
 		public String Default { get; init; }
 
-		public Boolean HasIncoming => Children != null && Children.Any(x => x.IsIncoming);
-		public Boolean HasOutgoing => Children != null && Children.Any(x => !x.IsIncoming);
+		public Boolean HasIncoming => Children != null && Children.OfType<Incoming>().Any();
+		public Boolean HasOutgoing => Children != null && Children.OfType<Outgoing>().Any();
 
-		internal IEnumerable<FlowDirection> Incoming => Children?.Where(x => x.IsIncoming);
-		internal IEnumerable<FlowDirection> Outgoing => Children?.Where(x => !x.IsIncoming);
+		internal IEnumerable<Incoming> Incoming => Children?.OfType<Incoming>();
+		internal IEnumerable<Outgoing> Outgoing => Children?.OfType<Outgoing>();
 	}
 }
