@@ -1,6 +1,8 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
+using System.Linq;
+
 using System.Threading.Tasks;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
@@ -14,7 +16,20 @@ namespace A2v10.Workflow.Bpmn
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			throw new NotImplementedException();
+			foreach (var ev in Children.OfType<EventDefinition>())
+			{
+				//ev.Run();
+			}
+			return new ValueTask();
+		}
+
+		public async ValueTask OnTrigger(IExecutionContext context)
+		{
+			if (CancelActivity)
+			{
+				var task = Parent.FindElement<BpmnTask>(AttachedToRef);
+				await task.CancelAsync(context);
+			}
 		}
 	}
 }

@@ -1,9 +1,9 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
@@ -18,7 +18,8 @@ namespace A2v10.Workflow.Bpmn
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, Func<IExecutionContext, IActivity, ValueTask> onComplete)
 		{
-			return base.ExecuteAsync(context, token, onComplete);
+			context.Schedule(Activity, onComplete, token);
+			return new ValueTask();
 		}
 	}
 }
