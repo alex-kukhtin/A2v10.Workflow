@@ -9,7 +9,7 @@ namespace A2v10.Workflow.Interfaces
 		IWorkflow Workflow { get; }
 
 		Guid Id { get; }
-		Guid Parent { get; }
+		Guid? Parent { get; }
 
 		ExpandoObject Result { get; set; }
 		ExpandoObject State { get; set; }

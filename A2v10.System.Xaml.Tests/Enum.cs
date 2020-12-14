@@ -15,7 +15,7 @@ namespace A2v10.System.Xaml.Tests
 	Name=""Var0"">
 </Variable>
 ";
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, null);
 
 			Assert.AreEqual(typeof(Variable), obj.GetType());
 			var v = obj as Variable;
@@ -31,7 +31,7 @@ namespace A2v10.System.Xaml.Tests
 	Name=""Var0"" Type=""String"">
 </Variable>
 ";
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Variable), obj.GetType());
 			var v = obj as Variable;

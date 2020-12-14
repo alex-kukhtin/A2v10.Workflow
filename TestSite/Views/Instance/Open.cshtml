@@ -1,0 +1,23 @@
+﻿@model dynamic
+@{
+	ViewData["Title"] = "Instance :" + Model.Id.ToString();
+}
+
+<div>
+	<nav class="navbar navbar-light bg-light">
+		<div class="navbar-brand">Instance: <b>@Model.Id</b></div>
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item">
+			</li>
+		</ul>
+	</nav>
+	<div class="row">
+		<div class="col-4">
+<code>
+<pre>
+@Model.State
+</pre>
+</code>
+		</div>
+	</div>
+</div>

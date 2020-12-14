@@ -7,6 +7,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 using A2v10.Workflow.Interfaces;
+using A2v10.System.Xaml;
 
 namespace A2v10.Workflow.Serialization
 {
@@ -74,9 +75,15 @@ namespace A2v10.Workflow.Serialization
 		}
 
 
-		IActivity DeserializeXaml(String text)
+		static IActivity DeserializeXaml(String text)
 		{
-			return null;
+			var obj = XamlServices.Parse(text, XamlServicesOptions.BpmnXamlOptions);
+			return obj switch
+			{
+				IActivityWrapper activityWrapper => activityWrapper.Root,
+				IActivity activity => activity,
+				_ => null,
+			};
 		}
 	}
 }

@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Interfaces
 {
-	public interface IRepository
+	public interface IActivityWrapper
 	{
-		IWorkflowStorage WorkflowStorage { get; }
-		IInstanceStorage InstanceStorage { get; }
+		IActivity Root { get; }
 	}
 }

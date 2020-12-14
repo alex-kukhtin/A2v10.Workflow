@@ -15,7 +15,7 @@ namespace A2v10.System.Xaml.Tests
 	Ref=""Ref0"">
 </Sequence>
 ";
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Sequence), obj.GetType());
 			var sq = obj as Sequence;
@@ -57,7 +57,7 @@ namespace A2v10.System.Xaml.Tests
 	Code Text 1
 </Code>
 ";
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Code), obj.GetType());
 			var code0 = obj as Code;
@@ -76,7 +76,7 @@ namespace A2v10.System.Xaml.Tests
 	<Code />
 </Sequence>
 ";
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Sequence), obj.GetType());
 			var sq = obj as Sequence;

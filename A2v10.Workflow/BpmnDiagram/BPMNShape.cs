@@ -11,5 +11,6 @@ namespace A2v10.Workflow.Bpmn.Diagram
 	public class BPMNShape : DiagramElement
 	{
 		public Bounds Bounds { get; init; }
+		public Boolean isMarkerVisible {get; init;}
 	}
 }

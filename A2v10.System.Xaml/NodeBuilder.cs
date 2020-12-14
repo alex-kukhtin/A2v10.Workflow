@@ -114,8 +114,6 @@ namespace A2v10.System.Xaml
 		public Boolean IsCamelCase { get; init; }
 	}
 
-	public record NamespaceDef(String Name, Boolean IsCamelCase, String Namespace, String Assembly);
-
 	public class NodeBuilder
 	{
 		private static readonly MethodInfo _getNodePropertyValue =
@@ -125,21 +123,23 @@ namespace A2v10.System.Xaml
 		private static readonly MethodInfo _convertChangeType =
 			typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(Object), typeof(Type), typeof(CultureInfo) });
 
-		private static readonly ConcurrentDictionary<ClassNamePair, NodeDefinition> _typeCache = new ConcurrentDictionary<ClassNamePair, NodeDefinition>();
+		// STATIC????? diff namespaces???
+		private readonly ConcurrentDictionary<ClassNamePair, NodeDefinition> _typeCache = new ConcurrentDictionary<ClassNamePair, NodeDefinition>();
 
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
+		private readonly XamlServicesOptions _options;
 
-		private readonly NamespaceDef[] BPMNNamespaces = new NamespaceDef[] { 
-			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true, "A2v10.Workflow.Bpmn", "A2v10.Workflow"),
-			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
-			new NamespaceDef("http://www.omg.org/spec/dd/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
-			new NamespaceDef("http://www.omg.org/spec/dd/20100524/dc", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow")
-		};
-
-		NamespaceDef IsBpmnNamespace(String value)
+		public NodeBuilder(XamlServicesOptions options)
 		{
+			_options = options;
+		}
+
+		NamespaceDef IsCustomNamespace(String value)
+		{
+			if (_options == null)
+				return null;
 			value = value.ToLowerInvariant();
-			return BPMNNamespaces.FirstOrDefault(x => x.Name == value);
+			return _options.Namespaces.FirstOrDefault(x => x.Name == value);
 		}
 
 		private static readonly Regex _namespaceRegEx = new Regex(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
@@ -151,7 +151,7 @@ namespace A2v10.System.Xaml
 				// xaml namespace for x:Key, etc
 				return;
 			}
-			var nsddef = IsBpmnNamespace(value);
+			var nsddef = IsCustomNamespace(value);
 			if (nsddef != null)
 			{
 				var nsd = new NamespaceDefinition()
@@ -333,7 +333,7 @@ namespace A2v10.System.Xaml
 				{
 					Prefix = nsKey,
 					Namespace = nsd.Namespace,
-					ClassName = typeName,
+					ClassName = CheckAlias(typeName),
 					IsCamelCase = nsd.IsCamelCase
 				};
 				return _typeCache.GetOrAdd(className, BuildNodeDefinition);
@@ -341,6 +341,16 @@ namespace A2v10.System.Xaml
 			else
 				throw new XamlReadException($"Namespace '{nsKey}' not found");
 		}
+
+		String CheckAlias(String name)
+		{
+			if (_options == null || _options.Aliases == null)
+				return name;
+			if (_options.Aliases.TryGetValue(name, out String outName))
+				return outName;
+			return name;
+		}
+
 
 		public Object BuildNode(XamlNode node)
 		{

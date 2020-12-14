@@ -21,7 +21,7 @@ namespace A2v10.System.Xaml.Tests
 
 			var xaml = File.ReadAllText("..\\..\\..\\TestFiles\\simple.bpmn");
 
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Definitions), obj.GetType());
 			var defs = obj as Definitions;
@@ -52,7 +52,7 @@ namespace A2v10.System.Xaml.Tests
 		{
 			var xaml = File.ReadAllText("..\\..\\..\\TestFiles\\parallel.bpmn");
 
-			var obj = XamlServices.Parse(xaml);
+			var obj = XamlServices.Parse(xaml, XamlServicesOptions.BpmnXamlOptions);
 
 			Assert.AreEqual(typeof(Definitions), obj.GetType());
 			var defs = obj as Definitions;

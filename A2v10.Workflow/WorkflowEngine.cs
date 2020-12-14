@@ -8,21 +8,26 @@ namespace A2v10.Workflow
 {
 	public class WorkflowEngine : IWorkflowEngine
 	{
-		private readonly IRepository _repository;
+		private readonly IWorkflowStorage _workflowStorage;
+		private readonly IInstanceStorage _instanceStorage;
 		private readonly ITracker _tracker;
 
-		public WorkflowEngine(IRepository repository, ITracker tracker)
+		public WorkflowEngine(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage, ITracker tracker)
 		{
-			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
+			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
 			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
 		}
 
-		public async ValueTask<IInstance> StartAsync(IActivity root, Object args = null)
+		public async ValueTask<IInstance> StartAsync(IActivity root, IIdentity identity, Object args = null)
 		{
 			var inst = new Instance()
 			{
 				Id = Guid.NewGuid(),
-				Workflow = new Workflow() { Root = root}
+				Workflow = new Workflow() { 
+					Root = root, 
+					Identity = identity
+				}
 			};
 			root.OnEndInit();
 			var context = new ExecutionContext(_tracker, inst.Workflow.Root, args);
@@ -30,20 +35,20 @@ namespace A2v10.Workflow
 			await context.RunAsync();
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
-			await _repository.InstanceStorage.Save(inst);
+			await _instanceStorage.Save(inst);
 			return inst;
 		}
 
 		public async ValueTask<IInstance> StartAsync(IIdentity identity, Object args = null)
 		{
-			var wf = await _repository.WorkflowStorage.LoadAsync(identity);
-			return await StartAsync(wf.Root, args);
+			var wf = await _workflowStorage.LoadAsync(identity);
+			return await StartAsync(wf.Root, identity, args);
 		}
 
 
 		public async ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null)
 		{
-			var inst = await _repository.InstanceStorage.Load(id);
+			var inst = await _instanceStorage.Load(id);
 			inst.Workflow.Root.OnEndInit();
 			var context = new ExecutionContext(_tracker, inst.Workflow.Root);
 			context.SetState(inst.State);
@@ -51,7 +56,7 @@ namespace A2v10.Workflow
 			await context.RunAsync();
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
-			await _repository.InstanceStorage.Save(inst);
+			await _instanceStorage.Save(inst);
 			return inst;
 		}
 	}

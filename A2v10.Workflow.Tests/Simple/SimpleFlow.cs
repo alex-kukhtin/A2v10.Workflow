@@ -30,15 +30,15 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			var inst = await wfe.StartAsync(root, new { X = 5 });
+			var inst = await wfe.StartAsync(root, null, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(7, result.Get<Int32>("R"));
 
-			inst = await wfe.StartAsync(root, new { X = 3 });
+			inst = await wfe.StartAsync(root, null, new { X = 3 });
 			result = inst.Result;
 			Assert.AreEqual(5, result.Get<Int32>("R"));
 
-			inst = await wfe.StartAsync(root, new { X = 11 });
+			inst = await wfe.StartAsync(root, null, new { X = 11 });
 			Assert.AreEqual(13, inst.Result.Get<Int32>("R"));
 		}
 
@@ -56,7 +56,7 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			await wfe.StartAsync(root);
+			await wfe.StartAsync(root, null);
 		}
 
 		[TestMethod]
@@ -80,10 +80,10 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			var inst = await wfe.StartAsync(root, new { X = 4 });
+			var inst = await wfe.StartAsync(root, null, new { X = 4 });
 			Assert.AreEqual("X <= 5", inst.Result.Get<String>("R"));
 
-			inst = await wfe.StartAsync(root, new { X = 23 });
+			inst = await wfe.StartAsync(root, null, new { X = 23 });
 			Assert.AreEqual("X > 5", inst.Result.Get<String>("R"));
 		}
 
@@ -112,7 +112,7 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			var inst = await wfe.StartAsync(root, new { X = 5 });
+			var inst = await wfe.StartAsync(root, null, new { X = 5 });
 			var result = inst.Result;
 			Assert.AreEqual(9, result.Get<Int32>("R"));
 		}

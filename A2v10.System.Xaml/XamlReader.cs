@@ -8,18 +8,20 @@ namespace A2v10.System.Xaml
 	{
 		private readonly XamlNode _root = new XamlNode() { Name = "Root" };
 		private readonly XmlReader _rdr;
+		private readonly XamlServicesOptions _options;
 
 		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
 
-		public XamlReader(XmlReader rdr)
+		public XamlReader(XmlReader rdr, XamlServicesOptions options)
 		{
 			_rdr = rdr;
+			_options = options;
 			_elemStack.Push(_root);
 		}
 
 		public Object Read()
 		{
-			var nodeBuilder = new NodeBuilder();
+			var nodeBuilder = new NodeBuilder(_options);
 			while (_rdr.Read())
 			{
 				if (_rdr.NodeType == XmlNodeType.Comment || _rdr.NodeType == XmlNodeType.Whitespace)
@@ -101,9 +103,8 @@ namespace A2v10.System.Xaml
 			parent.AddChildren(ch, builder);
 		}
 
-		void AddDeclaration()
+		static void AddDeclaration()
 		{
-
 		}
 
 	}

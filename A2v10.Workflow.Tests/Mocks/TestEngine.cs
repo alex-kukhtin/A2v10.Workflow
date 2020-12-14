@@ -27,7 +27,6 @@ namespace A2v10.Workflow.Tests
 
 			var collection = new ServiceCollection();
 
-			collection.AddSingleton<IRepository, InMemoryRepository>();
 			collection.AddSingleton<IWorkflowStorage, InMemoryWorkflowStorage>();
 			collection.AddSingleton<IInstanceStorage, InMemoryInstanceStorage>();
 			collection.AddSingleton<ISerializer, Serializer>();

@@ -6,16 +6,16 @@ namespace A2v10.System.Xaml
 {
 	public static class XamlServices
 	{
-		public static Object Parse(String xaml)
+		public static Object Parse(String xaml, XamlServicesOptions options = null)
 		{
 			using var stringReader = new StringReader(xaml);
 			using var xmlrdr = XmlReader.Create(stringReader);
-			return Load(xmlrdr);
+			return Load(xmlrdr, options);
 		}
 
-		public static Object Load(XmlReader rdr)
+		static Object Load(XmlReader rdr, XamlServicesOptions options = null)
 		{
-			var xaml = new XamlReader(rdr);
+			var xaml = new XamlReader(rdr, options);
 			return xaml.Read();
 		}
 	}
