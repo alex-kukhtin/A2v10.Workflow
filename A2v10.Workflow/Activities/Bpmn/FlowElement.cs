@@ -6,7 +6,7 @@ using System.Linq;
 namespace A2v10.Workflow.Bpmn
 {
 	[ContentProperty("Children")]
-	public abstract class FlowElement : BpmnElement
+	public abstract class FlowElement : BpmnActivity
 	{
 		public List<BpmnItem> Children { get; init; }
 

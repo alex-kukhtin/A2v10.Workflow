@@ -25,7 +25,7 @@ namespace A2v10.Workflow.Tests.Serialization
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BpmnElement>()
+				Elements = new List<BpmnItem>()
 				{
 					new StartEvent()
 					{
@@ -85,6 +85,8 @@ namespace A2v10.Workflow.Tests.Serialization
 			await wfs.PublishAsync("xxx", "123", "json");
 
 			var ident = await wfs.PublishAsync("test2", json, "json");
+			Assert.AreEqual(1, ident.Version);
+
 			ident = await wfs.PublishAsync("test2", json, "json");
 
 			Assert.AreEqual(2, ident.Version);
@@ -127,6 +129,9 @@ namespace A2v10.Workflow.Tests.Serialization
 
 
 			var ident = await wfs.PublishAsync("fchart1", json, "json");
+
+			Assert.AreEqual(1, ident.Version);
+
 			ident = await wfs.PublishAsync("fchart1", json, "json");
 
 			Assert.AreEqual(2, ident.Version);

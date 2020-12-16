@@ -32,9 +32,11 @@ namespace A2v10.Workflow.Bpmn
 			{
 				foreach (var og in Outgoing) {
 					var flow = Parent.FindElement<SequenceFlow>(og.Text);
-					context.Schedule(flow, onComplete, Parent.NewToken());
+					context.Schedule(flow, null, Parent.NewToken());
 				}
 			}
+			if (onComplete != null)
+				return onComplete(context, this);
 			return new ValueTask();
 		}
 	}

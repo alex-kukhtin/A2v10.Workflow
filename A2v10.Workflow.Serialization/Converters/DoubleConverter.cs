@@ -9,10 +9,14 @@ namespace A2v10.Workflow.Serialization
 	{
 		public override void WriteJson(JsonWriter writer, Double value, JsonSerializer serializer)
 		{
-			if (Math.Truncate(value) == value)
-				serializer.Serialize(writer, Convert.ToInt64(value));
+			if (Double.IsNaN(value))
+				writer.WriteValue("NaN");
+			else if (Double.IsInfinity(value))
+				writer.WriteValue("Infinity");
+			else if (Math.Truncate(value) == value)
+				writer.WriteValue(Convert.ToInt64(value));
 			else
-				serializer.Serialize(writer, value);
+				writer.WriteValue(value);
 		}
 
 		public override Double ReadJson(JsonReader reader, Type objectType, Double existingValue, Boolean hasExistingValue, JsonSerializer serializer)

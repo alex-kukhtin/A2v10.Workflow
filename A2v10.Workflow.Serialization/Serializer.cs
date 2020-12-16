@@ -18,7 +18,14 @@ namespace A2v10.Workflow.Serialization
 
 	public class Serializer : ISerializer
 	{
-		private readonly JsonSerializerSettings _actititySettings = new JsonSerializerSettings()
+		private static readonly JsonConverter[] _jsonConverters = new JsonConverter[]
+		{
+			new DoubleConverter(),
+			new StringEnumConverter(),
+			new ExpandoObjectConverter()
+		};
+
+		private static readonly JsonSerializerSettings _actititySettings = new JsonSerializerSettings()
 		{
 			Formatting = Formatting.None,
 			NullValueHandling = NullValueHandling.Ignore,
@@ -30,28 +37,27 @@ namespace A2v10.Workflow.Serialization
 				}
 			},
 			TypeNameHandling = TypeNameHandling.Auto,
-			Converters = new JsonConverter[] { 
-				new StringEnumConverter(), 
-				new ExpandoObjectConverter(),
-				new DoubleConverter() }
+			Converters = _jsonConverters
 		};
 
-		private readonly JsonConverter[] _jsonConverters = new JsonConverter[]
+		private static readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
 		{
-			new DoubleConverter(),
-			new StringEnumConverter(),
-			new ExpandoObjectConverter()
+			Formatting = Formatting.None,
+			NullValueHandling = NullValueHandling.Ignore,
+			FloatFormatHandling = FloatFormatHandling.Symbol,
+			FloatParseHandling = FloatParseHandling.Decimal,
+			Converters = _jsonConverters
 		};
 
 
 		public ExpandoObject Deserialize(String text)
 		{
-			return JsonConvert.DeserializeObject<ExpandoObject>(text, _jsonConverters);
+			return JsonConvert.DeserializeObject<ExpandoObject>(text, _jsonSettings);
 		}
 
 		public String Serialize(ExpandoObject obj)
 		{
-			return JsonConvert.SerializeObject(obj, _jsonConverters);
+			return JsonConvert.SerializeObject(obj, _jsonSettings);
 		}
 
 		public IActivity DeserializeActitity(String text, String format)

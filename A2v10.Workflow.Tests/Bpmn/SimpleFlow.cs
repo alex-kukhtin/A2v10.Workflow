@@ -19,7 +19,7 @@ namespace A2v10.Workflow.Tests
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BpmnElement>()
+				Elements = new List<BpmnItem>()
 				{
 					new StartEvent()
 					{
@@ -66,7 +66,7 @@ namespace A2v10.Workflow.Tests
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BpmnElement>()
+				Elements = new List<BpmnItem>()
 				{
 					new StartEvent()
 					{

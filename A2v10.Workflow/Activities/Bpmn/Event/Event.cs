@@ -6,7 +6,7 @@ using A2v10.System.Xaml;
 namespace A2v10.Workflow.Bpmn
 {
 	[ContentProperty("Children")]
-	public abstract class Event : BpmnElement
+	public abstract class Event : BpmnActivity
 	{
 		public virtual Boolean IsStart => false;
 

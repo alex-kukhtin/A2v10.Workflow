@@ -10,33 +10,57 @@ namespace A2v10.Workflow.Bpmn
 
 	public class BpmnTask : FlowElement
 	{
+
+		ExecutingAction _onComplete;
+		IToken _token;
+
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
+			_onComplete = onComplete;
+			_token = token;
 			// boundary events
 			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
 			{
 
 			}
+			return  ExecuteBody(context, OnBodyComplete);
+		}
 
+
+		ValueTask OnBodyComplete(IExecutionContext context, IActivity activity)
+		{
 			if (Outgoing == null)
-				return onComplete(context, this);
+			{
+				if (_onComplete != null)
+					return _onComplete(context, this);
+				return new ValueTask();
+			}
 
 			if (Outgoing.Count() == 1)
 			{
 				// simple outgouning - same token
 				var targetFlow = Parent.FindElement<SequenceFlow>(Outgoing.First().Text);
-				context.Schedule(targetFlow, onComplete, token);
+				context.Schedule(targetFlow, null, _token);
 			}
 			else
 			{
 				// same as task + parallelGateway
-				Parent.KillToken(token);
+				Parent.KillToken(_token);
 				foreach (var flowId in Outgoing)
 				{
 					var targetFlow = Parent.FindElement<SequenceFlow>(flowId.Text);
-					context.Schedule(targetFlow, onComplete, Parent.NewToken());
+					context.Schedule(targetFlow, null, Parent.NewToken());
 				}
 			}
+			if (_onComplete != null)
+				return _onComplete(context, this);
+			return new ValueTask();
+		}
+
+		public virtual ValueTask ExecuteBody(IExecutionContext context, ExecutingAction onComplete)
+		{
+			if (onComplete != null)
+				return onComplete(context, this);
 			return new ValueTask();
 		}
 	}
