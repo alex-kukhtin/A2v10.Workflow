@@ -3,10 +3,11 @@ using System;
 using System.Threading.Tasks;
 
 using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Interfaces.Api;
 
 namespace A2v10.Workflow
 {
-	public class WorkflowEngine : IWorkflowEngine
+	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi
 	{
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
@@ -58,6 +59,21 @@ namespace A2v10.Workflow
 			inst.State = context.GetState();
 			await _instanceStorage.Save(inst);
 			return inst;
+		}
+
+		public async ValueTask<IStartProcessResponse> StartAsync(IStartProcessRequest prm)
+		{
+			var i = await StartAsync(prm.Identity, prm.Parameters);
+			return new StartProcessResponse()
+			{
+				InstanceId = i.Id
+			};
+		}
+
+		public async ValueTask<IResumeProcessResponse> ResumeAsync(IResumeProcessRequest prm)
+		{
+			await ResumeAsync(prm.InstanceId, prm.Bookmark, prm.Result);
+			return new ResumeProcessResponse();
 		}
 	}
 }
