@@ -10,8 +10,10 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public virtual Boolean IsStart => false;
 
-		public List<BpmnItem> Children { get; init; }
+		public List<BaseElement> Children { get; init; }
 
 		public IEnumerable<Outgoing> Outgoing => Children.OfType<Outgoing>();
+
+		public EventDefinition EventDefinition => Children.OfType<EventDefinition>().FirstOrDefault();
 	}
 }

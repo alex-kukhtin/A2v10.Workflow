@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 namespace A2v10.Workflow.Tests.Serialization
 {
 	[TestClass]
-	[TestCategory("Serialization.Instance")]
-	public class Converters
+	[TestCategory("Converters.Test")]
+	public class TestConverters
 	{
 		private readonly JsonSerializerSettings settings = new JsonSerializerSettings
 		{
@@ -36,7 +36,6 @@ namespace A2v10.Workflow.Tests.Serialization
 			var x = JsonConvert.SerializeObject(new { x = 5, y = 7.12, n = Double.NaN }, settings);
 			Console.WriteLine(x);
 			var z = JsonConvert.DeserializeObject<Test>(x);
-			int r = 55;
 		}
 	}
 }

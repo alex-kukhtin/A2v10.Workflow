@@ -88,6 +88,11 @@ namespace A2v10.Workflow
 			AddMethod(_activity.Id, $"{name}: () => {{{expression};}}");
 		}
 
+		public void BuildExecuteResult(String name, String expression)
+		{
+			AddMethod(_activity.Id, $"{name}: (reply) => {{{expression};}}");
+		}
+
 		public void BuildEvaluate(String name, String expression)
 		{
 			AddMethod(_activity.Id, $"{name}: () => {{ return {expression};}}");

@@ -1,5 +1,6 @@
 ﻿
 using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Tracker;
 using Jint;
 using Jint.Native;
 using System;
@@ -13,12 +14,14 @@ namespace A2v10.Workflow
 		private readonly Engine _engine;
 		private readonly ExpandoObject _scriptData;
 		private readonly IActivity _root;
+		private readonly ITracker _tracker;
 
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
-		public ScriptEngine(IActivity root, String script, Object args = null)
+		public ScriptEngine(ITracker tracker, IActivity root, String script, Object args = null)
 		{
 			_root = root;
+			_tracker = tracker;
 			_engine = new Engine(EngineOptions);
 			_engine.AddNativeObjects();
 
@@ -60,6 +63,7 @@ namespace A2v10.Workflow
 
 		public T Evaluate<T>(String refer, String name)
 		{
+			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Evaluate, refer, name));
 			var func = GetFunc(refer, name);
 			if (func == null)
 				return default;
@@ -84,10 +88,20 @@ namespace A2v10.Workflow
 
 		public void Execute(String refer, String name)
 		{
+			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Execute, refer, name));
 			var func = GetFunc(refer, name);
 			if (func == null)
 				throw new WorkflowExecption($"Script element {refer}.{name} not found");
 			func(JsValue.Undefined, null);
+		}
+
+		public void ExecuteResult(String refer, String name, Object result)
+		{
+			var func = GetFunc(refer, name);
+			if (func == null)
+				throw new WorkflowExecption($"Script element {refer}.{name} not found");
+			var arg = JsValue.FromObject(_engine, result);
+			func(JsValue.Undefined, new JsValue[] { arg });
 		}
 	}
 }

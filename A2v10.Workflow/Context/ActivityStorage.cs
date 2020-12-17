@@ -1,9 +1,10 @@
 ﻿
-using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -34,11 +35,15 @@ namespace A2v10.Workflow
 
 		public T Get<T>(String name)
 		{
+			if (IsStoring)
+				throw new InvalidOperationException("Get in storing mode");
 			return _expando.Get<T>(name);
 		}
 
 		public ExecutingAction GetCallback(String name)
 		{
+			if (IsStoring)
+				throw new InvalidOperationException("Get in storing mode");
 			var itm = _expando.Get<ExpandoObject>(name);
 			if (itm == null)
 				return null;
@@ -50,11 +55,15 @@ namespace A2v10.Workflow
 
 		public void Set<T>(String name, T value)
 		{
+			if (IsLoading)
+				throw new InvalidOperationException("Set in loading mode");
 			_expando.Set(name, value);
 		}
 
 		public void SetCallback(String name, ExecutingAction callback)
 		{
+			if (IsLoading)
+				throw new InvalidOperationException("Set in loading mode");
 			if (callback == null)
 				return;
 			_expando.Set(name, CallbackItem.CreateFrom(callback));
@@ -62,14 +71,44 @@ namespace A2v10.Workflow
 
 		public void SetToken(String name, IToken value)
 		{
-			// TODO:
+			if (IsLoading)
+				throw new InvalidOperationException("Set in loading mode");
+			if (value == null)
+				return;
+			_expando.Set(name, value.ToString());
 		}
 
 		public IToken GetToken(String name)
 		{
-			// TODO:
-			return null;
+			if (IsStoring)
+				throw new InvalidOperationException("Get in storing mode");
+			var val = _expando.Get<String>(name);
+			if (val == null)
+				return null;
+			return Token.FromString(val);
 		}
 
+		public void SetTokenList(String name, List<IToken> list)
+		{
+			if (IsLoading)
+				throw new InvalidOperationException("Set in loading mode");
+			if (list == null || list.Count == 0)
+				return;
+			var vals = new List<String>();
+			foreach (var l in list)
+				vals.Add(l.ToString());
+			_expando.Set(name, vals);
+		}
+
+		public void GetTokenList(String name, List<IToken> list)
+		{
+			if (IsStoring)
+				throw new InvalidOperationException("Get in storing mode");
+			var vals = _expando.Get<List<Object>>(name);
+			if (vals == null)
+				return;
+			foreach (var v in vals)
+				list.Add(Token.FromString(v.ToString()));
+		}
 	}
 }

@@ -59,7 +59,7 @@ namespace A2v10.Workflow
 			_root.Traverse(sbTraverseArg);
 			sb.EndScript();
 
-			return new ScriptEngine(_root, sb.Script, args);
+			return new ScriptEngine(_tracker, _root, sb.Script, args);
 		}
 
 		public ExpandoObject GetResult()
@@ -95,6 +95,11 @@ namespace A2v10.Workflow
 		public void Execute(String refer, String name)
 		{
 			_script.Execute(refer, name);
+		}
+
+		public void ExecuteResult(String refer, String name, Object result)
+		{
+			_script.ExecuteResult(refer, name, result);
 		}
 
 		#endregion

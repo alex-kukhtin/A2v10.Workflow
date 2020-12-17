@@ -10,7 +10,7 @@ namespace A2v10.Workflow.Bpmn
 {
 	[ContentProperty("Items")]
 
-	public class Variables : BpmnItem
+	public class Variables : BaseElement
 	{
 		public List<Variable> Items { get; init; }
 	}

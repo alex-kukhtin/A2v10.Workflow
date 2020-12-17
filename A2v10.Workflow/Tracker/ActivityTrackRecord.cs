@@ -17,7 +17,7 @@ namespace A2v10.Workflow.Tracker
 			: base()
 		{
 			String strToken = token != null ? $", token:'{token}'" : null;
-			_message = $"{action} activity: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
+			_message = $"Activity:{action}: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
 		}
 
 		public override string ToString()

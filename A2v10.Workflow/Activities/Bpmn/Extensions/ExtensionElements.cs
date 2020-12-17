@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace A2v10.Workflow.Bpmn
 {
 	[ContentProperty("Items")]
-	public class ExtensionElements : BpmnItem
+	public class ExtensionElements : BaseElement
 	{
-		public List<BpmnItem> Items { get; init; }
+		public List<BaseElement> Items { get; init; }
 
 		public List<IVariable> GetVariables()
 		{

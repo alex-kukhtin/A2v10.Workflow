@@ -8,11 +8,31 @@ namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class BpmnTask : FlowElement
+	public class BpmnTask : FlowElement, IStorable
 	{
 
-		ExecutingAction _onComplete;
-		IToken _token;
+		protected ExecutingAction _onComplete;
+		protected IToken _token;
+
+		#region IStorable 
+		const String ON_COMPLETE = "OnComplete";
+		const String TOKEN = "Token";
+
+		public virtual void Store(IActivityStorage storage)
+		{
+			storage.SetCallback(ON_COMPLETE, _onComplete);
+			storage.SetToken(TOKEN, _token);
+
+		}
+
+		public virtual void Restore(IActivityStorage storage)
+		{
+			_onComplete = storage.GetCallback(ON_COMPLETE);
+			_token = storage.GetToken(TOKEN);
+		}
+		#endregion
+
+
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
@@ -21,13 +41,13 @@ namespace A2v10.Workflow.Bpmn
 			// boundary events
 			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
 			{
-
 			}
 			return  ExecuteBody(context, OnBodyComplete);
 		}
 
 
-		ValueTask OnBodyComplete(IExecutionContext context, IActivity activity)
+		[StoreName("OnBodyComplete")]
+		public ValueTask OnBodyComplete(IExecutionContext context, IActivity activity)
 		{
 			if (Outgoing == null)
 			{

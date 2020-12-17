@@ -23,17 +23,17 @@ namespace A2v10.Workflow.Tests.Serialization
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BpmnItem>()
+				Elements = new List<BaseElement>()
 				{
 					new StartEvent()
 					{
 						Id = "start",
-						Children = new List<BpmnItem>() { new Outgoing() {Text = "start->script" } }
+						Children = new List<BaseElement>() { new Outgoing() {Text = "start->script" } }
 					},
 					new EndEvent()
 					{
 						Id = "end",
-						Children = new List<BpmnItem>() {new Incoming() {Text = "script->end"} }
+						Children = new List<BaseElement>() {new Incoming() {Text = "script->end"} }
 					},
 					new SequenceFlow()
 					{

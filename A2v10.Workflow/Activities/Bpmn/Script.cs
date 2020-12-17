@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace A2v10.Workflow.Bpmn
 {
 	[ContentProperty("Text")]
-	public class Script : BpmnItem
+	public class Script : BaseElement
 	{
 		public String Text { get; init; }
 	}

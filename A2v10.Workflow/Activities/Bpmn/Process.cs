@@ -14,7 +14,8 @@ namespace A2v10.Workflow.Bpmn
 	public class Process : BpmnActivity, IStorable, IScoped, IScriptable
 	{
 		public Boolean IsExecutable { get; init; }
-		public List<BpmnItem> Elements { get; init; }
+		public Boolean IsClosed { get; init; }
+		public List<BaseElement> Elements { get; init; }
 
 		public List<IVariable> Variables => Elem<ExtensionElements>()?.GetVariables();
 
@@ -34,14 +35,14 @@ namespace A2v10.Workflow.Bpmn
 		{
 			storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.SetToken(TOKEN, _token);
-			//TODO:storage.Set(TOKENS, _tokens);
+			storage.SetTokenList(TOKENS, _tokens);
 		}
 
 		public void Restore(IActivityStorage storage)
 		{
 			_onComplete = storage.GetCallback(ON_COMPLETE);
 			_token = storage.GetToken(TOKEN);
-			//TODO:_tokens = storage.Get<List<IToken>>(TOKENS);
+			storage.GetTokenList(TOKEN, _tokens);
 		}
 		#endregion
 
@@ -72,9 +73,9 @@ namespace A2v10.Workflow.Bpmn
 			return new ValueTask();
 		}
 
-		public IEnumerable<T> Elems<T>() where T : BpmnItem => Elements.OfType<T>();
+		public IEnumerable<T> Elems<T>() where T : BaseElement => Elements.OfType<T>();
 
-		public T Elem<T>() where T : BpmnItem => Elements.OfType<T>().FirstOrDefault();
+		public T Elem<T>() where T : BaseElement => Elements.OfType<T>().FirstOrDefault();
 
 		[StoreName("OnElemComplete")]
 		ValueTask OnElemComplete(IExecutionContext context, IActivity activity)

@@ -8,9 +8,8 @@ namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public abstract class BpmnActivity : BpmnItem, IActivity
+	public abstract class BpmnActivity : BaseElement, IActivity
 	{
-		public String Id { get; init; }
 		public String Name { get; init; }
 
 		protected Process Parent { get; private set; }

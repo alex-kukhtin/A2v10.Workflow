@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn.Diagram
 {
-	public class DiagramElement : BpmnItem
+	public class DiagramElement : BaseElement
 	{
 #pragma warning disable IDE1006 // Naming Styles
 		public String id { get; init; }

@@ -15,5 +15,6 @@ namespace A2v10.Workflow.Interfaces
 
 		T Evaluate<T>(String refer, String name);
 		void Execute(String refer, String name);
+		void ExecuteResult(String refer, String name, Object result);
 	}
 }

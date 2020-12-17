@@ -9,7 +9,7 @@ namespace A2v10.Workflow.Bpmn
 {
 
 	[ContentProperty("Text")]
-	public abstract class FlowDirection : BpmnItem
+	public abstract class FlowDirection : BaseElement
 	{
 		public String Text { get; set; }
 		public abstract Boolean IsIncoming { get; }

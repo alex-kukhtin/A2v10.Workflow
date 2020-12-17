@@ -12,9 +12,12 @@ namespace A2v10.Workflow.Bpmn
 	public class Definitions : IActivityWrapper
 	{
 		public String Id { get; init; }
+		public String Name { get; init; }
 		public String TargetNamespace { get; init; }
 		public String Exporter { get; set; }
 		public String ExporterVersion { get; set; }
+		public String ExpressionLanguage { get; set; }
+		public String TypeLanguage { get; set; }
 
 		public List<Object> Children { get; init; }
 
