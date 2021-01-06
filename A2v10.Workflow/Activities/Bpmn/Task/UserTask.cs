@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using A2v10.System.Xaml;
 using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
@@ -14,12 +12,8 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public String Script => Children.OfType<Script>().FirstOrDefault()?.Text;
 
-		const String ON_USERTASK_COMPLETE = "OnUserTaskComplete";
-		ExecutingAction _onUserTaskComplete;
-
-		public override ValueTask ExecuteBody(IExecutionContext context, ExecutingAction onComplete)
+		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
-			_onUserTaskComplete = onComplete;
 			context.SetBookmark(Id, OnUserTaskComplete);
 			return new ValueTask();
 		}
@@ -27,13 +21,11 @@ namespace A2v10.Workflow.Bpmn
 		public override void Store(IActivityStorage storage)
 		{
 			base.Store(storage);
-			storage.SetCallback(ON_USERTASK_COMPLETE, _onUserTaskComplete);
 		}
 
 		public override void Restore(IActivityStorage storage)
 		{
 			base.Restore(storage);
-			_onUserTaskComplete = storage.GetCallback(ON_USERTASK_COMPLETE);
 		}
 
 		[StoreName("OnUserTaskComplete")]
@@ -41,8 +33,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			context.RemoveBookmark(bookmark);
 			context.ExecuteResult(Id, nameof(Script), result);
-			if (_onUserTaskComplete != null)
-				return _onUserTaskComplete(context, this);
+			CompleteBody(context);
 			return new ValueTask();
 		}
 

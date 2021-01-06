@@ -1,4 +1,4 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
 
 namespace A2v10.Workflow.Tracker
@@ -6,6 +6,7 @@ namespace A2v10.Workflow.Tracker
 	public enum ScriptTrackAction
 	{
 		Evaluate,
+		EvaluateResult,
 		Execute
 	}
 
@@ -13,13 +14,14 @@ namespace A2v10.Workflow.Tracker
 	{
 		private readonly String _message;
 
-		public ScriptTrackRecord(ScriptTrackAction action, String refer, String name)
+		public ScriptTrackRecord(ScriptTrackAction action, String refer, String name, Object result = null)
 			: base()
 		{
-			_message = $"Script:{action}: {{id: {refer}, name: '{name}'}}";
+			String strResult = result != null ? $", result:{result}" : String.Empty;
+			_message = $"Script:{action}: {{id: {refer}, name: '{name}'{strResult}}}";
 		}
 
-		public override string ToString()
+		public override String ToString()
 		{
 			return _message;
 		}

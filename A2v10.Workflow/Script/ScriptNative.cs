@@ -1,5 +1,7 @@
-﻿using Jint;
+﻿
 using System;
+using Jint;
+using Jint.Runtime.Interop;
 
 namespace A2v10.Workflow
 {
@@ -18,6 +20,7 @@ namespace A2v10.Workflow
 		public static void AddNativeObjects(this Engine engine)
 		{
 			engine.SetValue("console", new JsConsole());
+			engine.SetValue("Database", TypeReference.CreateTypeReference(engine, typeof(ScriptDatabase)));
 		}
 	}
 }

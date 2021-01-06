@@ -6,7 +6,9 @@ namespace A2v10.Workflow.Tracker
 	public enum ActivityTrackAction
 	{
 		Schedule,
-		Execute
+		Execute,
+		Bookmark,
+		Resume
 	}
 
 	public class ActivityTrackRecord : TrackRecord
@@ -18,6 +20,11 @@ namespace A2v10.Workflow.Tracker
 		{
 			String strToken = token != null ? $", token:'{token}'" : null;
 			_message = $"Activity:{action}: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
+		}
+
+		public ActivityTrackRecord(ActivityTrackAction action, String msg)
+		{
+			_message = $"Activity:{action}: {msg}";
 		}
 
 		public override string ToString()

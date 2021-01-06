@@ -10,7 +10,7 @@ namespace A2v10.Workflow.Tests
 {
 	[TestClass]
 	[TestCategory("Simple.Flow")]
-	public class Script
+	public class ScriptFlow
 	{
 		[TestMethod]
 		public async Task Sequence()

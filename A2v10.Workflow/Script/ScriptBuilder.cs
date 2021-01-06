@@ -16,10 +16,30 @@ namespace A2v10.Workflow
 
 		private readonly IActivity _activity;
 
+		public String Declarations => _declaratons;
+
 		public ActivityScriptBuilder(IActivity activity)
 		{
 			_activity = activity;
 		}
+
+		void AddMethods(String refer, List<String> methods)
+		{
+			if (!_methods.ContainsKey(refer))
+				_methods.Add(refer, methods);
+			else
+				_methods[refer].AddRange(methods);
+		}
+
+		void AddMethod(String refer, String method)
+		{
+			if (!_methods.ContainsKey(refer))
+				_methods.Add(refer, new List<String>() { method });
+			else
+				_methods[refer].Add(method);
+		}
+
+		#region IScriptBuilder
 
 		public void AddVariables(IEnumerable<IVariable> variables)
 		{
@@ -67,22 +87,6 @@ namespace A2v10.Workflow
 			}
 		}
 
-		void AddMethods(String refer, List<String> methods)
-		{
-			if (!_methods.ContainsKey(refer))
-				_methods.Add(refer, methods);
-			else
-				_methods[refer].AddRange(methods);
-		}
-
-		void AddMethod(String refer, String method)
-		{
-			if (!_methods.ContainsKey(refer))
-				_methods.Add(refer, new List<String>() { method });
-			else
-				_methods[refer].Add(method);
-		}
-
 		public void BuildExecute(String name, String expression)
 		{
 			AddMethod(_activity.Id, $"{name}: () => {{{expression};}}");
@@ -97,6 +101,8 @@ namespace A2v10.Workflow
 		{
 			AddMethod(_activity.Id, $"{name}: () => {{ return {expression};}}");
 		}
+		
+		#endregion
 
 		public String Methods
 		{
@@ -115,8 +121,6 @@ namespace A2v10.Workflow
 				return sb.ToString();
 			}
 		}
-
-		public String Declarations => _declaratons;
 	}
 
 	public class ActivityScript

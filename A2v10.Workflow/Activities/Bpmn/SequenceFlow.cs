@@ -6,10 +6,13 @@ namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class SequenceFlow : BpmnActivity
+	public class SequenceFlow : BpmnActivity, IScriptable
 	{
 		public String SourceRef { get; init; }
 		public String TargetRef { get; init; }
+
+		public String ConditionExpression { get; init; }
+		public Boolean Default { get; init; }
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
@@ -17,5 +20,13 @@ namespace A2v10.Workflow.Bpmn
 			context.Schedule(target, onComplete, token);
 			return new ValueTask();
 		}
+
+		#region IScriptable
+		public void BuildScript(IScriptBuilder builder)
+		{
+			builder.BuildEvaluate(nameof(ConditionExpression), ConditionExpression);
+		}
+		#endregion
+
 	}
 }

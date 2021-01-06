@@ -79,7 +79,8 @@ namespace A2v10.Workflow.Tests
 						Children  = new List<BaseElement>() { 
 							new Incoming() {Text = "start->gate1" },
 							new Outgoing() { Text = "gate1->task1" }, 
-							new Outgoing() { Text = "gate1->task2" } 
+							new Outgoing() { Text = "gate1->task2" },
+							new Script() {Text = ""}
 						}
 					},
 					new ScriptTask()

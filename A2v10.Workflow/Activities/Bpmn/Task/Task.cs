@@ -22,7 +22,6 @@ namespace A2v10.Workflow.Bpmn
 		{
 			storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.SetToken(TOKEN, _token);
-
 		}
 
 		public virtual void Restore(IActivityStorage storage)
@@ -42,12 +41,12 @@ namespace A2v10.Workflow.Bpmn
 			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
 			{
 			}
-			return  ExecuteBody(context, OnBodyComplete);
+			// loop
+			return  ExecuteBody(context);
 		}
 
 
-		[StoreName("OnBodyComplete")]
-		public ValueTask OnBodyComplete(IExecutionContext context, IActivity activity)
+		protected virtual ValueTask CompleteBody(IExecutionContext context)
 		{
 			if (Outgoing == null)
 			{
@@ -77,11 +76,9 @@ namespace A2v10.Workflow.Bpmn
 			return new ValueTask();
 		}
 
-		public virtual ValueTask ExecuteBody(IExecutionContext context, ExecutingAction onComplete)
+		public virtual ValueTask ExecuteBody(IExecutionContext context)
 		{
-			if (onComplete != null)
-				return onComplete(context, this);
-			return new ValueTask();
+			return CompleteBody(context);
 		}
 	}
 }

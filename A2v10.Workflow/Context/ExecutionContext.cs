@@ -78,6 +78,7 @@ namespace A2v10.Workflow
 
 		public void SetBookmark(String bookmark, ResumeAction onComplete)
 		{
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, $"{{bookmark:'{bookmark}'}}"));
 			_bookmarks.Add(bookmark, onComplete);
 		}
 
@@ -118,6 +119,7 @@ namespace A2v10.Workflow
 		{
 			if (_bookmarks.TryGetValue(bookmark, out ResumeAction action))
 			{
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, $"{{bookmark:'{bookmark}'}}"));
 				return action(this, bookmark, result);
 			}
 			return new ValueTask();

@@ -9,11 +9,9 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public String Script => Children.OfType<Script>().FirstOrDefault()?.Text;
 
-		public override ValueTask ExecuteBody(IExecutionContext context, Func<IExecutionContext, IActivity, ValueTask> onComplete)
+		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
 			context.Execute(Id, nameof(Script));
-			if (onComplete != null)
-				return onComplete(context, this);
 			return new ValueTask();
 		}
 

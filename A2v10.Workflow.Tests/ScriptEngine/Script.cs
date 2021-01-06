@@ -1,6 +1,8 @@
 ﻿
 using Jint;
 using Jint.Native;
+using Jint.Native.Object;
+using Jint.Runtime.Interop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -49,6 +51,24 @@ namespace A2v10.Workflow.Tests
 				Assert.Fail("Ref0 not found");
 			}
 
+		}
+
+		[TestMethod]
+		public void ScriptDatabase()
+		{
+			var eng = new Engine(opts =>
+			{
+				opts.Strict(true);
+				opts.SetWrapObjectHandler((e, o) =>
+				{
+					return new ObjectWrapper(e, o);
+				});
+			});
+			eng.AddNativeObjects();
+
+			var val = eng.Execute("return (new Database()).loadModel('first')").GetCompletionValue().ToObject();
+
+			int z = 55;
 		}
 	}
 }

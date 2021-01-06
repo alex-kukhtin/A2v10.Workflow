@@ -65,12 +65,19 @@ namespace A2v10.Workflow
 		{
 			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Evaluate, refer, name));
 			var func = GetFunc(refer, name);
+			T res = default;
 			if (func == null)
-				return default;
-			var obj = func(JsValue.Undefined, null).ToObject();
-			if (obj is T objT)
-				return objT;
-			return (T)Convert.ChangeType(obj, typeof(T));
+				res = default;
+			else
+			{
+				var obj = func(JsValue.Undefined, null).ToObject();
+				if (obj is T objT)
+					res = objT;
+				else
+					res = (T)Convert.ChangeType(obj, typeof(T));
+			}
+			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.EvaluateResult, refer, name, res));
+			return res;
 		}
 
 		private Func<JsValue, JsValue[], JsValue> GetFunc(String refer, String name)
@@ -97,6 +104,7 @@ namespace A2v10.Workflow
 
 		public void ExecuteResult(String refer, String name, Object result)
 		{
+			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Execute, refer, name, result));
 			var func = GetFunc(refer, name);
 			if (func == null)
 				throw new WorkflowExecption($"Script element {refer}.{name} not found");
