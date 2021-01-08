@@ -5,6 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="bundleconfig.json" />
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="app\descriptors\workflow.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="app\descriptors\workflow.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="A2v10.Data.Core" Version="10.0.7247" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
@@ -13,6 +26,17 @@
     <ProjectReference Include="..\A2v10.Workflow.Serialization\A2v10.Workflow.Serialization.csproj" />
     <ProjectReference Include="..\A2v10.Workflow.SqlServer\A2v10.Workflow.SqlServer.csproj" />
     <ProjectReference Include="..\A2v10.Workflow\A2v10.Workflow.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\bpmn\font\" />
+    <Folder Include="wwwroot\js\dist\" />
+    <Folder Include="wwwroot\lib\bpmn\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bundleconfig.json" />
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
 </Project>

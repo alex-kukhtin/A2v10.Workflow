@@ -1,0 +1,8 @@
+[
+    {
+        "outputFileName": "wwwroot/css/properties-panels.css",
+        "inputFiles": [
+            "node_modules/bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css"
+        ]
+  }
+]
