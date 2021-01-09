@@ -8,8 +8,35 @@
 </div>
 <div class="properties-panel-parent" id="js-properties-panel">
 </div>
+<ul class="bpmn-editor-toolbar">
+	<li>
+		<button class="btn btn-sm btn-outline-primary" id="tb-download">Download</button>
+	</li>
+</ul>
 
 
 @section Scripts {
-	<script src="~/js/dist/index.js"></script>
+<script src="~/js/dist/index.js"></script>
+<script>
+	let bpmnModeler = window.Modeler;
+	let id = '@ViewBag.Id';
+	if ('@ViewBag.Id')
+		fetch(`/Editor/Get/${id}`).then(resp => {
+			resp.text().then(text => {
+				console.log(text);
+				bpmnModeler.importXML(text);
+			});
+		});
+	else
+		bpmnModeler.createDiagram();
+
+	document.getElementById('tb-download').addEventListener('click', (ev) => {
+		ev.preventDefault();
+		ev.stopPropagation();
+		bpmnModeler.saveXML({ format: true }).then(result => {
+			console.info(result.xml);
+			alert('see console');
+		});
+	});
+</script>
 }

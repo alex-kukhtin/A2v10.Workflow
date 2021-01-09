@@ -28,5 +28,18 @@ let bpmnModeler = new BpmnModeler({
 
 console.dir('custom properties6');
 
+window.Modeler = bpmnModeler;
+
 console.dir(bpmnModeler);
-bpmnModeler.createDiagram();
+/*
+if (window.$$id$$)
+	fetch(`/Editor/Get/${window.$$id$$}`).then(resp => {
+		resp.text().then(text => {
+			console.log(text);
+			bpmnModeler.importXML(text);
+		});
+	});
+	//bpmnModeler.importXML(window.$$source$$);
+else
+	bpmnModeler.createDiagram();
+*/

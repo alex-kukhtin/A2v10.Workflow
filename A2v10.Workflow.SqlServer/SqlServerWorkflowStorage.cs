@@ -23,14 +23,18 @@ namespace A2v10.Workflow.SqlServer
 			_serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
 		}
 
-		public async ValueTask<IWorkflow> LoadAsync(IIdentity identity)
+		public Task<ExpandoObject> LoadWorkflowAsync(IIdentity identity)
 		{
 			var prms = new ExpandoObject();
 			prms.TryAdd("Id", identity.Id);
 			prms.TryAdd("Version", identity.Version);
 
-			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Workflow.Load]", prms);
+			return _dbContext.ReadExpandoAsync(null, $"{Schema}.[Workflow.Load]", prms);
+		}
 
+		public async Task<IWorkflow> LoadAsync(IIdentity identity)
+		{
+			var eo = await LoadWorkflowAsync(identity);
 			return new Workflow()
 			{
 				Identity = new Identity()
@@ -42,7 +46,13 @@ namespace A2v10.Workflow.SqlServer
 			};
 		}
 
-		public async ValueTask<IIdentity> PublishAsync(String id, String text, String format)
+		public async Task<String> LoadSourceAsync(IIdentity identity)
+		{
+			var eo = await LoadWorkflowAsync(identity);
+			return eo.Get<String>("Text");
+		}
+
+		public async Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			var prms = new ExpandoObject();
 			var d= prms as IDictionary<String, Object>;

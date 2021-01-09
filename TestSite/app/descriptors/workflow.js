@@ -1,22 +1,45 @@
 export default {
-	"name": "Workflow",
-	"prefix": "workflow",
-	"uri": "http://workflow",
-	"xml": {
-		"tagAlias": "lowerCase"
-	},
+	name: "wf",
+	prefix: "wf",
+	uri: "clr-namespace:A2v10.Workflow;assembly=A2v10.Workflow",
 	"associations": [],
-	"types": [
+	types: [
 		{
-			"name": "BewitchedStartEvent",
-			"extends": [
-				"bpmn:StartEvent"
+			name:"Variables",
+			superClass : [
+				"Element"
 			],
-			"properties": [
+			meta: {
+				"allowedIn": ["bpmn:Process", "bpmn:SubProcess"]
+			},
+			properties: [
 				{
-					"name": "spell",
-					"isAttr": true,
-					"type": "String"
+					"name": "values",
+					"type": "Variable",
+					"isMany": true
+				}
+			]
+		},
+		{
+			name: "Variable",
+			superClass : [
+				"Element"
+			],
+			properties: [
+				{
+					name: "Name",
+					isAttr: true,
+					type: "String"
+				},
+				{
+					name: "Type",
+					isAttr: true,
+					type: "String"
+				},
+				{
+					name: "Dir",
+					isAttr: true,
+					type: "String"
 				}
 			]
 		}

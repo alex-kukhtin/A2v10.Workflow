@@ -6,7 +6,8 @@ namespace A2v10.Workflow.Interfaces
 {
 	public interface IWorkflowStorage
 	{
-		ValueTask<IWorkflow> LoadAsync(IIdentity identity);
-		ValueTask<IIdentity> PublishAsync(String id, String text, String format);
+		Task<IWorkflow> LoadAsync(IIdentity identity);
+		Task<String> LoadSourceAsync(IIdentity identity);
+		Task<IIdentity> PublishAsync(String id, String text, String format);
 	}
 }

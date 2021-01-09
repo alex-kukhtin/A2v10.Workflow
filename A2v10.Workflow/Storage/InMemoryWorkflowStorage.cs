@@ -25,7 +25,12 @@ namespace A2v10.Workflow.Storage
 			_serializer = serializer;
 		}
 
-		public ValueTask<IWorkflow> LoadAsync(IIdentity identity)
+		public Task<String> LoadSourceAsync(IIdentity identity)
+		{
+			return Task.FromResult<String>(null);
+		}
+
+		public Task<IWorkflow> LoadAsync(IIdentity identity)
 		{
 			Int32 v = identity.Version;
 			if (v == 0)
@@ -46,10 +51,10 @@ namespace A2v10.Workflow.Storage
 				},
 				Root = root
 			};
-			return new ValueTask<IWorkflow>(wf);
+			return Task.FromResult<IWorkflow>(wf);
 		}
 
-		public ValueTask<IIdentity> PublishAsync(String id, String text, String format)
+		public Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			// find max version
 			var v = 0;
@@ -76,7 +81,7 @@ namespace A2v10.Workflow.Storage
 				Id = id,
 				Version = v
 			};
-			return new ValueTask<IIdentity>(ident);
+			return Task.FromResult<IIdentity>(ident);
 		}
 	}
 }

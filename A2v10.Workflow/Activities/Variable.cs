@@ -1,6 +1,8 @@
 ﻿
+using A2v10.System.Xaml;
 using A2v10.Workflow.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace A2v10.Workflow
 {

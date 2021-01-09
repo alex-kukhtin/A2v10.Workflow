@@ -14,6 +14,8 @@ import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProp
 
 // Require your custom property entries.
 import spellProps from './parts/SpellProps';
+import scriptProps from './parts/scriptProps';
+import variablesProps from './parts/variablesProps';
 
 
 // The general tab contains all bpmn relevant properties.
@@ -36,6 +38,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 	};
 	linkProps(detailsGroup, element, translate);
 	eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
+	scriptProps(detailsGroup, element, translate);
 
 	var documentationGroup = {
 		id: 'documentation',
@@ -50,6 +53,21 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 		generalGroup,
 		detailsGroup,
 		documentationGroup
+	];
+}
+
+function createVariablesTabGroups(element, translate) {
+
+	let variablesGroup = {
+		id: 'vars',
+		label: 'Variables',
+		entries: []
+	};
+
+	variablesProps(variablesGroup, element, translate);
+
+	return [
+		variablesGroup
 	];
 }
 
@@ -92,9 +110,16 @@ export default function WorkflowPropertiesProvider(
 			groups: createWorkflowTabGroups(element, translate)
 		};
 
+		var variablesTab = {
+			id: 'variables',
+			label: 'Variables',
+			groups: createVariablesTabGroups(element, translate)
+		};
+
 		// Show general + "workflow" tab
 		return [
 			generalTab,
+			variablesTab,
 			workflowTab
 		];
 	};

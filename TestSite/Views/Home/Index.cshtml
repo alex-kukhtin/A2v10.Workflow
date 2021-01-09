@@ -45,6 +45,7 @@
 						<input type="hidden" name="id" value="@wf.Id" />
 						<input type="hidden" name="version" value="@wf.Version" />
 						<button class="btn btn-primary btn-sm" type="submit">Run</button>
+						<a class="btn btn-secondary btn-sm" asp-action="Index" asp-controller="Editor" asp-route-id="@wf.Id">Edit</a>
 					</form>
 					<button class="btn btn-info btn-sm" type="submit">Versions</button>
 				</td>

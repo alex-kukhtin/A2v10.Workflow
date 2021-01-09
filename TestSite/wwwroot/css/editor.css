@@ -23,3 +23,17 @@
 .properties-panel-parent > .bpp-properties-panel {
   padding-bottom: 70px;
   min-height: 100%; }
+
+.bpmn-editor-toolbar {
+  display: flex;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 11;
+  overflow: auto;
+  padding: 0;
+  margin: 0; }
+  .bpmn-editor-toolbar li {
+    list-style: none;
+    padding: 2px;
+    margin: 0; }
