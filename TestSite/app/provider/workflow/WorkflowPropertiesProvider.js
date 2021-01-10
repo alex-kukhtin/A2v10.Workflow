@@ -16,6 +16,7 @@ import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProp
 import spellProps from './parts/SpellProps';
 import scriptProps from './parts/scriptProps';
 import variablesProps from './parts/variablesProps';
+import variablesDetailProps from './parts/variablesDetailProps';
 
 
 // The general tab contains all bpmn relevant properties.
@@ -56,6 +57,14 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 	];
 }
 
+function getSelected(node) {
+	if (!node) return null;
+	let tab = node.closest('div.bpp-properties-tab');
+	if (!tab) return null;
+	let combo = tab.querySelector('select.bpp-variables-list');
+	return combo ? { value: combo.value, idx: combo.selectedIndex } : null;
+}
+
 function createVariablesTabGroups(element, translate) {
 
 	let variablesGroup = {
@@ -64,10 +73,23 @@ function createVariablesTabGroups(element, translate) {
 		entries: []
 	};
 
+	let variablesDetailGroup = {
+		id: 'variables-detail',
+		label: 'Variable details',
+		entries: [],
+		enabled(elem, node) {
+			let sel = getSelected(node);
+			return sel && sel.idx >= 0;
+		}
+	};
+
 	variablesProps(variablesGroup, element, translate);
 
+	variablesDetailProps(variablesDetailGroup, element, translate);
+
 	return [
-		variablesGroup
+		variablesGroup,
+		variablesDetailGroup
 	];
 }
 

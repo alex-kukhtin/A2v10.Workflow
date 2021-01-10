@@ -6,48 +6,71 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 
+/*
+var extensionElementsEntry = require('./ExtensionElements'),
+	extensionElementsHelper = require('../../../../helper/ExtensionElementsHelper'),
+	cmdHelper = require('../../../../helper/CmdHelper'),
+	elementHelper = require('../../../../helper/ElementHelper'),
+	ImplementationTypeHelper = require('../../../../helper/ImplementationTypeHelper');
+*/
+
 
 function generateValueId() {
 	return utils.nextId('Value_');
 }
 
-console.dir(elementHelper, cmdHelper, getBusinessObject );
+const variablesHtml = `
+<div class="bpp-row bpp-element-list">
+	<label for=wf-variables-list>Activity variables</label>
+	<div class=bpp-field-wrapper>
+		<select size="5" class="bpp-variables-list" name="wf-variables-list"
+			data-list-entry-container data-on-change=selectElement>
+		</select>
+		<button class="action-button add" data-action="createElement"><span>+</span></button>
+		<button class="action-button clear" 
+				data-action="removeElement" data-disable="disableRemove">
+			<span>x</span>
+		</button>
+	</div>
+</div>
+`;
 
-export default function addProcessEntries(group, element, translate) {
+export default function addVariables(group, element, translate) {
 
-	if (is(element, 'bpmn:Process') || is(element, 'bpmn:SubProcess')) {
-		group.entries.push(entryFactory.table(translate, {
-			id: 'variable',
-			description: 'Activity variables',
-			labels: ['name', 'direction'],
-			modelProperties: ['name', 'direction'],
-			getElements: (elem, node) => {
-				console.dir({ s: 'get elements', elem, node });
-				return [{ id:'id1', name: 'name1', direction: 'dir1' }, {id: 'id2', name: 'name2', direction: 'dir2'}];
-			},
-			addElement: (elem, node) => {
-				console.dir('add element', elem, node);
-				let commands = [];
-				let bobj = getBusinessObject(elem);
-
-				var extensionElements = bobj.get('extensionElements');
-				if (!extensionElements) {
-					//extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
-					//commands.push(cmdHelper.updateBusinessObject(element, bo, { extensionElements: extensionElements }));
-				}
-
-				console.dir({ s: 'add element', elem, node, bobj, extensionElements });
-				return cmdHelper.addElementsTolist(elem, bobj, 'list_prop_name', [{}]);
-			},
-			removeElement: (elem, node, idx) => {
-				console.dir('remove element', elem, node);
-			},
-			updateElement: (elem, value, node, idx) => {
-				console.dir('update element', elem, value, node, idx);
-			},
-			validate: (elem, value, node, idx) => {
-				console.dir('validate', elem, value, node, idx);
+	if (!is(element, 'bpmn:Process') && !is(element, 'bpmn:SubProcess'))
+		return;
+	group.entries.push({
+		id: 'Variables',
+		html: variablesHtml,
+		get(elem, node) {
+			console.dir('get from addVariables');
+			console.dir({ elem, node });
+			let bo = getBusinessObject(elem);
+			console.dir({ elem, node, bo });
+			var ee = bo.get("extensionElements");
+			if (bo.extensionElements && bo.extensionElements.values) {
+				// $Variables
+				return bo.extensionElements.values;
 			}
-		}));
-	}
+			return [];
+		},
+		createElement(elem, node) {
+			alert('create element');
+		},
+		removeElement(elem, node) {
+			alert('remove element');
+		},
+		disableRemove(elem, entryNode, node, scope) {
+			console.dir('disable remove');
+		},
+		selectElement(elem, node, event, scope) {
+			console.dir('select element');
+			console.dir({ elem, node, event, scope });
+		},
+		createListEntryTemplate(value, index, selectbox) {
+			console.dir('create entry template');
+			console.dir({ value, index, selectbox });
+			return `<option value="">OPTION FROM CREATE LIST ENTRY TEMPLATE</option>`;
+		}
+	});
 }
