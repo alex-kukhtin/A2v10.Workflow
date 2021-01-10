@@ -1,0 +1,10 @@
+﻿
+2. Добавление переменных -> createExtension Elements
+3. Удаление переменных.
+4. Создание процесса - предопределенный шаблон
+5. Запуск процесса - переменные
+6. Убрать camunda в id элементов
+7. Variable. Name. Validate
+8. Variable. Value?
+9. Variable.Name template. Name is undefined.
+10.

@@ -5,6 +5,7 @@ import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
+import extensionElementsImpl from './impl/extensionElements';
 
 /*
 var extensionElementsEntry = require('./ExtensionElements'),
@@ -13,7 +14,6 @@ var extensionElementsEntry = require('./ExtensionElements'),
 	elementHelper = require('../../../../helper/ElementHelper'),
 	ImplementationTypeHelper = require('../../../../helper/ImplementationTypeHelper');
 */
-
 
 function generateValueId() {
 	return utils.nextId('Value_');
@@ -35,7 +35,7 @@ const variablesHtml = `
 </div>
 `;
 
-export default function addVariables(group, element, translate) {
+export default function addVariables(group, element, bpmnFactory, translate) {
 
 	if (!is(element, 'bpmn:Process') && !is(element, 'bpmn:SubProcess'))
 		return;
@@ -43,34 +43,73 @@ export default function addVariables(group, element, translate) {
 		id: 'Variables',
 		html: variablesHtml,
 		get(elem, node) {
-			console.dir('get from addVariables');
-			console.dir({ elem, node });
-			let bo = getBusinessObject(elem);
-			console.dir({ elem, node, bo });
-			var ee = bo.get("extensionElements");
-			if (bo.extensionElements && bo.extensionElements.values) {
-				// $Variables
-				return bo.extensionElements.values;
-			}
-			return [];
+			console.dir('variables get-elements');
+			let ee = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			return ee ? ee.values : [];
+		},
+		set(elem, values, node) {
+			let action = this.__action;
+			delete this.__action;
+			if (!action) return;
+			let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			return cmdHelper.addElementsTolist(elem, vars, 'values', [action.value]);
 		},
 		createElement(elem, node) {
-			alert('create element');
+			let selbox = node.querySelector('select[name=wf-variables-list]');
+
+			var bo = getBusinessObject(elem);
+			let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			var variable = elementHelper.createElement('wf:Variable', { Name: '', Type: 'String', Dir: 'Local' }, vars, bpmnFactory);
+			var optTemplate = this.createListEntryTemplate(variable);
+			let tmpsel = document.createElement('select');
+			tmpsel.innerHTML = optTemplate;
+			selbox.appendChild(tmpsel.firstChild);
+			selbox.lastChild.selected = 'selected';
+			this.__action = {
+				id: 'add-variable',
+				value: variable
+			};
+			return true;
+			/*
+			var commands = [];
+			var bo = getBusinessObject(elem);
+			let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			var variable = elementHelper.createElement('wf:Variable', { Name: '', Type: 'String', Dir: 'Local' }, vars, bpmnFactory);
+			commands.push(cmdHelper.addElementsTolist(bo, vars, 'values', [variable]));
+			vars.values.push(variable);
+			return commands;
+			*/
 		},
 		removeElement(elem, node) {
 			alert('remove element');
 		},
+		updateElement(elem, values, node, idx) {
+			console.dir('update element');
+			console.dir({ elem, values, node, idx});
+		},
 		disableRemove(elem, entryNode, node, scope) {
-			console.dir('disable remove');
+			let sel = extensionElementsImpl.getSelectedVariable(node);
+			return !sel || sel.idx === -1;
 		},
 		selectElement(elem, node, event, scope) {
 			console.dir('select element');
 			console.dir({ elem, node, event, scope });
 		},
-		createListEntryTemplate(value, index, selectbox) {
-			console.dir('create entry template');
-			console.dir({ value, index, selectbox });
-			return `<option value="">OPTION FROM CREATE LIST ENTRY TEMPLATE</option>`;
+		setControlValue(elem, node, option, property, value, idx) {
+			let ee = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			if (!ee || idx >= ee.values.length) return;
+			let varb = ee.values[idx];
+			let tmlText = this.createTemplateText(varb);
+			node.text = tmlText;
+		},
+		createTemplateText(value) {
+			return `${value.Name}: ${value.Type}  [${value.Dir}]`;
+		},
+		createListEntryTemplate(value) {
+			/*'data-value' is required
+			 *'data-name' is parameter 'property' for 'setControlValue'.
+			 */
+			return `<option value="" data-value data-name="variableText">${this.createTemplateText(value)}</option>`;
 		}
 	});
 }

@@ -18,6 +18,8 @@ import scriptProps from './parts/scriptProps';
 import variablesProps from './parts/variablesProps';
 import variablesDetailProps from './parts/variablesDetailProps';
 
+import extensionElementsImpl from './parts/impl/extensionElements';
+
 
 // The general tab contains all bpmn relevant properties.
 // The properties are organized in groups.
@@ -57,15 +59,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 	];
 }
 
-function getSelected(node) {
-	if (!node) return null;
-	let tab = node.closest('div.bpp-properties-tab');
-	if (!tab) return null;
-	let combo = tab.querySelector('select.bpp-variables-list');
-	return combo ? { value: combo.value, idx: combo.selectedIndex } : null;
-}
-
-function createVariablesTabGroups(element, translate) {
+function createVariablesTabGroups(element, bpmnFactory, translate) {
 
 	let variablesGroup = {
 		id: 'vars',
@@ -78,13 +72,12 @@ function createVariablesTabGroups(element, translate) {
 		label: 'Variable details',
 		entries: [],
 		enabled(elem, node) {
-			let sel = getSelected(node);
+			let sel = extensionElementsImpl.getSelectedVariable(node);
 			return sel && sel.idx >= 0;
 		}
 	};
 
-	variablesProps(variablesGroup, element, translate);
-
+	variablesProps(variablesGroup, element, bpmnFactory, translate);
 	variablesDetailProps(variablesDetailGroup, element, translate);
 
 	return [
@@ -135,7 +128,7 @@ export default function WorkflowPropertiesProvider(
 		var variablesTab = {
 			id: 'variables',
 			label: 'Variables',
-			groups: createVariablesTabGroups(element, translate)
+			groups: createVariablesTabGroups(element, bpmnFactory, translate)
 		};
 
 		// Show general + "workflow" tab
