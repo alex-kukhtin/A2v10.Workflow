@@ -51,7 +51,6 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 
 	documentationProps(documentationGroup, element, bpmnFactory, translate);
 
-	console.dir('createGeneralTabGroups')
 	return [
 		generalGroup,
 		detailsGroup,

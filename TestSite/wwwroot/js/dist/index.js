@@ -149,7 +149,6 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
     entries: []
   };
   (0, _DocumentationProps.default)(documentationGroup, element, bpmnFactory, translate);
-  console.dir('createGeneralTabGroups');
   return [generalGroup, detailsGroup, documentationGroup];
 }
 
@@ -298,6 +297,13 @@ function getExtensionElement(elem, type) {
   return null;
 }
 
+function getExtensionElements(elem) {
+  if (!elem) return null;
+  let bo = (0, _ModelUtil.getBusinessObject)(elem);
+  if (!bo) return null;
+  return bo.get('extensionElements');
+}
+
 function getSelectedVariableObject(node, elem) {
   let sel = getSelectedVariable(node);
   if (!sel || sel.idx === -1) return {};
@@ -309,7 +315,8 @@ function getSelectedVariableObject(node, elem) {
 var _default = {
   getSelectedVariable,
   getSelectedVariableObject,
-  getExtensionElement
+  getExtensionElement,
+  getExtensionElements
 };
 exports.default = _default;
 
@@ -475,8 +482,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = addVariables;
 
-var _EntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/EntryFactory"));
-
 var _ElementHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/ElementHelper"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
@@ -486,17 +491,6 @@ var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/*
-var extensionElementsEntry = require('./ExtensionElements'),
-	extensionElementsHelper = require('../../../../helper/ExtensionElementsHelper'),
-	cmdHelper = require('../../../../helper/CmdHelper'),
-	elementHelper = require('../../../../helper/ElementHelper'),
-	ImplementationTypeHelper = require('../../../../helper/ImplementationTypeHelper');
-*/
-function generateValueId() {
-  return utils.nextId('Value_');
-}
 
 const variablesHtml = `
 <div class="bpp-row bpp-element-list">
@@ -521,8 +515,6 @@ function addVariables(group, element, bpmnFactory, translate) {
     html: variablesHtml,
 
     get(elem, node) {
-      console.dir('variables get-elements');
-
       let ee = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
 
       return ee ? ee.values : [];
@@ -532,15 +524,30 @@ function addVariables(group, element, bpmnFactory, translate) {
       let action = this.__action;
       delete this.__action;
       if (!action) return;
+      let commands = [];
 
       let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
 
-      return _CmdHelper.default.addElementsTolist(elem, vars, 'values', [action.value]);
+      if (action.id === 'add-variable') {
+        let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
+
+        if (vars == null) {
+          let ee = _extensionElements.default.getExtensionElements(elem);
+
+          vars = _ElementHelper.default.createElement('wf:Variables', null, ee, bpmnFactory);
+          commands.push(_CmdHelper.default.addElementsTolist(elem, ee, 'values', [vars]));
+        }
+
+        commands.push(_CmdHelper.default.addElementsTolist(elem, vars, 'values', [action.value]));
+      } else if (action.id === 'remove-variable') {
+        commands.push(_CmdHelper.default.removeElementsFromList(elem, vars, 'values', null, [action.value]));
+      }
+
+      return commands;
     },
 
     createElement(elem, node) {
       let selbox = node.querySelector('select[name=wf-variables-list]');
-      var bo = (0, _ModelUtil.getBusinessObject)(elem);
 
       let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
 
@@ -560,29 +567,21 @@ function addVariables(group, element, bpmnFactory, translate) {
         value: variable
       };
       return true;
-      /*
-      var commands = [];
-      var bo = getBusinessObject(elem);
-      let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
-      var variable = elementHelper.createElement('wf:Variable', { Name: '', Type: 'String', Dir: 'Local' }, vars, bpmnFactory);
-      commands.push(cmdHelper.addElementsTolist(bo, vars, 'values', [variable]));
-      vars.values.push(variable);
-      return commands;
-      */
     },
 
     removeElement(elem, node) {
-      alert('remove element');
-    },
+      let selbox = node.querySelector('select[name=wf-variables-list]');
+      let ix = selbox.selectedIndex;
+      if (ix === -1) return;
+      selbox.removeChild(selbox[ix]);
 
-    updateElement(elem, values, node, idx) {
-      console.dir('update element');
-      console.dir({
-        elem,
-        values,
-        node,
-        idx
-      });
+      let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
+
+      this.__action = {
+        id: 'remove-variable',
+        value: vars.values[ix]
+      };
+      return true;
     },
 
     disableRemove(elem, entryNode, node, scope) {
@@ -591,15 +590,7 @@ function addVariables(group, element, bpmnFactory, translate) {
       return !sel || sel.idx === -1;
     },
 
-    selectElement(elem, node, event, scope) {
-      console.dir('select element');
-      console.dir({
-        elem,
-        node,
-        event,
-        scope
-      });
-    },
+    selectElement(elem, node, event, scope) {},
 
     setControlValue(elem, node, option, property, value, idx) {
       let ee = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
@@ -624,7 +615,7 @@ function addVariables(group, element, bpmnFactory, translate) {
   });
 }
 
-},{"./impl/extensionElements":6,"bpmn-js-properties-panel/lib/factory/EntryFactory":25,"bpmn-js-properties-panel/lib/helper/CmdHelper":36,"bpmn-js-properties-panel/lib/helper/ElementHelper":37,"bpmn-js/lib/util/ModelUtil":186}],11:[function(require,module,exports){
+},{"./impl/extensionElements":6,"bpmn-js-properties-panel/lib/helper/CmdHelper":36,"bpmn-js-properties-panel/lib/helper/ElementHelper":37,"bpmn-js/lib/util/ModelUtil":186}],11:[function(require,module,exports){
 module.exports = require('./lib');
 
 },{"./lib":40}],12:[function(require,module,exports){

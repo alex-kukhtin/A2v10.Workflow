@@ -24,6 +24,13 @@ function getExtensionElement(elem, type) {
 	return null;
 }
 
+function getExtensionElements(elem) {
+	if (!elem) return null;
+	let bo = getBusinessObject(elem);
+	if (!bo) return null;
+	return bo.get('extensionElements');
+}
+
 function getSelectedVariableObject(node, elem) {
 	let sel = getSelectedVariable(node);
 	if (!sel || sel.idx === -1)
@@ -36,5 +43,6 @@ function getSelectedVariableObject(node, elem) {
 export default {
 	getSelectedVariable,
 	getSelectedVariableObject,
-	getExtensionElement
+	getExtensionElement,
+	getExtensionElements
 };
