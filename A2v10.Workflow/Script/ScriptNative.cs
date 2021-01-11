@@ -1,5 +1,6 @@
 ﻿
 using System;
+using A2v10.Workflow.Interfaces;
 using Jint;
 using Jint.Runtime.Interop;
 
@@ -17,10 +18,12 @@ namespace A2v10.Workflow
 
 	public static class JsNativeExtensions
 	{
-		public static void AddNativeObjects(this Engine engine)
+		public static void AddNativeObjects(this Engine engine, IScriptNativeObjectProvider nativeObjects)
 		{
 			engine.SetValue("console", new JsConsole());
-			engine.SetValue("Database", TypeReference.CreateTypeReference(engine, typeof(ScriptDatabase)));
+			if (nativeObjects != null)
+				foreach (var nativeType in nativeObjects.NativeTypes())
+			engine.SetValue(nativeType.Name, TypeReference.CreateTypeReference(engine, nativeType.Type));
 		}
 	}
 }

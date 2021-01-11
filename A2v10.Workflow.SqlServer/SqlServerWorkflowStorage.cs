@@ -52,6 +52,7 @@ namespace A2v10.Workflow.SqlServer
 			return eo.Get<String>("Text");
 		}
 
+		// TODO: remove
 		public async Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			var prms = new ExpandoObject();
@@ -66,6 +67,11 @@ namespace A2v10.Workflow.SqlServer
 				Id = res.Get<String>("Id"),
 				Version = res.Get<Int32>("Version")
 			};
+		}
+
+		public Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

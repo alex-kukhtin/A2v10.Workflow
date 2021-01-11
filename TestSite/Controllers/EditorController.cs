@@ -12,9 +12,11 @@ namespace TestSite.Controllers
 	public class EditorController : Controller
 	{
 		private readonly IWorkflowStorage _workflowStorage;
-		public EditorController(IWorkflowStorage workflowStorage)
+		private readonly IWorkflowCatalog _workflowCatalog;
+		public EditorController(IWorkflowStorage workflowStorage, IWorkflowCatalog workflowCatalog)
 		{
 			_workflowStorage = workflowStorage;
+			_workflowCatalog = workflowCatalog;
 		}
 		public IActionResult Index(String id = null)
 		{
@@ -26,7 +28,10 @@ namespace TestSite.Controllers
 		{
 			String source = null;
 			if (!String.IsNullOrEmpty(id))
-				source = await _workflowStorage.LoadSourceAsync(new Identity() { Id = id });
+			{
+				var elem = await _workflowCatalog.LoadBodyAsync(id);
+				source = elem.Body;
+			}
 			return Content(source);
 		}
 	}

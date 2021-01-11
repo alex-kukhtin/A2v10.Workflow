@@ -29,11 +29,14 @@ namespace A2v10.Workflow.Tests
 
 			collection.AddSingleton<IWorkflowStorage, InMemoryWorkflowStorage>();
 			collection.AddSingleton<IInstanceStorage, InMemoryInstanceStorage>();
+			collection.AddSingleton<IWorkflowCatalog, InMemoryWorkflowCatalog>();
 			collection.AddSingleton<ISerializer, Serializer>();
 			collection.AddTransient<IWorkflowEngine, WorkflowEngine>();
 			collection.AddTransient<ITracker, ConsoleTracker>();
+			//collection.AddTransient<IServiceProvider>(sp => _provider);
 
 			_provider = collection.BuildServiceProvider();
+
 			return _provider;
 		}
 	}

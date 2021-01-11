@@ -1,10 +1,13 @@
 ﻿
-using A2v10.Workflow.Interfaces;
-using A2v10.Workflow.Tracker;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using A2v10.Workflow.Interfaces;
+using A2v10.Workflow.Tracker;
 
 namespace A2v10.Workflow
 {
@@ -28,11 +31,13 @@ namespace A2v10.Workflow
 		private readonly IActivity _root;
 
 		private readonly ScriptEngine _script;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly ITracker _tracker;
 
-		public ExecutionContext(ITracker tracker, IActivity root, Object args = null)
+		public ExecutionContext(IServiceProvider serviceProvider, IActivity root, Object args = null)
 		{
-			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_tracker = _serviceProvider.GetService<ITracker>();
 			_root = root;
 
 			// store all activites
@@ -59,7 +64,7 @@ namespace A2v10.Workflow
 			_root.Traverse(sbTraverseArg);
 			sb.EndScript();
 
-			return new ScriptEngine(_tracker, _root, sb.Script, args);
+			return new ScriptEngine(_serviceProvider, _root, sb.Script, args);
 		}
 
 		public ExpandoObject GetResult()

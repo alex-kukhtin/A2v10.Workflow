@@ -14,12 +14,12 @@ namespace TestSite.Controllers
 	public class WorkflowController : Controller
 	{
 		private readonly IWorkflowEngine _engine;
-		private readonly IWorkflowStorage _storage;
+		private readonly IWorkflowCatalog _catalog;
 
-		public WorkflowController(IWorkflowEngine engine, IWorkflowStorage storage)
+		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog)
 		{
 			_engine = engine;
-			_storage = storage;
+			_catalog = catalog;
 		}
 
 		[HttpPost]
@@ -35,7 +35,12 @@ namespace TestSite.Controllers
 			using var ms = new MemoryStream();
 			uploadedFile.CopyTo(ms);
 			var text = Encoding.UTF8.GetString(ms.ToArray());
-			await _storage.PublishAsync(id, text, format);
+			await _catalog.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = id,
+				Body = text,
+				Format = format
+			});
 			return Redirect("/");
 		}
 

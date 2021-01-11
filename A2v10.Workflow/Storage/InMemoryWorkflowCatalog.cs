@@ -1,0 +1,52 @@
+﻿using A2v10.Workflow.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace A2v10.Workflow.Storage
+{
+
+	public class CatalogWorkflow
+	{
+		public String Body { get; set; }
+		public String Format { get; set; }
+	}
+
+	public class InMemoryWorkflowCatalog : IWorkflowCatalog
+	{
+		private readonly Dictionary<String, CatalogWorkflow> _storage = new Dictionary<String, CatalogWorkflow>();
+
+		public Task<WorkflowElem> LoadBodyAsync(String id)
+		{
+			if (!_storage.TryGetValue(id, out CatalogWorkflow wf))
+				throw new KeyNotFoundException(id);
+			var wfe = new WorkflowElem()
+			{
+				Format = wf.Format,
+				Body = wf.Body
+			};
+			return Task.FromResult(wfe);
+		}
+
+		public Task<WorkflowThumbElem> LoadThumbAsync(string id)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task SaveAsync(IWorkflowDescriptor workflow)
+		{
+			if (_storage.ContainsKey(workflow.Id))
+				_storage[workflow.Id].Body = workflow.Body;
+			else
+			_storage.Add(workflow.Id, new CatalogWorkflow()
+			{
+				Body = workflow.Body,
+				Format = workflow.Format
+			});
+			return Task.CompletedTask;
+		}
+	}
+}

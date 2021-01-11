@@ -23,6 +23,21 @@ begin
 end
 go
 ------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Catalog')
+begin
+	create table [A2v10.Workflow].[Catalog]
+	(
+		[Id] nvarchar(255) not null,
+		[Format] nvarchar(32) not null,
+		[Body] nvarchar(max) null,
+		[Thumb] varbinary(max) null,
+		ThumbFormat nvarchar(32) null,
+		DateCreated datetime not null constraint DF_Catalog_DateCreated default(getutcdate()),
+		constraint PK_Catalog primary key nonclustered (Id)
+	);
+end
+go
+------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Instances')
 begin
 	create table [A2v10.Workflow].[Instances]
@@ -117,6 +132,17 @@ begin
 end
 go
 ------------------------------------------------
+create or alter procedure [A2v10.Workflow].[Workflows.Catalog.Load]
+@UserId bigint = null,
+@Id nvarchar(255)
+as
+begin
+	set nocount on;
+	set transaction isolation level read uncommitted;
+	select Id, Body, [Format] from [A2v10.Workflow].Catalog where Id=@Id;
+end
+go
+------------------------------------------------
 create or alter procedure [A2v10.Workflow].[Workflows.Index]
 @UserId bigint = null
 as
@@ -124,16 +150,12 @@ begin
 	set nocount on;
 	set transaction isolation level read uncommitted;
 
-	with T(Id, Version)
-	as (
-		select Id, max([Version]) from [A2v10.Workflow].Workflows
-		group by Id
-	)
-	select [Workflows!TWorkflow!Array] = null, [Id!!Id] = w.Id, w.[Version], 
-		w.[DateCreated], w.[Format],
+	select [Workflows!TWorkflow!Array] = null, [Id!!Id] = c.Id, 
+		c.[DateCreated], c.[Format],
 		InstanceCount = (select count(*) from [A2v10.Workflow].Instances i 
-			where WorkflowId = w.Id and i.[Version] = w.[Version])
-	from T inner join [A2v10.Workflow].Workflows w on T.Id = w.Id and T.[Version] = w.[Version]
+			where WorkflowId = c.Id),
+		[Version] = (select max([Version]) from [A2v10.Workflow].Workflows w where w.Id = c.Id)
+	from [A2v10.Workflow].[Catalog] c 
 	order by DateCreated desc
 end
 go
@@ -152,5 +174,11 @@ begin
 	order by DateModified desc
 end
 go
+
+
+select * from [A2v10.Workflow].Workflows order by DateCreated desc
+
+insert into [A2v10.Workflow].[Catalog] (Id, Body, [Format])
+select Id, [Text], [Format] from [A2v10.Workflow].Workflows where Id=N'Parallel_2' and [Version] = 1
 
 --insert into [A2v10.Workflow].Workflows (Id, [Version], [Format]) values (N'First BPMN', 1, N'xaml')

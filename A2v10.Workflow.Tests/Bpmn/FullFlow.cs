@@ -22,7 +22,16 @@ namespace A2v10.Workflow.Tests
 			var sp = TestEngine.ServiceProvider();
 
 			var wfs = sp.GetService<IWorkflowStorage>();
-			var ident = await  wfs.PublishAsync("Parallel1", xaml, "xaml");
+			var wfc = sp.GetService<IWorkflowCatalog>();
+
+			String wfId = "Parallel1";
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = wfId,
+				Body = xaml,
+				Format = "xaml"
+			});
+			var ident = await  wfs.PublishAsync(wfc, wfId);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
 			var inst = await wfe.StartAsync(ident, new { X = 5 });
@@ -39,7 +48,16 @@ namespace A2v10.Workflow.Tests
 			var sp = TestEngine.ServiceProvider();
 
 			var wfs = sp.GetService<IWorkflowStorage>();
-			var ident = await wfs.PublishAsync("Wait1", xaml, "xaml");
+			var wfc = sp.GetService<IWorkflowCatalog>();
+
+			String wfId = "Wait1";
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = wfId,
+				Body = xaml,
+				Format = "xaml"
+			});
+			var ident = await wfs.PublishAsync(wfc, wfId);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
 			var inst = await wfe.StartAsync(ident, new { X = 5 });

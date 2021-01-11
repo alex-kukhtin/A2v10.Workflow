@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Interfaces.Api;
 
@@ -9,15 +10,15 @@ namespace A2v10.Workflow
 {
 	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi
 	{
+		private readonly IServiceProvider _serviceProvider;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
-		private readonly ITracker _tracker;
 
-		public WorkflowEngine(IWorkflowStorage workflowStorage, IInstanceStorage instanceStorage, ITracker tracker)
+		public WorkflowEngine(IServiceProvider serviceProvider)
 		{
-			_workflowStorage = workflowStorage ?? throw new ArgumentNullException(nameof(workflowStorage));
-			_instanceStorage = instanceStorage ?? throw new ArgumentNullException(nameof(instanceStorage));
-			_tracker = tracker ?? throw new ArgumentNullException(nameof(tracker));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_workflowStorage = _serviceProvider.GetService<IWorkflowStorage>() ?? throw new NullReferenceException("IWorkflowStorage");
+			_instanceStorage = _serviceProvider.GetService<IInstanceStorage>() ?? throw new NullReferenceException("IInstanceStorage");
 		}
 
 		public async ValueTask<IInstance> StartAsync(IActivity root, IIdentity identity, Object args = null)
@@ -31,7 +32,7 @@ namespace A2v10.Workflow
 				}
 			};
 			root.OnEndInit();
-			var context = new ExecutionContext(_tracker, inst.Workflow.Root, args);
+			var context = new ExecutionContext(_serviceProvider, inst.Workflow.Root, args);
 			context.Schedule(inst.Workflow.Root, null, null);
 			await context.RunAsync();
 			inst.Result = context.GetResult();
@@ -51,7 +52,7 @@ namespace A2v10.Workflow
 		{
 			var inst = await _instanceStorage.Load(id);
 			inst.Workflow.Root.OnEndInit();
-			var context = new ExecutionContext(_tracker, inst.Workflow.Root);
+			var context = new ExecutionContext(_serviceProvider, inst.Workflow.Root);
 			context.SetState(inst.State);
 			await context.ResumeAsync(bookmark, reply);
 			await context.RunAsync();

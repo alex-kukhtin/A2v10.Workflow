@@ -9,13 +9,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using A2v10.Data;
 using A2v10.Data.Extensions;
-using A2v10.Data.Interfaces;
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.SqlServer;
 using A2v10.Workflow;
 using A2v10.Workflow.Serialization;
+
+using TestSite.Config;
 
 namespace TestSite
 {
@@ -33,9 +33,11 @@ namespace TestSite
 		{
 			services.AddControllersWithViews();
 			services.UseSimpleDbContext();
+			services.AddSingleton<IWorkflowCatalog, SqlServerWorkflowCatalog>();
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
+			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();
 
 			services.AddSingleton<ISerializer, Serializer>();
 			services.AddTransient<ITracker, NullTracker>();

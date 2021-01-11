@@ -54,7 +54,13 @@ namespace A2v10.Workflow.Storage
 			return Task.FromResult<IWorkflow>(wf);
 		}
 
-		public Task<IIdentity> PublishAsync(String id, String text, String format)
+		public async Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id)
+		{
+			var elem = await catalog.LoadBodyAsync(id);
+			return await PublishAsync(id, elem.Body, elem.Format);
+		}
+
+		private Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			// find max version
 			var v = 0;
@@ -83,5 +89,7 @@ namespace A2v10.Workflow.Storage
 			};
 			return Task.FromResult<IIdentity>(ident);
 		}
+
+
 	}
 }

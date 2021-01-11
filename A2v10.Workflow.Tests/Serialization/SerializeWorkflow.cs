@@ -51,7 +51,15 @@ namespace A2v10.Workflow.Tests.Serialization
 
 			var sp = TestEngine.ServiceProvider();
 			var wfs = sp.GetService<IWorkflowStorage>();
-			var ident = await wfs.PublishAsync("test1", json, "json");
+			var wfc = sp.GetService<IWorkflowCatalog>();
+
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = "test1",
+				Body = json,
+				Format = "json"
+			});
+			var ident = await wfs.PublishAsync(wfc, "test1");
 
 			var wfe = sp.GetService<IWorkflowEngine>();
 			await wfe.StartAsync(ident, null);
@@ -80,14 +88,29 @@ namespace A2v10.Workflow.Tests.Serialization
 
 			var sp = TestEngine.ServiceProvider();
 			var wfs = sp.GetService<IWorkflowStorage>();
+			var wfc = sp.GetService<IWorkflowCatalog>();
+
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = "xxx",
+				Body = "123",
+				Format = "json"
+			});
 
 			// check for empty storage
-			await wfs.PublishAsync("xxx", "123", "json");
+			await wfs.PublishAsync(wfc, "xxx");
 
-			var ident = await wfs.PublishAsync("test2", json, "json");
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = "test2",
+				Body = json,
+				Format = "json"
+			});
+
+			var ident = await wfs.PublishAsync(wfc, "test2");
 			Assert.AreEqual(1, ident.Version);
 
-			ident = await wfs.PublishAsync("test2", json, "json");
+			ident = await wfs.PublishAsync(wfc, "test2");
 
 			Assert.AreEqual(2, ident.Version);
 
@@ -126,13 +149,20 @@ namespace A2v10.Workflow.Tests.Serialization
 
 			var sp = TestEngine.ServiceProvider();
 			var wfs = sp.GetService<IWorkflowStorage>();
+			var wfc = sp.GetService<IWorkflowCatalog>();
 
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = "fchart1",
+				Body = json,
+				Format = "json"
+			});
 
-			var ident = await wfs.PublishAsync("fchart1", json, "json");
+			var ident = await wfs.PublishAsync(wfc, "fchart1");
 
 			Assert.AreEqual(1, ident.Version);
 
-			ident = await wfs.PublishAsync("fchart1", json, "json");
+			ident = await wfs.PublishAsync(wfc, "fchart1");
 
 			Assert.AreEqual(2, ident.Version);
 

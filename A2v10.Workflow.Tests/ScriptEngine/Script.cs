@@ -1,4 +1,5 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using Jint;
 using Jint.Native;
 using Jint.Native.Object;
@@ -6,6 +7,7 @@ using Jint.Runtime.Interop;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 
 namespace A2v10.Workflow.Tests
 {
@@ -61,13 +63,17 @@ namespace A2v10.Workflow.Tests
 				opts.Strict(true);
 				opts.SetWrapObjectHandler((e, o) =>
 				{
+					if (o is IInjectable injectable)
+						injectable.Inject(null);
 					return new ObjectWrapper(e, o);
 				});
 			});
-			eng.AddNativeObjects();
+			eng.AddNativeObjects(new ScriptNativeObjects());
 
 			var val = eng.Execute("return (new Database()).loadModel('first')").GetCompletionValue().ToObject();
-
+			var eo = val as ExpandoObject;
+			Assert.AreEqual("value", eo.Get<String>("prop"));
+			Assert.AreEqual("first", eo.Get<String>("procedure"));
 			int z = 55;
 		}
 	}

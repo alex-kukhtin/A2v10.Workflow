@@ -3,9 +3,11 @@ using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Tracker;
 using Jint;
 using Jint.Native;
+using Jint.Runtime.Interop;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace A2v10.Workflow
 {
@@ -14,16 +16,21 @@ namespace A2v10.Workflow
 		private readonly Engine _engine;
 		private readonly ExpandoObject _scriptData;
 		private readonly IActivity _root;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly ITracker _tracker;
 
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
-		public ScriptEngine(ITracker tracker, IActivity root, String script, Object args = null)
+		public ScriptEngine(IServiceProvider serviceProvider, IActivity root, String script, Object args = null)
 		{
 			_root = root;
-			_tracker = tracker;
+			_serviceProvider = serviceProvider;
+			_tracker = _serviceProvider.GetService<ITracker>();
 			_engine = new Engine(EngineOptions);
-			_engine.AddNativeObjects();
+
+
+			var _nativeObjects = _serviceProvider.GetService<IScriptNativeObjectProvider>();
+			_engine.AddNativeObjects(_nativeObjects);
 
 			Console.WriteLine(script);
 			var func = _engine.Execute(script).GetCompletionValue();
@@ -32,9 +39,15 @@ namespace A2v10.Workflow
 				SetArguments(args);
 		}
 
-		private static void EngineOptions(Options opts)
+		private void EngineOptions(Options opts)
 		{
 			opts.Strict(true);
+			opts.SetWrapObjectHandler((e, o) =>
+			{
+				if (o is IInjectable injectable)
+					injectable.Inject(_serviceProvider);
+				return new ObjectWrapper(e, o);
+			});
 		}
 
 		void SetArguments(Object args)

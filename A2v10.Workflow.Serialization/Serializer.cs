@@ -66,6 +66,7 @@ namespace A2v10.Workflow.Serialization
 			{
 				"json" => JsonConvert.DeserializeObject<ActivityWrapper>(text, _actititySettings).Root,
 				"xaml" => DeserializeXaml(text),
+				"text/xml" => DeserializeXaml(text),
 				_ => throw new NotImplementedException($"Deserialize for format '{format}' is not supported"),
 			};
 		}

@@ -8,6 +8,6 @@ namespace A2v10.Workflow.Interfaces
 	{
 		Task<IWorkflow> LoadAsync(IIdentity identity);
 		Task<String> LoadSourceAsync(IIdentity identity);
-		Task<IIdentity> PublishAsync(String id, String text, String format);
+		Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id);
 	}
 }
