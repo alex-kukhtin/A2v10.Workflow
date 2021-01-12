@@ -94,7 +94,8 @@ export default function addVariables(group, element, bpmnFactory, translate) {
 			node.text = tmlText;
 		},
 		createTemplateText(value) {
-			return `${value.Name}: ${value.Type}  [${value.Dir}]`;
+			let name = value.Name || '<unnamed>'
+			return `${name}: ${value.Type}  [${value.Dir}]`;
 		},
 		createListEntryTemplate(value) {
 			/*'data-value' is required

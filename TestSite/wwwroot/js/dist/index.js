@@ -602,7 +602,8 @@ function addVariables(group, element, bpmnFactory, translate) {
     },
 
     createTemplateText(value) {
-      return `${value.Name}: ${value.Type}  [${value.Dir}]`;
+      let name = value.Name || '<unnamed>';
+      return `${name}: ${value.Type}  [${value.Dir}]`;
     },
 
     createListEntryTemplate(value) {
