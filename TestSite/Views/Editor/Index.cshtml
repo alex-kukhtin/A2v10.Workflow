@@ -23,7 +23,6 @@
 	let id = '@ViewBag.Id';
 	fetch(`/Editor/Get/${id}`).then(resp => {
 		resp.text().then(text => {
-			console.log(text);
 			bpmnModeler.importXML(text);
 		});
 	});

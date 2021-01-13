@@ -18,7 +18,8 @@ namespace A2v10.System.Xaml
 			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true, "A2v10.Workflow.Bpmn", "A2v10.Workflow"),
 			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
 			new NamespaceDef("http://www.omg.org/spec/dd/20100524/di", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
-			new NamespaceDef("http://www.omg.org/spec/dd/20100524/dc", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow")
+			new NamespaceDef("http://www.omg.org/spec/dd/20100524/dc", false, "A2v10.Workflow.Bpmn.Diagram", "A2v10.Workflow"),
+			new NamespaceDef("http://www.w3.org/2001/xmlschema-instance", true, "A2v10.Workflow.Bpmn", "A2v10.Workflow"),
 		};
 
 		public static XamlServicesOptions BpmnXamlOptions =>

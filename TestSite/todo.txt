@@ -4,4 +4,5 @@
 6. Убрать camunda в id элементов
 7. Variable. Name. Validate
 8. Variable. Value?
-10.
+12. Не работает namespace для атрибутов
+	XamlReadException: Property xsi:type not found in type TimeDuration

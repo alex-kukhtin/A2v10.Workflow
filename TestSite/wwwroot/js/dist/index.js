@@ -6,36 +6,36 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  name: "wf",
-  prefix: "wf",
-  uri: "clr-namespace:A2v10.Workflow;assembly=A2v10.Workflow",
+  "name": "wf",
+  "prefix": "wf",
+  "uri": "clr-namespace:A2v10.Workflow;assembly=A2v10.Workflow",
   "associations": [],
-  types: [{
-    name: "Variables",
-    superClass: ["Element"],
-    meta: {
+  "types": [{
+    "name": "Variables",
+    "superClass": ["Element"],
+    "meta": {
       "allowedIn": ["bpmn:Process", "bpmn:SubProcess"]
     },
-    properties: [{
+    "properties": [{
       "name": "values",
       "type": "Variable",
       "isMany": true
     }]
   }, {
-    name: "Variable",
-    superClass: ["Element"],
-    properties: [{
-      name: "Name",
-      isAttr: true,
-      type: "String"
+    "name": "Variable",
+    "superClass": ["Element"],
+    "properties": [{
+      "name": "Name",
+      "isAttr": true,
+      "type": "String"
     }, {
-      name: "Type",
-      isAttr: true,
-      type: "String"
+      "name": "Type",
+      "isAttr": true,
+      "type": "String"
     }, {
-      name: "Dir",
-      isAttr: true,
-      type: "String"
+      "name": "Dir",
+      "isAttr": true,
+      "type": "String"
     }]
   }]
 };
@@ -69,21 +69,7 @@ let bpmnModeler = new _Modeler.default({
     workflow: _workflow2.default
   }
 });
-console.dir('custom properties6');
 window.Modeler = bpmnModeler;
-console.dir(bpmnModeler);
-/*
-if (window.$$id$$)
-	fetch(`/Editor/Get/${window.$$id$$}`).then(resp => {
-		resp.text().then(text => {
-			console.log(text);
-			bpmnModeler.importXML(text);
-		});
-	});
-	//bpmnModeler.importXML(window.$$source$$);
-else
-	bpmnModeler.createDiagram();
-*/
 
 },{"./descriptors/workflow":1,"./provider/workflow":4,"bpmn-js-properties-panel":11,"bpmn-js/lib/Modeler":59}],3:[function(require,module,exports){
 "use strict";

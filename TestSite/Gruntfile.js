@@ -6,10 +6,10 @@ module.exports = function (grunt) {
 		browserify: {
 			options: {
 				browserifyOptions: {
-					debug: false,
+					debug: false
 				},
 				plugin: [
-					'esmify'
+					'esmify',
 				]
 			},
 			app: {
@@ -18,8 +18,12 @@ module.exports = function (grunt) {
 				}
 			}
 		},
-		uglify: {
-			'app': {
+		terser: {
+			options: {
+				ecma: '2016',
+				mangle: false
+			},
+			app: {
 				files: {
 					"wwwroot/js/dist/index.min.js": ['wwwroot/js/dist/index.js']
 				}
@@ -33,8 +37,8 @@ module.exports = function (grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-browserify');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-terser');
 
-	grunt.registerTask("all", ['clean', 'browserify', 'uglify']);
+	grunt.registerTask("all", ['clean', 'browserify', 'terser']);
 };
