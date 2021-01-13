@@ -20,7 +20,7 @@ namespace A2v10.Workflow.SqlServer
 
 		public Task<WorkflowElem> LoadBodyAsync(String id)
 		{
-			return _dbContext.LoadAsync<WorkflowElem>(null, "[A2v10.Workflow].[Workflows.Catalog.Load]", new { Id = id });
+			return _dbContext.LoadAsync<WorkflowElem>(null, "[A2v10.Workflow].[Catalog.Load]", new { Id = id });
 		}
 
 		public Task<WorkflowThumbElem> LoadThumbAsync(string id)
@@ -35,7 +35,7 @@ namespace A2v10.Workflow.SqlServer
 			eo.Set("Body", workflow.Body);
 			eo.Set("Format", workflow.Format);
 			eo.Set("ThumbFormat", workflow.ThumbFormat);
-			return _dbContext.ExecuteExpandoAsync(null, "[A2v10.Workflow].[Workflows.Catalog.Save]", eo);
+			return _dbContext.ExecuteExpandoAsync(null, "[A2v10.Workflow].[Catalog.Save]", eo);
 		}
 	}
 }

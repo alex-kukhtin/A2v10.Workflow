@@ -12,6 +12,8 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public String Script => Children.OfType<Script>().FirstOrDefault()?.Text;
 
+		protected override bool CanInduceIdle => true;
+
 		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
 			context.SetBookmark(Id, OnUserTaskComplete);

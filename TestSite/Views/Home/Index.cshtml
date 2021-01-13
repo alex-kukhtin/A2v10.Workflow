@@ -41,13 +41,28 @@
 				<td>@wf.DateCreated.ToString()</td>
 				<td>@wf.InstanceCount</td>
 				<td style="width:0;white-space:nowrap">
-					<form style="display:inline" asp-action="Run" asp-controller="Workflow" method="post">
-						<input type="hidden" name="id" value="@wf.Id" />
-						<input type="hidden" name="version" value="@wf.Version" />
-						<button class="btn btn-primary btn-sm" type="submit">Run</button>
+					@if (wf.Version == null)
+					{
+						<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
+							<input type="hidden" name="id" value="@wf.Id" />
+							<button class="btn btn-warning btn-sm" type="submit">Publish</button>
+						</form>
+					}
+					else
+					{
+						<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
+							<input type="hidden" name="id" value="@wf.Id" />
+							<button class="btn btn-warning btn-sm" type="submit">Publish</button>
+						</form>
+						<a class="btn btn-danger btn-sm" asp-action="Run2" asp-controller="Workflow" asp-route-id="@wf.Id">Run</a>
 						<a class="btn btn-secondary btn-sm" asp-action="Index" asp-controller="Editor" asp-route-id="@wf.Id">Edit</a>
-					</form>
-					<button class="btn btn-info btn-sm" type="submit">Versions</button>
+						<form style="display:none" asp-action="Run" asp-controller="Workflow" method="post">
+							<input type="hidden" name="id" value="@wf.Id" />
+							<input type="hidden" name="version" value="@wf.Version" />
+							<button class="btn btn-primary btn-sm" type="submit">Run</button>
+						</form>
+						<button class="btn btn-info btn-sm">Versions</button>
+					}
 				</td>
 			</tr>
 			}

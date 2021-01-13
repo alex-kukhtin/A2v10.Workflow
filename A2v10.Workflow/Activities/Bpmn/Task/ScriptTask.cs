@@ -12,6 +12,7 @@ namespace A2v10.Workflow.Bpmn
 		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
 			context.Execute(Id, nameof(Script));
+			CompleteBody(context);
 			return new ValueTask();
 		}
 

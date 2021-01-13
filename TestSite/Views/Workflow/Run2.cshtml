@@ -1,0 +1,24 @@
+﻿@model TestSite.Models.Run2Model
+@{
+	ViewData["Title"] = "Run";
+}
+
+<div>
+
+	<form method="post" asp-controller="Workflow" asp-action="Run2">
+		<div class="row">
+			<div class="col-md-4">
+				<label>@Model.Id</label>
+				@Html.HiddenFor(m => m.Id)
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+				<div class="form-group code-block">
+					@Html.TextAreaFor(m => m.Parameter, 10)
+				</div>
+			</div>
+		</div>
+		<button class="btn btn-primary" type="submit">Run</button>
+	</form>
+</div>

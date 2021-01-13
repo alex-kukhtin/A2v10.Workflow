@@ -132,14 +132,50 @@ begin
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Workflows.Catalog.Load]
+create or alter procedure [A2v10.Workflow].[Catalog.Load]
 @UserId bigint = null,
 @Id nvarchar(255)
 as
 begin
 	set nocount on;
 	set transaction isolation level read uncommitted;
-	select Id, Body, [Format] from [A2v10.Workflow].Catalog where Id=@Id;
+	select Id, Body, [Format] from [A2v10.Workflow].[Catalog] where Id=@Id;
+end
+go
+------------------------------------------------
+create or alter procedure [A2v10.Workflow].[Catalog.Save]
+@UserId bigint = null,
+@Id nvarchar(255),
+@Body nvarchar(max),
+@Format nvarchar(32)
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+	update [A2v10.Workflow].[Catalog] set Body = @Body where Id=@Id;
+	if @@rowcount = 0
+		insert into [A2v10.Workflow].[Catalog] (Id, [Format], Body) 
+		values (@Id, @Format, @Body)
+end
+go
+------------------------------------------------
+create or alter procedure [A2v10.Workflow].[Catalog.Publish]
+@UserId bigint = null,
+@Id nvarchar(255)
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+
+	declare @retval table(Id nvarchar(255), [Version] int);
+
+	insert into [A2v10.Workflow].Workflows (Id, [Format], [Text], [Version])
+	output inserted.Id, inserted.[Version] into @retval(Id, [Version])
+	select Id, [Format], [Body], [Version] = 
+	(select isnull(max([Version]) + 1, 1) from [A2v10.Workflow].Workflows where Id=@Id)
+	from [A2v10.Workflow].[Catalog] where Id=@Id;
+
+	select Id, [Version] from @retval;
 end
 go
 ------------------------------------------------
@@ -176,9 +212,11 @@ end
 go
 
 
+/*
 select * from [A2v10.Workflow].Workflows order by DateCreated desc
 
 insert into [A2v10.Workflow].[Catalog] (Id, Body, [Format])
 select Id, [Text], [Format] from [A2v10.Workflow].Workflows where Id=N'Parallel_2' and [Version] = 1
 
 --insert into [A2v10.Workflow].Workflows (Id, [Version], [Format]) values (N'First BPMN', 1, N'xaml')
+*/

@@ -1,6 +1,6 @@
-﻿@model dynamic
+﻿@model TestSite.Models.InstanceOpenModel;
 @{
-	ViewData["Title"] = "Instance :" + Model.Id.ToString();
+	ViewData["Title"] = "Instance :" + Model.Id;
 }
 
 <div>
@@ -12,12 +12,12 @@
 		</ul>
 	</nav>
 	<div class="row">
-		<div class="col-4">
-<code>
+		<div class="col-8">
+<div style="background-color:#f9f9fa;border:1px solid #ccc;padding:10px">
 <pre>
 @Model.State
 </pre>
-</code>
+</div>
 		</div>
 	</div>
 </div>

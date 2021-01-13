@@ -14,18 +14,22 @@ namespace A2v10.Workflow.Bpmn
 		protected ExecutingAction _onComplete;
 		protected IToken _token;
 
+		protected virtual Boolean CanInduceIdle => false;
+
 		#region IStorable 
 		const String ON_COMPLETE = "OnComplete";
 		const String TOKEN = "Token";
 
 		public virtual void Store(IActivityStorage storage)
 		{
+			if (!CanInduceIdle) return;
 			storage.SetCallback(ON_COMPLETE, _onComplete);
 			storage.SetToken(TOKEN, _token);
 		}
 
 		public virtual void Restore(IActivityStorage storage)
 		{
+			if (!CanInduceIdle) return;
 			_onComplete = storage.GetCallback(ON_COMPLETE);
 			_token = storage.GetToken(TOKEN);
 		}

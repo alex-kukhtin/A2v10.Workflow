@@ -39,7 +39,7 @@ namespace A2v10.Workflow.SqlServer
 			{
 				Identity = new Identity()
 				{
-					Id = eo.Get<String>("WorkflowId"),
+					Id = eo.Get<String>("Id"),
 					Version = eo.Get<Int32>("Version")
 				},
 				Root = _serializer.DeserializeActitity(eo.Get<String>("Text"), eo.Get<String>("Format"))
@@ -56,10 +56,9 @@ namespace A2v10.Workflow.SqlServer
 		public async Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			var prms = new ExpandoObject();
-			var d= prms as IDictionary<String, Object>;
-			d.Add("Id", id);
-			d.Add("Format", format);
-			d.Add("Text", text);
+			prms.Set("Id", id);
+			prms.Set("Format", format);
+			prms.Set("Text", text);
 			var res = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Workflow.Publish]", prms);
 
 			return new Identity()
@@ -69,9 +68,18 @@ namespace A2v10.Workflow.SqlServer
 			};
 		}
 
-		public Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id)
+		public async Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id)
 		{
-			throw new NotImplementedException();
+			var prms = new ExpandoObject();
+			prms.Set("Id", id);
+
+			var res = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Catalog.Publish]", prms);
+
+			return new Identity()
+			{
+				Id = res.Get<String>("Id"),
+				Version = res.Get<Int32>("Version")
+			};
 		}
 	}
 }

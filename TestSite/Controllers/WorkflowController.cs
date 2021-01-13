@@ -2,12 +2,15 @@
 using A2v10.Workflow.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TestSite.Models;
 
 namespace TestSite.Controllers
 {
@@ -15,11 +18,13 @@ namespace TestSite.Controllers
 	{
 		private readonly IWorkflowEngine _engine;
 		private readonly IWorkflowCatalog _catalog;
+		private readonly IWorkflowStorage _storage;
 
-		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog)
+		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog, IWorkflowStorage storage)
 		{
 			_engine = engine;
 			_catalog = catalog;
+			_storage = storage;
 		}
 
 		[HttpPost]
@@ -49,6 +54,33 @@ namespace TestSite.Controllers
 		{
 			var identity = new Identity() { Id = id, Version = version };
 			await _engine.StartAsync(identity); //, new { X = 5 });
+			return Redirect("/");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> PublishCatalog(String id)
+		{
+			await _storage.PublishAsync(_catalog, id);
+			return Redirect("/");
+		}
+
+		[HttpGet]
+		public IActionResult Run2(String id)
+		{
+			var m = new Run2Model()
+			{
+				Id = id,
+				Parameter = "{}"
+			};
+			return View(m);
+		}
+
+		[HttpPost]
+		[ActionName("Run2")]
+		public async Task<IActionResult> HttpPost(Run2Model model) 
+		{
+			var prms = JsonConvert.DeserializeObject<ExpandoObject>(model.Parameter);
+			await _engine.StartAsync(new Identity() { Id = model.Id }, prms);
 			return Redirect("/");
 		}
 	}

@@ -10,6 +10,7 @@
 </div>
 <ul class="bpmn-editor-toolbar">
 	<li>
+		<button class="btn btn-sm btn-outline-primary" id="tb-save">Save</button>
 		<button class="btn btn-sm btn-outline-primary" id="tb-download">Download</button>
 	</li>
 </ul>
@@ -20,15 +21,12 @@
 <script>
 	let bpmnModeler = window.Modeler;
 	let id = '@ViewBag.Id';
-	if ('@ViewBag.Id')
-		fetch(`/Editor/Get/${id}`).then(resp => {
-			resp.text().then(text => {
-				console.log(text);
-				bpmnModeler.importXML(text);
-			});
+	fetch(`/Editor/Get/${id}`).then(resp => {
+		resp.text().then(text => {
+			console.log(text);
+			bpmnModeler.importXML(text);
 		});
-	else
-		bpmnModeler.createDiagram();
+	});
 
 	document.getElementById('tb-download').addEventListener('click', (ev) => {
 		ev.preventDefault();
@@ -36,6 +34,26 @@
 		bpmnModeler.saveXML({ format: true }).then(result => {
 			console.info(result.xml);
 			alert('see console');
+		});
+	});
+
+	document.getElementById('tb-save').addEventListener('click', ev => {
+		ev.preventDefault();
+		ev.stopPropagation();
+		if (!id)
+			id = prompt('enter workflow id');
+		bpmnModeler.saveXML({ format: true }).then(result => {
+			var fd = new FormData();
+			fd.append('content', result.xml);
+			var rq = new XMLHttpRequest();
+			rq.onload = (ev) => {
+				if (rq.status === 200)
+					window.location.replace(`/editor/index/${id}`);
+				else
+					alert('error');
+			};
+			rq.open("POST", `/editor/set/${id}`);
+			rq.send(fd);
 		});
 	});
 </script>

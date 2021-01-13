@@ -44,7 +44,7 @@ namespace A2v10.Workflow
 		public async ValueTask<IInstance> StartAsync(IIdentity identity, Object args = null)
 		{
 			var wf = await _workflowStorage.LoadAsync(identity);
-			return await StartAsync(wf.Root, identity, args);
+			return await StartAsync(wf.Root, wf.Identity, args);
 		}
 
 
