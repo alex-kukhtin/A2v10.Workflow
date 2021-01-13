@@ -80,6 +80,8 @@ namespace TestSite.Controllers
 		public async Task<IActionResult> HttpPost(Run2Model model) 
 		{
 			var prms = JsonConvert.DeserializeObject<ExpandoObject>(model.Parameter);
+			if (prms != null && (prms as IDictionary<String, Object>).Count == 0)
+				prms = null;
 			await _engine.StartAsync(new Identity() { Id = model.Id }, prms);
 			return Redirect("/");
 		}

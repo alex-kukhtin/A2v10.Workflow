@@ -11,7 +11,7 @@
 				<a class="btn btn-dark" asp-action="index" asp-controller="editor">Create</a>
 			</li>
 		</ul>
-		<form method="post" asp-action="publish" asp-controller="workflow" enctype="multipart/form-data">
+		<form method="post" asp-action="publish" asp-controller="workflow" enctype="multipart/form-data" style="display:none">
 			<div class="form-row">
 				<input class="" type="file" name="uploadedFile" />
 				<input class="" type="text" name="id" placeholder="Process Id" style="margin:0 1rem 0 0"/>
@@ -41,19 +41,12 @@
 				<td>@wf.DateCreated.ToString()</td>
 				<td>@wf.InstanceCount</td>
 				<td style="width:0;white-space:nowrap">
-					@if (wf.Version == null)
+					<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
+						<input type="hidden" name="id" value="@wf.Id" />
+						<button class="btn btn-warning btn-sm" type="submit">Publish</button>
+					</form>
+					@if (wf.Version != null) 
 					{
-						<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
-							<input type="hidden" name="id" value="@wf.Id" />
-							<button class="btn btn-warning btn-sm" type="submit">Publish</button>
-						</form>
-					}
-					else
-					{
-						<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
-							<input type="hidden" name="id" value="@wf.Id" />
-							<button class="btn btn-warning btn-sm" type="submit">Publish</button>
-						</form>
 						<a class="btn btn-danger btn-sm" asp-action="Run2" asp-controller="Workflow" asp-route-id="@wf.Id">Run</a>
 						<a class="btn btn-secondary btn-sm" asp-action="Index" asp-controller="Editor" asp-route-id="@wf.Id">Edit</a>
 						<form style="display:none" asp-action="Run" asp-controller="Workflow" method="post">

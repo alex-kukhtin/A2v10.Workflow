@@ -15,7 +15,7 @@ namespace A2v10.Workflow.Bpmn
 
 		public List<IVariable> GetVariables()
 		{
-			return Items.OfType<Variables>().FirstOrDefault()?.Items.OfType<IVariable>().ToList();
+			return Items?.OfType<Variables>().FirstOrDefault()?.Items?.OfType<IVariable>()?.ToList();
 		}
 	}
 }
