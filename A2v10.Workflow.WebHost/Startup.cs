@@ -30,7 +30,7 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
-			services.AddSingleton<IWorkflowApi, Services.MockApi>();
+			services.AddSingleton<IWorkflowApi, WorkflowEngine>();
 			services.AddSingleton<ISerializer, Serializer>();
 			services.AddTransient<ITracker, NullTracker>();
 		}

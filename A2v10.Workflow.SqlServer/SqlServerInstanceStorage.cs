@@ -26,6 +26,7 @@ namespace A2v10.Workflow.SqlServer
 		public async Task<IInstance> Load(Guid instanceId)
 		{
 			var prms = new ExpandoObject();
+			prms.Set<Guid>("Id", instanceId);
 			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms);
 			if (eo == null)
 				throw new SqlServerStorageException($"Instance '{instanceId}' not found");

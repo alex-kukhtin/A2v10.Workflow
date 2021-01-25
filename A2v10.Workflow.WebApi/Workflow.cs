@@ -29,6 +29,7 @@ namespace A2v10.Workflow.WebApi
 			InstanceId = src.InstanceId;
 		}
 
+		[JsonProperty(PropertyName = "instanceId")]
 		public Guid InstanceId { get; }
 	}
 

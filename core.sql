@@ -57,6 +57,25 @@ begin
 	);
 end
 go
+if not exists (select 1 from sys.indexes where [object_id]=object_id(N'[A2v10.Workflow].Instances') and [name]=N'IDX_Id_WorkflowId') begin
+	create unique index IDX_Id_WorkflowId on [A2v10.Workflow].Instances (Id, [WorkflowId]);
+end;
+go
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'InstanceVariablesInt')
+begin
+	create table [A2v10.Workflow].[InstanceVariablesInt]
+	(
+		InstanceId uniqueidentifier not null,
+		[Name] nvarchar(255) not null,
+		constraint PK_InstanceVariablesInt primary key clustered (InstanceId, [Name]),
+		[WorkflowId] nvarchar(255) not null,
+		constraint FK_InstanceVariablesInt_PK foreign key (InstanceId, [WorkflowId]) references [A2v10.Workflow].Instances (Id, [WorkflowId]),
+		[Value] bigint null
+	);
+	create index IDX_InstanceVariablesInt on [A2v10.Workflow].[InstanceVariablesInt] ([WorkflowId], [Name], [Value]);
+end
+go
+
 ------------------------------------------------
 create or alter procedure [A2v10.Workflow].[Workflow.Publish]
 @UserId bigint = null,
