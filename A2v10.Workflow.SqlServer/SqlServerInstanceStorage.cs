@@ -10,6 +10,7 @@ namespace A2v10.Workflow.SqlServer
 	public class SqlServerInstanceStorage : IInstanceStorage
 	{
 		private const String Schema = "[A2v10.Workflow]";
+		private const String Schema2 = "[A2v10_Workflow]";
 
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowStorage _workflowStorage;
@@ -47,13 +48,17 @@ namespace A2v10.Workflow.SqlServer
 
 		public async Task Save(IInstance instance)
 		{
-			var prms = new ExpandoObject();
-			prms.Set("Id", instance.Id);
-			prms.Set("Parent", instance.Parent);
-			prms.Set("Version", instance.Workflow.Identity.Version);
-			prms.Set("WorkflowId", instance.Workflow.Identity.Id);
-			prms.Set("State", _serializer.Serialize(instance.State));
-			await _dbContext.ExecuteExpandoAsync(null, $"{Schema}.[Instance.Save]", prms);
+			var ieo = new ExpandoObject();
+			ieo.Set("Id", instance.Id);
+			ieo.Set("Parent", instance.Parent);
+			ieo.Set("Version", instance.Workflow.Identity.Version);
+			ieo.Set("WorkflowId", instance.Workflow.Identity.Id);
+			ieo.Set("State", _serializer.Serialize(instance.State));
+			ieo.Set("Variables", instance.ExternalVariables);
+			ieo.Set("Bookmarks", instance.ExternalBookmarks);
+			var root = new ExpandoObject();
+			root.Set("Instance", ieo);
+			await _dbContext.SaveModelAsync(null, $"{Schema2}.[Instance.Update]", root);
 		}
 
 		#endregion

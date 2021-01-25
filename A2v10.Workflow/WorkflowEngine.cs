@@ -35,8 +35,7 @@ namespace A2v10.Workflow
 			var context = new ExecutionContext(_serviceProvider, inst.Workflow.Root, args);
 			context.Schedule(inst.Workflow.Root, null, null);
 			await context.RunAsync();
-			inst.Result = context.GetResult();
-			inst.State = context.GetState();
+			SetInstanceState(inst, context);
 			await _instanceStorage.Save(inst);
 			return inst;
 		}
@@ -56,11 +55,19 @@ namespace A2v10.Workflow
 			context.SetState(inst.State);
 			await context.ResumeAsync(bookmark, reply);
 			await context.RunAsync();
-			inst.Result = context.GetResult();
-			inst.State = context.GetState();
+			SetInstanceState(inst, context);
 			await _instanceStorage.Save(inst);
 			return inst;
 		}
+
+		void SetInstanceState(IInstance inst, ExecutionContext context)
+		{
+			inst.Result = context.GetResult();
+			inst.State = context.GetState();
+			inst.ExternalVariables = context.GetExternalVariables(inst.State);
+			inst.ExternalBookmarks = context.GetExternalBookmarks();
+		}
+
 
 		public async ValueTask<IStartProcessResponse> StartAsync(IStartProcessRequest prm)
 		{

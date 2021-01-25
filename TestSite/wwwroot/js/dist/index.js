@@ -36,6 +36,10 @@ var _default = {
       "name": "Dir",
       "isAttr": true,
       "type": "String"
+    }, {
+      "name": "External",
+      "isAttr": true,
+      "type": "Boolean"
     }]
   }]
 };
@@ -389,6 +393,12 @@ const VAR_TYPE_OPTIONS = [{
 }, {
   name: 'Object',
   value: 'Object'
+}, {
+  name: 'BigInt',
+  value: 'BigInt'
+}, {
+  name: 'Guid',
+  value: 'Guid'
 }];
 const VAR_DIR_OPTIONS = [{
   name: 'In',
@@ -455,6 +465,20 @@ function VariablesDetailProps(group, element, translate) {
 
     set(elem, values, node) {
       return setValue('Dir', elem, values, node);
+    }
+
+  }));
+  group.entries.push(_EntryFactory.default.checkbox(translate, {
+    id: 'var_external',
+    label: 'External',
+    modelProperty: 'External',
+
+    get(elem, node) {
+      return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
+    },
+
+    set(elem, values, node) {
+      return setValue('External', elem, values, node);
     }
 
   }));
@@ -540,7 +564,8 @@ function addVariables(group, element, bpmnFactory, translate) {
       var variable = _ElementHelper.default.createElement('wf:Variable', {
         Name: '',
         Type: 'String',
-        Dir: 'Local'
+        Dir: 'Local',
+        External: false
       }, vars, bpmnFactory);
 
       var optTemplate = this.createListEntryTemplate(variable);

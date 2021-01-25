@@ -3,6 +3,7 @@ using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 
 namespace A2v10.Workflow
 {
@@ -100,6 +101,52 @@ namespace A2v10.Workflow
 			res.SetNotNull("Variables", GetScriptVariables());
 			res.SetNotNull("Bookmarks", GetBookmarks());
 			return res;
+		}
+
+		public ExpandoObject GetExternalVariables(ExpandoObject state)
+		{
+			if (_root is not IScoped scopedRoot)
+				return null;
+			var result = new ExpandoObject();
+			var values = state.Get<ExpandoObject>("Variables");
+			var rootValues = values.Get<ExpandoObject>(_root.Id);
+
+			void AddList(VariableType varType, String propName)
+			{
+				var list = new List<Object>();
+				foreach (var v in scopedRoot.Variables.Where(v => v.External && v.Type == varType))
+				{
+					var ve = new ExpandoObject();
+					ve.Set("Name", v.Name);
+					ve.Set("Value", rootValues.Get<Object>(v.Name));
+					list.Add(ve);
+				}
+				if (list.Count > 0)
+					result.Set(propName, list);
+
+			};
+			AddList(VariableType.BigInt, "BigInt");
+			AddList(VariableType.String, "String");
+			AddList(VariableType.Guid, "Guid");
+			if (result.Count() > 0)
+				return result;
+			return null;
+		}
+
+		public ExpandoObject GetExternalBookmarks()
+		{
+			if (_bookmarks == null || _bookmarks.Count == 0)
+				return null;
+			var eo = new ExpandoObject();
+			var list = new List<Object>();
+			foreach (var b in _bookmarks)
+			{
+				var be = new ExpandoObject();
+				be.Set("Bookmark", b.Key);
+				list.Add(be);
+			}
+			eo.Set("Items", list);
+			return eo;
 		}
 
 		public void SetState(ExpandoObject state)

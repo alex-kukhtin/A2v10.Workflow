@@ -6,7 +6,16 @@ begin
 end
 go
 ------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10_Workflow')
+begin
+	exec sp_executesql N'create schema [A2v10_Workflow]';
+end
+go
+------------------------------------------------
 grant execute on schema ::[A2v10.Workflow] to public;
+go
+------------------------------------------------
+grant execute on schema ::[A2v10_Workflow] to public;
 go
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Workflows')
@@ -57,10 +66,13 @@ begin
 	);
 end
 go
-if not exists (select 1 from sys.indexes where [object_id]=object_id(N'[A2v10.Workflow].Instances') and [name]=N'IDX_Id_WorkflowId') begin
+------------------------------------------------
+if not exists (select 1 from sys.indexes where [object_id]=object_id(N'[A2v10.Workflow].Instances') and [name]=N'IDX_Id_WorkflowId') 
+begin
 	create unique index IDX_Id_WorkflowId on [A2v10.Workflow].Instances (Id, [WorkflowId]);
-end;
+end
 go
+------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'InstanceVariablesInt')
 begin
 	create table [A2v10.Workflow].[InstanceVariablesInt]
@@ -75,7 +87,22 @@ begin
 	create index IDX_InstanceVariablesInt on [A2v10.Workflow].[InstanceVariablesInt] ([WorkflowId], [Name], [Value]);
 end
 go
-
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'InstanceBookmarks')
+begin
+	create table [A2v10.Workflow].[InstanceBookmarks]
+	(
+		InstanceId uniqueidentifier not null,
+		[Bookmark] nvarchar(255) not null,
+		constraint PK_InstanceBookmarks primary key clustered (InstanceId, [Bookmark]),
+		[WorkflowId] nvarchar(255) not null,
+		constraint FK_InstanceBookmarks_PK foreign key (InstanceId, [WorkflowId]) 
+			references [A2v10.Workflow].Instances (Id, [WorkflowId]),
+	);
+	create index IDX_InstanceBookmarks_WorkflowId_Bookmark 
+		on [A2v10.Workflow].[InstanceBookmarks] ([WorkflowId], [Bookmark]);
+end
+go
 ------------------------------------------------
 create or alter procedure [A2v10.Workflow].[Workflow.Publish]
 @UserId bigint = null,
@@ -129,25 +156,106 @@ begin
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Instance.Save]
+drop procedure if exists [A2v10.Workflow].[Instance.Save];
+go
+------------------------------------------------
+drop procedure if exists [A2v10_Workflow].[Instance.Update];
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'Instance.TableType')
+	drop type [A2v10_Workflow].[Instance.TableType]
+go
+------------------------------------------------
+create type [A2v10_Workflow].[Instance.TableType] as table
+(
+	Id uniqueidentifier,
+	Parent uniqueidentifier,
+	[Version] int,
+	[WorkflowId] nvarchar(255) not null,
+	[State] nvarchar(max)
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'VariableInt.TableType')
+	drop type [A2v10_Workflow].[VariableInt.TableType]
+go
+------------------------------------------------
+create type [A2v10_Workflow].[VariableInt.TableType] as table
+(
+	[Name] nvarchar(255),
+	[Value] bigint
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'InstanceBookmarks.TableType')
+	drop type [A2v10_Workflow].[InstanceBookmarks.TableType]
+go
+------------------------------------------------
+create type [A2v10_Workflow].[InstanceBookmarks.TableType] as table
+(
+	[Bookmark] nvarchar(255)
+)
+go
+------------------------------------------------
+create or alter procedure [A2v10_Workflow].[Instance.Metadata]
+as
+begin
+	declare @Instance [A2v10_Workflow].[Instance.TableType];
+	declare @VariableInt [A2v10_Workflow].[VariableInt.TableType];
+	declare @Bookmarks [A2v10_Workflow].[InstanceBookmarks.TableType];
+
+	select [Instance!Instance!Metadata] = null, * from @Instance;
+	select [IntVariables!Instance.Variables.BigInt!Metadata] = null, * from @VariableInt;
+	select [Bookmarks!Instance.Bookmarks.Items!Metadata] = null, * from @Bookmarks;
+end
+go
+------------------------------------------------
+create or alter procedure [A2v10_Workflow].[Instance.Update]
 @UserId bigint = null,
-@Id uniqueidentifier,
-@Parent uniqueidentifier,
-@Version int,
-@WorkflowId nvarchar(255),
-@State nvarchar(max)
+@Instance [A2v10_Workflow].[Instance.TableType] readonly,
+@IntVariables [A2v10_Workflow].[VariableInt.TableType] readonly,
+@Bookmarks [A2v10_Workflow].[InstanceBookmarks.TableType] readonly
 as
 begin
 	set nocount on;
 	set transaction isolation level read committed;
-	update [A2v10.Workflow].Instances set
-		[State] = @State, DateModified=getutcdate()
-	where Id=@Id;
-	if @@rowcount = 0
-		insert into [A2v10.Workflow].Instances 
-			(Id, Parent, WorkflowId, [Version], [State])
-		values
-			(@Id, @Parent, @WorkflowId, @Version, @State);
+	set xact_abort on;
+
+	declare @rtable table (id uniqueidentifier, wfid nvarchar(255));
+	declare @InstanceId uniqueidentifier;
+	declare @WorkflowId nvarchar(255);
+
+	begin tran;
+	merge [A2v10.Workflow].Instances as t
+
+	using @Instance as s
+	on s.Id = t.Id
+	when matched then update set 
+		t.[State] = s.[State]
+	when not matched by target then insert
+		(Id, Parent, WorkflowId, [Version], [State]) values
+		(s.Id, s.Parent, s.WorkflowId, s.[Version], s.[State])
+	output inserted.Id, inserted.WorkflowId into @rtable(id, wfid);
+	select @InstanceId = id, @WorkflowId = wfid from @rtable;
+
+	merge [A2v10.Workflow].InstanceVariablesInt as t
+	using @IntVariables as s
+	on t.[Name] = s.[Name] and t.InstanceId = @InstanceId and t.WorkflowId = @WorkflowId
+	when matched then update set 
+		t.[Value] = s.[Value]
+	when not matched by target then insert
+		(InstanceId, [Name], WorkflowId, [Value]) values
+		(@InstanceId, s.[Name], @WorkflowId, s.[Value]);
+
+	merge [A2v10.Workflow].InstanceBookmarks as t
+	using @Bookmarks as s
+	on t.[Bookmark] = s.[Bookmark] and t.InstanceId = @InstanceId and t.WorkflowId = @WorkflowId
+	when not matched by target then insert
+		(InstanceId, [Bookmark], WorkflowId) values
+		(@InstanceId, s.[Bookmark], @WorkflowId)
+	when not matched by source and t.InstanceId=@InstanceId and t.WorkflowId = @WorkflowId then delete;
+
+	commit tran;
 end
 go
 ------------------------------------------------

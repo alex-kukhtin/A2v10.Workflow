@@ -40,6 +40,11 @@ export default {
 					"name": "Dir",
 					"isAttr": true,
 					"type": "String"
+				},
+				{
+					"name": "External",
+					"isAttr": true,
+					"type": "Boolean"
 				}
 			]
 		}

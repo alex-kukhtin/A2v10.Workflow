@@ -8,7 +8,9 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 const VAR_TYPE_OPTIONS = [
 	{ name: 'String', value: 'String' },
 	{ name: 'Number', value: 'Number' },
-	{ name: 'Object', value: 'Object' }
+	{ name: 'Object', value: 'Object' },
+	{ name: 'BigInt', value: 'BigInt' },
+	{ name: 'Guid',   value: 'Guid' }
 ];
 
 const VAR_DIR_OPTIONS = [
@@ -63,6 +65,18 @@ export default function VariablesDetailProps(group, element, translate) {
 		},
 		set(elem, values, node) {
 			return setValue('Dir', elem, values, node);
+		}
+	}));
+
+	group.entries.push(entryFactory.checkbox(translate, {
+		id: 'var_external',
+		label: 'External',
+		modelProperty: 'External',
+		get(elem, node) {
+			return extensionElementsImpl.getSelectedVariableObject(node, elem) || {};
+		},
+		set(elem, values, node) {
+			return setValue('External', elem, values, node);
 		}
 	}));
 }

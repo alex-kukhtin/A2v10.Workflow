@@ -1,9 +1,11 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 
 namespace A2v10.Workflow.Interfaces
 {
+
 	public interface IInstance
 	{
 		IWorkflow Workflow { get; }
@@ -13,5 +15,8 @@ namespace A2v10.Workflow.Interfaces
 
 		ExpandoObject Result { get; set; }
 		ExpandoObject State { get; set; }
+
+		ExpandoObject ExternalVariables { get; set; }
+		ExpandoObject ExternalBookmarks { get; set; }
 	}
 }

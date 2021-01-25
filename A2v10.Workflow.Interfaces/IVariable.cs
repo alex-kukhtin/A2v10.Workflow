@@ -7,7 +7,9 @@ namespace A2v10.Workflow.Interfaces
 		String,
 		Number,
 		Boolean,
-		Object
+		Object,
+		BigInt,
+		Guid
 	}
 
 	public enum VariableDirection
@@ -22,7 +24,8 @@ namespace A2v10.Workflow.Interfaces
 	public interface IVariable
 	{
 		VariableType Type { get; }
-		public VariableDirection Dir { get; set; }
+		VariableDirection Dir { get; set; }
+		Boolean External { get; }
 		String Name { get; }
 
 		public Boolean IsArgument { get; }
