@@ -9,9 +9,6 @@ namespace A2v10.Workflow.SqlServer
 {
 	public class SqlServerInstanceStorage : IInstanceStorage
 	{
-		private const String Schema = "[A2v10.Workflow]";
-		private const String Schema2 = "[A2v10_Workflow]";
-
 		private readonly IDbContext _dbContext;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly ISerializer _serializer;
@@ -28,7 +25,7 @@ namespace A2v10.Workflow.SqlServer
 		{
 			var prms = new ExpandoObject();
 			prms.Set<Guid>("Id", instanceId);
-			var eo = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Instance.Load]", prms);
+			var eo = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Instance.Load]", prms);
 			if (eo == null)
 				throw new SqlServerStorageException($"Instance '{instanceId}' not found");
 			var identity = new Identity()
@@ -58,7 +55,7 @@ namespace A2v10.Workflow.SqlServer
 			ieo.Set("Bookmarks", instance.ExternalBookmarks);
 			var root = new ExpandoObject();
 			root.Set("Instance", ieo);
-			await _dbContext.SaveModelAsync(null, $"{Schema2}.[Instance.Update]", root);
+			await _dbContext.SaveModelAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root);
 		}
 
 		#endregion

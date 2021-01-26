@@ -24,14 +24,14 @@ namespace TestSite.Controllers
 		public async Task<IActionResult> Index()
 		{
 			// workflows
-			var dm = await _dbContext.LoadModelAsync(null, "[A2v10.Workflow].[Workflows.Index]");
+			var dm = await _dbContext.LoadModelAsync(null, $"a2wf.[Workflows.Index]");
 			return View(dm.GetDynamic()["Workflows"]);
 		}
 
 
 		public async Task<IActionResult> Instances()
 		{
-			var dm = await _dbContext.LoadModelAsync(null, "[A2v10.Workflow].[Instances.Index]");
+			var dm = await _dbContext.LoadModelAsync(null, "a2wf.[Instances.Index]");
 			return View(dm.GetDynamic()["Instances"]);
 		}
 

@@ -15,8 +15,6 @@ namespace A2v10.Workflow.SqlServer
 		private readonly IDbContext _dbContext;
 		private readonly ISerializer _serializer;
 
-		private const String Schema = "[A2v10.Workflow]";
-
 		public SqlServerWorkflowStorage(IDbContext dbContext, ISerializer serializer)
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -29,7 +27,7 @@ namespace A2v10.Workflow.SqlServer
 			prms.TryAdd("Id", identity.Id);
 			prms.TryAdd("Version", identity.Version);
 
-			return _dbContext.ReadExpandoAsync(null, $"{Schema}.[Workflow.Load]", prms);
+			return _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Workflow.Load]", prms);
 		}
 
 		public async Task<IWorkflow> LoadAsync(IIdentity identity)
@@ -59,7 +57,7 @@ namespace A2v10.Workflow.SqlServer
 			prms.Set("Id", id);
 			prms.Set("Format", format);
 			prms.Set("Text", text);
-			var res = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Workflow.Publish]", prms);
+			var res = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Workflow.Publish]", prms);
 
 			return new Identity()
 			{
@@ -73,7 +71,7 @@ namespace A2v10.Workflow.SqlServer
 			var prms = new ExpandoObject();
 			prms.Set("Id", id);
 
-			var res = await _dbContext.ReadExpandoAsync(null, $"{Schema}.[Catalog.Publish]", prms);
+			var res = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Catalog.Publish]", prms);
 
 			return new Identity()
 			{
