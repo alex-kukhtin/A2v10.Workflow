@@ -1,8 +1,6 @@
 ﻿
-using A2v10.System.Xaml;
-using A2v10.Workflow.Interfaces;
 using System;
-using System.Collections.Generic;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -13,6 +11,7 @@ namespace A2v10.Workflow
 		public VariableType Type { get; set; }
 
 		public Boolean External { get; set; }
+		public String Value { get; set; }
 
 		public Boolean IsArgument => Dir == VariableDirection.In || Dir == VariableDirection.InOut;
 		public Boolean IsResult => Dir == VariableDirection.Out || Dir == VariableDirection.InOut;

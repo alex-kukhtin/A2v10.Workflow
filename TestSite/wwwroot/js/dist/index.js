@@ -40,6 +40,10 @@ var _default = {
       "name": "External",
       "isAttr": true,
       "type": "Boolean"
+    }, {
+      "name": "Value",
+      "isAttr": true,
+      "type": "String"
     }]
   }]
 };
@@ -378,6 +382,8 @@ var _EntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
 
+var _Utils = require("bpmn-js-properties-panel/lib/Utils");
+
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
@@ -424,20 +430,29 @@ function VariablesDetailProps(group, element, translate) {
     return _CmdHelper.default.updateBusinessObject(elem, vars, update);
   }
 
-  group.entries.push(_EntryFactory.default.textField(translate, {
+  let nameProp = _EntryFactory.default.validationAwareTextField(translate, {
     id: 'var_name',
     label: 'Name',
-    modelProperty: 'Name',
+    modelProperty: 'Name'
+  });
 
-    get(elem, node) {
-      return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
-    },
+  nameProp.get = (elem, node) => {
+    return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
+  };
 
-    set(elem, values, node) {
-      return setValue('Name', elem, values, node);
-    }
+  nameProp.set = (elem, values, node) => {
+    return setValue('Name', elem, values, node);
+  };
 
-  }));
+  nameProp.validate = (elem, values, node) => {
+    let nameValue = values.Name || '';
+    var idErr = (0, _Utils.validateId)(nameValue, translate);
+    return idErr ? {
+      Name: idErr
+    } : {};
+  };
+
+  group.entries.push(nameProp);
   group.entries.push(_EntryFactory.default.selectBox(translate, {
     id: 'var_type',
     label: 'Type',
@@ -484,7 +499,7 @@ function VariablesDetailProps(group, element, translate) {
   }));
 }
 
-},{"./impl/extensionElements":6,"bpmn-js-properties-panel/lib/factory/EntryFactory":25,"bpmn-js-properties-panel/lib/helper/CmdHelper":36,"bpmn-js/lib/util/ModelUtil":186}],10:[function(require,module,exports){
+},{"./impl/extensionElements":6,"bpmn-js-properties-panel/lib/Utils":14,"bpmn-js-properties-panel/lib/factory/EntryFactory":25,"bpmn-js-properties-panel/lib/helper/CmdHelper":36,"bpmn-js/lib/util/ModelUtil":186}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -565,7 +580,8 @@ function addVariables(group, element, bpmnFactory, translate) {
         Name: '',
         Type: 'String',
         Dir: 'Local',
-        External: false
+        External: false,
+        Value: ''
       }, vars, bpmnFactory);
 
       var optTemplate = this.createListEntryTemplate(variable);

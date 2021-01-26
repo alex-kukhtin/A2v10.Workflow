@@ -26,7 +26,9 @@ namespace A2v10.Workflow.Interfaces
 		VariableType Type { get; }
 		VariableDirection Dir { get; set; }
 		Boolean External { get; }
+
 		String Name { get; }
+		String Value { get; }
 
 		public Boolean IsArgument { get; }
 		public Boolean IsResult { get; }

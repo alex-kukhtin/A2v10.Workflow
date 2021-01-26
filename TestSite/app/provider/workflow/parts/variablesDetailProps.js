@@ -1,6 +1,7 @@
 ﻿
 import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 import {is} from 'bpmn-js/lib/util/ModelUtil';
+import { validateId } from 'bpmn-js-properties-panel/lib/Utils';
 
 import extensionElementsImpl from './impl/extensionElements';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
@@ -30,17 +31,24 @@ export default function VariablesDetailProps(group, element, translate) {
 		return cmdHelper.updateBusinessObject(elem, vars, update);
 	}
 
-	group.entries.push(entryFactory.textField(translate, {
+	let nameProp = entryFactory.validationAwareTextField(translate, {
 		id: 'var_name',
 		label: 'Name',
-		modelProperty: 'Name',
-		get(elem, node) {
-			return extensionElementsImpl.getSelectedVariableObject(node, elem) || {};
-		},
-		set(elem, values, node) {
-			return setValue('Name', elem, values, node);
-		}
-	}));
+		modelProperty: 'Name'
+	});
+	nameProp.get = (elem, node) => {
+		return extensionElementsImpl.getSelectedVariableObject(node, elem) || {};
+	};
+	nameProp.set = (elem, values, node) => {
+		return setValue('Name', elem, values, node);
+	};
+	nameProp.validate = (elem, values, node) => {
+		let nameValue = values.Name || '';
+		var idErr = validateId(nameValue, translate);
+		return idErr ? { Name: idErr } : {};
+	};
+
+	group.entries.push(nameProp);
 
 	group.entries.push(entryFactory.selectBox(translate, {
 		id: 'var_type',

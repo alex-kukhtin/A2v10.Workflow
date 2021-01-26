@@ -45,6 +45,11 @@ export default {
 					"name": "External",
 					"isAttr": true,
 					"type": "Boolean"
+				},
+				{
+					"name": "Value",
+					"isAttr": true,
+					"type": "String"
 				}
 			]
 		}

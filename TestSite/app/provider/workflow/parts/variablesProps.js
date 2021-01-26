@@ -55,7 +55,7 @@ export default function addVariables(group, element, bpmnFactory, translate) {
 			let selbox = node.querySelector('select[name=wf-variables-list]');
 
 			let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
-			var variable = elementHelper.createElement('wf:Variable', { Name: '', Type: 'String', Dir: 'Local', External: false }, vars, bpmnFactory);
+			var variable = elementHelper.createElement('wf:Variable', { Name: '', Type: 'String', Dir: 'Local', External: false, Value:'' }, vars, bpmnFactory);
 			var optTemplate = this.createListEntryTemplate(variable);
 			let tmpsel = document.createElement('select');
 			tmpsel.innerHTML = optTemplate;
