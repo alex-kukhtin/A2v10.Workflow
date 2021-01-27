@@ -280,9 +280,11 @@ go
 create or alter procedure a2wf.[Instance.Update]
 @UserId bigint = null,
 @Instance a2wf.[Instance.TableType] readonly,
+@Variables a2wf.[Variables.TableType] readonly,
 @IntVariables a2wf.[VariableInt.TableType] readonly,
 @GuidVariables a2wf.[VariableGuid.TableType] readonly,
 @StringVariables a2wf.[VariableString.TableType] readonly,
+@Book a2wf.[Bookmarks.TableType] readonly,
 @Bookmarks a2wf.[InstanceBookmarks.TableType] readonly
 as
 begin
@@ -310,7 +312,8 @@ begin
 	using (
 		select si.WorkflowId, InstanceId=si.Id, siv.*
 		from @Instance si
-		inner join @IntVariables siv on siv.ParentGUID=si.[GUID]
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @IntVariables siv on siv.ParentGUID=sv.[GUID]
 	) as s
 	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when matched then update set 
@@ -329,7 +332,8 @@ begin
 	using (
 		select si.WorkflowId, InstanceId=si.Id, siv.*
 		from @Instance si
-		inner join @GuidVariables siv on siv.ParentGUID=si.[GUID]
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @GuidVariables siv on siv.ParentGUID=sv.[GUID]
 	) as s
 	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when matched then update set 
@@ -348,7 +352,8 @@ begin
 	using (
 		select si.WorkflowId, InstanceId=si.Id, siv.*
 		from @Instance si
-		inner join @StringVariables siv on siv.ParentGUID=si.[GUID]
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @StringVariables siv on siv.ParentGUID=sv.[GUID]
 	) as s
 	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when matched then update set 
@@ -365,9 +370,10 @@ begin
 	)
 	merge t
 	using (
-		select si.WorkflowId, InstanceId=si.Id, sb.*
+		select si.WorkflowId, InstanceId=si.Id, sib.*
 		from @Instance si
-		inner join @Bookmarks sb on sb.ParentGUID=si.[GUID]
+		inner join @Book sb on sb.ParentGUID=si.[GUID]
+		inner join @Bookmarks sib on sib.ParentGUID=sb.[GUID]
 	) as s
 	on t.[Bookmark] = s.[Bookmark] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when not matched by target then insert
