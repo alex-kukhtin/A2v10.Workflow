@@ -19,7 +19,7 @@ namespace A2v10.Workflow.Tests
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BaseElement>()
+				Children = new List<BaseElement>()
 				{
 					new StartEvent()
 					{
@@ -66,7 +66,7 @@ namespace A2v10.Workflow.Tests
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BaseElement>()
+				Children = new List<BaseElement>()
 				{
 					new StartEvent()
 					{

@@ -4,8 +4,6 @@
 8. Variable. Value?
 12. Не работает namespace для атрибутов
 	XamlReadException: Property xsi:type not found in type TimeDuration
-13. ExclusiveGateway
-14. Не работают Variables для подпроцесса
 15. Сохранение Track
 16. Instance -> ExecutionState
 18. 
@@ -14,3 +12,5 @@ import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/Proce
 import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
 import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps';
 import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
+
+19. ExecutionState -> Init, Hold, Idle, Complete

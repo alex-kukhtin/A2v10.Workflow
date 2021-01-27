@@ -25,7 +25,7 @@ namespace A2v10.Workflow.Tests.Serialization
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BaseElement>()
+				Children = new List<BaseElement>()
 				{
 					new StartEvent()
 					{

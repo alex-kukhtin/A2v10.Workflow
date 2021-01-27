@@ -30,24 +30,18 @@ export default function addVariables(group, element, bpmnFactory, translate) {
 		html: variablesHtml,
 		get(elem, node) {
 			let ee = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
-			return ee ? ee.values : [];
+			return ee ? ee.values : undefined;
 		},
 		set(elem, values, node) {
 			let action = this.__action;
 			delete this.__action;
 			if (!action) return;
-			let commands = [];
-			let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
+			let varel = extensionElementsImpl.getOrCreateExtensionElement(elem, 'wf:Variables', bpmnFactory);
+			let commands = varel.commands;
 			if (action.id === 'add-variable') {
-				let vars = extensionElementsImpl.getExtensionElement(elem, 'wf:Variables');
-				if (vars == null) {
-					let ee = extensionElementsImpl.getExtensionElements(elem);
-					vars = elementHelper.createElement('wf:Variables', null, ee, bpmnFactory);
-					commands.push(cmdHelper.addElementsTolist(elem, ee, 'values', [vars]));
-				}
-				commands.push(cmdHelper.addElementsTolist(elem, vars, 'values', [action.value]));
+				commands.push(cmdHelper.addElementsTolist(elem, varel.elem, 'values', [action.value]));
 			} else if (action.id === 'remove-variable') {
-				commands.push(cmdHelper.removeElementsFromList(elem, vars, 'values', null, [action.value]));
+				commands.push(cmdHelper.removeElementsFromList(elem, varel.elem, 'values', null, [action.value]));
 			}
 			return commands;
 		},

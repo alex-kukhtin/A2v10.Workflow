@@ -2,6 +2,7 @@
 import entryFactory from '../../lib/factory/entryFactory';
 
 import { validateId } from 'bpmn-js-properties-panel/lib/Utils';
+import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 import extensionElementsImpl from './impl/extensionElements';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
@@ -76,15 +77,17 @@ export default function VariablesDetailProps(group, element, translate) {
 		}
 	}));
 
-	group.entries.push(entryFactory.checkbox(translate, {
-		id: 'var_external',
-		label: 'External',
-		modelProperty: 'External',
-		get(elem, node) {
-			return extensionElementsImpl.getSelectedVariableObject(node, elem) || {};
-		},
-		set(elem, values, node) {
-			return setValue('External', elem, values, node);
-		}
-	}));
+	if (is(element, "bpmn:Process")) {
+		group.entries.push(entryFactory.checkbox(translate, {
+			id: 'var_external',
+			label: 'External',
+			modelProperty: 'External',
+			get(elem, node) {
+				return extensionElementsImpl.getSelectedVariableObject(node, elem) || {};
+			},
+			set(elem, values, node) {
+				return setValue('External', elem, values, node);
+			}
+		}));
+	}
 }

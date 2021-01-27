@@ -1466,6 +1466,8 @@ var _entryFactory = _interopRequireDefault(require("../../lib/factory/entryFacto
 
 var _Utils = require("bpmn-js-properties-panel/lib/Utils");
 
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
@@ -1565,23 +1567,26 @@ function VariablesDetailProps(group, element, translate) {
     }
 
   }));
-  group.entries.push(_entryFactory.default.checkbox(translate, {
-    id: 'var_external',
-    label: 'External',
-    modelProperty: 'External',
 
-    get(elem, node) {
-      return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
-    },
+  if ((0, _ModelUtil.is)(element, "bpmn:Process")) {
+    group.entries.push(_entryFactory.default.checkbox(translate, {
+      id: 'var_external',
+      label: 'External',
+      modelProperty: 'External',
 
-    set(elem, values, node) {
-      return setValue('External', elem, values, node);
-    }
+      get(elem, node) {
+        return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
+      },
 
-  }));
+      set(elem, values, node) {
+        return setValue('External', elem, values, node);
+      }
+
+    }));
+  }
 }
 
-},{"../../lib/factory/entryFactory":7,"./impl/extensionElements":17,"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/helper/CmdHelper":46}],20:[function(require,module,exports){
+},{"../../lib/factory/entryFactory":7,"./impl/extensionElements":17,"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1624,30 +1629,22 @@ function addVariables(group, element, bpmnFactory, translate) {
     get(elem, node) {
       let ee = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
 
-      return ee ? ee.values : [];
+      return ee ? ee.values : undefined;
     },
 
     set(elem, values, node) {
       let action = this.__action;
       delete this.__action;
       if (!action) return;
-      let commands = [];
 
-      let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
+      let varel = _extensionElements.default.getOrCreateExtensionElement(elem, 'wf:Variables', bpmnFactory);
+
+      let commands = varel.commands;
 
       if (action.id === 'add-variable') {
-        let vars = _extensionElements.default.getExtensionElement(elem, 'wf:Variables');
-
-        if (vars == null) {
-          let ee = _extensionElements.default.getExtensionElements(elem);
-
-          vars = _ElementHelper.default.createElement('wf:Variables', null, ee, bpmnFactory);
-          commands.push(_CmdHelper.default.addElementsTolist(elem, ee, 'values', [vars]));
-        }
-
-        commands.push(_CmdHelper.default.addElementsTolist(elem, vars, 'values', [action.value]));
+        commands.push(_CmdHelper.default.addElementsTolist(elem, varel.elem, 'values', [action.value]));
       } else if (action.id === 'remove-variable') {
-        commands.push(_CmdHelper.default.removeElementsFromList(elem, vars, 'values', null, [action.value]));
+        commands.push(_CmdHelper.default.removeElementsFromList(elem, varel.elem, 'values', null, [action.value]));
       }
 
       return commands;

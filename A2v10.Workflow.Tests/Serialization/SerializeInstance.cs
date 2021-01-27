@@ -23,7 +23,7 @@ namespace A2v10.Workflow.Tests.Serialization
 			{
 				Id = "process",
 				IsExecutable = true,
-				Elements = new List<BaseElement>()
+				Children = new List<BaseElement>()
 				{
 					new StartEvent()
 					{
@@ -50,7 +50,7 @@ namespace A2v10.Workflow.Tests.Serialization
 			var r = s.DeserializeActitity(json, "json") as Process;
 
 			Assert.AreEqual(r.Id, p.Id);
-			Assert.AreEqual(r.Elements.Count, p.Elements.Count);
+			Assert.AreEqual(r.Children.Count, p.Children.Count);
 
 			var pEvent = p.FindElement<Event>("start");
 			var rEvent = r.FindElement<Event>("start");

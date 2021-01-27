@@ -35,9 +35,9 @@ namespace A2v10.System.Xaml.Tests
 			Assert.AreEqual("Process_1", proc.Id);
 			Assert.AreEqual(false, proc.IsExecutable);
 
-			Assert.AreEqual(1, proc.Elements.Count);
+			Assert.AreEqual(1, proc.Children.Count);
 
-			var sev = proc.Elements[0] as StartEvent;
+			var sev = proc.Children[0] as StartEvent;
 
 			Assert.AreEqual("StartEvent_1y45yut", sev.Id);
 			Assert.AreEqual("hunger noticed", sev.Name);
