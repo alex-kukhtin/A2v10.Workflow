@@ -3,17 +3,15 @@
 import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
 // Require all properties you need from existing providers.
-// In this case all available bpmn relevant properties without camunda extensions.
 import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps';
 import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
 import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps';
-import documentationProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/DocumentationProps';
-import idProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps';
+import documentationProps from '../workflow/parts/bpmn/documentationProps';
+import idProps from '../workflow/parts/bpmn/idProps';
 import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
 
 
 // Require your custom property entries.
-import spellProps from './parts/SpellProps';
 import scriptProps from './parts/scriptProps';
 import variablesProps from './parts/variablesProps';
 import variablesDetailProps from './parts/variablesDetailProps';
@@ -41,7 +39,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 	};
 	linkProps(detailsGroup, element, translate);
 	eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
-	scriptProps(detailsGroup, element, translate);
+	scriptProps(detailsGroup, element, bpmnFactory, translate);
 
 	var documentationGroup = {
 		id: 'documentation',
@@ -85,24 +83,6 @@ function createVariablesTabGroups(element, bpmnFactory, translate) {
 	];
 }
 
-// Create the custom magic tab
-function createWorkflowTabGroups(element, translate) {
-
-	// Create a group called "Black Magic".
-	var blackMagicGroup = {
-		id: 'wf',
-		label: 'Workflow',
-		entries: []
-	};
-
-	// Add the spell props to the black magic group.
-	spellProps(blackMagicGroup, element, translate);
-
-	return [
-		blackMagicGroup
-	];
-}
-
 export default function WorkflowPropertiesProvider(
 	eventBus, bpmnFactory, canvas,
 	elementRegistry, translate) {
@@ -117,24 +97,16 @@ export default function WorkflowPropertiesProvider(
 			groups: createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, translate)
 		};
 
-		// The "workflow" tab
-		var workflowTab = {
-			id: 'wf',
-			label: 'Workflows',
-			groups: createWorkflowTabGroups(element, translate)
-		};
-
 		var variablesTab = {
 			id: 'variables',
 			label: 'Variables',
 			groups: createVariablesTabGroups(element, bpmnFactory, translate)
 		};
 
-		// Show general + "workflow" tab
+		// Show "general" + "variables" tab
 		return [
 			generalTab,
-			variablesTab,
-			workflowTab
+			variablesTab
 		];
 	};
 }

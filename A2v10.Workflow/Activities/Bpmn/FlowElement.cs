@@ -8,8 +8,6 @@ namespace A2v10.Workflow.Bpmn
 	[ContentProperty("Children")]
 	public abstract class FlowElement : BpmnActivity
 	{
-		public List<BaseElement> Children { get; init; }
-
 		public String Default { get; init; }
 
 		public Boolean HasIncoming => Children != null && Children.OfType<Incoming>().Any();

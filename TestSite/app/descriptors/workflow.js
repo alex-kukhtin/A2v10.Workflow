@@ -52,6 +52,19 @@ export default {
 					"type": "String"
 				}
 			]
+		},
+		{
+			"name": "Script",
+			"superClass": [
+				"Element"
+			],
+			"properties": [
+				{
+					"name": "text",
+					"type": "String",
+					"isBody": true
+				}
+			]
 		}
 	]
 };

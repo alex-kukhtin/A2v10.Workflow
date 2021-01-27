@@ -107,6 +107,9 @@ namespace A2v10.Workflow
 		{
 			if (_root is not IScoped scopedRoot)
 				return null;
+			var variables = scopedRoot.Variables;
+			if (variables == null || variables.Count == 0)
+				return null;
 			var result = new ExpandoObject();
 			var values = state.Get<ExpandoObject>("Variables");
 			var rootValues = values.Get<ExpandoObject>(_root.Id);
@@ -114,7 +117,7 @@ namespace A2v10.Workflow
 			void AddList(VariableType varType, String propName)
 			{
 				var list = new List<Object>();
-				foreach (var v in scopedRoot.Variables.Where(v => v.External && v.Type == varType))
+				foreach (var v in variables.Where(v => v.External && v.Type == varType))
 				{
 					var ve = new ExpandoObject();
 					ve.Set("Name", v.Name);
@@ -128,7 +131,7 @@ namespace A2v10.Workflow
 			AddList(VariableType.BigInt, "BigInt");
 			AddList(VariableType.String, "String");
 			AddList(VariableType.Guid, "Guid");
-			if (result.Count() > 0)
+			if (result.Any())
 				return result;
 			return null;
 		}

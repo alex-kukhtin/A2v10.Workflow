@@ -10,7 +10,8 @@ namespace A2v10.Workflow.Bpmn
 
 	public class UserTask : BpmnTask, IScriptable
 	{
-		public String Script => Children.OfType<Script>().FirstOrDefault()?.Text;
+		// wf:Script here
+		public String Script => ExtensionElements<A2v10.Workflow.Script>()?.FirstOrDefault()?.Text;
 
 		protected override bool CanInduceIdle => true;
 
@@ -35,8 +36,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			context.RemoveBookmark(bookmark);
 			context.ExecuteResult(Id, nameof(Script), result);
-			CompleteBody(context);
-			return new ValueTask();
+			return CompleteBody(context);
 		}
 
 		#region IScriptable

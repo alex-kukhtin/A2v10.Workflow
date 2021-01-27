@@ -5,7 +5,6 @@ import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from './provider/workflow';
 
 import workflowModdleDescriptor from './descriptors/workflow';
-//var workflowModdleDescriptor = require('./descriptors/workflow');
 
 let canvas = document.getElementById('canvas');
 

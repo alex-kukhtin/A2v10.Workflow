@@ -7,13 +7,13 @@ namespace A2v10.Workflow.Bpmn
 {
 	public class ScriptTask : BpmnTask, IScriptable
 	{
-		public String Script => Children.OfType<Script>().FirstOrDefault()?.Text;
+		// bpmn:script
+		public String Script => Children.OfType<A2v10.Workflow.Bpmn.Script>().FirstOrDefault()?.Text;
 
 		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
 			context.Execute(Id, nameof(Script));
-			CompleteBody(context);
-			return new ValueTask();
+			return CompleteBody(context);
 		}
 
 		#region IScriptable

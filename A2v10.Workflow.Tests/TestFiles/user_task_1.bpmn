@@ -20,7 +20,12 @@
 		<userTask id="Activity_1rffhs5" name="Inc (2)">
 			<incoming>Flow_0dv5clc</incoming>
 			<outgoing>Flow_00y5202</outgoing>
-			<script>X += reply.V</script>
+			<script></script>
+			<extensionElements>
+				<wf:Script>
+					X += reply.V;
+				</wf:Script>
+			</extensionElements>
 		</userTask>
 		<sequenceFlow id="Flow_0dv5clc" sourceRef="Gateway_13u1p9c" targetRef="Activity_1rffhs5" />
 		<scriptTask id="Activity_0fw6530" name="Int(5)">
