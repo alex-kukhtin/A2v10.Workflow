@@ -100,8 +100,9 @@ namespace A2v10.System.Xaml
 
 		public void AddProperty(NodeBuilder builder, String name, String value)
 		{
+			var propName = builder.QualifyPropertyName(name);
 			var nd = builder.GetNodeDefinition(Name);
-			Properties.Add(nd.MakeName(name), nd.BuildProperty(name, value));
+			Properties.Add(nd.MakeName(name), nd.BuildProperty(propName, value));
 		}
 	}
 }

@@ -7,9 +7,7 @@ using A2v10.System.Xaml;
 
 namespace A2v10.Workflow.Bpmn.Diagram
 {
-	[ContentProperty("Waypoints")]
 	public class BPMNEdge : DiagramElement
 	{
-		public List<waypoint> Waypoints { get; init; }
 	}
 }

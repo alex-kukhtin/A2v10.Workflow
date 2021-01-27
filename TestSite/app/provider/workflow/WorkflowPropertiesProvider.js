@@ -9,6 +9,7 @@ import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProp
 import documentationProps from '../workflow/parts/bpmn/documentationProps';
 import idProps from '../workflow/parts/bpmn/idProps';
 import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
+import conditionalProps from '../workflow/parts/bpmn/conditionalProps';
 
 
 // Require your custom property entries.
@@ -40,6 +41,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 	linkProps(detailsGroup, element, translate);
 	eventProps(detailsGroup, element, bpmnFactory, elementRegistry, translate);
 	scriptProps(detailsGroup, element, bpmnFactory, translate);
+	conditionalProps(detailsGroup, element, bpmnFactory, translate);
 
 	var documentationGroup = {
 		id: 'documentation',

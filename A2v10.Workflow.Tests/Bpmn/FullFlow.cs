@@ -70,5 +70,35 @@ namespace A2v10.Workflow.Tests
 			
 
 		}
+
+		[TestMethod]
+		public async Task Exclusive()
+		{
+			var xaml = File.ReadAllText("..\\..\\..\\TestFiles\\exclusive_gateway.bpmn");
+
+			var sp = TestEngine.ServiceProvider();
+
+			var wfs = sp.GetService<IWorkflowStorage>();
+			var wfc = sp.GetService<IWorkflowCatalog>();
+
+			String wfId = "Exclusive_1";
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = wfId,
+				Body = xaml,
+				Format = "xaml"
+			});
+			var ident = await wfs.PublishAsync(wfc, wfId);
+
+			var wfe = sp.GetService<IWorkflowEngine>();
+			var inst = await wfe.StartAsync(ident, new { X = 6 });
+			var res = inst.Result;
+
+			Assert.AreEqual("Yes", res.Get<String>("R"));
+
+			inst = await wfe.StartAsync(ident, new { X = 4 });
+			res = inst.Result;
+			Assert.AreEqual("No", res.Get<String>("R"));
+		}
 	}
 }

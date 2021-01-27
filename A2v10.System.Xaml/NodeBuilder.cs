@@ -310,6 +310,18 @@ namespace A2v10.System.Xaml
 			};
 		}
 
+		public String QualifyPropertyName(String name)
+		{
+			if (!name.Contains(':'))
+				return name;
+			var name2 = name.Split(':');
+			if (!_namespaces.TryGetValue(name2[0], out NamespaceDefinition def))
+				throw new XamlReadException($"Namespace '{name2[0]}' not found");
+			if (def.IsCamelCase)
+				return name2[1].ToPascalCase();
+			return name2[1];
+		}
+
 		public NodeDefinition GetNodeDefinition(String typeName)
 		{
 			//GetNode
