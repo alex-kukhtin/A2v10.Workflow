@@ -1,40 +1,30 @@
-
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10.Workflow')
+if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'a2wf')
 begin
-	exec sp_executesql N'create schema [A2v10.Workflow]';
+	exec sp_executesql N'create schema a2wf';
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'A2v10_Workflow')
+grant execute on schema ::a2wf to public;
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Workflows')
 begin
-	exec sp_executesql N'create schema [A2v10_Workflow]';
-end
-go
-------------------------------------------------
-grant execute on schema ::[A2v10.Workflow] to public;
-go
-------------------------------------------------
-grant execute on schema ::[A2v10_Workflow] to public;
-go
-------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Workflows')
-begin
-	create table [A2v10.Workflow].[Workflows]
+	create table a2wf.Workflows
 	(
 		[Id] nvarchar(255) not null,
 		[Version] int not null,
 		[Format] nvarchar(32) not null,
 		[Text] nvarchar(max) null,
 		DateCreated datetime not null constraint DF_Workflows_DateCreated default(getutcdate()),
-		constraint PK_Workflows primary key nonclustered (Id, [Version])
+		constraint PK_Workflows primary key clustered (Id, [Version]) with (fillfactor = 70)
 	);
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Catalog')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Catalog')
 begin
-	create table [A2v10.Workflow].[Catalog]
+	create table a2wf.[Catalog]
 	(
 		[Id] nvarchar(255) not null,
 		[Format] nvarchar(32) not null,
@@ -42,19 +32,19 @@ begin
 		[Thumb] varbinary(max) null,
 		ThumbFormat nvarchar(32) null,
 		DateCreated datetime not null constraint DF_Catalog_DateCreated default(getutcdate()),
-		constraint PK_Catalog primary key nonclustered (Id)
+		constraint PK_Catalog primary key clustered (Id)
 	);
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'Instances')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Instances')
 begin
-	create table [A2v10.Workflow].[Instances]
+	create table a2wf.Instances
 	(
 		Id uniqueidentifier not null 
-			constraint PK_Instances primary key nonclustered,
+			constraint PK_Instances primary key clustered with (fillfactor = 70),
 		Parent uniqueidentifier null
-			constraint FK_Instances_Parent_Workflows foreign key references [A2v10.Workflow].Instances(Id),
+			constraint FK_Instances_Parent_Workflows foreign key references a2wf.Instances(Id),
 		[WorkflowId] nvarchar(255) not null,
 		[Version] int not null,
 		[State] nvarchar(max) null,
@@ -62,49 +52,72 @@ begin
 		DateCreated datetime not null constraint DF_Instances_DateCreated default(getutcdate()),
 		DateModified datetime not null constraint DF_Workflows_Modified default(getutcdate()),
 		constraint FK_Instances_WorkflowId_Workflows foreign key (WorkflowId, [Version]) 
-			references [A2v10.Workflow].Workflows(Id, [Version])
+			references a2wf.Workflows(Id, [Version])
 	);
+	create unique index IDX_Instances_WorkflowId_Id on a2wf.Instances (WorkflowId, Id) with (fillfactor = 70);
 end
 go
 ------------------------------------------------
-if not exists (select 1 from sys.indexes where [object_id]=object_id(N'[A2v10.Workflow].Instances') and [name]=N'IDX_Id_WorkflowId') 
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceVariablesInt')
 begin
-	create unique index IDX_Id_WorkflowId on [A2v10.Workflow].Instances (Id, [WorkflowId]);
-end
-go
-------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'InstanceVariablesInt')
-begin
-	create table [A2v10.Workflow].[InstanceVariablesInt]
+	create table a2wf.InstanceVariablesInt
 	(
 		InstanceId uniqueidentifier not null,
 		[Name] nvarchar(255) not null,
-		constraint PK_InstanceVariablesInt primary key clustered (InstanceId, [Name]),
-		[WorkflowId] nvarchar(255) not null,
-		constraint FK_InstanceVariablesInt_PK foreign key (InstanceId, [WorkflowId]) references [A2v10.Workflow].Instances (Id, [WorkflowId]),
+		constraint PK_InstanceVariablesInt primary key clustered (InstanceId, [Name]) with (fillfactor = 70),
+		WorkflowId nvarchar(255) not null,
+		constraint FK_InstanceVariablesInt_PK foreign key ([WorkflowId], InstanceId) references a2wf.Instances (WorkflowId, Id),
 		[Value] bigint null
 	);
-	create index IDX_InstanceVariablesInt on [A2v10.Workflow].[InstanceVariablesInt] ([WorkflowId], [Name], [Value]);
+	create index IDX_InstanceVariablesInt_WNV on a2wf.InstanceVariablesInt (WorkflowId, [Name], [Value]) with (fillfactor = 70);
 end
 go
 ------------------------------------------------
-if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'A2v10.Workflow' and TABLE_NAME=N'InstanceBookmarks')
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceVariablesGuid')
 begin
-	create table [A2v10.Workflow].[InstanceBookmarks]
+	create table a2wf.InstanceVariablesGuid
+	(
+		InstanceId uniqueidentifier not null,
+		[Name] nvarchar(255) not null,
+		constraint PK_InstanceVariablesGuid primary key clustered (InstanceId, [Name]) with (fillfactor = 70),
+		WorkflowId nvarchar(255) not null,
+		constraint FK_InstanceVariablesGuid_PK foreign key ([WorkflowId], InstanceId) references a2wf.Instances (WorkflowId, Id),
+		[Value] uniqueidentifier null
+	);
+	create index IDX_InstanceVariablesGuid_WNV on a2wf.InstanceVariablesGuid (WorkflowId, [Name], [Value]) with (fillfactor = 70);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceVariablesString')
+begin
+	create table a2wf.InstanceVariablesString
+	(
+		InstanceId uniqueidentifier not null,
+		[Name] nvarchar(255) not null,
+		constraint PK_InstanceVariablesString primary key clustered (InstanceId, [Name]) with (fillfactor = 70),
+		WorkflowId nvarchar(255) not null,
+		constraint FK_InstanceVariablesString_PK foreign key ([WorkflowId], InstanceId) references a2wf.Instances (WorkflowId, Id),
+		[Value] nvarchar(255) null
+	);
+	create index IDX_InstanceVariablesString_WNV on a2wf.InstanceVariablesString (WorkflowId, [Name], [Value]) with (fillfactor = 70);
+end
+go
+------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceBookmarks')
+begin
+	create table a2wf.InstanceBookmarks
 	(
 		InstanceId uniqueidentifier not null,
 		[Bookmark] nvarchar(255) not null,
-		constraint PK_InstanceBookmarks primary key clustered (InstanceId, [Bookmark]),
+		constraint PK_InstanceBookmarks primary key clustered (InstanceId, [Bookmark]) with (fillfactor = 70),
 		[WorkflowId] nvarchar(255) not null,
-		constraint FK_InstanceBookmarks_PK foreign key (InstanceId, [WorkflowId]) 
-			references [A2v10.Workflow].Instances (Id, [WorkflowId]),
+		constraint FK_InstanceBookmarks_PK foreign key (WorkflowId, InstanceId) references a2wf.Instances (WorkflowId, Id),
 	);
-	create index IDX_InstanceBookmarks_WorkflowId_Bookmark 
-		on [A2v10.Workflow].[InstanceBookmarks] ([WorkflowId], [Bookmark]);
+	create index IDX_InstanceBookmarks_WB on a2wf.InstanceBookmarks (WorkflowId, Bookmark) with (fillfactor = 70);
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Workflow.Publish]
+create or alter procedure a2wf.[Workflow.Publish]
 @UserId bigint = null,
 @Id nvarchar(255),
 @Format nvarchar(32),
@@ -116,17 +129,17 @@ begin
 
 	declare @rtable table(Id nvarchar(255), [Version] int);
 	
-	insert into [A2v10.Workflow].Workflows (Id, [Format], [Text], [Version])
+	insert into a2wf.Workflows (Id, [Format], [Text], [Version])
 	output inserted.Id, inserted.[Version] into @rtable
 	values (@Id, @Format, @Text,
-		(select isnull(max([Version]), 0) + 1 from [A2v10.Workflow].Workflows where Id=@Id)
+		(select isnull(max([Version]), 0) + 1 from a2wf.Workflows where Id=@Id)
 	);
 
 	select [Id], [Version] from @rtable;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Workflow.Load]
+create or alter procedure a2wf.[Workflow.Load]
 @UserId bigint = null,
 @Id nvarchar(255),
 @Version int = 0
@@ -135,13 +148,13 @@ begin
 	set nocount on;
 	set transaction isolation level read uncommitted;
 	if @Version = 0
-		select @Version = max([Version]) from [A2v10.Workflow].Workflows where Id=@Id;
-	select [Id], [Format], [Version], [Text] from [A2v10.Workflow].Workflows 
+		select @Version = max([Version]) from a2wf.Workflows where Id=@Id;
+	select [Id], [Format], [Version], [Text] from a2wf.Workflows 
 	where Id=@Id and [Version]=@Version;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Instance.Load]
+create or alter procedure a2wf.[Instance.Load]
 @UserId bigint = null,
 @Id uniqueidentifier
 as
@@ -151,23 +164,21 @@ begin
 	select [Instance!TInstance!Object] = null, [Id!!Id] = Id, [WorkflowId], [Version], [State], 
 		ExecutionStatus, 
 		DateCreated, DateModified
-	from [A2v10.Workflow].Instances 
+	from a2wf.Instances 
 	where Id=@Id;
 end
 go
 ------------------------------------------------
-drop procedure if exists [A2v10.Workflow].[Instance.Save];
+drop procedure if exists a2wf.[Instance.Update];
 go
 ------------------------------------------------
-drop procedure if exists [A2v10_Workflow].[Instance.Update];
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'Instance.TableType')
+	drop type a2wf.[Instance.TableType]
 go
 ------------------------------------------------
-if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'Instance.TableType')
-	drop type [A2v10_Workflow].[Instance.TableType]
-go
-------------------------------------------------
-create type [A2v10_Workflow].[Instance.TableType] as table
+create type a2wf.[Instance.TableType] as table
 (
+	[GUID] uniqueidentifier,
 	Id uniqueidentifier,
 	Parent uniqueidentifier,
 	[Version] int,
@@ -176,101 +187,217 @@ create type [A2v10_Workflow].[Instance.TableType] as table
 )
 go
 ------------------------------------------------
-if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'VariableInt.TableType')
-	drop type [A2v10_Workflow].[VariableInt.TableType]
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'Variables.TableType')
+	drop type a2wf.[Variables.TableType]
 go
 ------------------------------------------------
-create type [A2v10_Workflow].[VariableInt.TableType] as table
+create type a2wf.[Variables.TableType] as table
 (
+	[GUID] uniqueidentifier,
+	ParentGUID uniqueidentifier
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'VariableInt.TableType')
+	drop type a2wf.[VariableInt.TableType]
+go
+------------------------------------------------
+create type a2wf.[VariableInt.TableType] as table
+(
+	ParentGUID uniqueidentifier,
 	[Name] nvarchar(255),
 	[Value] bigint
 )
 go
 ------------------------------------------------
-if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'A2v10_Workflow' and DOMAIN_NAME = N'InstanceBookmarks.TableType')
-	drop type [A2v10_Workflow].[InstanceBookmarks.TableType]
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'VariableGuid.TableType')
+	drop type a2wf.[VariableGuid.TableType]
 go
 ------------------------------------------------
-create type [A2v10_Workflow].[InstanceBookmarks.TableType] as table
+create type a2wf.[VariableGuid.TableType] as table
 (
+	ParentGUID uniqueidentifier,
+	[Name] nvarchar(255),
+	[Value] uniqueidentifier
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'VariableString.TableType')
+	drop type a2wf.[VariableString.TableType]
+go
+------------------------------------------------
+create type a2wf.[VariableString.TableType] as table
+(
+	ParentGUID uniqueidentifier,
+	[Name] nvarchar(255),
+	[Value] nvarchar(255)
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'Bookmarks.TableType')
+	drop type a2wf.[Bookmarks.TableType]
+go
+------------------------------------------------
+create type a2wf.[Bookmarks.TableType] as table
+(
+	[GUID] uniqueidentifier,
+	ParentGUID uniqueidentifier
+)
+go
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'InstanceBookmarks.TableType')
+	drop type a2wf.[InstanceBookmarks.TableType]
+go
+------------------------------------------------
+create type a2wf.[InstanceBookmarks.TableType] as table
+(
+	ParentGUID uniqueidentifier,
 	[Bookmark] nvarchar(255)
 )
 go
 ------------------------------------------------
-create or alter procedure [A2v10_Workflow].[Instance.Metadata]
+create or alter procedure a2wf.[Instance.Metadata]
 as
 begin
-	declare @Instance [A2v10_Workflow].[Instance.TableType];
-	declare @VariableInt [A2v10_Workflow].[VariableInt.TableType];
-	declare @Bookmarks [A2v10_Workflow].[InstanceBookmarks.TableType];
+	declare @Instance a2wf.[Instance.TableType];
+	declare @Variables a2wf.[Variables.TableType];
+	declare @VariableInt a2wf.[VariableInt.TableType];
+	declare @VariableGuid a2wf.[VariableGuid.TableType];
+	declare @VariableString a2wf.[VariableString.TableType];
+	declare @Book a2wf.[Bookmarks.TableType];
+	declare @Bookmarks a2wf.[InstanceBookmarks.TableType];
 
 	select [Instance!Instance!Metadata] = null, * from @Instance;
+	select [Variables!Instance.Variables!Metadata] = null, * from @Variables;
 	select [IntVariables!Instance.Variables.BigInt!Metadata] = null, * from @VariableInt;
+	select [GuidVariables!Instance.Variables.Guid!Metadata] = null, * from @VariableGuid;
+	select [StringVariables!Instance.Variables.String!Metadata] = null, * from @VariableString;
+	select [Book!Instance.Bookmarks!Metadata] = null, * from @Book;
 	select [Bookmarks!Instance.Bookmarks.Items!Metadata] = null, * from @Bookmarks;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10_Workflow].[Instance.Update]
+create or alter procedure a2wf.[Instance.Update]
 @UserId bigint = null,
-@Instance [A2v10_Workflow].[Instance.TableType] readonly,
-@IntVariables [A2v10_Workflow].[VariableInt.TableType] readonly,
-@Bookmarks [A2v10_Workflow].[InstanceBookmarks.TableType] readonly
+@Instance a2wf.[Instance.TableType] readonly,
+@Variables a2wf.[Variables.TableType] readonly,
+@IntVariables a2wf.[VariableInt.TableType] readonly,
+@GuidVariables a2wf.[VariableGuid.TableType] readonly,
+@StringVariables a2wf.[VariableString.TableType] readonly,
+@Book a2wf.[Bookmarks.TableType] readonly,
+@Bookmarks a2wf.[InstanceBookmarks.TableType] readonly
 as
 begin
 	set nocount on;
 	set transaction isolation level read committed;
 	set xact_abort on;
 
-	declare @rtable table (id uniqueidentifier, wfid nvarchar(255));
-	declare @InstanceId uniqueidentifier;
-	declare @WorkflowId nvarchar(255);
-
 	begin tran;
-	merge [A2v10.Workflow].Instances as t
-
+	
+	merge a2wf.Instances as t
 	using @Instance as s
 	on s.Id = t.Id
 	when matched then update set 
 		t.[State] = s.[State]
 	when not matched by target then insert
 		(Id, Parent, WorkflowId, [Version], [State]) values
-		(s.Id, s.Parent, s.WorkflowId, s.[Version], s.[State])
-	output inserted.Id, inserted.WorkflowId into @rtable(id, wfid);
-	select @InstanceId = id, @WorkflowId = wfid from @rtable;
+		(s.Id, s.Parent, s.WorkflowId, s.[Version], s.[State]);
 
-	merge [A2v10.Workflow].InstanceVariablesInt as t
-	using @IntVariables as s
-	on t.[Name] = s.[Name] and t.InstanceId = @InstanceId and t.WorkflowId = @WorkflowId
+	with t as (
+		select tt.*
+		from a2wf.InstanceVariablesInt tt
+		inner join @Instance si on si.Id=tt.InstanceId
+	)
+	merge t
+	using (
+		select si.WorkflowId, InstanceId=si.Id, siv.*
+		from @Instance si
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @IntVariables siv on siv.ParentGUID=sv.[GUID]
+	) as s
+	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when matched then update set 
 		t.[Value] = s.[Value]
 	when not matched by target then insert
 		(InstanceId, [Name], WorkflowId, [Value]) values
-		(@InstanceId, s.[Name], @WorkflowId, s.[Value]);
+		(s.InstanceId, s.[Name], s.WorkflowId, s.[Value])
+	when not matched by source then delete;
 
-	merge [A2v10.Workflow].InstanceBookmarks as t
-	using @Bookmarks as s
-	on t.[Bookmark] = s.[Bookmark] and t.InstanceId = @InstanceId and t.WorkflowId = @WorkflowId
+	with t as (
+		select tt.*
+		from a2wf.InstanceVariablesGuid tt
+		inner join @Instance si on si.Id=tt.InstanceId
+	)
+	merge t
+	using (
+		select si.WorkflowId, InstanceId=si.Id, siv.*
+		from @Instance si
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @GuidVariables siv on siv.ParentGUID=sv.[GUID]
+	) as s
+	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
+	when matched then update set 
+		t.[Value] = s.[Value]
+	when not matched by target then insert
+		(InstanceId, [Name], WorkflowId, [Value]) values
+		(s.InstanceId, s.[Name], s.WorkflowId, s.[Value])
+	when not matched by source then delete;
+
+	with t as (
+		select tt.*
+		from a2wf.InstanceVariablesString tt
+		inner join @Instance si on si.Id=tt.InstanceId
+	)
+	merge t
+	using (
+		select si.WorkflowId, InstanceId=si.Id, siv.*
+		from @Instance si
+		inner join @Variables sv on sv.ParentGUID=si.[GUID]
+		inner join @StringVariables siv on siv.ParentGUID=sv.[GUID]
+	) as s
+	on t.[Name] = s.[Name] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
+	when matched then update set 
+		t.[Value] = s.[Value]
+	when not matched by target then insert
+		(InstanceId, [Name], WorkflowId, [Value]) values
+		(s.InstanceId, s.[Name], s.WorkflowId, s.[Value])
+	when not matched by source then delete;
+
+	with t as (
+		select tt.*
+		from a2wf.InstanceBookmarks tt
+		inner join @Instance si on si.Id=tt.InstanceId
+	)
+	merge t
+	using (
+		select si.WorkflowId, InstanceId=si.Id, sib.*
+		from @Instance si
+		inner join @Book sb on sb.ParentGUID=si.[GUID]
+		inner join @Bookmarks sib on sib.ParentGUID=sb.[GUID]
+	) as s
+	on t.[Bookmark] = s.[Bookmark] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when not matched by target then insert
 		(InstanceId, [Bookmark], WorkflowId) values
-		(@InstanceId, s.[Bookmark], @WorkflowId)
-	when not matched by source and t.InstanceId=@InstanceId and t.WorkflowId = @WorkflowId then delete;
+		(s.InstanceId, s.[Bookmark], s.WorkflowId)
+	when not matched by source then delete;
+
 
 	commit tran;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Catalog.Load]
+create or alter procedure a2wf.[Catalog.Load]
 @UserId bigint = null,
 @Id nvarchar(255)
 as
 begin
 	set nocount on;
 	set transaction isolation level read uncommitted;
-	select Id, Body, [Format] from [A2v10.Workflow].[Catalog] where Id=@Id;
+	select Id, Body, [Format] from a2wf.[Catalog] where Id=@Id;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Catalog.Save]
+create or alter procedure a2wf.[Catalog.Save]
 @UserId bigint = null,
 @Id nvarchar(255),
 @Body nvarchar(max),
@@ -279,14 +406,14 @@ as
 begin
 	set nocount on;
 	set transaction isolation level read committed;
-	update [A2v10.Workflow].[Catalog] set Body = @Body where Id=@Id;
+	update a2wf.[Catalog] set Body = @Body where Id=@Id;
 	if @@rowcount = 0
-		insert into [A2v10.Workflow].[Catalog] (Id, [Format], Body) 
+		insert into a2wf.[Catalog] (Id, [Format], Body) 
 		values (@Id, @Format, @Body)
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Catalog.Publish]
+create or alter procedure a2wf.[Catalog.Publish]
 @UserId bigint = null,
 @Id nvarchar(255)
 as
@@ -296,17 +423,17 @@ begin
 
 	declare @retval table(Id nvarchar(255), [Version] int);
 
-	insert into [A2v10.Workflow].Workflows (Id, [Format], [Text], [Version])
+	insert into a2wf.Workflows (Id, [Format], [Text], [Version])
 	output inserted.Id, inserted.[Version] into @retval(Id, [Version])
 	select Id, [Format], [Body], [Version] = 
-	(select isnull(max([Version]) + 1, 1) from [A2v10.Workflow].Workflows where Id=@Id)
-	from [A2v10.Workflow].[Catalog] where Id=@Id;
+	(select isnull(max([Version]) + 1, 1) from a2wf.Workflows where Id=@Id)
+	from a2wf.[Catalog] where Id=@Id;
 
 	select Id, [Version] from @retval;
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Workflows.Index]
+create or alter procedure a2wf.[Workflows.Index]
 @UserId bigint = null
 as
 begin
@@ -315,15 +442,15 @@ begin
 
 	select [Workflows!TWorkflow!Array] = null, [Id!!Id] = c.Id, 
 		c.[DateCreated], c.[Format],
-		InstanceCount = (select count(*) from [A2v10.Workflow].Instances i 
+		InstanceCount = (select count(*) from a2wf.Instances i 
 			where WorkflowId = c.Id),
-		[Version] = (select max([Version]) from [A2v10.Workflow].Workflows w where w.Id = c.Id)
-	from [A2v10.Workflow].[Catalog] c 
+		[Version] = (select max([Version]) from a2wf.Workflows w where w.Id = c.Id)
+	from a2wf.[Catalog] c 
 	order by DateCreated desc
 end
 go
 ------------------------------------------------
-create or alter procedure [A2v10.Workflow].[Instances.Index]
+create or alter procedure a2wf.[Instances.Index]
 @UserId bigint = null
 as
 begin
@@ -333,17 +460,7 @@ begin
 	select [Instances!TWorkflow!Array] = null, 
 		[Id!!Id] = i.Id, i.WorkflowId, i.[Version], i.[DateCreated], i.DateModified,
 		i.[State], i.ExecutionStatus
-	from [A2v10.Workflow].Instances i 
+	from a2wf.Instances i 
 	order by DateModified desc
 end
 go
-
-
-/*
-select * from [A2v10.Workflow].Workflows order by DateCreated desc
-
-insert into [A2v10.Workflow].[Catalog] (Id, Body, [Format])
-select Id, [Text], [Format] from [A2v10.Workflow].Workflows where Id=N'Parallel_2' and [Version] = 1
-
---insert into [A2v10.Workflow].Workflows (Id, [Version], [Format]) values (N'First BPMN', 1, N'xaml')
-*/

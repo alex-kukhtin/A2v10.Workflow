@@ -23,7 +23,7 @@ namespace TestSite.Controllers
 		{
 			var prms = new ExpandoObject();
 			prms.TryAdd("Id", id);
-			var model = await _dbContext.LoadModelAsync(null, "[A2v10.Workflow].[Instance.Load]", prms);
+			var model = await _dbContext.LoadModelAsync(null, "a2wf.[Instance.Load]", prms);
 			var stateJson = model.Eval<String>("Instance.State");
 
 			var stateObj = JsonConvert.DeserializeObject<ExpandoObject>(stateJson);
