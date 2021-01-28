@@ -74,7 +74,6 @@ namespace A2v10.Workflow.Tests
 			var eo = val as ExpandoObject;
 			Assert.AreEqual("value", eo.Get<String>("prop"));
 			Assert.AreEqual("first", eo.Get<String>("procedure"));
-			int z = 55;
 		}
 	}
 }

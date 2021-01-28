@@ -51,10 +51,20 @@ begin
 		[ExecutionStatus] nvarchar(255) null,
 		DateCreated datetime not null constraint DF_Instances_DateCreated default(getutcdate()),
 		DateModified datetime not null constraint DF_Workflows_Modified default(getutcdate()),
+		Lock uniqueidentifier null,
+		LockDate datetime null,
 		constraint FK_Instances_WorkflowId_Workflows foreign key (WorkflowId, [Version]) 
 			references a2wf.Workflows(Id, [Version])
 	);
 	create unique index IDX_Instances_WorkflowId_Id on a2wf.Instances (WorkflowId, Id) with (fillfactor = 70);
+end
+go
+------------------------------------------------
+-- TODO: remove
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Instances' and COLUMN_NAME=N'Lock')
+begin
+	alter table a2wf.Instances add Lock uniqueidentifier null;
+	alter table a2wf.Instances add LockDate datetime null;
 end
 go
 ------------------------------------------------
@@ -161,11 +171,33 @@ as
 begin
 	set nocount on;
 	set transaction isolation level read uncommitted;
-	select [Instance!TInstance!Object] = null, [Id!!Id] = Id, [WorkflowId], [Version], [State], 
-		ExecutionStatus, 
-		DateCreated, DateModified
-	from a2wf.Instances 
-	where Id=@Id;
+	declare @inst table(id uniqueidentifier);
+
+	update a2wf.Instances set Lock=newid(), LockDate = getutcdate()
+	output inserted.Id into @inst(Id)
+	where Id=@Id and Lock is null;
+
+	select [Instance!TInstance!Object] = null, [Id!!Id] = i.Id, [WorkflowId], [Version], [State], 
+		ExecutionStatus, Lock
+	from @inst t inner join a2wf.Instances i on t.Id = i.Id
+	where t.Id=@Id;
+end
+go
+------------------------------------------------
+create or alter procedure a2wf.[Instance.Create]
+@UserId bigint = null,
+@Id uniqueidentifier,
+@Parent uniqueidentifier,
+@Version int = 0,
+@WorkflowId nvarchar(255),
+@ExecutionStatus nvarchar(255)
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+	set xact_abort on;
+	insert into a2wf.Instances(Id, Parent, WorkflowId, [Version], ExecutionStatus)
+	values (@Id, @Parent, @WorkflowId, @Version, @ExecutionStatus);
 end
 go
 ------------------------------------------------
@@ -180,9 +212,9 @@ create type a2wf.[Instance.TableType] as table
 (
 	[GUID] uniqueidentifier,
 	Id uniqueidentifier,
-	Parent uniqueidentifier,
-	[Version] int,
-	[WorkflowId] nvarchar(255) not null,
+	WorkflowId nvarchar(255),
+	[ExecutionStatus] nvarchar(255) null,
+	Lock uniqueidentifier,
 	[State] nvarchar(max)
 )
 go
@@ -294,19 +326,34 @@ begin
 
 	begin tran;
 	
-	merge a2wf.Instances as t
+	declare @rtable table (id uniqueidentifier);
+	with ti as (
+		select t.Id, t.[State], t.DateModified, t.ExecutionStatus, t.Lock, t.LockDate
+		from a2wf.Instances t
+		inner join @Instance p on p.Id = t.Id and t.Lock = p.Lock
+	)
+	merge ti as t
 	using @Instance as s
 	on s.Id = t.Id
 	when matched then update set 
-		t.[State] = s.[State]
-	when not matched by target then insert
-		(Id, Parent, WorkflowId, [Version], [State]) values
-		(s.Id, s.Parent, s.WorkflowId, s.[Version], s.[State]);
+		t.[State] = s.[State],
+		t.DateModified = getutcdate(),
+		t.ExecutionStatus = s.ExecutionStatus,
+		t.Lock = null,
+		t.LockDate = null
+	output inserted.Id into @rtable;
+	
+	if not exists(select id from @rtable)
+	begin
+		declare @wfid nvarchar(255);
+		select @wfid = cast(Id as nvarchar(255)) from @Instance;
+		raiserror(N'Failed to update workflow (id = %s', 16, -1, @wfid) with nowait;
+	end;
 
 	with t as (
 		select tt.*
 		from a2wf.InstanceVariablesInt tt
-		inner join @Instance si on si.Id=tt.InstanceId
+		inner join @Instance si on si.Id = tt.InstanceId
 	)
 	merge t
 	using (
@@ -380,7 +427,6 @@ begin
 		(InstanceId, [Bookmark], WorkflowId) values
 		(s.InstanceId, s.[Bookmark], s.WorkflowId)
 	when not matched by source then delete;
-
 
 	commit tran;
 end

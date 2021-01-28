@@ -34,13 +34,24 @@ namespace A2v10.Workflow.Storage
 			throw new NotImplementedException();
 		}
 
+		public Task Create(IInstance instance)
+		{
+			if (_memory.ContainsKey(instance.Id))
+				throw new WorkflowExecption($"Instance storage. Instance with id = {instance.Id} has been already created");
+			var si = new SavedInstance(instance.Workflow.Root, _serializer.Serialize(instance.State));
+			_memory.Add(instance.Id, si);
+			return Task.CompletedTask;
+		}
+
 		public Task Save(IInstance instance)
 		{
-			var si = new SavedInstance(instance.Workflow.Root, _serializer.Serialize(instance.State));
 			if (_memory.ContainsKey(instance.Id))
+			{
+				var si = new SavedInstance(instance.Workflow.Root, _serializer.Serialize(instance.State));
 				_memory[instance.Id] = si;
+			}
 			else
-				_memory.Add(instance.Id, si);
+				throw new WorkflowExecption($"Instance storage. Instance with id = {instance.Id} not found");
 			return Task.CompletedTask;
 		}
 	}

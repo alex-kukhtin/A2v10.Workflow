@@ -62,7 +62,8 @@ namespace A2v10.Workflow.Tests.Serialization
 			var ident = await wfs.PublishAsync(wfc, "test1");
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			await wfe.StartAsync(ident, null);
+			var inst = await wfe.CreateAsync(ident);
+			await wfe.RunAsync(inst.Id);
 		}
 
 		[TestMethod]
@@ -115,7 +116,8 @@ namespace A2v10.Workflow.Tests.Serialization
 			Assert.AreEqual(2, ident.Version);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			var inst = await wfe.StartAsync(ident, new { x = 5 });
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst.Id, new { x = 5 });
 
 			Assert.AreEqual(10, inst.Result.Get<Int32>("x"));
 
@@ -167,7 +169,8 @@ namespace A2v10.Workflow.Tests.Serialization
 			Assert.AreEqual(2, ident.Version);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			var inst = await wfe.StartAsync(ident, new { X = 5 });
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst.Id, new { X = 5 });
 			Assert.AreEqual(0, inst.Result.Get<Int32>("x"));
 		}
 	}

@@ -55,7 +55,8 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			await wfe.StartAsync(process, null);
+			var inst = await wfe.CreateAsync(process, null);
+			await wfe.RunAsync(inst.Id);
 		}
 
 
@@ -123,7 +124,8 @@ namespace A2v10.Workflow.Tests
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			await wfe.StartAsync(process, null);
+			var inst = await wfe.CreateAsync(process, null);
+			await wfe.RunAsync(inst.Id);
 		}
 	}
 }

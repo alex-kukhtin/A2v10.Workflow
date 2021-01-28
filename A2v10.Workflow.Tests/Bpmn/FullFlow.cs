@@ -34,7 +34,8 @@ namespace A2v10.Workflow.Tests
 			var ident = await  wfs.PublishAsync(wfc, wfId);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			var inst = await wfe.StartAsync(ident, new { X = 5 });
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst, new { X = 5 });
 			var res = inst.Result;
 
 			Assert.AreEqual(12, res.Get<Int32>("X"));
@@ -60,7 +61,8 @@ namespace A2v10.Workflow.Tests
 			var ident = await wfs.PublishAsync(wfc, wfId);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			var inst = await wfe.StartAsync(ident, new { X = 5 });
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst.Id, new { X = 5 });
 			var res = inst.Result;
 			Assert.AreEqual(10, res.Get<Int32>("X"));
 
@@ -91,12 +93,14 @@ namespace A2v10.Workflow.Tests
 			var ident = await wfs.PublishAsync(wfc, wfId);
 
 			var wfe = sp.GetService<IWorkflowEngine>();
-			var inst = await wfe.StartAsync(ident, new { X = 6 });
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst.Id, new { X = 6 });
 			var res = inst.Result;
 
 			Assert.AreEqual("Yes", res.Get<String>("R"));
 
-			inst = await wfe.StartAsync(ident, new { X = 4 });
+			inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst.Id, new { X = 4 });
 			res = inst.Result;
 			Assert.AreEqual("No", res.Get<String>("R"));
 		}

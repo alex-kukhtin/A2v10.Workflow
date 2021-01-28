@@ -14,6 +14,9 @@ namespace A2v10.Workflow
 		public Guid Id { get; init; }
 		public Guid? Parent { get; init; }
 
+		public WorkflowExecutionStatus ExecutionStatus { get; set; }
+		public Guid? Lock { get; init; }
+
 		public ExpandoObject Result { get; set; }
 		public ExpandoObject State { get; set; }
 

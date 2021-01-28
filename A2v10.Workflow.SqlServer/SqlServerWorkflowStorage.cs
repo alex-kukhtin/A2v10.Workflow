@@ -1,8 +1,7 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using A2v10.Data.Interfaces;
@@ -33,7 +32,7 @@ namespace A2v10.Workflow.SqlServer
 		public async Task<IWorkflow> LoadAsync(IIdentity identity)
 		{
 			var eo = await LoadWorkflowAsync(identity);
-			return new Workflow()
+			var wf = new Workflow()
 			{
 				Identity = new Identity()
 				{
@@ -42,6 +41,8 @@ namespace A2v10.Workflow.SqlServer
 				},
 				Root = _serializer.DeserializeActitity(eo.Get<String>("Text"), eo.Get<String>("Format"))
 			};
+			wf.Root.OnEndInit();
+			return wf;
 		}
 
 		public async Task<String> LoadSourceAsync(IIdentity identity)

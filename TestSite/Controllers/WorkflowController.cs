@@ -53,7 +53,8 @@ namespace TestSite.Controllers
 		public async Task<IActionResult> Run(String id, Int32 version)
 		{
 			var identity = new Identity() { Id = id, Version = version };
-			await _engine.StartAsync(identity); //, new { X = 5 });
+			var inst = await _engine.CreateAsync(identity); //, new { X = 5 });
+			await _engine.RunAsync(inst.Id);
 			return Redirect("/");
 		}
 
@@ -82,7 +83,8 @@ namespace TestSite.Controllers
 			var prms = JsonConvert.DeserializeObject<ExpandoObject>(model.Parameter);
 			if (prms != null && (prms as IDictionary<String, Object>).Count == 0)
 				prms = null;
-			await _engine.StartAsync(new Identity() { Id = model.Id }, prms);
+			var inst = await _engine.CreateAsync(new Identity() { Id = model.Id });
+			await _engine.RunAsync(inst.Id, prms);
 			return Redirect("/");
 		}
 	}

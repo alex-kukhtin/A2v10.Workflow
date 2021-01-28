@@ -31,7 +31,8 @@ namespace A2v10.Workflow.Tests.Runtime
 			};
 
 			var wfe = TestEngine.CreateInMemoryEngine();
-			var inst = await wfe.StartAsync(root, null, new { x = 5 });
+			var inst = await wfe.CreateAsync(root, null);
+			inst = await wfe.RunAsync(inst.Id, new { x = 5 });
 			Assert.AreEqual(10, inst.Result.Get<Int32>("x"));
 
 			var resInst = await wfe.ResumeAsync(inst.Id, "Bookmark1");

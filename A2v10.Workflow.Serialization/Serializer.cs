@@ -52,6 +52,8 @@ namespace A2v10.Workflow.Serialization
 
 		public ExpandoObject Deserialize(String text)
 		{
+			if (text == null)
+				return null;
 			return JsonConvert.DeserializeObject<ExpandoObject>(text, _jsonSettings);
 		}
 

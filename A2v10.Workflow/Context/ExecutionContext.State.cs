@@ -152,6 +152,14 @@ namespace A2v10.Workflow
 			return eo;
 		}
 
+		public WorkflowExecutionStatus GetExecutionStatus()
+		{
+			WorkflowExecutionStatus status = WorkflowExecutionStatus.Complete;
+			if (_bookmarks.Any())
+				status = WorkflowExecutionStatus.Idle;
+			return status;
+		}
+
 		public void SetState(ExpandoObject state)
 		{
 			SetActivityStates(state.Get<ExpandoObject>("State"));

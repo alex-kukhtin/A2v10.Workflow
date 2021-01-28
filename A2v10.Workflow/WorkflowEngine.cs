@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
+
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Interfaces.Api;
 
@@ -21,29 +22,43 @@ namespace A2v10.Workflow
 			_instanceStorage = _serviceProvider.GetService<IInstanceStorage>() ?? throw new NullReferenceException("IInstanceStorage");
 		}
 
-		public async ValueTask<IInstance> StartAsync(IActivity root, IIdentity identity, Object args = null)
+		public async ValueTask<IInstance> CreateAsync(IActivity root, IIdentity identity)
 		{
 			var inst = new Instance()
 			{
 				Id = Guid.NewGuid(),
-				Workflow = new Workflow() { 
-					Root = root, 
+				Workflow = new Workflow() {
+					Root = root,
 					Identity = identity
 				}
 			};
 			root.OnEndInit();
-			var context = new ExecutionContext(_serviceProvider, inst.Workflow.Root, args);
-			context.Schedule(inst.Workflow.Root, null, null);
-			await context.RunAsync();
-			SetInstanceState(inst, context);
-			await _instanceStorage.Save(inst);
+			await _instanceStorage.Create(inst);
 			return inst;
 		}
 
-		public async ValueTask<IInstance> StartAsync(IIdentity identity, Object args = null)
+		public async ValueTask<IInstance> CreateAsync(IIdentity identity)
 		{
 			var wf = await _workflowStorage.LoadAsync(identity);
-			return await StartAsync(wf.Root, wf.Identity, args);
+			return await CreateAsync(wf.Root, wf.Identity);
+		}
+
+		public async ValueTask<IInstance> RunAsync(IInstance instance, Object args = null)
+		{
+			if (instance.ExecutionStatus != WorkflowExecutionStatus.Init)
+				throw new WorkflowExecption($"Instance (id={instance.Id}) is already running");
+			var context = new ExecutionContext(_serviceProvider, instance.Workflow.Root, args);
+			context.Schedule(instance.Workflow.Root, null, null);
+			await context.RunAsync();
+			SetInstanceState(instance, context);
+			await _instanceStorage.Save(instance);
+			return instance;
+		}
+
+		public async ValueTask<IInstance> RunAsync(Guid id, Object args = null)
+		{
+			IInstance instance = await _instanceStorage.Load(id);
+			return await RunAsync(instance, args);
 		}
 
 
@@ -60,28 +75,30 @@ namespace A2v10.Workflow
 			return inst;
 		}
 
-		void SetInstanceState(IInstance inst, ExecutionContext context)
+		static void SetInstanceState(IInstance inst, ExecutionContext context)
 		{
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
 			inst.ExternalVariables = context.GetExternalVariables(inst.State);
 			inst.ExternalBookmarks = context.GetExternalBookmarks();
-		}
-
-
-		public async ValueTask<IStartProcessResponse> StartAsync(IStartProcessRequest prm)
-		{
-			var i = await StartAsync(prm.Identity, prm.Parameters);
-			return new StartProcessResponse()
-			{
-				InstanceId = i.Id
-			};
+			inst.ExecutionStatus = context.GetExecutionStatus();
 		}
 
 		public async ValueTask<IResumeProcessResponse> ResumeAsync(IResumeProcessRequest prm)
 		{
 			await ResumeAsync(prm.InstanceId, prm.Bookmark, prm.Result);
 			return new ResumeProcessResponse();
+		}
+
+
+		public async ValueTask<IStartProcessResponse> StartAsync(IStartProcessRequest prm)
+		{
+			var i = await CreateAsync(prm.Identity);
+			i = await RunAsync(i.Id, prm.Parameters);
+			return new StartProcessResponse()
+			{
+				InstanceId = i.Id
+			};
 		}
 	}
 }
