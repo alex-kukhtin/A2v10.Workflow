@@ -13,7 +13,7 @@ namespace A2v10.Workflow.WebHost.Services
 			throw new ApiException();
 		}
 
-		private class StartResp : IStartProcessResponse
+		private class StartResp : IStartProcessResponse, ICreateProcessResponse
 		{
 			public StartResp()
 			{
@@ -26,6 +26,18 @@ namespace A2v10.Workflow.WebHost.Services
 		{
 			if (prm.Identity.Id == "test")
 				return new ValueTask<IStartProcessResponse>(new StartResp());
+			throw new ApiException();
+		}
+
+		public ValueTask<ICreateProcessResponse> CreateAsync(ICreateProcessRequest prm)
+		{
+			if (prm.Identity.Id == "test")
+				return new ValueTask<ICreateProcessResponse>(new StartResp());
+			throw new ApiException();
+		}
+
+		public ValueTask<IRunProcessResponse> RunAsync(IRunProcessRequest prm)
+		{
 			throw new ApiException();
 		}
 	}

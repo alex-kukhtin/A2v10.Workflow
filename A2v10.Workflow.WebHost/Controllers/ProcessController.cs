@@ -21,6 +21,36 @@ namespace A2v10.Workflow.WebHost.Controllers
 		}
 
 		[HttpPost]
+		[Route("create")]
+		public async ValueTask<IActionResult> Create(CreateProcessRequest req)
+		{
+			try
+			{
+				var r = await api.CreateAsync(req);
+				return Ok(new CreateProcessResponse(r, false));
+			}
+			catch (ApiException e)
+			{
+				return StatusCode(422, new ErrorResponse(e));
+			}
+		}
+
+		[HttpPost]
+		[Route("run")]
+		public async ValueTask<IActionResult> Run(RunProcessRequest req)
+		{
+			try
+			{
+				var r = await api.RunAsync(req);
+				return Ok(new RunProcessResponse(r, false));
+			}
+			catch (ApiException e)
+			{
+				return StatusCode(422, new ErrorResponse(e));
+			}
+		}
+
+		[HttpPost]
 		[Route("start")]
 		public async ValueTask<IActionResult> Start(StartProcessRequest req)
 		{

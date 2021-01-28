@@ -100,5 +100,20 @@ namespace A2v10.Workflow
 				InstanceId = i.Id
 			};
 		}
+
+		public async ValueTask<ICreateProcessResponse> CreateAsync(ICreateProcessRequest prm)
+		{
+			var i = await CreateAsync(prm.Identity);
+			return new StartProcessResponse()
+			{
+				InstanceId = i.Id
+			};
+		}
+
+		public async ValueTask<IRunProcessResponse> RunAsync(IRunProcessRequest prm)
+		{
+			await RunAsync(prm.InstanceId, prm.Parameters);
+			return new ResumeProcessResponse();
+		}
 	}
 }

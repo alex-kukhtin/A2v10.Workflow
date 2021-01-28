@@ -8,6 +8,49 @@ using Newtonsoft.Json.Converters;
 namespace A2v10.Workflow.WebApi
 {
 	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
+	public record CreateProcessRequest : Request, ICreateProcessRequest
+	{
+		[JsonProperty(PropertyName = "workflow")]
+		public string Workflow { get; set; }
+		[JsonProperty(PropertyName = "version")]
+		public int Version { get; set; }
+
+		IIdentity ICreateProcessRequest.Identity => new Identity(Workflow, Version);
+	}
+
+	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
+	public record CreateProcessResponse : Response, ICreateProcessResponse
+	{
+		public CreateProcessResponse(ICreateProcessResponse src, bool statusFlag = true) : base(statusFlag, src)
+		{
+			InstanceId = src.InstanceId;
+		}
+
+		[JsonProperty(PropertyName = "instanceId")]
+		public Guid InstanceId { get; }
+	}
+
+	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
+	public record RunProcessRequest : Request, IRunProcessRequest
+	{
+		[JsonProperty(PropertyName = "instanceId")]
+		public Guid InstanceId { get; set; }
+		[JsonProperty(PropertyName = "parameters", ItemConverterType = typeof(ExpandoObjectConverter))]
+		public ExpandoObject Parameters { get; set; }
+
+		object IRunProcessRequest.Parameters => Parameters;
+	}
+
+	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
+	public record RunProcessResponse : Response
+	{
+		public RunProcessResponse(IRunProcessResponse src, bool statusFlag = true) : base(statusFlag, src)
+		{
+
+		}
+	}
+
+	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
 	public record StartProcessRequest : Request, IStartProcessRequest
 	{
 		[JsonProperty(PropertyName = "workflow")]

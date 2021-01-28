@@ -156,11 +156,12 @@ create or alter procedure a2wf.[Workflow.Load]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
-	if @Version = 0
-		select @Version = max([Version]) from a2wf.Workflows where Id=@Id;
-	select [Id], [Format], [Version], [Text] from a2wf.Workflows 
-	where Id=@Id and [Version]=@Version;
+	set transaction isolation level read committed;
+	
+	select top (1) [Id], [Format], [Version], [Text]
+	from a2wf.Workflows
+	where Id=@Id and (@Version=0 or [Version]=@Version)
+	order by [Version] desc;
 end
 go
 ------------------------------------------------
@@ -170,7 +171,7 @@ create or alter procedure a2wf.[Instance.Load]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 	declare @inst table(id uniqueidentifier);
 
 	update a2wf.Instances set Lock=newid(), LockDate = getutcdate()
@@ -438,7 +439,7 @@ create or alter procedure a2wf.[Catalog.Load]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 	select Id, Body, [Format] from a2wf.[Catalog] where Id=@Id;
 end
 go
@@ -484,7 +485,7 @@ create or alter procedure a2wf.[Workflows.Index]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 
 	select [Workflows!TWorkflow!Array] = null, [Id!!Id] = c.Id, 
 		c.[DateCreated], c.[Format],
@@ -501,7 +502,7 @@ create or alter procedure a2wf.[Instances.Index]
 as
 begin
 	set nocount on;
-	set transaction isolation level read uncommitted;
+	set transaction isolation level read committed;
 
 	select [Instances!TWorkflow!Array] = null, 
 		[Id!!Id] = i.Id, i.WorkflowId, i.[Version], i.[DateCreated], i.DateModified,

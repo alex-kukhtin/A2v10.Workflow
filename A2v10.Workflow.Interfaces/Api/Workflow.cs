@@ -8,6 +8,8 @@ namespace A2v10.Workflow.Interfaces.Api
 {
 	public interface IWorkflowApi
 	{
+		ValueTask<ICreateProcessResponse> CreateAsync(ICreateProcessRequest prm);
+		ValueTask<IRunProcessResponse> RunAsync(IRunProcessRequest prm);
 		ValueTask<IStartProcessResponse> StartAsync(IStartProcessRequest prm);
 		ValueTask<IResumeProcessResponse> ResumeAsync(IResumeProcessRequest prm);
 	}
@@ -20,6 +22,27 @@ namespace A2v10.Workflow.Interfaces.Api
 	public interface IResponse
 	{
 
+	}
+
+	public interface ICreateProcessRequest : IRequest
+	{
+		IIdentity Identity { get; }
+	}
+
+	public interface ICreateProcessResponse : IResponse
+	{
+		Guid InstanceId { get; }
+	}
+
+	public interface IRunProcessRequest : IRequest
+	{
+		Guid InstanceId { get; }
+		Object Parameters { get; }
+	}
+
+	public interface IRunProcessResponse : IResponse
+	{
+		
 	}
 
 	public interface IStartProcessRequest : IRequest

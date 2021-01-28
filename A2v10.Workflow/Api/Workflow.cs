@@ -10,12 +10,12 @@ namespace A2v10.Workflow.Interfaces.Api
 	{
 	}
 
-	internal record StartProcessResponse : Response, IStartProcessResponse
+	internal record StartProcessResponse : Response, IStartProcessResponse, ICreateProcessResponse
 	{
 		public Guid InstanceId { get; init; }
 	}
 
-	internal record ResumeProcessResponse : Response, IResumeProcessResponse
+	internal record ResumeProcessResponse : Response, IResumeProcessResponse, IRunProcessResponse
 	{
 	}
 }
