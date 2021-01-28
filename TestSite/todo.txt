@@ -2,8 +2,6 @@
 
 6. Убрать camunda в id элементов
 8. Variable. Value?
-12. Не работает namespace для атрибутов
-	XamlReadException: Property xsi:type not found in type TimeDuration
 15. Сохранение Track
 16. Instance -> ExecutionState
 18. 
