@@ -27,14 +27,4 @@ let bpmnModeler = new BpmnModeler({
 
 window.Modeler = bpmnModeler;
 
-window.addEventListener("beforeunload", function (ev) {
-	let cs = bpmnModeler.get("commandStack");
-	if (cs.canUndo()) {
-		ev.preventDefault();
-		event.returnValue = ''; // chrome
-	}
-});
 
-bpmnModeler.on('commandStack.changed', function () {
-	console.dir('commandStack.changed');
-});

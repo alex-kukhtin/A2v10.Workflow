@@ -36,6 +36,14 @@
 		});
 	});
 
+	window.addEventListener("beforeunload", function (ev) {
+		let cs = bpmnModeler.get("commandStack");
+		if (cs.canUndo()) {
+			ev.preventDefault();
+			event.returnValue = ''; // chrome
+		}
+	});
+
 	document.getElementById('tb-save').addEventListener('click', ev => {
 		ev.preventDefault();
 		ev.stopPropagation();
@@ -46,10 +54,12 @@
 			fd.append('content', result.xml);
 			var rq = new XMLHttpRequest();
 			rq.onload = (ev) => {
-				if (rq.status === 200)
+				if (rq.status === 200) {
+					bpmnModeler.get("commandStack").clear();
 					window.location.replace(`/editor/index/${id}`);
-				else
-					alert('error');
+				} else {
+					alert('save failed');
+				}
 			};
 			rq.open("POST", `/editor/set/${id}`);
 			rq.send(fd);
