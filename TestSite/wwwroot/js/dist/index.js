@@ -85,6 +85,17 @@ let bpmnModeler = new _Modeler.default({
   }
 });
 window.Modeler = bpmnModeler;
+window.addEventListener("beforeunload", function (ev) {
+  let cs = bpmnModeler.get("commandStack");
+
+  if (cs.canUndo()) {
+    ev.preventDefault();
+    event.returnValue = ''; // chrome
+  }
+});
+bpmnModeler.on('commandStack.changed', function () {
+  console.dir('commandStack.changed');
+});
 
 },{"./descriptors/workflow":1,"./provider/workflow":13,"bpmn-js-properties-panel":21,"bpmn-js/lib/Modeler":67}],3:[function(require,module,exports){
 'use strict';
