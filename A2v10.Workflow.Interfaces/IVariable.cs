@@ -32,5 +32,7 @@ namespace A2v10.Workflow.Interfaces
 
 		public Boolean IsArgument { get; }
 		public Boolean IsResult { get; }
+
+		String Assignment();
 	}
 }

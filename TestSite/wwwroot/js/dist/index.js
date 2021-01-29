@@ -1568,6 +1568,26 @@ function VariablesDetailProps(group, element, translate) {
 
   }));
 
+  let valueProp = _entryFactory.default.validationAwareTextField(translate, {
+    id: 'var_value',
+    label: 'Value',
+    modelProperty: 'Value'
+  });
+
+  valueProp.get = (elem, node) => {
+    return _extensionElements.default.getSelectedVariableObject(node, elem) || {};
+  };
+
+  valueProp.set = (elem, values, node) => {
+    return setValue('Value', elem, values, node);
+  };
+
+  valueProp.validate = (elem, values, node) => {
+    return {};
+  };
+
+  group.entries.push(valueProp);
+
   if ((0, _ModelUtil.is)(element, "bpmn:Process")) {
     group.entries.push(_entryFactory.default.checkbox(translate, {
       id: 'var_external',

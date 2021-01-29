@@ -52,7 +52,7 @@ namespace A2v10.Workflow
 					v.Dir switch
 					{
 						VariableDirection.Const => $"const {v.Name}; ",
-						_ => $"let {v.Name}; "
+						_ => $"let {v.Name}{v.Assignment()}; "
 					}
 				);
 

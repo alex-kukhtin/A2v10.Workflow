@@ -1,5 +1,6 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Bpmn
@@ -22,6 +23,11 @@ namespace A2v10.Workflow.Bpmn
 		{
 			if (!HasOutgoing)
 				return null;
+			if (Outgoing.Count() == 1)
+			{
+				// join flows
+				return Parent.FindElement<SequenceFlow>(Outgoing.ElementAt(0).Text);
+			}
 			foreach (var og in Outgoing)
 			{
 				var flow = Parent.FindElement<SequenceFlow>(og.Text);

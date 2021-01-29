@@ -117,7 +117,7 @@ namespace A2v10.Workflow
 
 		public void ExecuteResult(String refer, String name, Object result)
 		{
-			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Execute, refer, name, result));
+			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.ExecuteResult, refer, name, result));
 			var func = GetFunc(refer, name);
 			if (func == null)
 				throw new WorkflowExecption($"Script element {refer}.{name} not found");
