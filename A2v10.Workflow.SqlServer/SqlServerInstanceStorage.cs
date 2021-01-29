@@ -65,8 +65,11 @@ namespace A2v10.Workflow.SqlServer
 			ieo.Set("ExecutionStatus", instance.ExecutionStatus.ToString());
 			ieo.Set("Lock", instance.Lock);
 			ieo.Set("State", _serializer.Serialize(instance.State));
-			ieo.Set("Variables", instance.ExternalVariables);
-			ieo.Set("Bookmarks", instance.ExternalBookmarks);
+
+			var instanceData = instance.InstanceData;
+			ieo.Set("Variables", instanceData.ExternalVariables);
+			ieo.Set("Bookmarks", instanceData.ExternalBookmarks);
+			ieo.Set("TrackRecords", instanceData.TrackRecords);
 
 			var root = new ExpandoObject();
 			root.Set("Instance", ieo);

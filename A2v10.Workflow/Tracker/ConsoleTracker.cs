@@ -1,5 +1,6 @@
 ﻿using A2v10.Workflow.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace A2v10.Workflow
 {
@@ -15,6 +16,18 @@ namespace A2v10.Workflow
 		public void Track(ITrackRecord record)
 		{
 			Console.WriteLine($"{_no++}: {record}");
+		}
+
+		public List<ITrackRecord> Records => null;
+
+		public void Start()
+		{
+			Console.WriteLine($"Start tracking");
+		}
+
+		public void Stop()
+		{
+			Console.WriteLine($"Stop tracking");
 		}
 	}
 }

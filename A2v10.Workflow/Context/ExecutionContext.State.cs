@@ -12,17 +12,17 @@ namespace A2v10.Workflow
 		ExpandoObject GetActivityStates()
 		{
 			var actState = new ExpandoObject();
-			var actStateD = actState as IDictionary<String, Object>;
 			foreach (var (refer, activity) in _activities)
 			{
 				if (activity is IStorable storable)
 				{
 					ActivityStorage storage = new ActivityStorage(StorageState.Storing, _activities);
 					storable.Store(storage);
-					actStateD.Add(refer, storage.Value);
+					if (storage.Value.Any())
+						actState.Set(refer, storage.Value);
 				}
 			}
-			if (actStateD.Count == 0)
+			if (!actState.Any())
 				return null;
 			return actState;
 		}
@@ -165,6 +165,21 @@ namespace A2v10.Workflow
 			SetActivityStates(state.Get<ExpandoObject>("State"));
 			SetScriptVariables(state.Get<ExpandoObject>("Variables"));
 			SetBookmarks(state.Get<ExpandoObject>("Bookmarks"));
+		}
+
+		public List<Object> GetTrackRecords()
+		{
+			var records = _tracker.Records;
+			if (records == null)
+				return null;
+
+			var lst = new List<Object>();
+			for (var i=0; i<records.Count; i++)
+				lst.Add(records[i].ToExpandoObject(i + 1 /*1-based*/));
+
+			if (lst.Count == 0)
+				return null;
+			return lst;
 		}
 	}
 }

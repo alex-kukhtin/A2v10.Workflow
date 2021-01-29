@@ -1,29 +1,35 @@
 ﻿
 using System;
+using System.Dynamic;
 
 namespace A2v10.Workflow.Tracker
 {
 	public enum ScriptTrackAction
 	{
-		Evaluate,
-		EvaluateResult,
-		Execute
+		// see: db
+		Evaluate = 0,
+		EvaluateResult = 1,
+		Execute = 2
 	}
 
 	public class ScriptTrackRecord : TrackRecord
 	{
-		private readonly String _message;
+		private readonly ScriptTrackAction _action;
 
 		public ScriptTrackRecord(ScriptTrackAction action, String refer, String name, Object result = null)
 			: base()
 		{
+			_action = action;
 			String strResult = result != null ? $", result:{result}" : String.Empty;
-			_message = $"Script:{action}: {{id: {refer}, name: '{name}'{strResult}}}";
+			Message = $"Script:{action}: {{id: {refer}, name: '{name}'{strResult}}}";
 		}
 
-		public override String ToString()
+		public override ExpandoObject ToExpandoObject(int no)
 		{
-			return _message;
+			var eo = CreateExpando(no);
+			eo.Set("Kind", (Int32)TrackRecordKind.Script);
+			eo.Set("Action", (Int32) _action);
+			return eo;
 		}
 	}
 }

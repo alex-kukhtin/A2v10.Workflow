@@ -48,6 +48,7 @@ namespace A2v10.Workflow
 			_root.Traverse(toMapArg);
 
 			_script = BuildScript(args);
+			_tracker.Start();
 		}
 
 		ScriptEngine BuildScript(Object args)
@@ -118,6 +119,7 @@ namespace A2v10.Workflow
 				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, queueItem.Activity, queueItem.Token));
 				await queueItem.Action(this, queueItem.Token, queueItem.OnComplete);
 			}
+			_tracker.Stop();
 		}
 
 		public ValueTask ResumeAsync(String bookmark, Object result)

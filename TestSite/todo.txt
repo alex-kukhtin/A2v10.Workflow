@@ -2,8 +2,6 @@
 
 6. Убрать camunda в id элементов
 8. Variable. Value?
-15. Сохранение Track
-16. Instance -> ExecutionState
 18. 
 переделать свойства (WorkflowPropertiesProvider.js)
 import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps';
@@ -11,4 +9,3 @@ import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventPr
 import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps';
 import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
 
-19. ExecutionState -> Init, Hold, Idle, Complete

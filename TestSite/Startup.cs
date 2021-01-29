@@ -40,7 +40,7 @@ namespace TestSite
 			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();
 
 			services.AddSingleton<ISerializer, Serializer>();
-			services.AddTransient<ITracker, NullTracker>();
+			services.AddTransient<ITracker, InstanceTracker>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

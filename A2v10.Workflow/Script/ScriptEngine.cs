@@ -32,7 +32,7 @@ namespace A2v10.Workflow
 			var _nativeObjects = _serviceProvider.GetService<IScriptNativeObjectProvider>();
 			_engine.AddNativeObjects(_nativeObjects);
 
-			Console.WriteLine(script);
+			//Console.WriteLine(script);
 			var func = _engine.Execute(script).GetCompletionValue();
 			_scriptData = func.Invoke().ToObject() as ExpandoObject;
 			if (args != null)

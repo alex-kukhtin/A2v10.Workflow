@@ -79,9 +79,14 @@ namespace A2v10.Workflow
 		{
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
-			inst.ExternalVariables = context.GetExternalVariables(inst.State);
-			inst.ExternalBookmarks = context.GetExternalBookmarks();
 			inst.ExecutionStatus = context.GetExecutionStatus();
+			var instData = new InstanceData()
+			{
+				ExternalVariables = context.GetExternalVariables(inst.State),
+				ExternalBookmarks = context.GetExternalBookmarks(),
+				TrackRecords = context.GetTrackRecords()
+			};
+			inst.InstanceData = instData;
 		}
 
 		public async ValueTask<IResumeProcessResponse> ResumeAsync(IResumeProcessRequest prm)

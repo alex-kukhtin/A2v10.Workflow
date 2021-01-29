@@ -32,7 +32,7 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 			services.AddSingleton<IWorkflowApi, WorkflowEngine>();
 			services.AddSingleton<ISerializer, Serializer>();
-			services.AddTransient<ITracker, NullTracker>();
+			services.AddTransient<ITracker, InstanceTracker>();
 		}
 
 		private static void ConfigureMvc(MvcOptions opt)
