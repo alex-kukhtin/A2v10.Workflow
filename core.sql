@@ -154,16 +154,18 @@ as
 begin
 	set nocount on;
 	set transaction isolation level read committed;
-
-	declare @rtable table(Id nvarchar(255), [Version] int);
 	
 	insert into a2wf.Workflows (Id, [Format], [Text], [Version])
-	output inserted.Id, inserted.[Version] into @rtable
-	values (@Id, @Format, @Text,
-		(select isnull(max([Version]), 0) + 1 from a2wf.Workflows where Id=@Id)
-	);
+	output inserted.Id, inserted.[Version]
+	select v.Id, v.[Format], v.[Text], coalesce(cs.[Version], 0) + 1
+	from (values (@Id, @Format, @Text)) v (Id, [Format], [Text])
+	left join (
+		select c.Id, c.[Version], c.[Format], c.[Text], c.DateCreated,
+			RN=row_number() over (partition by c.Id order by c.[Version] desc)
+		from a2wf.Workflows c
+	) cs on cs.Id=v.Id and cs.RN=1
+	where not (v.[Format]=cs.[Format] and v.[Text]=cs.[Text]);
 
-	select [Id], [Version] from @rtable;
 end
 go
 ------------------------------------------------
