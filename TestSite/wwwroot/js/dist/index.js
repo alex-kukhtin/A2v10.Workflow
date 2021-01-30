@@ -70,6 +70,7 @@ var _workflow2 = _interopRequireDefault(require("./descriptors/workflow"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//import BpmnViewer from "bpmn-js/lib/Viewer";
 let canvas = document.getElementById('canvas');
 let bpmnModeler = new _Modeler.default({
   container: canvas,
@@ -84,9 +85,20 @@ let bpmnModeler = new _Modeler.default({
     workflow: _workflow2.default
   }
 });
-window.Modeler = bpmnModeler;
+/*
+const bpmnViewer = new BpmnViewer(
+	{
+		container: canvas,
+		keyboard: {
+			bindTo: window
+		}
+	}
+);
+*/
 
-},{"./descriptors/workflow":1,"./provider/workflow":13,"bpmn-js-properties-panel":21,"bpmn-js/lib/Modeler":67}],3:[function(require,module,exports){
+window.Modeler = bpmnModeler; // window.Viewer = bpmnViewer;
+
+},{"./descriptors/workflow":1,"./provider/workflow":13,"bpmn-js-properties-panel":25,"bpmn-js/lib/Modeler":67}],3:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -155,7 +167,7 @@ var checkbox = function (translate, options, defaultParameters) {
 
 module.exports = checkbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],4:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],4:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -347,7 +359,7 @@ EntryFactory.toggleSwitch = function (translate, options) {
 
 module.exports = EntryFactory;
 
-},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":31,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":33,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":34,"bpmn-js-properties-panel/lib/factory/LabelFactory":37,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":38,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":40,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":43,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],5:[function(require,module,exports){
+},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":35,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":37,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":38,"bpmn-js-properties-panel/lib/factory/LabelFactory":41,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":42,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":44,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":47,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],5:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -412,7 +424,7 @@ var textField = function (translate, options, defaultParameters) {
 
 module.exports = textField;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"min-dom":601}],6:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],6:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -481,7 +493,7 @@ var checkbox = function (translate, options, defaultParameters) {
 
 module.exports = checkbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],7:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],7:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -673,7 +685,7 @@ EntryFactory.toggleSwitch = function (translate, options) {
 
 module.exports = EntryFactory;
 
-},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":31,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":33,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":34,"bpmn-js-properties-panel/lib/factory/LabelFactory":37,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":38,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":40,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":43,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],8:[function(require,module,exports){
+},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":35,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":37,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":38,"bpmn-js-properties-panel/lib/factory/LabelFactory":41,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":42,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":44,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":47,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],8:[function(require,module,exports){
 'use strict';
 
 var _Utils = require("bpmn-js-properties-panel/lib/Utils");
@@ -803,7 +815,7 @@ var selectbox = function (translate, options, defaultParameters) {
 
 module.exports = selectbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"lodash/forEach":567,"min-dom":601}],9:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"lodash/forEach":567,"min-dom":601}],9:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -839,7 +851,7 @@ var textBox = function (translate, options, defaultParameters) {
 
 module.exports = textBox;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"min-dom":601}],10:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],10:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -904,7 +916,7 @@ var textField = function (translate, options, defaultParameters) {
 
 module.exports = textField;
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":36,"min-dom":601}],11:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],11:[function(require,module,exports){
 'use strict';
 
 var _TextInputEntryFactory = _interopRequireDefault(require("./TextInputEntryFactory"));
@@ -965,19 +977,19 @@ var _inherits = _interopRequireDefault(require("inherits"));
 
 var _PropertiesActivator = _interopRequireDefault(require("bpmn-js-properties-panel/lib/PropertiesActivator"));
 
-var _ProcessProps = _interopRequireDefault(require("bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps"));
-
 var _EventProps = _interopRequireDefault(require("bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps"));
-
-var _LinkProps = _interopRequireDefault(require("bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps"));
 
 var _documentationProps = _interopRequireDefault(require("../workflow/parts/bpmn/documentationProps"));
 
+var _conditionalProps = _interopRequireDefault(require("../workflow/parts/bpmn/conditionalProps"));
+
 var _idProps = _interopRequireDefault(require("../workflow/parts/bpmn/idProps"));
 
-var _NameProps = _interopRequireDefault(require("bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps"));
+var _processProps = _interopRequireDefault(require("../workflow/parts/bpmn/processProps"));
 
-var _conditionalProps = _interopRequireDefault(require("../workflow/parts/bpmn/conditionalProps"));
+var _nameProps = _interopRequireDefault(require("../workflow/parts/bpmn/nameProps"));
+
+var _linkProps = _interopRequireDefault(require("../workflow/parts/bpmn/linkProps"));
 
 var _scriptProps = _interopRequireDefault(require("./parts/scriptProps"));
 
@@ -1000,14 +1012,14 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
     entries: []
   };
   (0, _idProps.default)(generalGroup, element, translate);
-  (0, _NameProps.default)(generalGroup, element, bpmnFactory, canvas, translate);
-  (0, _ProcessProps.default)(generalGroup, element, translate);
+  (0, _nameProps.default)(generalGroup, element, bpmnFactory, canvas, translate);
+  (0, _processProps.default)(generalGroup, element, translate);
   var detailsGroup = {
     id: 'details',
     label: 'Details',
     entries: []
   };
-  (0, _LinkProps.default)(detailsGroup, element, translate);
+  (0, _linkProps.default)(detailsGroup, element, translate);
   (0, _EventProps.default)(detailsGroup, element, bpmnFactory, elementRegistry, translate);
   (0, _scriptProps.default)(detailsGroup, element, bpmnFactory, translate);
   (0, _conditionalProps.default)(detailsGroup, element, bpmnFactory, translate);
@@ -1064,7 +1076,7 @@ function WorkflowPropertiesProvider(eventBus, bpmnFactory, canvas, elementRegist
 
 (0, _inherits.default)(WorkflowPropertiesProvider, _PropertiesActivator.default);
 
-},{"../workflow/parts/bpmn/conditionalProps":14,"../workflow/parts/bpmn/documentationProps":15,"../workflow/parts/bpmn/idProps":16,"./parts/impl/extensionElements":17,"./parts/scriptProps":18,"./parts/variablesDetailProps":19,"./parts/variablesProps":20,"bpmn-js-properties-panel/lib/PropertiesActivator":22,"bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps":51,"bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps":52,"bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps":53,"bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps":54,"inherits":392}],13:[function(require,module,exports){
+},{"../workflow/parts/bpmn/conditionalProps":14,"../workflow/parts/bpmn/documentationProps":15,"../workflow/parts/bpmn/idProps":16,"../workflow/parts/bpmn/linkProps":18,"../workflow/parts/bpmn/nameProps":19,"../workflow/parts/bpmn/processProps":20,"./parts/impl/extensionElements":21,"./parts/scriptProps":22,"./parts/variablesDetailProps":23,"./parts/variablesProps":24,"bpmn-js-properties-panel/lib/PropertiesActivator":26,"bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps":55,"inherits":392}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1116,7 +1128,7 @@ module.exports = function (group, element, bpmnFactory, translate) {
   group.entries.push({
     id: 'condition',
     label: translate('Condition'),
-    html: '<div class="bpp-row">' + '<label for="cam-condition-type">' + (0, _Utils.escapeHTML)(translate('Condition Type')) + '</label>' + '<div class="bpp-field-wrapper">' + '<select id="cam-condition-type" name="conditionType" data-value>' + '<option value="expression">' + (0, _Utils.escapeHTML)(translate('Expression')) + '</option>' + '<option value="" selected></option>' + '</select>' + '</div>' + '</div>' + // expression
+    html: '<div class="bpp-row">' + '<label for="wf-condition-type">' + (0, _Utils.escapeHTML)(translate('Condition Type')) + '</label>' + '<div class="bpp-field-wrapper">' + '<select id="wf-condition-type" name="conditionType" data-value>' + '<option value="expression">' + (0, _Utils.escapeHTML)(translate('Expression')) + '</option>' + '<option value="" selected></option>' + '</select>' + '</div>' + '</div>' + // expression
     '<div class="bpp-row">' + '<label for="wf-condition" data-show="isExpression">' + (0, _Utils.escapeHTML)(translate('Expression')) + '</label>' + '<div class="bpp-field-wrapper" data-show="isExpression">' + '<input id="wf-condition" type="text" name="condition" />' + '<button class="action-button clear" data-action="clear" data-show="canClear">' + '<span>X</span>' + '</button>' + '</div>' + '</div>',
     get: function (element, propertyName) {
       var conditionalEventDefinition = _EventDefinitionHelper.default.getConditionalEventDefinition(element);
@@ -1193,7 +1205,7 @@ function isConditionalSource(element) {
   return (0, _ModelingUtil.isAny)(element, CONDITIONAL_SOURCES);
 }
 
-},{"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js-properties-panel/lib/helper/ElementHelper":47,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":48,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],15:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":52,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],15:[function(require,module,exports){
 'use strict';
 
 var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
@@ -1258,7 +1270,7 @@ module.exports = function (group, element, bpmnFactory, translate) {
   }
 };
 
-},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],16:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],16:[function(require,module,exports){
 'use strict';
 
 var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
@@ -1303,7 +1315,251 @@ module.exports = function (group, element, translate, options) {
   }));
 };
 
-},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],17:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],17:[function(require,module,exports){
+'use strict';
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Create an entry to modify the name of an an element.
+ *
+ * @param  {djs.model.Base} element
+ * @param  {Object} options
+ * @param  {string} options.id the id of the entry
+ * @param  {string} options.label the label of the entry
+ *
+ * @return {Array<Object>} return an array containing
+ *                         the entry to modify the name
+ */
+module.exports = function (element, options, translate) {
+  options = options || {};
+  var id = options.id || 'name',
+      label = options.label || translate('Name'),
+      modelProperty = options.modelProperty || 'name';
+
+  var nameEntry = _entryFactory.default.textBox(translate, {
+    id: id,
+    label: label,
+    modelProperty: modelProperty,
+    get: options.get,
+    set: options.set
+  });
+
+  return [nameEntry];
+};
+
+},{"../../../../lib/factory/entryFactory":7}],18:[function(require,module,exports){
+'use strict';
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
+
+var _forEach = _interopRequireDefault(require("lodash/forEach"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getLinkEventDefinition(element) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  var linkEventDefinition = null;
+
+  if (bo.eventDefinitions) {
+    (0, _forEach.default)(bo.eventDefinitions, function (eventDefinition) {
+      if ((0, _ModelUtil.is)(eventDefinition, 'bpmn:LinkEventDefinition')) {
+        linkEventDefinition = eventDefinition;
+      }
+    });
+  }
+
+  return linkEventDefinition;
+}
+
+module.exports = function (group, element, translate) {
+  var linkEvents = ['bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent'];
+  (0, _forEach.default)(linkEvents, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      var linkEventDefinition = getLinkEventDefinition(element);
+
+      if (linkEventDefinition) {
+        var entry = _entryFactory.default.textField(translate, {
+          id: 'link-event',
+          label: translate('Link Name'),
+          modelProperty: 'link-name'
+        });
+
+        entry.get = function () {
+          return {
+            'link-name': linkEventDefinition.get('name')
+          };
+        };
+
+        entry.set = function (element, values) {
+          var newProperties = {
+            name: values['link-name']
+          };
+          return _CmdHelper.default.updateBusinessObject(element, linkEventDefinition, newProperties);
+        };
+
+        group.entries.push(entry);
+      }
+    }
+  });
+};
+
+},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],19:[function(require,module,exports){
+'use strict';
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _name = _interopRequireDefault(require("./implementation/name"));
+
+var _CategoryHelper = require("bpmn-js-properties-panel/lib/helper/CategoryHelper");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, canvas, translate, options) {
+  if (!options) {
+    options = {};
+  }
+
+  function initializeCategory(semantic) {
+    var rootElement = canvas.getRootElement(),
+        definitions = (0, _ModelUtil.getBusinessObject)(rootElement).$parent,
+        categoryValue = (0, _CategoryHelper.createCategoryValue)(definitions, bpmnFactory);
+    semantic.categoryValueRef = categoryValue;
+  }
+
+  function setGroupName(element, values) {
+    var bo = (0, _ModelUtil.getBusinessObject)(element),
+        categoryValueRef = bo.categoryValueRef;
+
+    if (!categoryValueRef) {
+      initializeCategory(bo);
+    } // needs direct call to update categoryValue properly
+
+
+    return {
+      cmd: 'element.updateLabel',
+      context: {
+        element: element,
+        newLabel: values.categoryValue
+      }
+    };
+  }
+
+  function getGroupName(element) {
+    var bo = (0, _ModelUtil.getBusinessObject)(element),
+        value = (bo.categoryValueRef || {}).value;
+    return {
+      categoryValue: value
+    };
+  }
+
+  if (!(0, _ModelUtil.is)(element, 'bpmn:Collaboration')) {
+    var nameOptions = {
+      id: options.id
+    };
+
+    if ((0, _ModelUtil.is)(element, 'bpmn:TextAnnotation')) {
+      nameOptions.modelProperty = 'text';
+      nameOptions.label = translate('Text');
+    } else if ((0, _ModelUtil.is)(element, 'bpmn:Group')) {
+      nameOptions.modelProperty = 'categoryValue';
+      nameOptions.label = translate('Category Value');
+      nameOptions.get = getGroupName;
+      nameOptions.set = setGroupName;
+    } // name
+
+
+    group.entries = group.entries.concat((0, _name.default)(element, nameOptions, translate));
+  }
+};
+
+},{"./implementation/name":17,"bpmn-js-properties-panel/lib/helper/CategoryHelper":49,"bpmn-js/lib/util/ModelUtil":194}],20:[function(require,module,exports){
+'use strict';
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _Utils = _interopRequireDefault(require("bpmn-js-properties-panel/lib/Utils"));
+
+var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
+
+var _ParticipantHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/ParticipantHelper"));
+
+var _name = _interopRequireDefault(require("./implementation/name"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, translate, options) {
+  var businessObject = (0, _ModelUtil.getBusinessObject)(element);
+  var processIdDescription = options && options.processIdDescription;
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:Process') || (0, _ModelUtil.is)(element, 'bpmn:Participant') && businessObject.get('processRef')) {
+    /**
+     * processId
+     */
+    if ((0, _ModelUtil.is)(element, 'bpmn:Participant')) {
+      var idEntry = _entryFactory.default.validationAwareTextField(translate, {
+        id: 'process-id',
+        label: translate('Process Id'),
+        description: processIdDescription && translate(processIdDescription),
+        modelProperty: 'processId'
+      }); // in participants we have to change the default behavior of set and get
+
+
+      idEntry.get = function (element) {
+        var properties = _ParticipantHelper.default.getProcessBusinessObject(element, 'id');
+
+        return {
+          processId: properties.id
+        };
+      };
+
+      idEntry.set = function (element, values) {
+        return _ParticipantHelper.default.modifyProcessBusinessObject(element, 'id', {
+          id: values.processId
+        });
+      };
+
+      idEntry.validate = function (element, values) {
+        var idValue = values.processId;
+        var bo = (0, _ModelUtil.getBusinessObject)(element);
+
+        var processIdError = _Utils.default.isIdValid(bo.processRef, idValue, translate);
+
+        return processIdError ? {
+          processId: processIdError
+        } : {};
+      };
+
+      group.entries.push(idEntry);
+      /**
+       * process name
+       */
+
+      var processNameEntry = (0, _name.default)(element, {
+        id: 'process-name',
+        label: translate('Process Name')
+      })[0]; // in participants we have to change the default behavior of set and get
+
+      processNameEntry.get = function (element) {
+        return _ParticipantHelper.default.getProcessBusinessObject(element, 'name');
+      };
+
+      processNameEntry.set = function (element, values) {
+        return _ParticipantHelper.default.modifyProcessBusinessObject(element, 'name', values);
+      };
+
+      group.entries.push(processNameEntry);
+    }
+  }
+};
+
+},{"../../../lib/factory/entryFactory":7,"./implementation/name":17,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/ParticipantHelper":53,"bpmn-js/lib/util/ModelUtil":194}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1395,7 +1651,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js-properties-panel/lib/helper/ElementHelper":47,"bpmn-js/lib/util/ModelUtil":194}],18:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js/lib/util/ModelUtil":194}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1454,7 +1710,7 @@ function scriptProps(group, element, bpmnFactory, translate) {
 
 ;
 
-},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":17,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],19:[function(require,module,exports){
+},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1606,7 +1862,7 @@ function VariablesDetailProps(group, element, translate) {
   }
 }
 
-},{"../../lib/factory/entryFactory":7,"./impl/extensionElements":17,"bpmn-js-properties-panel/lib/Utils":24,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],20:[function(require,module,exports){
+},{"../../lib/factory/entryFactory":7,"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1742,10 +1998,10 @@ function addVariables(group, element, bpmnFactory, translate) {
   });
 }
 
-},{"./impl/extensionElements":17,"bpmn-js-properties-panel/lib/helper/CmdHelper":46,"bpmn-js-properties-panel/lib/helper/ElementHelper":47,"bpmn-js/lib/util/ModelUtil":194}],21:[function(require,module,exports){
+},{"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js/lib/util/ModelUtil":194}],25:[function(require,module,exports){
 module.exports = require('./lib');
 
-},{"./lib":50}],22:[function(require,module,exports){
+},{"./lib":54}],26:[function(require,module,exports){
 'use strict';
 
 var DEFAULT_PRIORITY = 1000;
@@ -1828,7 +2084,7 @@ PropertiesActivator.prototype.isEntryVisible = function(element, entry, group, t
 PropertiesActivator.prototype.isPropertyEditable = function(propertyName, element, entry, group, tab) {
   return true;
 };
-},{}],23:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var createDropdown = require('./Utils').createDropdown,
@@ -3151,7 +3407,7 @@ function setContentEditableSelection(node, selection) {
 function isImplicitRoot(element) {
   return element.id === '__implicitroot';
 }
-},{"./Utils":24,"bpmn-js/lib/util/ModelUtil":194,"lodash/debounce":561,"lodash/filter":563,"lodash/flattenDeep":566,"lodash/forEach":567,"lodash/get":568,"lodash/isArray":572,"lodash/isEmpty":576,"lodash/isFunction":577,"lodash/isObject":579,"lodash/keyBy":583,"lodash/keys":584,"lodash/map":585,"lodash/reduce":590,"lodash/xor":599,"min-dom":601,"scroll-tabs":610,"selection-update":611}],24:[function(require,module,exports){
+},{"./Utils":28,"bpmn-js/lib/util/ModelUtil":194,"lodash/debounce":561,"lodash/filter":563,"lodash/flattenDeep":566,"lodash/forEach":567,"lodash/get":568,"lodash/isArray":572,"lodash/isEmpty":576,"lodash/isFunction":577,"lodash/isObject":579,"lodash/keyBy":583,"lodash/keys":584,"lodash/map":585,"lodash/reduce":590,"lodash/xor":599,"min-dom":601,"scroll-tabs":610,"selection-update":611}],28:[function(require,module,exports){
 'use strict';
 
 var domQuery = require('min-dom').query,
@@ -3461,7 +3717,7 @@ function createDropdown(dropdown) {
 }
 
 module.exports.createDropdown = createDropdown;
-},{"bpmn-js/lib/util/ModelUtil":194,"ids":391,"lodash/forEach":567,"min-dom":601}],25:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":194,"ids":391,"lodash/forEach":567,"min-dom":601}],29:[function(require,module,exports){
 'use strict';
 
 var elementHelper = require('../helper/ElementHelper');
@@ -3564,7 +3820,7 @@ function ensureNotNull(prop, name) {
   return prop;
 }
 
-},{"../helper/ElementHelper":47}],26:[function(require,module,exports){
+},{"../helper/ElementHelper":51}],30:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3676,7 +3932,7 @@ CreateBusinessObjectListHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"../helper/ElementHelper":47,"lodash/forEach":567}],27:[function(require,module,exports){
+},{"../helper/ElementHelper":51,"lodash/forEach":567}],31:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3709,7 +3965,7 @@ MultiCommandHandler.prototype.preExecute = function(context) {
     commandStack.execute(command.cmd, command.context);
   });
 };
-},{"lodash/forEach":567}],28:[function(require,module,exports){
+},{"lodash/forEach":567}],32:[function(require,module,exports){
 'use strict';
 
 var reduce = require('lodash/transform'),
@@ -3842,7 +4098,7 @@ UpdateBusinessObjectHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567,"lodash/keys":584,"lodash/transform":597}],29:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567,"lodash/keys":584,"lodash/transform":597}],33:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3965,7 +4221,7 @@ UpdateBusinessObjectListHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"lodash/forEach":567}],30:[function(require,module,exports){
+},{"lodash/forEach":567}],34:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3993,7 +4249,7 @@ CommandInitializer.$inject = [ 'eventBus', 'commandStack' ];
 module.exports = {
   __init__: [ CommandInitializer ]
 };
-},{"./CreateAndReferenceHandler":25,"./CreateBusinessObjectListHandler":26,"./MultiCommandHandler":27,"./UpdateBusinessObjectHandler":28,"./UpdateBusinessObjectListHandler":29,"lodash/forEach":567}],31:[function(require,module,exports){
+},{"./CreateAndReferenceHandler":29,"./CreateBusinessObjectListHandler":30,"./MultiCommandHandler":31,"./UpdateBusinessObjectHandler":32,"./UpdateBusinessObjectListHandler":33,"lodash/forEach":567}],35:[function(require,module,exports){
 'use strict';
 
 var domClasses = require('min-dom').classes,
@@ -4301,7 +4557,7 @@ function setPosition(el, x, y) {
   assign(el.style, { left: x + 'px', top: y + 'px' });
 }
 
-},{"../Utils":24,"./EntryFieldDescription":36,"min-dash":600,"min-dom":601}],32:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"min-dash":600,"min-dom":601}],36:[function(require,module,exports){
 'use strict';
 
 var domify = require('min-dom').domify;
@@ -4382,7 +4638,7 @@ var checkbox = function(translate, options, defaultParameters) {
 
 module.exports = checkbox;
 
-},{"../Utils":24,"../helper/CmdHelper":46,"./EntryFieldDescription":36,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],33:[function(require,module,exports){
+},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],37:[function(require,module,exports){
 'use strict';
 
 var escapeHTML = require('../Utils').escapeHTML;
@@ -4505,7 +4761,7 @@ module.exports = Collapsible;
 
 function noop() {}
 
-},{"../Utils":24,"min-dom":601}],34:[function(require,module,exports){
+},{"../Utils":28,"min-dom":601}],38:[function(require,module,exports){
 'use strict';
 
 var assign = require('lodash/assign'),
@@ -4632,7 +4888,7 @@ var comboBox = function(translate, options) {
 
 module.exports = comboBox;
 
-},{"../Utils":24,"./EntryFieldDescription":36,"./SelectEntryFactory":39,"lodash/assign":558,"lodash/find":564,"min-dom":601}],35:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"./SelectEntryFactory":43,"lodash/assign":558,"lodash/find":564,"min-dom":601}],39:[function(require,module,exports){
 'use strict';
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
@@ -4812,7 +5068,7 @@ EntryFactory.toggleSwitch = function(translate, options) {
 
 module.exports = EntryFactory;
 
-},{"../helper/CmdHelper":46,"./AutoSuggestTextBoxFactory":31,"./CheckboxEntryFactory":32,"./CollapsibleEntryFactory":33,"./ComboEntryFactory":34,"./LabelFactory":37,"./LinkEntryFactory":38,"./SelectEntryFactory":39,"./TableEntryFactory":40,"./TextBoxEntryFactory":41,"./TextInputEntryFactory":42,"./ToggleSwitchEntryFactory":43,"./ValidationAwareTextInput":44,"bpmn-js/lib/util/ModelUtil":194}],36:[function(require,module,exports){
+},{"../helper/CmdHelper":50,"./AutoSuggestTextBoxFactory":35,"./CheckboxEntryFactory":36,"./CollapsibleEntryFactory":37,"./ComboEntryFactory":38,"./LabelFactory":41,"./LinkEntryFactory":42,"./SelectEntryFactory":43,"./TableEntryFactory":44,"./TextBoxEntryFactory":45,"./TextInputEntryFactory":46,"./ToggleSwitchEntryFactory":47,"./ValidationAwareTextInput":48,"bpmn-js/lib/util/ModelUtil":194}],40:[function(require,module,exports){
 'use strict';
 
 var domify = require('min-dom').domify,
@@ -4947,7 +5203,7 @@ function escapeText(text) {
 
   return escaped.join('');
 }
-},{"../Utils":24,"min-dom":601}],37:[function(require,module,exports){
+},{"../Utils":28,"min-dom":601}],41:[function(require,module,exports){
 'use strict';
 
 /**
@@ -4987,7 +5243,7 @@ var label = function(options) {
 
 module.exports = label;
 
-},{}],38:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 var domify = require('min-dom').domify;
@@ -5078,7 +5334,7 @@ function link(translate, options) {
 
 module.exports = link;
 
-},{"../Utils":24,"./EntryFieldDescription":36,"lodash/bind":559,"min-dom":601}],39:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"lodash/bind":559,"min-dom":601}],43:[function(require,module,exports){
 'use strict';
 
 var escapeHTML = require('../Utils').escapeHTML;
@@ -5225,7 +5481,7 @@ var selectbox = function(translate, options, defaultParameters) {
 
 module.exports = selectbox;
 
-},{"../Utils":24,"./EntryFieldDescription":36,"lodash/forEach":567,"min-dom":601}],40:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"lodash/forEach":567,"min-dom":601}],44:[function(require,module,exports){
 'use strict';
 
 var escapeHTML = require('../Utils').escapeHTML;
@@ -5569,7 +5825,7 @@ module.exports = function(translate, options) {
 
 };
 
-},{"../Utils":24,"../helper/CmdHelper":46,"./EntryFieldDescription":36,"lodash/filter":563,"lodash/forEach":567,"lodash/keys":584,"min-dom":601,"selection-update":611}],41:[function(require,module,exports){
+},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"lodash/filter":563,"lodash/forEach":567,"lodash/keys":584,"min-dom":601,"selection-update":611}],45:[function(require,module,exports){
 'use strict';
 
 var domify = require('min-dom').domify;
@@ -5615,7 +5871,7 @@ var textBox = function(translate, options, defaultParameters) {
 
 module.exports = textBox;
 
-},{"../Utils":24,"./EntryFieldDescription":36,"min-dom":601}],42:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"min-dom":601}],46:[function(require,module,exports){
 'use strict';
 
 var escapeHTML = require('../Utils').escapeHTML;
@@ -5703,7 +5959,7 @@ var textField = function(translate, options, defaultParameters) {
 
 module.exports = textField;
 
-},{"../Utils":24,"./EntryFieldDescription":36,"min-dom":601}],43:[function(require,module,exports){
+},{"../Utils":28,"./EntryFieldDescription":40,"min-dom":601}],47:[function(require,module,exports){
 'use strict';
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
@@ -5809,7 +6065,7 @@ var toggleSwitch = function(translate, options, defaultParameters) {
 
 module.exports = toggleSwitch;
 
-},{"../Utils":24,"../helper/CmdHelper":46,"./EntryFieldDescription":36,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],44:[function(require,module,exports){
+},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],48:[function(require,module,exports){
 'use strict';
 
 var textField = require('./TextInputEntryFactory');
@@ -5867,7 +6123,7 @@ var validationAwareTextField = function(translate, options, defaultParameters) {
 
 module.exports = validationAwareTextField;
 
-},{"./TextInputEntryFactory":42}],45:[function(require,module,exports){
+},{"./TextInputEntryFactory":46}],49:[function(require,module,exports){
 'use strict';
 
 var collectionAdd = require('diagram-js/lib/util/Collections').add,
@@ -5899,7 +6155,7 @@ CategoryHelper.createCategoryValue = function(definitions, bpmnFactory) {
   return categoryValue;
 
 };
-},{"bpmn-js/lib/util/ModelUtil":194,"diagram-js/lib/util/Collections":372}],46:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":194,"diagram-js/lib/util/Collections":372}],50:[function(require,module,exports){
 'use strict';
 
 var CmdHelper = {};
@@ -5979,7 +6235,7 @@ CmdHelper.setList = function(element, businessObject, listPropertyName, updatedO
   };
 };
 
-},{}],47:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 var ElementHelper = {};
@@ -6004,7 +6260,7 @@ ElementHelper.createElement = function(elementType, properties, parent, factory)
   return element;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
@@ -6063,7 +6319,7 @@ EventDefinitionHelper.getConditionalEventDefinition = function(element) {
   return this.getEventDefinition(element, 'bpmn:ConditionalEventDefinition');
 };
 
-},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],49:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],53:[function(require,module,exports){
 'use strict';
 
 var is = require('bpmn-js/lib/util/ModelUtil').is,
@@ -6100,7 +6356,7 @@ ParticipantHelper.getProcessBusinessObject = function(element, propertyName) {
 
   return properties;
 };
-},{"./CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194}],50:[function(require,module,exports){
+},{"./CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],54:[function(require,module,exports){
 module.exports = {
   __depends__: [
     require('./cmd'),
@@ -6110,7 +6366,7 @@ module.exports = {
   propertiesPanel: [ 'type', require('./PropertiesPanel') ]
 };
 
-},{"./PropertiesPanel":23,"./cmd":30,"diagram-js/lib/i18n/translate":355}],51:[function(require,module,exports){
+},{"./PropertiesPanel":27,"./cmd":34,"diagram-js/lib/i18n/translate":355}],55:[function(require,module,exports){
 'use strict';
 
 var is = require('bpmn-js/lib/util/ModelUtil').is,
@@ -6262,206 +6518,7 @@ module.exports = function(group, element, bpmnFactory, elementRegistry, translat
 
 };
 
-},{"../../../helper/EventDefinitionHelper":48,"./implementation/CompensateEventDefinition":55,"./implementation/ConditionalEventDefinition":56,"./implementation/ErrorEventDefinition":58,"./implementation/EscalationEventDefinition":59,"./implementation/MessageEventDefinition":61,"./implementation/SignalEventDefinition":63,"./implementation/TimerEventDefinition":64,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],52:[function(require,module,exports){
-'use strict';
-
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    entryFactory = require('../../../factory/EntryFactory'),
-    cmdHelper = require('../../../helper/CmdHelper');
-
-var forEach = require('lodash/forEach');
-
-function getLinkEventDefinition(element) {
-
-  var bo = getBusinessObject(element);
-
-  var linkEventDefinition = null;
-  if (bo.eventDefinitions) {
-    forEach(bo.eventDefinitions, function(eventDefinition) {
-      if (is(eventDefinition, 'bpmn:LinkEventDefinition')) {
-        linkEventDefinition = eventDefinition;
-      }
-    });
-  }
-
-  return linkEventDefinition;
-}
-
-module.exports = function(group, element, translate) {
-  var linkEvents = [ 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent' ];
-
-  forEach(linkEvents, function(event) {
-    if (is(element, event)) {
-
-      var linkEventDefinition = getLinkEventDefinition(element);
-
-      if (linkEventDefinition) {
-        var entry = entryFactory.textField(translate, {
-          id: 'link-event',
-          label: translate('Link Name'),
-          modelProperty: 'link-name'
-        });
-
-        entry.get = function() {
-          return { 'link-name': linkEventDefinition.get('name') };
-        };
-
-        entry.set = function(element, values) {
-          var newProperties = {
-            name: values['link-name']
-          };
-          return cmdHelper.updateBusinessObject(element, linkEventDefinition, newProperties);
-        };
-
-        group.entries.push(entry);
-      }
-    }
-  });
-};
-
-
-},{"../../../factory/EntryFactory":35,"../../../helper/CmdHelper":46,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],53:[function(require,module,exports){
-'use strict';
-
-var nameEntryFactory = require('./implementation/Name'),
-    createCategoryValue = require('../../../helper/CategoryHelper').createCategoryValue,
-    is = require('bpmn-js/lib/util/ModelUtil').is,
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
-
-module.exports = function(group, element, bpmnFactory, canvas, translate, options) {
-  if (!options) {
-    options = {};
-  }
-
-  function initializeCategory(semantic) {
-    var rootElement = canvas.getRootElement(),
-        definitions = getBusinessObject(rootElement).$parent,
-        categoryValue = createCategoryValue(definitions, bpmnFactory);
-
-    semantic.categoryValueRef = categoryValue;
-
-  }
-
-  function setGroupName(element, values) {
-    var bo = getBusinessObject(element),
-        categoryValueRef = bo.categoryValueRef;
-
-    if (!categoryValueRef) {
-      initializeCategory(bo);
-    }
-
-    // needs direct call to update categoryValue properly
-    return {
-      cmd: 'element.updateLabel',
-      context: {
-        element: element,
-        newLabel: values.categoryValue
-      }
-    };
-  }
-
-  function getGroupName(element) {
-    var bo = getBusinessObject(element),
-        value = (bo.categoryValueRef || {}).value;
-
-    return { categoryValue: value };
-  }
-
-  if (!is(element, 'bpmn:Collaboration')) {
-    var nameOptions = {
-      id: options.id
-    };
-
-    if (is(element, 'bpmn:TextAnnotation')) {
-      nameOptions.modelProperty = 'text';
-      nameOptions.label = translate('Text');
-    } else if (is(element, 'bpmn:Group')) {
-      nameOptions.modelProperty = 'categoryValue';
-      nameOptions.label = translate('Category Value');
-      nameOptions.get = getGroupName;
-      nameOptions.set = setGroupName;
-    }
-
-    // name
-    group.entries = group.entries.concat(nameEntryFactory(element, nameOptions, translate));
-  }
-};
-
-},{"../../../helper/CategoryHelper":45,"./implementation/Name":62,"bpmn-js/lib/util/ModelUtil":194}],54:[function(require,module,exports){
-'use strict';
-
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    entryFactory = require('../../../factory/EntryFactory'),
-    participantHelper = require('../../../helper/ParticipantHelper'),
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    nameEntryFactory = require('./implementation/Name'),
-    utils = require('../../../Utils');
-
-module.exports = function(group, element, translate, options) {
-  var businessObject = getBusinessObject(element);
-
-  var processIdDescription = options && options.processIdDescription;
-
-  if (is(element, 'bpmn:Process') || (is(element, 'bpmn:Participant') && businessObject.get('processRef'))) {
-
-    /**
-     * processId
-     */
-    if (is(element, 'bpmn:Participant')) {
-      var idEntry = entryFactory.validationAwareTextField(translate, {
-        id: 'process-id',
-        label: translate('Process Id'),
-        description: processIdDescription && translate(processIdDescription),
-        modelProperty: 'processId'
-      });
-
-      // in participants we have to change the default behavior of set and get
-      idEntry.get = function(element) {
-        var properties = participantHelper.getProcessBusinessObject(element, 'id');
-        return { processId: properties.id };
-      };
-
-      idEntry.set = function(element, values) {
-        return participantHelper.modifyProcessBusinessObject(element, 'id', { id: values.processId });
-      };
-
-      idEntry.validate = function(element, values) {
-        var idValue = values.processId;
-
-        var bo = getBusinessObject(element);
-
-        var processIdError = utils.isIdValid(bo.processRef, idValue, translate);
-
-        return processIdError ? { processId: processIdError } : {};
-      };
-
-      group.entries.push(idEntry);
-
-
-      /**
-       * process name
-       */
-      var processNameEntry = nameEntryFactory(element, {
-        id: 'process-name',
-        label: translate('Process Name')
-      })[0];
-
-      // in participants we have to change the default behavior of set and get
-      processNameEntry.get = function(element) {
-        return participantHelper.getProcessBusinessObject(element, 'name');
-      };
-
-      processNameEntry.set = function(element, values) {
-        return participantHelper.modifyProcessBusinessObject(element, 'name', values);
-      };
-
-      group.entries.push(processNameEntry);
-    }
-  }
-};
-
-},{"../../../Utils":24,"../../../factory/EntryFactory":35,"../../../helper/ParticipantHelper":49,"./implementation/Name":62,"bpmn-js/lib/util/ModelUtil":194}],55:[function(require,module,exports){
+},{"../../../helper/EventDefinitionHelper":52,"./implementation/CompensateEventDefinition":56,"./implementation/ConditionalEventDefinition":57,"./implementation/ErrorEventDefinition":59,"./implementation/EscalationEventDefinition":60,"./implementation/MessageEventDefinition":62,"./implementation/SignalEventDefinition":63,"./implementation/TimerEventDefinition":64,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],56:[function(require,module,exports){
 'use strict';
 
 var entryFactory = require('../../../../factory/EntryFactory');
@@ -6593,7 +6650,7 @@ module.exports = function(group, element, bpmnFactory, compensateEventDefinition
 
 };
 
-},{"../../../../Utils":24,"../../../../factory/EntryFactory":35,"../../../../helper/CmdHelper":46,"../../../../helper/EventDefinitionHelper":48,"bpmn-js/lib/util/ModelUtil":194,"lodash/filter":563,"lodash/find":564,"lodash/forEach":567}],56:[function(require,module,exports){
+},{"../../../../Utils":28,"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"../../../../helper/EventDefinitionHelper":52,"bpmn-js/lib/util/ModelUtil":194,"lodash/filter":563,"lodash/find":564,"lodash/forEach":567}],57:[function(require,module,exports){
 'use strict';
 
 var entryFactory = require('../../../../factory/EntryFactory'),
@@ -6649,7 +6706,7 @@ module.exports = function(group, element, bpmnFactory, conditionalEventDefinitio
   }
 };
 
-},{"../../../../factory/EntryFactory":35,"../../../../helper/CmdHelper":46,"bpmn-js/lib/util/DiUtil":192,"bpmn-js/lib/util/ModelUtil":194}],57:[function(require,module,exports){
+},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"bpmn-js/lib/util/DiUtil":192,"bpmn-js/lib/util/ModelUtil":194}],58:[function(require,module,exports){
 'use strict';
 
 var entryFactory = require('../../../../factory/EntryFactory');
@@ -6718,7 +6775,7 @@ module.exports = function(element, definition, bpmnFactory, translate, options) 
   return [ entry ];
 };
 
-},{"../../../../factory/EntryFactory":35,"../../../../helper/CmdHelper":46}],58:[function(require,module,exports){
+},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50}],59:[function(require,module,exports){
 'use strict';
 
 var eventDefinitionReference = require('./EventDefinitionReference'),
@@ -6759,7 +6816,7 @@ module.exports = function(group, element, bpmnFactory, errorEventDefinition, tra
 
 };
 
-},{"./ElementReferenceProperty":57,"./EventDefinitionReference":60}],59:[function(require,module,exports){
+},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],60:[function(require,module,exports){
 'use strict';
 
 var entryFactory = require('../../../../factory/EntryFactory'),
@@ -6823,7 +6880,7 @@ module.exports = function(group, element, bpmnFactory, escalationEventDefinition
   }
 };
 
-},{"../../../../factory/EntryFactory":35,"../../../../helper/CmdHelper":46,"./ElementReferenceProperty":57,"./EventDefinitionReference":60}],60:[function(require,module,exports){
+},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],61:[function(require,module,exports){
 'use strict';
 
 var cmdHelper = require('../../../../helper/CmdHelper');
@@ -6977,7 +7034,7 @@ module.exports = function(element, definition, bpmnFactory, options) {
 
 };
 
-},{"../../../../Utils":24,"../../../../helper/CmdHelper":46,"../../../../helper/ElementHelper":47,"lodash/find":564,"lodash/forEach":567,"min-dom":601}],61:[function(require,module,exports){
+},{"../../../../Utils":28,"../../../../helper/CmdHelper":50,"../../../../helper/ElementHelper":51,"lodash/find":564,"lodash/forEach":567,"min-dom":601}],62:[function(require,module,exports){
 'use strict';
 
 var eventDefinitionReference = require('./EventDefinitionReference'),
@@ -7007,42 +7064,7 @@ module.exports = function(group, element, bpmnFactory, messageEventDefinition, t
 
 };
 
-},{"./ElementReferenceProperty":57,"./EventDefinitionReference":60}],62:[function(require,module,exports){
-'use strict';
-
-var entryFactory = require('../../../../factory/EntryFactory');
-
-/**
- * Create an entry to modify the name of an an element.
- *
- * @param  {djs.model.Base} element
- * @param  {Object} options
- * @param  {string} options.id the id of the entry
- * @param  {string} options.label the label of the entry
- *
- * @return {Array<Object>} return an array containing
- *                         the entry to modify the name
- */
-module.exports = function(element, options, translate) {
-
-  options = options || {};
-  var id = options.id || 'name',
-      label = options.label || translate('Name'),
-      modelProperty = options.modelProperty || 'name';
-
-  var nameEntry = entryFactory.textBox(translate, {
-    id: id,
-    label: label,
-    modelProperty: modelProperty,
-    get: options.get,
-    set: options.set
-  });
-
-  return [ nameEntry ];
-
-};
-
-},{"../../../../factory/EntryFactory":35}],63:[function(require,module,exports){
+},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],63:[function(require,module,exports){
 'use strict';
 
 var eventDefinitionReference = require('./EventDefinitionReference'),
@@ -7072,7 +7094,7 @@ module.exports = function(group, element, bpmnFactory, signalEventDefinition, tr
 
 };
 
-},{"./ElementReferenceProperty":57,"./EventDefinitionReference":60}],64:[function(require,module,exports){
+},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],64:[function(require,module,exports){
 'use strict';
 
 var elementHelper = require('../../../../helper/ElementHelper'),
@@ -7260,7 +7282,7 @@ function TimerEventDefinition(group, element, bpmnFactory, timerEventDefinition,
 
 module.exports = TimerEventDefinition;
 
-},{"../../../../factory/EntryFactory":35,"../../../../helper/CmdHelper":46,"../../../../helper/ElementHelper":47}],65:[function(require,module,exports){
+},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"../../../../helper/ElementHelper":51}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69720,4 +69742,4 @@ function transform(node, transforms) {
   return transformList.consolidate();
 }
 
-},{}]},{},[1,2,6,7,8,9,10,11,13,14,15,16,17,18,19,20,12]);
+},{}]},{},[1,2,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,23,24,12]);

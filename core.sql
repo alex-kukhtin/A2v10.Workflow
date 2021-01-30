@@ -137,8 +137,8 @@ begin
 		RecordNumber int not null,
 		EventTime datetime not null
 			constraint DF_InstanceTrack_EventTime default(getutcdate()),
-		[Type] nvarchar(32),
-		[Action] nvarchar(32),
+		Kind int,
+		[Action] int,
 		[Message] nvarchar(max)
 	);
 	create index IDX_InstanceTrack_InstanceId on a2wf.InstanceTrack (InstanceId) with (fillfactor = 70);
@@ -287,17 +287,6 @@ create type a2wf.[VariableString.TableType] as table
 )
 go
 ------------------------------------------------
-if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'Bookmarks.TableType')
-	drop type a2wf.[Bookmarks.TableType]
-go
-------------------------------------------------
-create type a2wf.[Bookmarks.TableType] as table
-(
-	[GUID] uniqueidentifier,
-	ParentGUID uniqueidentifier
-)
-go
-------------------------------------------------
 if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'InstanceBookmarks.TableType')
 	drop type a2wf.[InstanceBookmarks.TableType]
 go
@@ -318,7 +307,7 @@ create type a2wf.[InstanceTrack.TableType] as table
 	ParentGUID uniqueidentifier,
 	RecordNumber int,
 	EventTime datetime,
-	[Type] int,
+	[Kind] int,
 	[Action] int,
 	[Message] nvarchar(max)
 )
@@ -332,7 +321,6 @@ begin
 	declare @VariableInt a2wf.[VariableInt.TableType];
 	declare @VariableGuid a2wf.[VariableGuid.TableType];
 	declare @VariableString a2wf.[VariableString.TableType];
-	declare @Book a2wf.[Bookmarks.TableType];
 	declare @Bookmarks a2wf.[InstanceBookmarks.TableType];
 	declare @TrackRecords a2wf.[InstanceTrack.TableType];
 
@@ -341,8 +329,7 @@ begin
 	select [IntVariables!Instance.Variables.BigInt!Metadata] = null, * from @VariableInt;
 	select [GuidVariables!Instance.Variables.Guid!Metadata] = null, * from @VariableGuid;
 	select [StringVariables!Instance.Variables.String!Metadata] = null, * from @VariableString;
-	select [Book!Instance.Bookmarks!Metadata] = null, * from @Book;
-	select [Bookmarks!Instance.Bookmarks.Items!Metadata] = null, * from @Bookmarks;
+	select [Bookmarks!Instance.Bookmarks!Metadata] = null, * from @Bookmarks;
 	select [TrackRecords!Instance.TrackRecords!Metadata] = null, * from @TrackRecords;
 end
 go
@@ -354,7 +341,6 @@ create or alter procedure a2wf.[Instance.Update]
 @IntVariables a2wf.[VariableInt.TableType] readonly,
 @GuidVariables a2wf.[VariableGuid.TableType] readonly,
 @StringVariables a2wf.[VariableString.TableType] readonly,
-@Book a2wf.[Bookmarks.TableType] readonly,
 @Bookmarks a2wf.[InstanceBookmarks.TableType] readonly,
 @TrackRecords a2wf.[InstanceTrack.TableType] readonly
 as
@@ -464,8 +450,7 @@ begin
 	using (
 		select si.WorkflowId, InstanceId=si.Id, sib.*
 		from @Instance si
-		inner join @Book sb on sb.ParentGUID=si.[GUID]
-		inner join @Bookmarks sib on sib.ParentGUID=sb.[GUID]
+		inner join @Bookmarks sib on sib.ParentGUID=si.[GUID]
 	) as s
 	on t.[Bookmark] = s.[Bookmark] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId
 	when not matched by target then insert
@@ -473,8 +458,8 @@ begin
 		(s.InstanceId, s.[Bookmark], s.WorkflowId)
 	when not matched by source then delete;
 
-	insert into a2wf.InstanceTrack(InstanceId, RecordNumber, EventTime, [Type], [Action], [Message])
-	select i.Id, RecordNumber, EventTime, [Type], [Action], [Message] from 
+	insert into a2wf.InstanceTrack(InstanceId, RecordNumber, EventTime, [Kind], [Action], [Message])
+	select i.Id, RecordNumber, EventTime, [Kind], [Action], [Message] from 
 	@TrackRecords r inner join @Instance i on r.ParentGUID = i.[GUID];
 
 	commit tran;

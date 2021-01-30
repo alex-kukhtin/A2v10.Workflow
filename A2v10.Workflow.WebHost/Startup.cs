@@ -1,20 +1,20 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 using A2v10.Data.Extensions;
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.SqlServer;
-using A2v10.Workflow;
 using A2v10.Workflow.Serialization;
 using A2v10.Workflow.Interfaces.Api;
-using Microsoft.AspNetCore.Mvc;
 
 namespace A2v10.Workflow.WebHost
 {
@@ -27,12 +27,14 @@ namespace A2v10.Workflow.WebHost
 			services.AddControllers(SetControllerOptions).AddNewtonsoftJson(ConfigureNewtonsoft);
 			services.AddMvc(ConfigureMvc).AddNewtonsoftJson(ConfigureNewtonsoft);
 			services.UseSimpleDbContext();
+			
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
-			services.AddSingleton<IWorkflowApi, WorkflowEngine>();
 			services.AddSingleton<ISerializer, Serializer>();
-			services.AddTransient<ITracker, InstanceTracker>();
+
+			services.AddScoped<ITracker, InstanceTracker>();
+			services.AddScoped<IWorkflowApi, WorkflowEngine>();
 		}
 
 		private static void ConfigureMvc(MvcOptions opt)

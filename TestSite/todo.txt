@@ -4,9 +4,6 @@
 
 18. 
 переделать свойства (WorkflowPropertiesProvider.js)
-import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps';
 import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
-import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps';
-import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
 
 21. 

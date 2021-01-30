@@ -20,7 +20,7 @@ namespace TestSite.Controllers
 		private readonly IWorkflowCatalog _catalog;
 		private readonly IWorkflowStorage _storage;
 
-		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog, IWorkflowStorage storage)
+		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog, IWorkflowStorage storage, ITracker tracker)
 		{
 			_engine = engine;
 			_catalog = catalog;

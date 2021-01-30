@@ -36,11 +36,12 @@ namespace TestSite
 			services.AddSingleton<IWorkflowCatalog, SqlServerWorkflowCatalog>();
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
-			services.AddSingleton<IWorkflowEngine, WorkflowEngine>();
 			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();
 
 			services.AddSingleton<ISerializer, Serializer>();
-			services.AddTransient<ITracker, InstanceTracker>();
+
+			services.AddScoped<ITracker, InstanceTracker>();
+			services.AddScoped<IWorkflowEngine, WorkflowEngine>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

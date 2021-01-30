@@ -21,11 +21,11 @@ namespace A2v10.Workflow
 
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
-		public ScriptEngine(IServiceProvider serviceProvider, IActivity root, String script, Object args = null)
+		public ScriptEngine(IServiceProvider serviceProvider, ITracker tracker, IActivity root, String script, Object args = null)
 		{
 			_root = root;
 			_serviceProvider = serviceProvider;
-			_tracker = _serviceProvider.GetService<ITracker>();
+			_tracker = tracker;
 			_engine = new Engine(EngineOptions);
 
 

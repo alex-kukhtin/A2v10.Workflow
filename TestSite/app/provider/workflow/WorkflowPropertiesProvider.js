@@ -3,14 +3,14 @@
 import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
 // Require all properties you need from existing providers.
-import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps';
 import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
-import linkProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/LinkProps';
-import documentationProps from '../workflow/parts/bpmn/documentationProps';
-import idProps from '../workflow/parts/bpmn/idProps';
-import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
-import conditionalProps from '../workflow/parts/bpmn/conditionalProps';
 
+import documentationProps from '../workflow/parts/bpmn/documentationProps';
+import conditionalProps from '../workflow/parts/bpmn/conditionalProps';
+import idProps from '../workflow/parts/bpmn/idProps';
+import processProps from '../workflow/parts/bpmn/processProps';
+import nameProps from '../workflow/parts/bpmn/nameProps';
+import linkProps from '../workflow/parts/bpmn/linkProps';
 
 // Require your custom property entries.
 import scriptProps from './parts/scriptProps';

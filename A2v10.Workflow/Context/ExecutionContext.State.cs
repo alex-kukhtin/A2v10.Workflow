@@ -136,11 +136,10 @@ namespace A2v10.Workflow
 			return null;
 		}
 
-		public ExpandoObject GetExternalBookmarks()
+		public List<Object> GetExternalBookmarks()
 		{
 			if (_bookmarks == null || _bookmarks.Count == 0)
 				return null;
-			var eo = new ExpandoObject();
 			var list = new List<Object>();
 			foreach (var b in _bookmarks)
 			{
@@ -148,8 +147,7 @@ namespace A2v10.Workflow
 				be.Set("Bookmark", b.Key);
 				list.Add(be);
 			}
-			eo.Set("Items", list);
-			return eo;
+			return list;
 		}
 
 		public WorkflowExecutionStatus GetExecutionStatus()

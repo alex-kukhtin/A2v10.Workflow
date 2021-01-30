@@ -31,9 +31,8 @@ namespace A2v10.Workflow.Tests
 			collection.AddSingleton<IInstanceStorage, InMemoryInstanceStorage>();
 			collection.AddSingleton<IWorkflowCatalog, InMemoryWorkflowCatalog>();
 			collection.AddSingleton<ISerializer, Serializer>();
-			collection.AddTransient<IWorkflowEngine, WorkflowEngine>();
-			collection.AddTransient<ITracker, ConsoleTracker>();
-			//collection.AddTransient<IServiceProvider>(sp => _provider);
+			collection.AddScoped<IWorkflowEngine, WorkflowEngine>();
+			collection.AddScoped<ITracker, ConsoleTracker>();
 
 			_provider = collection.BuildServiceProvider();
 

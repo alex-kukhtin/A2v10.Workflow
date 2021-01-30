@@ -14,12 +14,14 @@ namespace A2v10.Workflow
 		private readonly IServiceProvider _serviceProvider;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
+		private readonly ITracker _tracker;
 
-		public WorkflowEngine(IServiceProvider serviceProvider)
+		public WorkflowEngine(IServiceProvider serviceProvider, ITracker tracker)
 		{
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_workflowStorage = _serviceProvider.GetService<IWorkflowStorage>() ?? throw new NullReferenceException("IWorkflowStorage");
 			_instanceStorage = _serviceProvider.GetService<IInstanceStorage>() ?? throw new NullReferenceException("IInstanceStorage");
+			_tracker = tracker;
 		}
 
 		public async ValueTask<IInstance> CreateAsync(IActivity root, IIdentity identity)
@@ -47,7 +49,7 @@ namespace A2v10.Workflow
 		{
 			if (instance.ExecutionStatus != WorkflowExecutionStatus.Init)
 				throw new WorkflowExecption($"Instance (id={instance.Id}) is already running");
-			var context = new ExecutionContext(_serviceProvider, instance.Workflow.Root, args);
+			var context = new ExecutionContext(_serviceProvider, _tracker, instance.Workflow.Root, args);
 			context.Schedule(instance.Workflow.Root, null, null);
 			await context.RunAsync();
 			SetInstanceState(instance, context);
@@ -66,7 +68,7 @@ namespace A2v10.Workflow
 		{
 			var inst = await _instanceStorage.Load(id);
 			inst.Workflow.Root.OnEndInit();
-			var context = new ExecutionContext(_serviceProvider, inst.Workflow.Root);
+			var context = new ExecutionContext(_serviceProvider, _tracker, inst.Workflow.Root);
 			context.SetState(inst.State);
 			await context.ResumeAsync(bookmark, reply);
 			await context.RunAsync();

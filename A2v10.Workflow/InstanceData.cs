@@ -12,7 +12,7 @@ namespace A2v10.Workflow
 	{
 		public ExpandoObject ExternalVariables { get; init; }
 
-		public ExpandoObject ExternalBookmarks { get; init; }
+		public List<Object> ExternalBookmarks { get; init; }
 
 		public List<Object> TrackRecords { get; init; }
 	}

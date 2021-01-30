@@ -34,10 +34,10 @@ namespace A2v10.Workflow
 		private readonly IServiceProvider _serviceProvider;
 		private readonly ITracker _tracker;
 
-		public ExecutionContext(IServiceProvider serviceProvider, IActivity root, Object args = null)
+		public ExecutionContext(IServiceProvider serviceProvider, ITracker tracker, IActivity root, Object args = null)
 		{
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_tracker = _serviceProvider.GetService<ITracker>();
+			_tracker = tracker;
 			_root = root;
 
 			// store all activites
@@ -65,7 +65,7 @@ namespace A2v10.Workflow
 			_root.Traverse(sbTraverseArg);
 			sb.EndScript();
 
-			return new ScriptEngine(_serviceProvider, _root, sb.Script, args);
+			return new ScriptEngine(_serviceProvider, _tracker, _root, sb.Script, args);
 		}
 
 		public ExpandoObject GetResult()

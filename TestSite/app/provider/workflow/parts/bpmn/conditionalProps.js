@@ -32,9 +32,9 @@ module.exports = function (group, element, bpmnFactory, translate) {
 		label: translate('Condition'),
 		html:
 		'<div class="bpp-row">' +
-			'<label for="cam-condition-type">' + escapeHTML(translate('Condition Type')) + '</label>' +
+			'<label for="wf-condition-type">' + escapeHTML(translate('Condition Type')) + '</label>' +
 			'<div class="bpp-field-wrapper">' +
-				'<select id="cam-condition-type" name="conditionType" data-value>' +
+				'<select id="wf-condition-type" name="conditionType" data-value>' +
 					'<option value="expression">' + escapeHTML(translate('Expression')) + '</option>' +
 					'<option value="" selected></option>' +
 			'</select>' +
