@@ -2,23 +2,19 @@
 
 import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
-// Require all properties you need from existing providers.
-import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
-
 import documentationProps from '../workflow/parts/bpmn/documentationProps';
 import conditionalProps from '../workflow/parts/bpmn/conditionalProps';
 import idProps from '../workflow/parts/bpmn/idProps';
 import processProps from '../workflow/parts/bpmn/processProps';
 import nameProps from '../workflow/parts/bpmn/nameProps';
 import linkProps from '../workflow/parts/bpmn/linkProps';
+import eventProps from '../workflow/parts/bpmn/eventProps';
 
-// Require your custom property entries.
 import scriptProps from './parts/scriptProps';
 import variablesProps from './parts/variablesProps';
 import variablesDetailProps from './parts/variablesDetailProps';
 
 import extensionElementsImpl from './parts/impl/extensionElements';
-
 
 // The general tab contains all bpmn relevant properties.
 // The properties are organized in groups.

@@ -1,4 +1,5 @@
 using System;
+using System.Dynamic;
 
 namespace TestSite.Models
 {
@@ -7,5 +8,7 @@ namespace TestSite.Models
 		public String Id { get; set; }
 
 		public String State { get; set; }
+
+		public dynamic Instance { get; set; }
 	}
 }

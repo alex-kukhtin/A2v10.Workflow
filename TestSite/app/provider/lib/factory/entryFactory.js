@@ -6,15 +6,17 @@ import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import textInputField from './textInputEntryFactory';
 import checkboxField from './CheckboxEntryFactory';
 import selectBoxField from './selectEntryFactory';
-import comboBoxField from 'bpmn-js-properties-panel/lib/factory/ComboEntryFactory';
 import textBoxField from './textBoxEntryFactory';
 import validationAwareTextInputField from './validationAwareTextInput';
-import tableField from 'bpmn-js-properties-panel/lib/factory/TableEntryFactory';
+import comboBoxField from './comboEntryFactory';
+import autoSuggestTextBoxField from './autoSuggestTextBoxFactory';
+import link from './linkEntryFactory';
+
+//import tableField from 'bpmn-js-properties-panel/lib/factory/TableEntryFactory';
+
 import labelEntry from 'bpmn-js-properties-panel/lib/factory/LabelFactory';
-import link from 'bpmn-js-properties-panel/lib/factory/LinkEntryFactory';
-import autoSuggestTextBoxField from 'bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory';
-import collapsible from 'bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory';
 import toggleSwitch from 'bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory';
+import collapsible from 'bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory';
 
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
@@ -151,9 +153,11 @@ EntryFactory.comboBox = function (translate, options) {
     return comboBoxField(translate, options);
 };
 
+/*
 EntryFactory.table = function (translate, options) {
     return tableField(translate, options);
 };
+*/
 
 EntryFactory.label = function (options) {
     return labelEntry(options);

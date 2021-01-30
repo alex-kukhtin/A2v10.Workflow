@@ -17,24 +17,28 @@
 				<th>Id</th>
 				<th>Workflow</th>
 				<th>Version</th>
+				<th>ExecutionStatus</th>
 				<th>DateCreated</th>
 				<th>DateModified</th>
+				<th>Lock</th>
 				<th />
 			</tr>
 		</thead>
 		<tbody>
 			@foreach (var inst in Model)
 			{
-				<tr>
-					<td>@inst.Id</td>
-					<td>@inst.WorkflowId</td>
-					<td>@inst.Version</td>
-					<td>@inst.DateCreated.ToString()</td>
-					<td>@inst.DateModified.ToString()</td>
-					<td>
-						<a class="btn btn-primary btn-sm" href="/instance/open/@inst.Id">View</a>
-					</td>
-				</tr>
+			<tr>
+				<td>@inst.Id</td>
+				<td>@inst.WorkflowId</td>
+				<td>@inst.Version</td>
+				<td>@inst.ExecutionStatus</td>
+				<td>@inst.DateCreated.ToString()</td>
+				<td>@inst.DateModified.ToString()</td>
+				<td>@(inst.Lock != null && inst.Lock != Guid.Empty ? inst.Lock.ToString(): "")</td>
+				<td>
+					<a class="btn btn-primary btn-sm" href="/instance/open/@inst.Id">View</a>
+				</td>
+			</tr>
 			}
 		</tbody>
 	</table>

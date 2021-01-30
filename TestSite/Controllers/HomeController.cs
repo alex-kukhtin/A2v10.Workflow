@@ -1,5 +1,4 @@
-﻿using A2v10.Data.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -7,6 +6,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using TestSite.Models;
+
+using A2v10.Data.Interfaces;
 
 namespace TestSite.Controllers
 {
@@ -24,16 +25,10 @@ namespace TestSite.Controllers
 		public async Task<IActionResult> Index()
 		{
 			// workflows
-			var dm = await _dbContext.LoadModelAsync(null, $"a2wf.[Workflows.Index]");
+			var dm = await _dbContext.LoadModelAsync(null, $"a2wfui.[Workflows.Index]");
 			return View(dm.GetDynamic()["Workflows"]);
 		}
 
-
-		public async Task<IActionResult> Instances()
-		{
-			var dm = await _dbContext.LoadModelAsync(null, "a2wf.[Instances.Index]");
-			return View(dm.GetDynamic()["Instances"]);
-		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()

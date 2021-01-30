@@ -1,9 +1,5 @@
 ﻿
 
-6. Убрать camunda в id элементов
-
-18. 
-переделать свойства (WorkflowPropertiesProvider.js)
-import eventProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps';
-
-21. 
+23. TestSite - добавить просмотр (не редактирование!) bpmn
+24. Сформировать скрипты для Viewer
+25. terser - minify: mangle: true

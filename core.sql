@@ -512,35 +512,3 @@ begin
 	select Id, [Version] from @retval;
 end
 go
-------------------------------------------------
-create or alter procedure a2wf.[Workflows.Index]
-@UserId bigint = null
-as
-begin
-	set nocount on;
-	set transaction isolation level read committed;
-
-	select [Workflows!TWorkflow!Array] = null, [Id!!Id] = c.Id, 
-		c.[DateCreated], c.[Format],
-		InstanceCount = (select count(*) from a2wf.Instances i 
-			where WorkflowId = c.Id),
-		[Version] = (select max([Version]) from a2wf.Workflows w where w.Id = c.Id)
-	from a2wf.[Catalog] c 
-	order by DateCreated desc
-end
-go
-------------------------------------------------
-create or alter procedure a2wf.[Instances.Index]
-@UserId bigint = null
-as
-begin
-	set nocount on;
-	set transaction isolation level read committed;
-
-	select [Instances!TWorkflow!Array] = null, 
-		[Id!!Id] = i.Id, i.WorkflowId, i.[Version], i.[DateCreated], i.DateModified,
-		i.[State], i.ExecutionStatus
-	from a2wf.Instances i 
-	order by DateModified desc
-end
-go

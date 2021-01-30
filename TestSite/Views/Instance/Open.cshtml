@@ -12,12 +12,32 @@
 		</ul>
 	</nav>
 	<div class="row">
-		<div class="col-8">
-<div style="background-color:#f9f9fa;border:1px solid #ccc;padding:10px">
+		<div class="col-6">
+			<h5>State</h5>
+			<div style="background-color:#f9f9fa;border:1px solid #ccc;padding:10px">
 <pre>
 @Model.State
 </pre>
-</div>
+			</div>
+		</div>
+		<div class="col-6">
+			<h5>Track</h5>
+			<table class="table table-sm table-striped">
+				<thead>
+					<tr>
+						<th>Date/Time</th>
+						<th>Message</th>
+					</tr>
+				</thead>
+				@{ foreach (var t in Model.Instance.Track)
+					{
+						<tr>
+							<td class="text-center">@t.EventTime</td>
+							<td>@t.Message</td>
+						</tr>
+					}
+				}
+			</table>
 		</div>
 	</div>
 </div>

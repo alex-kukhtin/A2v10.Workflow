@@ -98,7 +98,7 @@ const bpmnViewer = new BpmnViewer(
 
 window.Modeler = bpmnModeler; // window.Viewer = bpmnViewer;
 
-},{"./descriptors/workflow":1,"./provider/workflow":13,"bpmn-js-properties-panel":25,"bpmn-js/lib/Modeler":67}],3:[function(require,module,exports){
+},{"./descriptors/workflow":1,"./provider/workflow":16,"bpmn-js-properties-panel":38,"bpmn-js/lib/Modeler":60}],3:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -167,7 +167,7 @@ var checkbox = function (translate, options, defaultParameters) {
 
 module.exports = checkbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],4:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187,"min-dom":594}],4:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -178,29 +178,28 @@ var _CheckboxEntryFactory = _interopRequireDefault(require("./CheckboxEntryFacto
 
 var _selectEntryFactory = _interopRequireDefault(require("./selectEntryFactory"));
 
-var _ComboEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ComboEntryFactory"));
-
 var _textBoxEntryFactory = _interopRequireDefault(require("./textBoxEntryFactory"));
 
 var _validationAwareTextInput = _interopRequireDefault(require("./validationAwareTextInput"));
 
-var _TableEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/TableEntryFactory"));
+var _comboEntryFactory = _interopRequireDefault(require("./comboEntryFactory"));
+
+var _autoSuggestTextBoxFactory = _interopRequireDefault(require("./autoSuggestTextBoxFactory"));
+
+var _linkEntryFactory = _interopRequireDefault(require("./linkEntryFactory"));
 
 var _LabelFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/LabelFactory"));
 
-var _LinkEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/LinkEntryFactory"));
-
-var _AutoSuggestTextBoxFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory"));
+var _ToggleSwitchEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory"));
 
 var _CollapsibleEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory"));
-
-var _ToggleSwitchEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // input entities
+//import tableField from 'bpmn-js-properties-panel/lib/factory/TableEntryFactory';
 // helpers ////////////////////////////////////////
 function ensureNotNull(prop) {
   if (!prop) {
@@ -330,23 +329,25 @@ EntryFactory.selectBox = function (translate, options) {
 };
 
 EntryFactory.comboBox = function (translate, options) {
-  return (0, _ComboEntryFactory.default)(translate, options);
+  return (0, _comboEntryFactory.default)(translate, options);
 };
-
+/*
 EntryFactory.table = function (translate, options) {
-  return (0, _TableEntryFactory.default)(translate, options);
+    return tableField(translate, options);
 };
+*/
+
 
 EntryFactory.label = function (options) {
   return (0, _LabelFactory.default)(options);
 };
 
 EntryFactory.link = function (translate, options) {
-  return (0, _LinkEntryFactory.default)(translate, options);
+  return (0, _linkEntryFactory.default)(translate, options);
 };
 
 EntryFactory.autoSuggest = function (translate, options) {
-  return (0, _AutoSuggestTextBoxFactory.default)(translate, options, setDefaultParameters(options));
+  return (0, _autoSuggestTextBoxFactory.default)(translate, options, setDefaultParameters(options));
 };
 
 EntryFactory.collapsible = function (options) {
@@ -359,7 +360,7 @@ EntryFactory.toggleSwitch = function (translate, options) {
 
 module.exports = EntryFactory;
 
-},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":35,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":37,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":38,"bpmn-js-properties-panel/lib/factory/LabelFactory":41,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":42,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":44,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":47,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],5:[function(require,module,exports){
+},{"./CheckboxEntryFactory":3,"./autoSuggestTextBoxFactory":6,"./comboEntryFactory":8,"./linkEntryFactory":10,"./selectEntryFactory":11,"./textBoxEntryFactory":12,"./textInputEntryFactory":13,"./validationAwareTextInput":14,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":48,"bpmn-js-properties-panel/lib/factory/LabelFactory":50,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":51,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],5:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -424,7 +425,269 @@ var textField = function (translate, options, defaultParameters) {
 
 module.exports = textField;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],6:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"min-dom":594}],6:[function(require,module,exports){
+'use strict';
+
+var _minDom = require("min-dom");
+
+var _minDash = require("min-dash");
+
+var _Utils = require("bpmn-js-properties-panel/lib/Utils");
+
+var _EntryFieldDescription = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/EntryFieldDescription"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var CLASS_ACTIVE = 'active';
+var FOCUS_LEAVE_DELAY = '150';
+var TEXT_NODE_NAME = '#text';
+var SUGGESTION_LIST_BOX_THRESHOLD = 15;
+
+var noop = function () {};
+
+var autoSuggestTextBox = function (translate, options, defaultParameters) {
+  var resource = defaultParameters,
+      label = options.label || resource.id,
+      canBeShown = !!options.show && typeof options.show === 'function',
+      description = options.description;
+  resource.html = (0, _minDom.domify)('<label ' + 'for="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + label + '</label>' + '<div class="bpp-field-wrapper" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + '<div ' + 'contenteditable="true"' + 'id="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + 'name="' + (0, _Utils.escapeHTML)(options.modelProperty) + '" ' + 'data-auto-suggest="suggestItems"' + 'data-blur="handleFocusLeave"' + '></div>' + '<div class="bpp-autosuggest-list"></div>' + '</div>');
+
+  if (description) {
+    (0, _minDom.query)('.bpp-field-wrapper', resource.html).appendChild((0, _EntryFieldDescription.default)(translate, description));
+  }
+
+  if (canBeShown) {
+    resource.isShown = function () {
+      return options.show.apply(resource, arguments);
+    };
+  }
+  /**
+   * Ensure selected item got recognized before list got hidden
+   */
+
+
+  resource.handleFocusLeave = (0, _minDash.debounce)(function (element, entryNode) {
+    clearSuggestionList(entryNode);
+    hideSuggestionList(entryNode);
+  }, FOCUS_LEAVE_DELAY);
+  /**
+   * Fill the suggestion list relative to the current word under the cursor.
+   *
+   * @param {djs.model.Base} element
+   * @param {HTMLElement} entryNode
+   * @param {Event} event
+   */
+
+  resource.suggestItems = function (element, entryNode, event) {
+    var editorNode = event.delegateTarget,
+        range = getSelectionRange(),
+        focusNode = range.focusNode,
+        caretPosition = getCaretPosition(range.range),
+        canSuggest = options.canSuggest || noop,
+        getItems = options.getItems;
+
+    function updateSuggestionList(items) {
+      var listNode = (0, _minDom.query)('.bpp-autosuggest-list', entryNode); // (1) clear list before
+
+      clearSuggestionList(entryNode); // (2) keep list invisible if no items
+
+      if (!items.length) {
+        return;
+      }
+
+      (0, _minDom.classes)(listNode).add(CLASS_ACTIVE); // (3) create new items
+
+      (0, _minDash.forEach)(items, function (item) {
+        createSuggestionItem(listNode, item);
+      }); // (4) place list relative to cursor
+
+      var position = getSuggestionListPosition(listNode, document.body).position;
+      setPosition(listNode, position.x, position.y);
+    }
+
+    function createSuggestionItem(parentNode, value) {
+      var itemNode = (0, _minDom.domify)('<div class="bpp-autosuggest-item"></div>');
+      itemNode.innerText = (0, _Utils.escapeHTML)(value);
+      parentNode.appendChild(itemNode);
+      itemNode.addEventListener('click', handleItemClick);
+    }
+
+    function handleItemClick(event) {
+      var value = event.target.innerText,
+          wordIndex = currentWord.index,
+          start = wordIndex,
+          end = wordIndex + currentWord[0].length;
+      selectRange(focusNode, start, end);
+      document.execCommand('insertText', false, value);
+      clearSuggestionList(entryNode);
+      hideSuggestionList(entryNode);
+    }
+
+    hideSuggestionList(entryNode);
+    var currentWord = getWordUnderCursor(focusNode, caretPosition) || [];
+
+    if (currentWord && canSuggest(currentWord, editorNode, focusNode)) {
+      var items = getItems(element, entryNode),
+          results = [],
+          value = currentWord[0]; // sort matches by
+      // (1) item starts with value (case insensitive)
+      // (2) value is inside suggested item (case insensitive)
+
+      (0, _minDash.forEach)(items, function (item) {
+        var itemLowerCase = item.toLowerCase(),
+            valueLowerCase = value && value.toLowerCase();
+
+        if (itemLowerCase.indexOf(valueLowerCase) === 0) {
+          results.push(item);
+        }
+      });
+      (0, _minDash.forEach)(items, function (item) {
+        var itemLowerCase = item.toLowerCase(item),
+            valueLowerCase = value && value.toLowerCase();
+
+        if (itemLowerCase.indexOf(valueLowerCase) >= 1) {
+          results.push(item);
+        }
+      });
+      updateSuggestionList(results);
+    }
+  };
+  /**
+  * Calculates the position coordinates of the suggestion list,
+  * dependant on position of cursor
+  *
+  * @return {Object} coordinates
+  */
+
+
+  function getSuggestionListPosition(listNode, container) {
+    var range = getSelectionRange().range,
+        cursorBounds = range.getBoundingClientRect(),
+        clientBounds = container.getBoundingClientRect(),
+        listBounds = listNode.getBoundingClientRect();
+    var coordinates = {
+      'top-left': {
+        x: cursorBounds.right - listBounds.width,
+        y: cursorBounds.top - listBounds.height
+      },
+      'top-right': {
+        x: cursorBounds.right,
+        y: cursorBounds.top - listBounds.height
+      },
+      'bottom-left': {
+        x: cursorBounds.right - listBounds.width,
+        y: cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD
+      },
+      'bottom-right': {
+        x: cursorBounds.right,
+        y: cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD
+      }
+    };
+    var orientation = '';
+
+    if (cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD + listBounds.height > clientBounds.height + clientBounds.top) {
+      orientation = 'top-';
+    } else {
+      orientation = 'bottom-';
+    }
+
+    if (cursorBounds.right + listBounds.width > clientBounds.width + clientBounds.left) {
+      orientation += 'left';
+    } else {
+      orientation += 'right';
+    }
+
+    return {
+      orientation: orientation,
+      position: coordinates[orientation]
+    };
+  }
+
+  resource.getSuggestionListPosition = getSuggestionListPosition;
+  resource.cssClasses = ['bpp-autosuggest-textbox'];
+  return resource;
+};
+
+module.exports = autoSuggestTextBox; // helpers /////////////////////////////
+
+function getSelectionRange() {
+  var selection = document.getSelection();
+  return {
+    range: selection.getRangeAt(0),
+    focusNode: selection.focusNode
+  };
+}
+
+function getCaretPosition(range) {
+  return range.startOffset;
+}
+
+function selectRange(focusNode, start, end) {
+  var range = document.createRange(),
+      selection = window.getSelection();
+  range.setStart(focusNode, start);
+  range.setEnd(focusNode, end);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function hideSuggestionList(entryNode) {
+  var listNode = (0, _minDom.query)('.bpp-autosuggest-list', entryNode);
+  (0, _minDom.classes)(listNode).remove(CLASS_ACTIVE);
+}
+
+function clearSuggestionList(entryNode) {
+  var listNode = (0, _minDom.query)('.bpp-autosuggest-list', entryNode);
+
+  while (listNode.firstChild) {
+    listNode.removeChild(listNode.firstChild);
+  }
+}
+
+function getWordUnderCursor(node, currentCursorPositon) {
+  var value = node.nodeName === TEXT_NODE_NAME ? node.wholeText : node.innerText,
+      allWords = findWords(value);
+  return (0, _minDash.find)(allWords, function (word) {
+    var matchValue = word[0],
+        wordStart = word.index,
+        wordEnd = wordStart + matchValue.length - 1;
+    return wordStart <= currentCursorPositon - 1 && wordEnd >= currentCursorPositon - 1;
+  });
+}
+/**
+ * Retrieves all words inside a text (also inside clauses and after operators)
+ *
+ * @param {string} value
+ *
+ * @return {Array<Object>}
+ */
+
+
+function findWords(value) {
+  // eslint-disable-next-line no-useless-escape
+  return matchAll(value, /[^\s\r\(\)\,\+\-\*\/\{\}]+/g);
+}
+
+function matchAll(value, regex) {
+  var regexp = RegExp(regex),
+      match,
+      matches = [];
+
+  while ((match = regexp.exec(value)) !== null) {
+    matches.push(match);
+  }
+
+  return matches;
+}
+
+function setPosition(el, x, y) {
+  (0, _minDash.assign)(el.style, {
+    left: x + 'px',
+    top: y + 'px'
+  });
+}
+
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory/EntryFieldDescription":49,"min-dash":593,"min-dom":594}],7:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -493,7 +756,121 @@ var checkbox = function (translate, options, defaultParameters) {
 
 module.exports = checkbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],7:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187,"min-dom":594}],8:[function(require,module,exports){
+'use strict';
+
+var _assign = _interopRequireDefault(require("lodash/assign"));
+
+var _find = _interopRequireDefault(require("lodash/find"));
+
+var _minDom = require("min-dom");
+
+var _Utils = require("bpmn-js-properties-panel/lib/Utils");
+
+var _selectEntryFactory = _interopRequireDefault(require("./selectEntryFactory"));
+
+var _EntryFieldDescription = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/EntryFieldDescription"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * The combo box is a special implementation of the select entry and adds the option 'custom' to the
+ * select box. If 'custom' is selected, an additional text input field is shown which allows to define
+ * a custom value.
+ *
+ * @param  {Object} options
+ * @param  {string} options.id
+ * @param  {string} options.label
+ * @param  {Array<Object>} options.selectOptions list of name/value pairs
+ * @param  {string} options.modelProperty
+ * @param  {function} options.get
+ * @param  {function} options.set
+ * @param  {string} [options.customValue] custom select option value (default: 'custom')
+ * @param  {string} [options.customName] custom select option name visible in the select box (default: 'custom')
+ *
+ * @return {Object}
+ */
+var comboBox = function (translate, options) {
+  var selectOptions = options.selectOptions,
+      modelProperty = options.modelProperty,
+      customValue = options.customValue || 'custom',
+      customName = options.customName || 'custom ' + modelProperty,
+      description = options.description; // check if a value is not a built in value
+
+  var isCustomValue = function (value) {
+    if (typeof value[modelProperty] === 'undefined') {
+      return false;
+    }
+
+    var isCustom = !(0, _find.default)(selectOptions, function (option) {
+      return value[modelProperty] === option.value;
+    });
+    return isCustom;
+  };
+
+  var comboOptions = (0, _assign.default)({}, options); // true if the selected value in the select box is customValue
+
+  comboOptions.showCustomInput = function (element, node) {
+    var selectBox = (0, _minDom.query)('[data-entry="' + options.id + '"] select', node.parentNode);
+
+    if (selectBox) {
+      return selectBox.value === customValue;
+    }
+
+    return false;
+  };
+
+  comboOptions.get = function (element, node) {
+    var value = options.get(element, node);
+    var modifiedValues = {};
+
+    if (!isCustomValue(value)) {
+      modifiedValues[modelProperty] = value[modelProperty] || '';
+      return modifiedValues;
+    }
+
+    modifiedValues[modelProperty] = customValue;
+    modifiedValues['custom-' + modelProperty] = value[modelProperty];
+    return modifiedValues;
+  };
+
+  comboOptions.set = function (element, values, node) {
+    var modifiedValues = {}; // if the custom select option has been selected
+    // take the value from the text input field
+
+    if (values[modelProperty] === customValue) {
+      modifiedValues[modelProperty] = values['custom-' + modelProperty] || '';
+    } else if (options.emptyParameter && values[modelProperty] === '') {
+      modifiedValues[modelProperty] = undefined;
+    } else {
+      modifiedValues[modelProperty] = values[modelProperty];
+    }
+
+    return options.set(element, modifiedValues, node);
+  };
+
+  comboOptions.selectOptions.push({
+    name: customName,
+    value: customValue
+  });
+  var comboBoxEntry = (0, _assign.default)({}, (0, _selectEntryFactory.default)(translate, comboOptions, comboOptions));
+  var fragment = document.createDocumentFragment();
+  fragment.appendChild(comboBoxEntry.html);
+  comboBoxEntry.html = fragment;
+  comboBoxEntry.html.appendChild((0, _minDom.domify)('<div class="bpp-field-wrapper bpp-combo-input" ' + 'data-show="showCustomInput"' + '>' + '<input id="wf-' + (0, _Utils.escapeHTML)(options.id) + '-input" type="text" name="custom-' + (0, _Utils.escapeHTML)(modelProperty) + '" ' + ' />' + '</div>')); // add description below combo box entry field
+
+  if (description) {
+    comboBoxEntry.html.appendChild((0, _EntryFieldDescription.default)(translate, description, {
+      show: 'showCustomInput'
+    }));
+  }
+
+  return comboBoxEntry;
+};
+
+module.exports = comboBox;
+
+},{"./selectEntryFactory":11,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory/EntryFieldDescription":49,"lodash/assign":551,"lodash/find":557,"min-dom":594}],9:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -504,29 +881,28 @@ var _CheckboxEntryFactory = _interopRequireDefault(require("./CheckboxEntryFacto
 
 var _selectEntryFactory = _interopRequireDefault(require("./selectEntryFactory"));
 
-var _ComboEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ComboEntryFactory"));
-
 var _textBoxEntryFactory = _interopRequireDefault(require("./textBoxEntryFactory"));
 
 var _validationAwareTextInput = _interopRequireDefault(require("./validationAwareTextInput"));
 
-var _TableEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/TableEntryFactory"));
+var _comboEntryFactory = _interopRequireDefault(require("./comboEntryFactory"));
+
+var _autoSuggestTextBoxFactory = _interopRequireDefault(require("./autoSuggestTextBoxFactory"));
+
+var _linkEntryFactory = _interopRequireDefault(require("./linkEntryFactory"));
 
 var _LabelFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/LabelFactory"));
 
-var _LinkEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/LinkEntryFactory"));
-
-var _AutoSuggestTextBoxFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory"));
+var _ToggleSwitchEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory"));
 
 var _CollapsibleEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory"));
-
-var _ToggleSwitchEntryFactory = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // input entities
+//import tableField from 'bpmn-js-properties-panel/lib/factory/TableEntryFactory';
 // helpers ////////////////////////////////////////
 function ensureNotNull(prop) {
   if (!prop) {
@@ -656,23 +1032,25 @@ EntryFactory.selectBox = function (translate, options) {
 };
 
 EntryFactory.comboBox = function (translate, options) {
-  return (0, _ComboEntryFactory.default)(translate, options);
+  return (0, _comboEntryFactory.default)(translate, options);
 };
-
+/*
 EntryFactory.table = function (translate, options) {
-  return (0, _TableEntryFactory.default)(translate, options);
+    return tableField(translate, options);
 };
+*/
+
 
 EntryFactory.label = function (options) {
   return (0, _LabelFactory.default)(options);
 };
 
 EntryFactory.link = function (translate, options) {
-  return (0, _LinkEntryFactory.default)(translate, options);
+  return (0, _linkEntryFactory.default)(translate, options);
 };
 
 EntryFactory.autoSuggest = function (translate, options) {
-  return (0, _AutoSuggestTextBoxFactory.default)(translate, options, setDefaultParameters(options));
+  return (0, _autoSuggestTextBoxFactory.default)(translate, options, setDefaultParameters(options));
 };
 
 EntryFactory.collapsible = function (options) {
@@ -685,7 +1063,93 @@ EntryFactory.toggleSwitch = function (translate, options) {
 
 module.exports = EntryFactory;
 
-},{"./CheckboxEntryFactory":3,"./selectEntryFactory":8,"./textBoxEntryFactory":9,"./textInputEntryFactory":10,"./validationAwareTextInput":11,"bpmn-js-properties-panel/lib/factory/AutoSuggestTextBoxFactory":35,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":37,"bpmn-js-properties-panel/lib/factory/ComboEntryFactory":38,"bpmn-js-properties-panel/lib/factory/LabelFactory":41,"bpmn-js-properties-panel/lib/factory/LinkEntryFactory":42,"bpmn-js-properties-panel/lib/factory/TableEntryFactory":44,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":47,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],8:[function(require,module,exports){
+},{"./CheckboxEntryFactory":3,"./autoSuggestTextBoxFactory":6,"./comboEntryFactory":8,"./linkEntryFactory":10,"./selectEntryFactory":11,"./textBoxEntryFactory":12,"./textInputEntryFactory":13,"./validationAwareTextInput":14,"bpmn-js-properties-panel/lib/factory/CollapsibleEntryFactory":48,"bpmn-js-properties-panel/lib/factory/LabelFactory":50,"bpmn-js-properties-panel/lib/factory/ToggleSwitchEntryFactory":51,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],10:[function(require,module,exports){
+'use strict';
+
+var _minDom = require("min-dom");
+
+var _Utils = require("bpmn-js-properties-panel/lib/Utils");
+
+var _EntryFieldDescription = _interopRequireDefault(require("bpmn-js-properties-panel/lib/factory/EntryFieldDescription"));
+
+var _bind = _interopRequireDefault(require("lodash/bind"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * An entry that renders a clickable link.
+ *
+ * A passed {@link options#handleClick} handler is responsible
+ * to process the click.
+ *
+ * The link may be conditionally shown or hidden. This can be
+ * controlled via the {@link options.showLink}.
+ *
+ * @param {Object} options
+ * @param {String} options.id
+ * @param {String} [options.buttonLabel]
+ * @param {Function} options.handleClick
+ * @param {Function} [options.showLink] returning false to hide link
+ * @param {String} [options.description]
+ *
+ * @example
+ *
+ * var linkEntry = link({
+ *   id: 'foo',
+ *   description: 'Some Description',
+ *   handleClick: function(element, node, event) { ... },
+ *   showLink: function(element, node) { ... }
+ * });
+ *
+ * @return {Entry} the newly created entry
+ */
+function link(translate, options) {
+  var id = options.id,
+      buttonLabel = options.buttonLabel || id,
+      showLink = options.showLink,
+      handleClick = options.handleClick,
+      description = options.description,
+      label = options.label;
+
+  if (showLink && typeof showLink !== 'function') {
+    throw new Error('options.showLink must be a function');
+  }
+
+  if (typeof handleClick !== 'function') {
+    throw new Error('options.handleClick must be a function');
+  }
+
+  var resource = {
+    id: id,
+    html: document.createDocumentFragment()
+  };
+
+  if (label) {
+    resource.html.appendChild((0, _minDom.domify)('<label for="wf-' + (0, _Utils.escapeHTML)(id) + '" ' + (showLink ? 'data-show="showLink" ' : '') + '>' + (0, _Utils.escapeHTML)(label) + '</label>'));
+  }
+
+  resource.html.appendChild((0, _minDom.domify)('<div class="bpp-field-wrapper">' + '<a data-action="handleClick" ' + (showLink ? 'data-show="showLink" ' : '') + 'class="bpp-entry-link' + (options.cssClasses ? ' ' + (0, _Utils.escapeHTML)(options.cssClasses) : '') + '">' + (0, _Utils.escapeHTML)(buttonLabel) + '</a></div>')); // add description below link entry field
+
+  if (description) {
+    resource.html.appendChild((0, _EntryFieldDescription.default)(translate, description, {
+      show: 'showLink'
+    }));
+  }
+
+  resource.handleClick = (0, _bind.default)(handleClick, resource);
+
+  if (typeof showLink === 'function') {
+    resource.showLink = function () {
+      return showLink.apply(resource, arguments);
+    };
+  }
+
+  return resource;
+}
+
+module.exports = link;
+
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory/EntryFieldDescription":49,"lodash/bind":552,"min-dom":594}],11:[function(require,module,exports){
 'use strict';
 
 var _Utils = require("bpmn-js-properties-panel/lib/Utils");
@@ -815,7 +1279,7 @@ var selectbox = function (translate, options, defaultParameters) {
 
 module.exports = selectbox;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"lodash/forEach":567,"min-dom":601}],9:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"lodash/forEach":560,"min-dom":594}],12:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -851,7 +1315,7 @@ var textBox = function (translate, options, defaultParameters) {
 
 module.exports = textBox;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],10:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"min-dom":594}],13:[function(require,module,exports){
 'use strict';
 
 var _minDom = require("min-dom");
@@ -916,7 +1380,7 @@ var textField = function (translate, options, defaultParameters) {
 
 module.exports = textField;
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":40,"min-dom":601}],11:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/factory//EntryFieldDescription":49,"min-dom":594}],14:[function(require,module,exports){
 'use strict';
 
 var _TextInputEntryFactory = _interopRequireDefault(require("./TextInputEntryFactory"));
@@ -965,7 +1429,7 @@ var validationAwareTextField = function (translate, options, defaultParameters) 
 
 module.exports = validationAwareTextField;
 
-},{"./TextInputEntryFactory":5}],12:[function(require,module,exports){
+},{"./TextInputEntryFactory":5}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -976,8 +1440,6 @@ exports.default = WorkflowPropertiesProvider;
 var _inherits = _interopRequireDefault(require("inherits"));
 
 var _PropertiesActivator = _interopRequireDefault(require("bpmn-js-properties-panel/lib/PropertiesActivator"));
-
-var _EventProps = _interopRequireDefault(require("bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps"));
 
 var _documentationProps = _interopRequireDefault(require("../workflow/parts/bpmn/documentationProps"));
 
@@ -991,6 +1453,8 @@ var _nameProps = _interopRequireDefault(require("../workflow/parts/bpmn/nameProp
 
 var _linkProps = _interopRequireDefault(require("../workflow/parts/bpmn/linkProps"));
 
+var _eventProps = _interopRequireDefault(require("../workflow/parts/bpmn/eventProps"));
+
 var _scriptProps = _interopRequireDefault(require("./parts/scriptProps"));
 
 var _variablesProps = _interopRequireDefault(require("./parts/variablesProps"));
@@ -1001,8 +1465,6 @@ var _extensionElements = _interopRequireDefault(require("./parts/impl/extensionE
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Require all properties you need from existing providers.
-// Require your custom property entries.
 // The general tab contains all bpmn relevant properties.
 // The properties are organized in groups.
 function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, translate) {
@@ -1020,7 +1482,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
     entries: []
   };
   (0, _linkProps.default)(detailsGroup, element, translate);
-  (0, _EventProps.default)(detailsGroup, element, bpmnFactory, elementRegistry, translate);
+  (0, _eventProps.default)(detailsGroup, element, bpmnFactory, elementRegistry, translate);
   (0, _scriptProps.default)(detailsGroup, element, bpmnFactory, translate);
   (0, _conditionalProps.default)(detailsGroup, element, bpmnFactory, translate);
   var documentationGroup = {
@@ -1076,7 +1538,7 @@ function WorkflowPropertiesProvider(eventBus, bpmnFactory, canvas, elementRegist
 
 (0, _inherits.default)(WorkflowPropertiesProvider, _PropertiesActivator.default);
 
-},{"../workflow/parts/bpmn/conditionalProps":14,"../workflow/parts/bpmn/documentationProps":15,"../workflow/parts/bpmn/idProps":16,"../workflow/parts/bpmn/linkProps":18,"../workflow/parts/bpmn/nameProps":19,"../workflow/parts/bpmn/processProps":20,"./parts/impl/extensionElements":21,"./parts/scriptProps":22,"./parts/variablesDetailProps":23,"./parts/variablesProps":24,"bpmn-js-properties-panel/lib/PropertiesActivator":26,"bpmn-js-properties-panel/lib/provider/bpmn/parts/EventProps":55,"inherits":392}],13:[function(require,module,exports){
+},{"../workflow/parts/bpmn/conditionalProps":17,"../workflow/parts/bpmn/documentationProps":18,"../workflow/parts/bpmn/eventProps":19,"../workflow/parts/bpmn/idProps":20,"../workflow/parts/bpmn/linkProps":31,"../workflow/parts/bpmn/nameProps":32,"../workflow/parts/bpmn/processProps":33,"./parts/impl/extensionElements":34,"./parts/scriptProps":35,"./parts/variablesDetailProps":36,"./parts/variablesProps":37,"bpmn-js-properties-panel/lib/PropertiesActivator":39,"inherits":385}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1094,7 +1556,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./WorkflowPropertiesProvider":12}],14:[function(require,module,exports){
+},{"./WorkflowPropertiesProvider":15}],17:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -1205,7 +1667,7 @@ function isConditionalSource(element) {
   return (0, _ModelingUtil.isAny)(element, CONDITIONAL_SOURCES);
 }
 
-},{"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":52,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],15:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":55,"bpmn-js/lib/features/modeling/util/ModelingUtil":158,"bpmn-js/lib/util/ModelUtil":187,"min-dom":594}],18:[function(require,module,exports){
 'use strict';
 
 var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
@@ -1270,7 +1732,117 @@ module.exports = function (group, element, bpmnFactory, translate) {
   }
 };
 
-},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],16:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],19:[function(require,module,exports){
+'use strict';
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _ModelingUtil = require("bpmn-js/lib/features/modeling/util/ModelingUtil");
+
+var _EventDefinitionHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/EventDefinitionHelper"));
+
+var _forEach = _interopRequireDefault(require("lodash/forEach"));
+
+var _messageEventDefinition = _interopRequireDefault(require("./implementation/messageEventDefinition"));
+
+var _signalEventDefinition = _interopRequireDefault(require("./implementation/signalEventDefinition"));
+
+var _errorEventDefinition = _interopRequireDefault(require("./implementation/errorEventDefinition"));
+
+var _escalationEventDefinition = _interopRequireDefault(require("./implementation/escalationEventDefinition"));
+
+var _timerEventDefinition = _interopRequireDefault(require("./implementation/timerEventDefinition"));
+
+var _compensateEventDefinition = _interopRequireDefault(require("./implementation/compensateEventDefinition"));
+
+var _conditionalEventDefinition = _interopRequireDefault(require("./implementation/conditionalEventDefinition"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, elementRegistry, translate) {
+  var events = ['bpmn:StartEvent', 'bpmn:EndEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:BoundaryEvent', 'bpmn:IntermediateCatchEvent']; // Message and Signal Event Definition
+
+  (0, _forEach.default)(events, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      var messageEventDefinition = _EventDefinitionHelper.default.getMessageEventDefinition(element),
+          signalEventDefinition = _EventDefinitionHelper.default.getSignalEventDefinition(element);
+
+      if (messageEventDefinition) {
+        (0, _messageEventDefinition.default)(group, element, bpmnFactory, messageEventDefinition, translate);
+      }
+
+      if (signalEventDefinition) {
+        (0, _signalEventDefinition.default)(group, element, bpmnFactory, signalEventDefinition, translate);
+      }
+    }
+  }); // Special Case: Receive Task
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:ReceiveTask')) {
+    (0, _messageEventDefinition.default)(group, element, bpmnFactory, (0, _ModelUtil.getBusinessObject)(element), translate);
+  } // Error Event Definition
+
+
+  var errorEvents = ['bpmn:StartEvent', 'bpmn:BoundaryEvent', 'bpmn:EndEvent'];
+  (0, _forEach.default)(errorEvents, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      var errorEventDefinition = _EventDefinitionHelper.default.getErrorEventDefinition(element);
+
+      if (errorEventDefinition) {
+        (0, _errorEventDefinition.default)(group, element, bpmnFactory, errorEventDefinition, translate);
+      }
+    }
+  }); // Escalation Event Definition
+
+  var escalationEvents = ['bpmn:StartEvent', 'bpmn:BoundaryEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:EndEvent'];
+  (0, _forEach.default)(escalationEvents, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      var showEscalationCodeVariable = (0, _ModelUtil.is)(element, 'bpmn:StartEvent') || (0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent'); // get business object
+
+      var escalationEventDefinition = _EventDefinitionHelper.default.getEscalationEventDefinition(element);
+
+      if (escalationEventDefinition) {
+        (0, _escalationEventDefinition.default)(group, element, bpmnFactory, escalationEventDefinition, showEscalationCodeVariable, translate);
+      }
+    }
+  }); // Timer Event Definition
+
+  var timerEvents = ['bpmn:StartEvent', 'bpmn:BoundaryEvent', 'bpmn:IntermediateCatchEvent'];
+  (0, _forEach.default)(timerEvents, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      // get business object
+      var timerEventDefinition = _EventDefinitionHelper.default.getTimerEventDefinition(element);
+
+      if (timerEventDefinition) {
+        (0, _timerEventDefinition.default)(group, element, bpmnFactory, timerEventDefinition, translate);
+      }
+    }
+  }); // Compensate Event Definition
+
+  var compensationEvents = ['bpmn:EndEvent', 'bpmn:IntermediateThrowEvent'];
+  (0, _forEach.default)(compensationEvents, function (event) {
+    if ((0, _ModelUtil.is)(element, event)) {
+      // get business object
+      var compensateEventDefinition = _EventDefinitionHelper.default.getCompensateEventDefinition(element);
+
+      if (compensateEventDefinition) {
+        (0, _compensateEventDefinition.default)(group, element, bpmnFactory, compensateEventDefinition, elementRegistry, translate);
+      }
+    }
+  }); // Conditional Event Definition
+
+  var conditionalEvents = ['bpmn:StartEvent', 'bpmn:BoundaryEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent'];
+
+  if ((0, _ModelingUtil.isAny)(element, conditionalEvents)) {
+    // get business object
+    var conditionalEventDefinition = _EventDefinitionHelper.default.getConditionalEventDefinition(element);
+
+    if (conditionalEventDefinition) {
+      (0, _conditionalEventDefinition.default)(group, element, bpmnFactory, conditionalEventDefinition, elementRegistry, translate);
+    }
+  }
+};
+
+},{"./implementation/compensateEventDefinition":21,"./implementation/conditionalEventDefinition":22,"./implementation/errorEventDefinition":24,"./implementation/escalationEventDefinition":25,"./implementation/messageEventDefinition":27,"./implementation/signalEventDefinition":29,"./implementation/timerEventDefinition":30,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":55,"bpmn-js/lib/features/modeling/util/ModelingUtil":158,"bpmn-js/lib/util/ModelUtil":187,"lodash/forEach":560}],20:[function(require,module,exports){
 'use strict';
 
 var _entryFactory = _interopRequireDefault(require("../../../lib/factory/entryFactory"));
@@ -1315,7 +1887,504 @@ module.exports = function (group, element, translate, options) {
   }));
 };
 
-},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],17:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],21:[function(require,module,exports){
+'use strict';
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _EventDefinitionHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/EventDefinitionHelper"));
+
+var _Utils = _interopRequireDefault(require("bpmn-js-properties-panel/lib/Utils"));
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _forEach = _interopRequireDefault(require("lodash/forEach"));
+
+var _find = _interopRequireDefault(require("lodash/find"));
+
+var _filter = _interopRequireDefault(require("lodash/filter"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getContainedActivities(element) {
+  return getFlowElements(element, 'bpmn:Activity');
+}
+
+function getContainedBoundaryEvents(element) {
+  return getFlowElements(element, 'bpmn:BoundaryEvent');
+}
+
+function getFlowElements(element, type) {
+  return _Utils.default.filterElementsByType(element.flowElements, type);
+}
+
+function isCompensationEventAttachedToActivity(activity, boundaryEvents) {
+  var activityId = activity.id;
+  var boundaryEvent = (0, _find.default)(boundaryEvents, function (boundaryEvent) {
+    var compensateEventDefinition = _EventDefinitionHelper.default.getCompensateEventDefinition(boundaryEvent);
+
+    var attachedToRef = boundaryEvent.attachedToRef;
+    return compensateEventDefinition && attachedToRef && attachedToRef.id === activityId;
+  });
+  return !!boundaryEvent;
+} // subprocess: only when it is not triggeredByEvent
+// activity: only when it attach a compensation boundary event
+// callActivity: no limitation
+
+
+function canActivityBeCompensated(activity, boundaryEvents) {
+  return (0, _ModelUtil.is)(activity, 'bpmn:SubProcess') && !activity.triggeredByEvent || (0, _ModelUtil.is)(activity, 'bpmn:CallActivity') || isCompensationEventAttachedToActivity(activity, boundaryEvents);
+}
+
+function getActivitiesForCompensation(element) {
+  var boundaryEvents = getContainedBoundaryEvents(element);
+  return (0, _filter.default)(getContainedActivities(element), function (activity) {
+    return canActivityBeCompensated(activity, boundaryEvents);
+  });
+}
+
+function getActivitiesForActivityRef(element) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  var parent = bo.$parent;
+  var activitiesForActivityRef = getActivitiesForCompensation(parent); // if throwing compensation event is in an event sub process:
+  // get also all activities outside of the event sub process
+
+  if ((0, _ModelUtil.is)(parent, 'bpmn:SubProcess') && parent.triggeredByEvent) {
+    parent = parent.$parent;
+
+    if (parent) {
+      activitiesForActivityRef = activitiesForActivityRef.concat(getActivitiesForCompensation(parent));
+    }
+  }
+
+  return activitiesForActivityRef;
+}
+
+function createActivityRefOptions(element) {
+  var options = [{
+    value: ''
+  }];
+  var activities = getActivitiesForActivityRef(element);
+  (0, _forEach.default)(activities, function (activity) {
+    var activityId = activity.id;
+    var name = (activity.name ? activity.name + ' ' : '') + '(id=' + activityId + ')';
+    options.push({
+      value: activityId,
+      name: name
+    });
+  });
+  return options;
+}
+
+module.exports = function (group, element, bpmnFactory, compensateEventDefinition, elementRegistry, translate) {
+  group.entries.push(_entryFactory.default.checkbox(translate, {
+    id: 'wait-for-completion',
+    label: translate('Wait for Completion'),
+    modelProperty: 'waitForCompletion',
+    get: function (element, node) {
+      return {
+        waitForCompletion: compensateEventDefinition.waitForCompletion
+      };
+    },
+    set: function (element, values) {
+      values.waitForCompletion = values.waitForCompletion || false;
+      return _CmdHelper.default.updateBusinessObject(element, compensateEventDefinition, values);
+    }
+  }));
+  group.entries.push(_entryFactory.default.selectBox(translate, {
+    id: 'activity-ref',
+    label: translate('Activity Ref'),
+    selectOptions: createActivityRefOptions(element),
+    modelProperty: 'activityRef',
+    get: function (element, node) {
+      var activityRef = compensateEventDefinition.activityRef;
+      activityRef = activityRef && activityRef.id;
+      return {
+        activityRef: activityRef || ''
+      };
+    },
+    set: function (element, values) {
+      var activityRef = values.activityRef || undefined;
+      activityRef = activityRef && (0, _ModelUtil.getBusinessObject)(elementRegistry.get(activityRef));
+      return _CmdHelper.default.updateBusinessObject(element, compensateEventDefinition, {
+        activityRef: activityRef
+      });
+    }
+  }));
+};
+
+},{"../../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/EventDefinitionHelper":55,"bpmn-js/lib/util/ModelUtil":187,"lodash/filter":556,"lodash/find":557,"lodash/forEach":560}],22:[function(require,module,exports){
+'use strict';
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
+
+var _DiUtil = require("bpmn-js/lib/util/DiUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, conditionalEventDefinition, elementRegistry, translate) {
+  var getValue = function (modelProperty) {
+    return function (element) {
+      var modelPropertyValue = conditionalEventDefinition.get('wf:' + modelProperty);
+      var value = {};
+      value[modelProperty] = modelPropertyValue;
+      return value;
+    };
+  };
+
+  var setValue = function (modelProperty) {
+    return function (element, values) {
+      var props = {};
+      props['wf:' + modelProperty] = values[modelProperty] || undefined;
+      return _CmdHelper.default.updateBusinessObject(element, conditionalEventDefinition, props);
+    };
+  };
+
+  group.entries.push(_entryFactory.default.textField(translate, {
+    id: 'variableName',
+    label: translate('Variable Name'),
+    modelProperty: 'variableName',
+    get: getValue('variableName'),
+    set: setValue('variableName')
+  }));
+  var isConditionalStartEvent = (0, _ModelUtil.is)(element, 'bpmn:StartEvent') && !(0, _DiUtil.isEventSubProcess)(element.parent);
+
+  if (!isConditionalStartEvent) {
+    group.entries.push(_entryFactory.default.textField(translate, {
+      id: 'variableEvents',
+      label: translate('Variable Events'),
+      description: translate('Specify more than one variable change event as a comma separated list.'),
+      modelProperty: 'variableEvents',
+      get: getValue('variableEvents'),
+      set: setValue('variableEvents')
+    }));
+  }
+};
+
+},{"../../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/DiUtil":185,"bpmn-js/lib/util/ModelUtil":187}],23:[function(require,module,exports){
+'use strict';
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Create an entry to modify a property of an element which
+ * is referenced by a event definition.
+ *
+ * @param  {djs.model.Base} element
+ * @param  {ModdleElement} definition
+ * @param  {BpmnFactory} bpmnFactory
+ * @param  {Object} options
+ * @param  {string} options.id the id of the entry
+ * @param  {string} options.label the label of the entry
+ * @param  {string} options.referenceProperty the name of referencing property
+ * @param  {string} options.modelProperty the name of property to modify
+ * @param  {string} options.shouldValidate a flag indicate whether to validate or not
+ *
+ * @return {Array<Object>} return an array containing the entries
+ */
+module.exports = function (element, definition, bpmnFactory, translate, options) {
+  var id = options.id || 'element-property';
+  var label = options.label;
+  var referenceProperty = options.referenceProperty;
+  var modelProperty = options.modelProperty || 'name';
+  var shouldValidate = options.shouldValidate || false;
+
+  var entry = _entryFactory.default.textField(translate, {
+    id: id,
+    label: label,
+    modelProperty: modelProperty,
+    get: function (element, node) {
+      var reference = definition.get(referenceProperty);
+      var props = {};
+      props[modelProperty] = reference && reference.get(modelProperty);
+      return props;
+    },
+    set: function (element, values, node) {
+      var reference = definition.get(referenceProperty);
+      var props = {};
+      props[modelProperty] = values[modelProperty] || undefined;
+      return _CmdHelper.default.updateBusinessObject(element, reference, props);
+    },
+    hidden: function (element, node) {
+      return !definition.get(referenceProperty);
+    }
+  });
+
+  if (shouldValidate) {
+    entry.validate = function (element, values, node) {
+      var reference = definition.get(referenceProperty);
+
+      if (reference && !values[modelProperty]) {
+        var validationErrors = {};
+        validationErrors[modelProperty] = 'Must provide a value';
+        return validationErrors;
+      }
+    };
+  }
+
+  return [entry];
+};
+
+},{"../../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/helper/CmdHelper":53}],24:[function(require,module,exports){
+'use strict';
+
+var _eventDefinitionReference = _interopRequireDefault(require("./eventDefinitionReference"));
+
+var _elementReferenceProperty = _interopRequireDefault(require("./elementReferenceProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, errorEventDefinition, translate) {
+  group.entries = group.entries.concat((0, _eventDefinitionReference.default)(element, errorEventDefinition, bpmnFactory, {
+    label: translate('Error'),
+    elementName: 'error',
+    elementType: 'bpmn:Error',
+    referenceProperty: 'errorRef',
+    newElementIdPrefix: 'Error_'
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, errorEventDefinition, bpmnFactory, translate, {
+    id: 'error-element-name',
+    label: translate('Error Name'),
+    referenceProperty: 'errorRef',
+    modelProperty: 'name',
+    shouldValidate: true
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, errorEventDefinition, bpmnFactory, translate, {
+    id: 'error-element-code',
+    label: translate('Error Code'),
+    referenceProperty: 'errorRef',
+    modelProperty: 'errorCode'
+  }));
+};
+
+},{"./elementReferenceProperty":23,"./eventDefinitionReference":26}],25:[function(require,module,exports){
+'use strict';
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+var _eventDefinitionReference = _interopRequireDefault(require("./eventDefinitionReference"));
+
+var _elementReferenceProperty = _interopRequireDefault(require("./elementReferenceProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, escalationEventDefinition, showEscalationCodeVariable, translate) {
+  group.entries = group.entries.concat((0, _eventDefinitionReference.default)(element, escalationEventDefinition, bpmnFactory, {
+    label: translate('Escalation'),
+    elementName: 'escalation',
+    elementType: 'bpmn:Escalation',
+    referenceProperty: 'escalationRef',
+    newElementIdPrefix: 'Escalation_'
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, escalationEventDefinition, bpmnFactory, translate, {
+    id: 'escalation-element-name',
+    label: translate('Escalation Name'),
+    referenceProperty: 'escalationRef',
+    modelProperty: 'name',
+    shouldValidate: true
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, escalationEventDefinition, bpmnFactory, translate, {
+    id: 'escalation-element-code',
+    label: translate('Escalation Code'),
+    referenceProperty: 'escalationRef',
+    modelProperty: 'escalationCode'
+  }));
+
+  if (showEscalationCodeVariable) {
+    group.entries.push(_entryFactory.default.textField(translate, {
+      id: 'escalationCodeVariable',
+      label: translate('Escalation Code Variable'),
+      modelProperty: 'escalationCodeVariable',
+      get: function (element) {
+        var codeVariable = escalationEventDefinition.get('wf:escalationCodeVariable');
+        return {
+          escalationCodeVariable: codeVariable
+        };
+      },
+      set: function (element, values) {
+        return _CmdHelper.default.updateBusinessObject(element, escalationEventDefinition, {
+          'wf:escalationCodeVariable': values.escalationCodeVariable || undefined
+        });
+      }
+    }));
+  }
+};
+
+},{"../../../../lib/factory/entryFactory":9,"./elementReferenceProperty":23,"./eventDefinitionReference":26,"bpmn-js-properties-panel/lib/helper/CmdHelper":53}],26:[function(require,module,exports){
+'use strict';
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _minDom = require("min-dom");
+
+var _forEach = _interopRequireDefault(require("lodash/forEach"));
+
+var _find = _interopRequireDefault(require("lodash/find"));
+
+var _ElementHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/ElementHelper"));
+
+var _Utils = _interopRequireDefault(require("bpmn-js-properties-panel/lib/Utils"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const escapeHTML = _Utils.default.escapeHTML;
+var selector = 'select[name=selectedElement]';
+/**
+ * Get select box containing all elements.
+ *
+ * @param {DOMElement} node
+ *
+ * @return {DOMElement} the select box
+ */
+
+function getSelectBox(node) {
+  return (0, _minDom.query)(selector, node.parentElement);
+}
+/**
+ * Find element by given id.
+ *
+ * @param {ModdleElement} eventDefinition
+ *
+ * @return {ModdleElement} an element
+ */
+
+
+function findElementById(eventDefinition, type, id) {
+  var elements = _Utils.default.findRootElementsByType(eventDefinition, type);
+
+  return (0, _find.default)(elements, function (element) {
+    return element.id === id;
+  });
+}
+/**
+ * Create an entry to modify the reference to an element from an
+ * event definition.
+ *
+ * @param  {djs.model.Base} element
+ * @param  {ModdleElement} definition
+ * @param  {BpmnFactory} bpmnFactory
+ * @param  {Object} options
+ * @param  {string} options.label the label of the entry
+ * @param  {string} options.description the description of the entry
+ * @param  {string} options.elementName the name of the element
+ * @param  {string} options.elementType the type of the element
+ * @param  {string} options.referenceProperty the name of referencing property
+ * @param  {string} options.newElementIdPrefix the prefix of a new created element
+ *
+ * @return {Array<Object>} return an array containing the entries
+ */
+
+
+module.exports = function (element, definition, bpmnFactory, options) {
+  var elementName = options.elementName || '',
+      elementType = options.elementType,
+      referenceProperty = options.referenceProperty;
+  var newElementIdPrefix = options.newElementIdPrefix || 'elem_';
+  var label = options.label || '',
+      description = options.description || '';
+  var entries = [];
+  entries.push({
+    id: 'event-definitions-' + elementName,
+    description: description,
+    html: '<div class="bpp-row bpp-select">' + '<label for="wf-' + escapeHTML(elementName) + '">' + escapeHTML(label) + '</label>' + '<div class="bpp-field-wrapper">' + '<select id="wf-' + escapeHTML(elementName) + '" name="selectedElement" data-value>' + '</select>' + '<button class="action-button add" id="addElement" data-action="addElement"><span>+</span></button>' + '</div>' + '</div>',
+    get: function (element, entryNode) {
+      _Utils.default.updateOptionsDropDown(selector, definition, elementType, entryNode);
+
+      var reference = definition.get(referenceProperty);
+      return {
+        selectedElement: reference && reference.id || ''
+      };
+    },
+    set: function (element, values) {
+      var selection = values.selectedElement;
+      var props = {};
+
+      if (!selection || typeof selection === 'undefined') {
+        // remove reference to element
+        props[referenceProperty] = undefined;
+        return _CmdHelper.default.updateBusinessObject(element, definition, props);
+      }
+
+      var commands = [];
+      var selectedElement = findElementById(definition, elementType, selection);
+
+      if (!selectedElement) {
+        var root = _Utils.default.getRoot(definition); // create a new element
+
+
+        selectedElement = _ElementHelper.default.createElement(elementType, {
+          name: selection
+        }, root, bpmnFactory);
+        commands.push(_CmdHelper.default.addAndRemoveElementsFromList(element, root, 'rootElements', null, [selectedElement]));
+      } // update reference to element
+
+
+      props[referenceProperty] = selectedElement;
+      commands.push(_CmdHelper.default.updateBusinessObject(element, definition, props));
+      return commands;
+    },
+    addElement: function (element, inputNode) {
+      // note: this generated id will be used as name
+      // of the element and not as id
+      var id = _Utils.default.nextId(newElementIdPrefix);
+
+      var optionTemplate = (0, _minDom.domify)('<option value="' + escapeHTML(id) + '"> (id=' + escapeHTML(id) + ')' + '</option>'); // add new option
+
+      var selectBox = getSelectBox(inputNode);
+      selectBox.insertBefore(optionTemplate, selectBox.firstChild); // select new element in the select box
+
+      (0, _forEach.default)(selectBox, function (option) {
+        if (option.value === id) {
+          (0, _minDom.attr)(option, 'selected', 'selected');
+        } else {
+          (0, _minDom.attr)(option, 'selected', null);
+        }
+      });
+      return true;
+    }
+  });
+  return entries;
+};
+
+},{"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"lodash/find":557,"lodash/forEach":560,"min-dom":594}],27:[function(require,module,exports){
+'use strict';
+
+var _eventDefinitionReference = _interopRequireDefault(require("./eventDefinitionReference"));
+
+var _elementReferenceProperty = _interopRequireDefault(require("./elementReferenceProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, messageEventDefinition, translate) {
+  group.entries = group.entries.concat((0, _eventDefinitionReference.default)(element, messageEventDefinition, bpmnFactory, {
+    label: translate('Message'),
+    elementName: 'message',
+    elementType: 'bpmn:Message',
+    referenceProperty: 'messageRef',
+    newElementIdPrefix: 'Message_'
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, messageEventDefinition, bpmnFactory, translate, {
+    id: 'message-element-name',
+    label: translate('Message Name'),
+    referenceProperty: 'messageRef',
+    modelProperty: 'name',
+    shouldValidate: true
+  }));
+};
+
+},{"./elementReferenceProperty":23,"./eventDefinitionReference":26}],28:[function(require,module,exports){
 'use strict';
 
 var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
@@ -1350,7 +2419,215 @@ module.exports = function (element, options, translate) {
   return [nameEntry];
 };
 
-},{"../../../../lib/factory/entryFactory":7}],18:[function(require,module,exports){
+},{"../../../../lib/factory/entryFactory":9}],29:[function(require,module,exports){
+'use strict';
+
+var _eventDefinitionReference = _interopRequireDefault(require("./eventDefinitionReference"));
+
+var _elementReferenceProperty = _interopRequireDefault(require("./elementReferenceProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = function (group, element, bpmnFactory, signalEventDefinition, translate) {
+  group.entries = group.entries.concat((0, _eventDefinitionReference.default)(element, signalEventDefinition, bpmnFactory, {
+    label: translate('Signal'),
+    elementName: 'signal',
+    elementType: 'bpmn:Signal',
+    referenceProperty: 'signalRef',
+    newElementIdPrefix: 'Signal_'
+  }));
+  group.entries = group.entries.concat((0, _elementReferenceProperty.default)(element, signalEventDefinition, bpmnFactory, translate, {
+    id: 'signal-element-name',
+    label: translate('Signal Name'),
+    referenceProperty: 'signalRef',
+    modelProperty: 'name',
+    shouldValidate: true
+  }));
+};
+
+},{"./elementReferenceProperty":23,"./eventDefinitionReference":26}],30:[function(require,module,exports){
+'use strict';
+
+var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
+
+var _ElementHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/ElementHelper"));
+
+var _entryFactory = _interopRequireDefault(require("../../../../lib/factory/entryFactory"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Get the timer definition type for a given timer event definition.
+ *
+ * @param {ModdleElement<bpmn:TimerEventDefinition>} timer
+ *
+ * @return {string|undefined} the timer definition type
+ */
+function getTimerDefinitionType(timer) {
+  if (!timer) {
+    return;
+  }
+
+  var timeDate = timer.get('timeDate');
+
+  if (typeof timeDate !== 'undefined') {
+    return 'timeDate';
+  }
+
+  var timeCycle = timer.get('timeCycle');
+
+  if (typeof timeCycle !== 'undefined') {
+    return 'timeCycle';
+  }
+
+  var timeDuration = timer.get('timeDuration');
+
+  if (typeof timeDuration !== 'undefined') {
+    return 'timeDuration';
+  }
+}
+/**
+ * Get the actual timer event definition based on option, whether it's a getter
+ * to fetch the timer event definition or the exact event definition itself
+ *
+ * @param {ModdleElement<bpmn:TimerEventDefinition>|Function} timerOrFunction
+ * @param {Shape} element
+ * @param {HTMLElement} node
+ *
+ * @return ModdleElement<bpmn:TimerEventDefinition>
+ */
+
+
+function getTimerDefinition(timerOrFunction, element, node) {
+  if (typeof timerOrFunction === 'function') {
+    return timerOrFunction(element, node);
+  }
+
+  return timerOrFunction;
+}
+/**
+ * Creates 'bpmn:FormalExpression' element.
+ *
+ * @param {ModdleElement} parent
+ * @param {string} body
+ * @param {BpmnFactory} bpmnFactory
+ *
+ * @return {ModdleElement<bpmn:FormalExpression>} a formal expression
+ */
+
+
+function createFormalExpression(parent, body, bpmnFactory) {
+  body = body || undefined;
+  return _ElementHelper.default.createElement('bpmn:FormalExpression', {
+    body: body
+  }, parent, bpmnFactory);
+}
+
+function TimerEventDefinition(group, element, bpmnFactory, timerEventDefinition, translate, options) {
+  var selectOptions = [{
+    value: 'timeDate',
+    name: translate('Date')
+  }, {
+    value: 'timeDuration',
+    name: translate('Duration')
+  }, {
+    value: 'timeCycle',
+    name: translate('Cycle')
+  }];
+  var prefix = options && options.idPrefix || '',
+      createTimerEventDefinition = options && options.createTimerEventDefinition;
+  group.entries.push(_entryFactory.default.selectBox(translate, {
+    id: prefix + 'timer-event-definition-type',
+    label: translate('Timer Definition Type'),
+    selectOptions: selectOptions,
+    emptyParameter: true,
+    modelProperty: 'timerDefinitionType',
+    get: function (element, node) {
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node);
+      return {
+        timerDefinitionType: getTimerDefinitionType(timerDefinition) || ''
+      };
+    },
+    set: function (element, values, node) {
+      var props = {
+        timeDuration: undefined,
+        timeDate: undefined,
+        timeCycle: undefined
+      };
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
+          newType = values.timerDefinitionType;
+
+      if (!timerDefinition && typeof createTimerEventDefinition === 'function') {
+        timerDefinition = createTimerEventDefinition(element, node);
+      }
+
+      if (values.timerDefinitionType) {
+        var oldType = getTimerDefinitionType(timerDefinition);
+        var value;
+
+        if (oldType) {
+          var definition = timerDefinition.get(oldType);
+          value = definition.get('body');
+        }
+
+        props[newType] = createFormalExpression(timerDefinition, value, bpmnFactory);
+      }
+
+      return _CmdHelper.default.updateBusinessObject(element, timerDefinition, props);
+    },
+    hidden: function (element, node) {
+      return getTimerDefinition(timerEventDefinition, element, node) === undefined;
+    }
+  }));
+  group.entries.push(_entryFactory.default.textField(translate, {
+    id: prefix + 'timer-event-definition',
+    label: translate('Timer Definition'),
+    modelProperty: 'timerDefinition',
+    get: function (element, node) {
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
+          type = getTimerDefinitionType(timerDefinition),
+          definition = type && timerDefinition.get(type),
+          value = definition && definition.get('body');
+      return {
+        timerDefinition: value
+      };
+    },
+    set: function (element, values, node) {
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
+          type = getTimerDefinitionType(timerDefinition),
+          definition = type && timerDefinition.get(type);
+
+      if (definition) {
+        return _CmdHelper.default.updateBusinessObject(element, definition, {
+          body: values.timerDefinition || undefined
+        });
+      }
+    },
+    validate: function (element, node) {
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
+          type = getTimerDefinitionType(timerDefinition),
+          definition = type && timerDefinition.get(type);
+
+      if (definition) {
+        var value = definition.get('body');
+
+        if (!value) {
+          return {
+            timerDefinition: translate('Must provide a value')
+          };
+        }
+      }
+    },
+    hidden: function (element, node) {
+      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node);
+      return !getTimerDefinitionType(timerDefinition);
+    }
+  }));
+}
+
+module.exports = TimerEventDefinition;
+
+},{"../../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54}],31:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -1410,7 +2687,7 @@ module.exports = function (group, element, translate) {
   });
 };
 
-},{"../../../lib/factory/entryFactory":7,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],19:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":9,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187,"lodash/forEach":560}],32:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -1479,7 +2756,7 @@ module.exports = function (group, element, bpmnFactory, canvas, translate, optio
   }
 };
 
-},{"./implementation/name":17,"bpmn-js-properties-panel/lib/helper/CategoryHelper":49,"bpmn-js/lib/util/ModelUtil":194}],20:[function(require,module,exports){
+},{"./implementation/name":28,"bpmn-js-properties-panel/lib/helper/CategoryHelper":52,"bpmn-js/lib/util/ModelUtil":187}],33:[function(require,module,exports){
 'use strict';
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
@@ -1559,7 +2836,7 @@ module.exports = function (group, element, translate, options) {
   }
 };
 
-},{"../../../lib/factory/entryFactory":7,"./implementation/name":17,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/ParticipantHelper":53,"bpmn-js/lib/util/ModelUtil":194}],21:[function(require,module,exports){
+},{"../../../lib/factory/entryFactory":9,"./implementation/name":28,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/ParticipantHelper":56,"bpmn-js/lib/util/ModelUtil":187}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1651,7 +2928,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js/lib/util/ModelUtil":194}],22:[function(require,module,exports){
+},{"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"bpmn-js/lib/util/ModelUtil":187}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1710,7 +2987,7 @@ function scriptProps(group, element, bpmnFactory, translate) {
 
 ;
 
-},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],23:[function(require,module,exports){
+},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1862,7 +3139,7 @@ function VariablesDetailProps(group, element, translate) {
   }
 }
 
-},{"../../lib/factory/entryFactory":7,"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/Utils":28,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],24:[function(require,module,exports){
+},{"../../lib/factory/entryFactory":9,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1998,10 +3275,10 @@ function addVariables(group, element, bpmnFactory, translate) {
   });
 }
 
-},{"./impl/extensionElements":21,"bpmn-js-properties-panel/lib/helper/CmdHelper":50,"bpmn-js-properties-panel/lib/helper/ElementHelper":51,"bpmn-js/lib/util/ModelUtil":194}],25:[function(require,module,exports){
+},{"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"bpmn-js/lib/util/ModelUtil":187}],38:[function(require,module,exports){
 module.exports = require('./lib');
 
-},{"./lib":54}],26:[function(require,module,exports){
+},{"./lib":57}],39:[function(require,module,exports){
 'use strict';
 
 var DEFAULT_PRIORITY = 1000;
@@ -2084,7 +3361,7 @@ PropertiesActivator.prototype.isEntryVisible = function(element, entry, group, t
 PropertiesActivator.prototype.isPropertyEditable = function(propertyName, element, entry, group, tab) {
   return true;
 };
-},{}],27:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var createDropdown = require('./Utils').createDropdown,
@@ -3407,7 +4684,7 @@ function setContentEditableSelection(node, selection) {
 function isImplicitRoot(element) {
   return element.id === '__implicitroot';
 }
-},{"./Utils":28,"bpmn-js/lib/util/ModelUtil":194,"lodash/debounce":561,"lodash/filter":563,"lodash/flattenDeep":566,"lodash/forEach":567,"lodash/get":568,"lodash/isArray":572,"lodash/isEmpty":576,"lodash/isFunction":577,"lodash/isObject":579,"lodash/keyBy":583,"lodash/keys":584,"lodash/map":585,"lodash/reduce":590,"lodash/xor":599,"min-dom":601,"scroll-tabs":610,"selection-update":611}],28:[function(require,module,exports){
+},{"./Utils":41,"bpmn-js/lib/util/ModelUtil":187,"lodash/debounce":554,"lodash/filter":556,"lodash/flattenDeep":559,"lodash/forEach":560,"lodash/get":561,"lodash/isArray":565,"lodash/isEmpty":569,"lodash/isFunction":570,"lodash/isObject":572,"lodash/keyBy":576,"lodash/keys":577,"lodash/map":578,"lodash/reduce":583,"lodash/xor":592,"min-dom":594,"scroll-tabs":603,"selection-update":604}],41:[function(require,module,exports){
 'use strict';
 
 var domQuery = require('min-dom').query,
@@ -3717,7 +4994,7 @@ function createDropdown(dropdown) {
 }
 
 module.exports.createDropdown = createDropdown;
-},{"bpmn-js/lib/util/ModelUtil":194,"ids":391,"lodash/forEach":567,"min-dom":601}],29:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":187,"ids":384,"lodash/forEach":560,"min-dom":594}],42:[function(require,module,exports){
 'use strict';
 
 var elementHelper = require('../helper/ElementHelper');
@@ -3820,7 +5097,7 @@ function ensureNotNull(prop, name) {
   return prop;
 }
 
-},{"../helper/ElementHelper":51}],30:[function(require,module,exports){
+},{"../helper/ElementHelper":54}],43:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3932,7 +5209,7 @@ CreateBusinessObjectListHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"../helper/ElementHelper":51,"lodash/forEach":567}],31:[function(require,module,exports){
+},{"../helper/ElementHelper":54,"lodash/forEach":560}],44:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -3965,7 +5242,7 @@ MultiCommandHandler.prototype.preExecute = function(context) {
     commandStack.execute(command.cmd, command.context);
   });
 };
-},{"lodash/forEach":567}],32:[function(require,module,exports){
+},{"lodash/forEach":560}],45:[function(require,module,exports){
 'use strict';
 
 var reduce = require('lodash/transform'),
@@ -4098,7 +5375,7 @@ UpdateBusinessObjectHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567,"lodash/keys":584,"lodash/transform":597}],33:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":187,"lodash/forEach":560,"lodash/keys":577,"lodash/transform":590}],46:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -4221,7 +5498,7 @@ UpdateBusinessObjectListHandler.prototype.revert = function(context) {
   return context.changed;
 };
 
-},{"lodash/forEach":567}],34:[function(require,module,exports){
+},{"lodash/forEach":560}],47:[function(require,module,exports){
 'use strict';
 
 var forEach = require('lodash/forEach');
@@ -4249,396 +5526,7 @@ CommandInitializer.$inject = [ 'eventBus', 'commandStack' ];
 module.exports = {
   __init__: [ CommandInitializer ]
 };
-},{"./CreateAndReferenceHandler":29,"./CreateBusinessObjectListHandler":30,"./MultiCommandHandler":31,"./UpdateBusinessObjectHandler":32,"./UpdateBusinessObjectListHandler":33,"lodash/forEach":567}],35:[function(require,module,exports){
-'use strict';
-
-var domClasses = require('min-dom').classes,
-    domify = require('min-dom').domify,
-    domQuery = require('min-dom').query;
-
-var assign = require('min-dash').assign,
-    find = require('min-dash').find,
-    forEach = require('min-dash').forEach,
-    debounce = require('min-dash').debounce;
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-var CLASS_ACTIVE = 'active';
-
-var FOCUS_LEAVE_DELAY = '150';
-
-var TEXT_NODE_NAME = '#text';
-
-var SUGGESTION_LIST_BOX_THRESHOLD = 15;
-
-var noop = function() {};
-
-
-var autoSuggestTextBox = function(translate, options, defaultParameters) {
-
-  var resource = defaultParameters,
-      label = options.label || resource.id,
-      canBeShown = !!options.show && typeof options.show === 'function',
-      description = options.description;
-
-  resource.html =
-    domify('<label ' +
-      'for="camunda-' + escapeHTML(resource.id) + '" ' +
-      (canBeShown ? 'data-show="isShown"' : '') +
-      '>' + label + '</label>' +
-    '<div class="bpp-field-wrapper" ' +
-      (canBeShown ? 'data-show="isShown"' : '') +
-    '>' +
-      '<div ' +
-        'contenteditable="true"' +
-        'id="camunda-' + escapeHTML(resource.id) + '" ' +
-        'name="' + escapeHTML(options.modelProperty) + '" ' +
-        'data-auto-suggest="suggestItems"' +
-        'data-blur="handleFocusLeave"' +
-      '></div>' +
-      '<div class="bpp-autosuggest-list"></div>' +
-    '</div>');
-
-  if (description) {
-    domQuery('.bpp-field-wrapper', resource.html).appendChild(entryFieldDescription(translate, description));
-  }
-
-  if (canBeShown) {
-    resource.isShown = function() {
-      return options.show.apply(resource, arguments);
-    };
-  }
-
-  /**
-   * Ensure selected item got recognized before list got hidden
-   */
-  resource.handleFocusLeave = debounce(function(element, entryNode) {
-    clearSuggestionList(entryNode);
-    hideSuggestionList(entryNode);
-  }, FOCUS_LEAVE_DELAY);
-
-  /**
-   * Fill the suggestion list relative to the current word under the cursor.
-   *
-   * @param {djs.model.Base} element
-   * @param {HTMLElement} entryNode
-   * @param {Event} event
-   */
-  resource.suggestItems = function(element, entryNode, event) {
-    var editorNode = event.delegateTarget,
-        range = getSelectionRange(),
-        focusNode = range.focusNode,
-        caretPosition = getCaretPosition(range.range),
-        canSuggest = options.canSuggest || noop,
-        getItems = options.getItems;
-
-    function updateSuggestionList(items) {
-      var listNode = domQuery('.bpp-autosuggest-list', entryNode);
-
-      // (1) clear list before
-      clearSuggestionList(entryNode);
-
-      // (2) keep list invisible if no items
-      if (!items.length) {
-        return;
-      }
-
-      domClasses(listNode).add(CLASS_ACTIVE);
-
-      // (3) create new items
-      forEach(items, function(item) {
-        createSuggestionItem(listNode, item);
-      });
-
-      // (4) place list relative to cursor
-      var position = getSuggestionListPosition(listNode, document.body).position;
-      setPosition(listNode, position.x, position.y);
-    }
-
-    function createSuggestionItem(parentNode, value) {
-      var itemNode = domify('<div class="bpp-autosuggest-item"></div>');
-      itemNode.innerText = escapeHTML(value);
-
-      parentNode.appendChild(itemNode);
-
-      itemNode.addEventListener('click', handleItemClick);
-    }
-
-    function handleItemClick(event) {
-      var value = event.target.innerText,
-          wordIndex = currentWord.index,
-          start = wordIndex,
-          end = wordIndex + currentWord[0].length;
-
-      selectRange(focusNode, start, end);
-
-      document.execCommand('insertText', false, value);
-
-      clearSuggestionList(entryNode);
-      hideSuggestionList(entryNode);
-    }
-
-    hideSuggestionList(entryNode);
-
-    var currentWord = (getWordUnderCursor(focusNode, caretPosition) || []);
-
-    if (currentWord && canSuggest(currentWord, editorNode, focusNode)) {
-      var items = getItems(element, entryNode),
-          results = [],
-          value = currentWord[0];
-
-      // sort matches by
-      // (1) item starts with value (case insensitive)
-      // (2) value is inside suggested item (case insensitive)
-      forEach(items, function(item) {
-        var itemLowerCase = item.toLowerCase(),
-            valueLowerCase = value && value.toLowerCase();
-
-        if (itemLowerCase.indexOf(valueLowerCase) === 0) {
-          results.push(item);
-        }
-      });
-
-      forEach(items, function(item) {
-        var itemLowerCase = item.toLowerCase(item),
-            valueLowerCase = value && value.toLowerCase();
-
-        if (itemLowerCase.indexOf(valueLowerCase) >= 1) {
-          results.push(item);
-        }
-      });
-
-      updateSuggestionList(results);
-    }
-  };
-
-  /**
-  * Calculates the position coordinates of the suggestion list,
-  * dependant on position of cursor
-  *
-  * @return {Object} coordinates
-  */
-  function getSuggestionListPosition(listNode, container) {
-    var range = getSelectionRange().range,
-        cursorBounds = range.getBoundingClientRect(),
-        clientBounds = container.getBoundingClientRect(),
-        listBounds = listNode.getBoundingClientRect();
-
-    var coordinates = {
-      'top-left': {
-        x: cursorBounds.right - listBounds.width,
-        y: cursorBounds.top - listBounds.height
-      },
-      'top-right': {
-        x: cursorBounds.right,
-        y: cursorBounds.top - listBounds.height
-      },
-      'bottom-left': {
-        x: cursorBounds.right - listBounds.width,
-        y: cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD
-      },
-      'bottom-right': {
-        x: cursorBounds.right,
-        y: cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD
-      }
-    };
-
-    var orientation = '';
-
-    if (cursorBounds.top + SUGGESTION_LIST_BOX_THRESHOLD + listBounds.height > (clientBounds.height + clientBounds.top)) {
-      orientation = 'top-';
-    } else {
-      orientation = 'bottom-';
-    }
-
-    if (cursorBounds.right + listBounds.width > (clientBounds.width + clientBounds.left)) {
-      orientation += 'left';
-    } else {
-      orientation += 'right';
-    }
-
-    return { orientation: orientation, position: coordinates[orientation] };
-  }
-
-  resource.getSuggestionListPosition = getSuggestionListPosition;
-
-
-  resource.cssClasses = ['bpp-autosuggest-textbox'];
-
-  return resource;
-};
-
-module.exports = autoSuggestTextBox;
-
-
-// helpers /////////////////////////////
-
-function getSelectionRange() {
-  var selection = document.getSelection();
-
-  return {
-    range: selection.getRangeAt(0),
-    focusNode: selection.focusNode
-  };
-}
-
-function getCaretPosition(range) {
-  return range.startOffset;
-}
-
-function selectRange(focusNode, start, end) {
-  var range = document.createRange(),
-      selection = window.getSelection();
-
-  range.setStart(focusNode, start);
-  range.setEnd(focusNode, end);
-
-  selection.removeAllRanges();
-
-  selection.addRange(range);
-}
-
-function hideSuggestionList(entryNode) {
-  var listNode = domQuery('.bpp-autosuggest-list', entryNode);
-  domClasses(listNode).remove(CLASS_ACTIVE);
-}
-
-function clearSuggestionList(entryNode) {
-  var listNode = domQuery('.bpp-autosuggest-list', entryNode);
-  while (listNode.firstChild) {
-    listNode.removeChild(listNode.firstChild);
-  }
-}
-
-function getWordUnderCursor(node, currentCursorPositon) {
-  var value = node.nodeName === TEXT_NODE_NAME ? node.wholeText : node.innerText,
-      allWords = findWords(value);
-
-  return find(allWords, function(word) {
-    var matchValue = word[0],
-        wordStart = word.index,
-        wordEnd = wordStart + matchValue.length - 1;
-
-    return (
-      wordStart <= (currentCursorPositon - 1) &&
-      wordEnd >= (currentCursorPositon - 1)
-    );
-  });
-}
-
-/**
- * Retrieves all words inside a text (also inside clauses and after operators)
- *
- * @param {string} value
- *
- * @return {Array<Object>}
- */
-function findWords(value) {
-
-  // eslint-disable-next-line no-useless-escape
-  return matchAll(value, /[^\s\r\(\)\,\+\-\*\/\{\}]+/g);
-}
-
-function matchAll(value, regex) {
-  var regexp = RegExp(regex),
-      match,
-      matches = [];
-
-  while ((match = regexp.exec(value)) !== null) {
-    matches.push(match);
-  }
-
-  return matches;
-}
-
-function setPosition(el, x, y) {
-  assign(el.style, { left: x + 'px', top: y + 'px' });
-}
-
-},{"../Utils":28,"./EntryFieldDescription":40,"min-dash":600,"min-dom":601}],36:[function(require,module,exports){
-'use strict';
-
-var domify = require('min-dom').domify;
-
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    cmdHelper = require('../helper/CmdHelper'),
-    escapeHTML = require('../Utils').escapeHTML;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-
-var checkbox = function(translate, options, defaultParameters) {
-  var resource = defaultParameters,
-      id = resource.id,
-      label = options.label || id,
-      canBeDisabled = !!options.disabled && typeof options.disabled === 'function',
-      canBeHidden = !!options.hidden && typeof options.hidden === 'function',
-      description = options.description;
-
-  resource.html =
-    domify('<input id="camunda-' + escapeHTML(id) + '" ' +
-         'type="checkbox" ' +
-         'name="' + escapeHTML(options.modelProperty) + '" ' +
-         (canBeDisabled ? 'data-disable="isDisabled"' : '') +
-         (canBeHidden ? 'data-show="isHidden"' : '') +
-         ' />' +
-    '<label for="camunda-' + escapeHTML(id) + '" ' +
-         (canBeDisabled ? 'data-disable="isDisabled"' : '') +
-         (canBeHidden ? 'data-show="isHidden"' : '') +
-         '>' + escapeHTML(label) + '</label>');
-
-  // add description below checkbox entry field
-  if (description) {
-    resource.html.appendChild(entryFieldDescription(translate, description, { show: canBeHidden && 'isHidden' }));
-  }
-
-  resource.get = function(element) {
-    var bo = getBusinessObject(element),
-        res = {};
-
-    res[options.modelProperty] = bo.get(options.modelProperty);
-
-    return res;
-  };
-
-  resource.set = function(element, values) {
-    var res = {};
-
-    res[options.modelProperty] = !!values[options.modelProperty];
-
-    return cmdHelper.updateProperties(element, res);
-  };
-
-  if (typeof options.set === 'function') {
-    resource.set = options.set;
-  }
-
-  if (typeof options.get === 'function') {
-    resource.get = options.get;
-  }
-
-  if (canBeDisabled) {
-    resource.isDisabled = function() {
-      return options.disabled.apply(resource, arguments);
-    };
-  }
-
-  if (canBeHidden) {
-    resource.isHidden = function() {
-      return !options.hidden.apply(resource, arguments);
-    };
-  }
-
-  resource.cssClasses = ['bpp-checkbox'];
-
-  return resource;
-};
-
-module.exports = checkbox;
-
-},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],37:[function(require,module,exports){
+},{"./CreateAndReferenceHandler":42,"./CreateBusinessObjectListHandler":43,"./MultiCommandHandler":44,"./UpdateBusinessObjectHandler":45,"./UpdateBusinessObjectListHandler":46,"lodash/forEach":560}],48:[function(require,module,exports){
 'use strict';
 
 var escapeHTML = require('../Utils').escapeHTML;
@@ -4761,314 +5649,8 @@ module.exports = Collapsible;
 
 function noop() {}
 
-},{"../Utils":28,"min-dom":601}],38:[function(require,module,exports){
+},{"../Utils":41,"min-dom":594}],49:[function(require,module,exports){
 'use strict';
-
-var assign = require('lodash/assign'),
-    find = require('lodash/find');
-
-var domify = require('min-dom').domify,
-    domQuery = require('min-dom').query;
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var selectEntryFactory = require('./SelectEntryFactory'),
-    entryFieldDescription = require('./EntryFieldDescription');
-
-
-/**
- * The combo box is a special implementation of the select entry and adds the option 'custom' to the
- * select box. If 'custom' is selected, an additional text input field is shown which allows to define
- * a custom value.
- *
- * @param  {Object} options
- * @param  {string} options.id
- * @param  {string} options.label
- * @param  {Array<Object>} options.selectOptions list of name/value pairs
- * @param  {string} options.modelProperty
- * @param  {function} options.get
- * @param  {function} options.set
- * @param  {string} [options.customValue] custom select option value (default: 'custom')
- * @param  {string} [options.customName] custom select option name visible in the select box (default: 'custom')
- *
- * @return {Object}
- */
-var comboBox = function(translate, options) {
-
-  var selectOptions = options.selectOptions,
-      modelProperty = options.modelProperty,
-      customValue = options.customValue || 'custom',
-      customName = options.customName || 'custom ' + modelProperty,
-      description = options.description;
-
-  // check if a value is not a built in value
-  var isCustomValue = function(value) {
-    if (typeof value[modelProperty] === 'undefined') {
-      return false;
-    }
-
-    var isCustom = !find(selectOptions, function(option) {
-      return value[modelProperty] === option.value;
-    });
-
-    return isCustom;
-  };
-
-  var comboOptions = assign({}, options);
-
-  // true if the selected value in the select box is customValue
-  comboOptions.showCustomInput = function(element, node) {
-    var selectBox = domQuery('[data-entry="'+ options.id +'"] select', node.parentNode);
-
-    if (selectBox) {
-      return selectBox.value === customValue;
-    }
-
-    return false;
-  };
-
-  comboOptions.get = function(element, node) {
-    var value = options.get(element, node);
-
-    var modifiedValues = {};
-
-    if (!isCustomValue(value)) {
-      modifiedValues[modelProperty] = value[modelProperty] || '';
-
-      return modifiedValues;
-    }
-
-    modifiedValues[modelProperty] = customValue;
-    modifiedValues['custom-'+modelProperty] = value[modelProperty];
-
-    return modifiedValues;
-  };
-
-  comboOptions.set = function(element, values, node) {
-    var modifiedValues = {};
-
-    // if the custom select option has been selected
-    // take the value from the text input field
-    if (values[modelProperty] === customValue) {
-      modifiedValues[modelProperty] = values['custom-' + modelProperty] || '';
-    }
-    else if (options.emptyParameter && values[modelProperty] === '') {
-      modifiedValues[modelProperty] = undefined;
-    } else {
-      modifiedValues[modelProperty] = values[modelProperty];
-    }
-    return options.set(element, modifiedValues, node);
-  };
-
-  comboOptions.selectOptions.push({ name: customName, value: customValue });
-
-  var comboBoxEntry = assign({}, selectEntryFactory(translate, comboOptions, comboOptions));
-
-  var fragment = document.createDocumentFragment();
-
-  fragment.appendChild(comboBoxEntry.html);
-
-  comboBoxEntry.html = fragment;
-
-  comboBoxEntry.html.appendChild(domify('<div class="bpp-field-wrapper bpp-combo-input" ' +
-    'data-show="showCustomInput"' +
-    '>' +
-    '<input id="camunda-' + escapeHTML(options.id) + '-input" type="text" name="custom-' +
-      escapeHTML(modelProperty) + '" ' +
-    ' />' +
-  '</div>'));
-
-  // add description below combo box entry field
-  if (description) {
-    comboBoxEntry.html.appendChild(entryFieldDescription(translate, description, { show: 'showCustomInput' }));
-  }
-
-  return comboBoxEntry;
-};
-
-module.exports = comboBox;
-
-},{"../Utils":28,"./EntryFieldDescription":40,"./SelectEntryFactory":43,"lodash/assign":558,"lodash/find":564,"min-dom":601}],39:[function(require,module,exports){
-'use strict';
-
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
-
-// input entities
-var textInputField = require('./TextInputEntryFactory'),
-    checkboxField = require('./CheckboxEntryFactory'),
-    selectBoxField = require('./SelectEntryFactory'),
-    comboBoxField = require('./ComboEntryFactory'),
-    textBoxField = require('./TextBoxEntryFactory'),
-    validationAwareTextInputField = require('./ValidationAwareTextInput'),
-    tableField = require('./TableEntryFactory'),
-    labelEntry = require('./LabelFactory'),
-    link = require('./LinkEntryFactory'),
-    autoSuggestTextBoxField = require('./AutoSuggestTextBoxFactory'),
-    collapsible = require('./CollapsibleEntryFactory'),
-    toggleSwitch = require('./ToggleSwitchEntryFactory');
-
-var cmdHelper = require('../helper/CmdHelper');
-
-// helpers ////////////////////////////////////////
-
-function ensureNotNull(prop) {
-  if (!prop) {
-    throw new Error(prop + ' must be set.');
-  }
-
-  return prop;
-}
-
-/**
- * sets the default parameters which are needed to create an entry
- *
- * @param options
- * @returns {{id: *, description: (*|string), get: (*|Function), set: (*|Function),
- *            validate: (*|Function), html: string}}
- */
-var setDefaultParameters = function(options) {
-
-  // default method to fetch the current value of the input field
-  var defaultGet = function(element) {
-    var bo = getBusinessObject(element),
-        res = {},
-        prop = ensureNotNull(options.modelProperty);
-    res[prop] = bo.get(prop);
-
-    return res;
-  };
-
-  // default method to set a new value to the input field
-  var defaultSet = function(element, values) {
-    var res = {},
-        prop = ensureNotNull(options.modelProperty);
-    if (values[prop] !== '') {
-      res[prop] = values[prop];
-    } else {
-      res[prop] = undefined;
-    }
-
-    return cmdHelper.updateProperties(element, res);
-  };
-
-  // default validation method
-  var defaultValidate = function() {
-    return {};
-  };
-
-  return {
-    id : options.id,
-    description : (options.description || ''),
-    get : (options.get || defaultGet),
-    set : (options.set || defaultSet),
-    validate : (options.validate || defaultValidate),
-    html: ''
-  };
-};
-
-function EntryFactory() {
-
-}
-
-/**
- * Generates an text input entry object for a property panel.
- * options are:
- * - id: id of the entry - String
- *
- * - description: description of the property - String
- *
- * - label: label for the input field - String
- *
- * - set: setter method - Function
- *
- * - get: getter method - Function
- *
- * - validate: validation mehtod - Function
- *
- * - modelProperty: name of the model property - String
- *
- * - buttonAction: Object which contains the following properties: - Object
- * ---- name: name of the [data-action] callback - String
- * ---- method: callback function for [data-action] - Function
- *
- * - buttonShow: Object which contains the following properties: - Object
- * ---- name: name of the [data-show] callback - String
- * ---- method: callback function for [data-show] - Function
- *
- * @param options
- * @returns the propertyPanel entry resource object
- */
-EntryFactory.textField = function(translate, options) {
-  return textInputField(translate, options, setDefaultParameters(options));
-};
-
-EntryFactory.validationAwareTextField = function(translate, options) {
-  return validationAwareTextInputField(translate, options, setDefaultParameters(options));
-};
-
-/**
- * Generates a checkbox input entry object for a property panel.
- * options are:
- * - id: id of the entry - String
- *
- * - description: description of the property - String
- *
- * - label: label for the input field - String
- *
- * - set: setter method - Function
- *
- * - get: getter method - Function
- *
- * - validate: validation method - Function
- *
- * - modelProperty: name of the model property - String
- *
- * @param options
- * @returns the propertyPanel entry resource object
- */
-EntryFactory.checkbox = function(translate, options) {
-  return checkboxField(translate, options, setDefaultParameters(options));
-};
-
-EntryFactory.textBox = function(translate, options) {
-  return textBoxField(translate, options, setDefaultParameters(options));
-};
-
-EntryFactory.selectBox = function(translate, options) {
-  return selectBoxField(translate, options, setDefaultParameters(options));
-};
-
-EntryFactory.comboBox = function(translate, options) {
-  return comboBoxField(translate, options);
-};
-
-EntryFactory.table = function(translate, options) {
-  return tableField(translate, options);
-};
-
-EntryFactory.label = function(options) {
-  return labelEntry(options);
-};
-
-EntryFactory.link = function(translate, options) {
-  return link(translate, options);
-};
-
-EntryFactory.autoSuggest = function(translate, options) {
-  return autoSuggestTextBoxField(translate, options, setDefaultParameters(options));
-};
-
-EntryFactory.collapsible = function(options) {
-  return collapsible(options);
-};
-
-EntryFactory.toggleSwitch = function(translate, options) {
-  return toggleSwitch(translate, options, setDefaultParameters(options));
-};
-
-module.exports = EntryFactory;
-
-},{"../helper/CmdHelper":50,"./AutoSuggestTextBoxFactory":35,"./CheckboxEntryFactory":36,"./CollapsibleEntryFactory":37,"./ComboEntryFactory":38,"./LabelFactory":41,"./LinkEntryFactory":42,"./SelectEntryFactory":43,"./TableEntryFactory":44,"./TextBoxEntryFactory":45,"./TextInputEntryFactory":46,"./ToggleSwitchEntryFactory":47,"./ValidationAwareTextInput":48,"bpmn-js/lib/util/ModelUtil":194}],40:[function(require,module,exports){
 'use strict';
 
 var domify = require('min-dom').domify,
@@ -5203,7 +5785,7 @@ function escapeText(text) {
 
   return escaped.join('');
 }
-},{"../Utils":28,"min-dom":601}],41:[function(require,module,exports){
+},{"../Utils":41,"min-dom":594}],50:[function(require,module,exports){
 'use strict';
 
 /**
@@ -5243,723 +5825,7 @@ var label = function(options) {
 
 module.exports = label;
 
-},{}],42:[function(require,module,exports){
-'use strict';
-
-var domify = require('min-dom').domify;
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-var bind = require('lodash/bind');
-
-/**
- * An entry that renders a clickable link.
- *
- * A passed {@link options#handleClick} handler is responsible
- * to process the click.
- *
- * The link may be conditionally shown or hidden. This can be
- * controlled via the {@link options.showLink}.
- *
- * @param {Object} options
- * @param {String} options.id
- * @param {String} [options.buttonLabel]
- * @param {Function} options.handleClick
- * @param {Function} [options.showLink] returning false to hide link
- * @param {String} [options.description]
- *
- * @example
- *
- * var linkEntry = link({
- *   id: 'foo',
- *   description: 'Some Description',
- *   handleClick: function(element, node, event) { ... },
- *   showLink: function(element, node) { ... }
- * });
- *
- * @return {Entry} the newly created entry
- */
-function link(translate, options) {
-
-  var id = options.id,
-      buttonLabel = options.buttonLabel || id,
-      showLink = options.showLink,
-      handleClick = options.handleClick,
-      description = options.description,
-      label = options.label;
-
-  if (showLink && typeof showLink !== 'function') {
-    throw new Error('options.showLink must be a function');
-  }
-
-  if (typeof handleClick !== 'function') {
-    throw new Error('options.handleClick must be a function');
-  }
-
-  var resource = {
-    id: id,
-    html: document.createDocumentFragment()
-  };
-
-  if (label) {
-    resource.html.appendChild(domify('<label for="camunda-' + escapeHTML(id) + '" ' +
-      (showLink ? 'data-show="showLink" ' : '') +
-      '>'+ escapeHTML(label) +'</label>'));
-  }
-
-  resource.html.appendChild(domify('<div class="bpp-field-wrapper">' +
-    '<a data-action="handleClick" ' +
-    (showLink ? 'data-show="showLink" ' : '') +
-    'class="bpp-entry-link' + (options.cssClasses ? ' ' + escapeHTML(options.cssClasses) : '') +
-    '">' + escapeHTML(buttonLabel) + '</a></div>'));
-
-
-  // add description below link entry field
-  if (description) {
-    resource.html.appendChild(entryFieldDescription(translate, description, { show: 'showLink' }));
-  }
-
-  resource.handleClick = bind(handleClick, resource);
-
-  if (typeof showLink === 'function') {
-    resource.showLink = function() {
-      return showLink.apply(resource, arguments);
-    };
-  }
-
-  return resource;
-}
-
-module.exports = link;
-
-},{"../Utils":28,"./EntryFieldDescription":40,"lodash/bind":559,"min-dom":601}],43:[function(require,module,exports){
-'use strict';
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var domify = require('min-dom').domify,
-    domQuery = require('min-dom').query;
-
-var forEach = require('lodash/forEach');
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-
-var isList = function(list) {
-  return !(!list || Object.prototype.toString.call(list) !== '[object Array]');
-};
-
-var addEmptyParameter = function(list) {
-  return list.concat([ { name: '', value: '' } ]);
-};
-
-var createOption = function(option) {
-  return '<option value="' + option.value + '">' + option.name + '</option>';
-};
-
-/**
- * @param  {Object} options
- * @param  {string} options.id
- * @param  {string} [options.label]
- * @param  {Array<Object>} options.selectOptions
- * @param  {string} options.modelProperty
- * @param  {boolean} options.emptyParameter
- * @param  {function} options.disabled
- * @param  {function} options.hidden
- * @param  {Object} defaultParameters
- *
- * @return {Object}
- */
-var selectbox = function(translate, options, defaultParameters) {
-  var resource = defaultParameters,
-      label = options.label || resource.id,
-      selectOptions = options.selectOptions || [ { name: '', value: '' } ],
-      modelProperty = options.modelProperty,
-      emptyParameter = options.emptyParameter,
-      canBeDisabled = !!options.disabled && typeof options.disabled === 'function',
-      canBeHidden = !!options.hidden && typeof options.hidden === 'function',
-      description = options.description;
-
-
-  if (emptyParameter) {
-    selectOptions = addEmptyParameter(selectOptions);
-  }
-
-
-  resource.html =
-    domify('<label for="camunda-' + escapeHTML(resource.id) + '"' +
-    (canBeDisabled ? 'data-disable="isDisabled" ' : '') +
-    (canBeHidden ? 'data-show="isHidden" ' : '') +
-    '>' + escapeHTML(label) + '</label>' +
-    '<select id="camunda-' + escapeHTML(resource.id) + '-select" name="' +
-    escapeHTML(modelProperty) + '"' +
-    (canBeDisabled ? 'data-disable="isDisabled" ' : '') +
-    (canBeHidden ? 'data-show="isHidden" ' : '') +
-    ' data-value></select>');
-
-  var select = domQuery('select', resource.html);
-
-  if (isList(selectOptions)) {
-    forEach(selectOptions, function(option) {
-      select.appendChild(
-        domify(
-          '<option value="' + escapeHTML(option.value) +
-          (option.title ? '" title="' + escapeHTML(option.title) : '') +
-          '">' +
-          (option.name ? escapeHTML(option.name) : '') +
-          '</option>'
-        )
-      );
-    });
-  }
-
-  // add description below select box entry field
-  if (description && typeof options.showCustomInput !== 'function') {
-    resource.html.appendChild(entryFieldDescription(translate, description, { show: canBeHidden && 'isHidden' }));
-  }
-
-  /**
-   * Fill the select box options dynamically.
-   *
-   * Calls the defined function #selectOptions in the entry to get the
-   * values for the options and set the value to the inputNode.
-   *
-   * @param {djs.model.Base} element
-   * @param {HTMLElement} entryNode
-   * @param {EntryDescriptor} inputNode
-   * @param {Object} inputName
-   * @param {Object} newValue
-   */
-  resource.setControlValue = function(element, entryNode, inputNode, inputName, newValue) {
-    if (typeof selectOptions === 'function') {
-
-      var options = selectOptions(element, inputNode);
-
-      if (options) {
-
-        // remove existing options
-        while (inputNode.firstChild) {
-          inputNode.removeChild(inputNode.firstChild);
-        }
-
-        // add options
-        forEach(options, function(option) {
-          var template = domify(createOption(option));
-
-          inputNode.appendChild(template);
-        });
-
-
-      }
-    }
-
-    // set select value
-    if (newValue !== undefined) {
-      inputNode.value = newValue;
-    }
-
-  };
-
-  if (canBeDisabled) {
-    resource.isDisabled = function() {
-      return options.disabled.apply(resource, arguments);
-    };
-  }
-
-  if (canBeHidden) {
-    resource.isHidden = function() {
-      return !options.hidden.apply(resource, arguments);
-    };
-  }
-
-  resource.cssClasses = ['bpp-dropdown'];
-
-  return resource;
-};
-
-module.exports = selectbox;
-
-},{"../Utils":28,"./EntryFieldDescription":40,"lodash/forEach":567,"min-dom":601}],44:[function(require,module,exports){
-'use strict';
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var cmdHelper = require('../helper/CmdHelper');
-
-var domQuery = require('min-dom').query,
-    domAttr = require('min-dom').attr,
-    domClosest = require('min-dom').closest;
-
-var filter = require('lodash/filter'),
-    forEach = require('lodash/forEach'),
-    keys = require('lodash/keys');
-
-var domify = require('min-dom').domify;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-var updateSelection = require('selection-update');
-
-var TABLE_ROW_DIV_SNIPPET = '<div class="bpp-field-wrapper bpp-table-row">';
-var DELETE_ROW_BUTTON_SNIPPET = '<button class="action-button clear" data-action="deleteElement">' +
-                                  '<span>X</span>' +
-                                '</button>';
-
-function createInputRowTemplate(properties, canRemove) {
-  var template = TABLE_ROW_DIV_SNIPPET;
-  template += createInputTemplate(properties, canRemove);
-  template += canRemove ? DELETE_ROW_BUTTON_SNIPPET : '';
-  template += '</div>';
-
-  return template;
-}
-
-function createInputTemplate(properties, canRemove) {
-  var columns = properties.length;
-  var template = '';
-  forEach(properties, function(prop) {
-    template += '<input class="bpp-table-row-columns-' + columns + ' ' +
-                               (canRemove ? 'bpp-table-row-removable' : '') + '" ' +
-                       'id="camunda-table-row-cell-input-value" ' +
-                       'type="text" ' +
-                       'name="' + escapeHTML(prop) + '" />';
-  });
-  return template;
-}
-
-function createLabelRowTemplate(labels) {
-  var template = TABLE_ROW_DIV_SNIPPET;
-  template += createLabelTemplate(labels);
-  template += '</div>';
-
-  return template;
-}
-
-function createLabelTemplate(labels) {
-  var columns = labels.length;
-  var template = '';
-  forEach(labels, function(label) {
-    template += '<label class="bpp-table-row-columns-' + columns + '">' + escapeHTML(label) + '</label>';
-  });
-  return template;
-}
-
-function pick(elements, properties) {
-  return (elements || []).map(function(elem) {
-    var newElement = {};
-    forEach(properties, function(prop) {
-      newElement[prop] = elem[prop] || '';
-    });
-    return newElement;
-  });
-}
-
-function diff(element, node, values, oldValues, editable) {
-  return filter(values, function(value, idx) {
-    return !valueEqual(element, node, value, oldValues[idx], editable, idx);
-  });
-}
-
-function valueEqual(element, node, value, oldValue, editable, idx) {
-  if (value && !oldValue) {
-    return false;
-  }
-  var allKeys = keys(value).concat(keys(oldValue));
-
-  return allKeys.every(function(key) {
-    var n = value[key] || undefined;
-    var o = oldValue[key] || undefined;
-    return !editable(element, node, key, idx) || n === o;
-  });
-}
-
-function getEntryNode(node) {
-  return domClosest(node, '[data-entry]', true);
-}
-
-function getContainer(node) {
-  return domQuery('div[data-list-entry-container]', node);
-}
-
-function getSelection(node) {
-  return {
-    start: node.selectionStart,
-    end: node.selectionEnd
-  };
-}
-
-function setSelection(node, selection) {
-  node.selectionStart = selection.start;
-  node.selectionEnd = selection.end;
-}
-
-/**
- * @param  {Object} options
- * @param  {string} options.id
- * @param  {string} options.description
- * @param  {Array<string>} options.modelProperties
- * @param  {Array<string>} options.labels
- * @param  {Function} options.getElements - this callback function must return a list of business object items
- * @param  {Function} options.removeElement
- * @param  {Function} options.addElement
- * @param  {Function} options.updateElement
- * @param  {Function} options.editable
- * @param  {Function} options.setControlValue
- * @param  {Function} options.show
- *
- * @return {Object}
- */
-module.exports = function(translate, options) {
-
-  var id = options.id,
-      modelProperties = options.modelProperties,
-      labels = options.labels,
-      description = options.description;
-
-  var labelRow = createLabelRowTemplate(labels);
-
-  var getElements = options.getElements;
-
-  var removeElement = options.removeElement,
-      canRemove = typeof removeElement === 'function';
-
-  var addElement = options.addElement,
-      canAdd = typeof addElement === 'function',
-      addLabel = options.addLabel || 'Add Value';
-
-  var updateElement = options.updateElement,
-      canUpdate = typeof updateElement === 'function';
-
-  var editable = options.editable || function() { return true; },
-      setControlValue = options.setControlValue;
-
-  var show = options.show,
-      canBeShown = typeof show === 'function';
-
-  var elements = function(element, node) {
-    return pick(getElements(element, node), modelProperties);
-  };
-
-  var html = domify((canAdd ?
-    '<div class="bpp-table-add-row" ' + (canBeShown ? 'data-show="show"' : '') + '>' +
-          '<label>' + escapeHTML(addLabel) + '</label>' +
-          '<button class="action-button add" data-action="addElement"><span>+</span></button>' +
-        '</div>' : '') +
-        '<div class="bpp-table" data-show="showTable">' +
-          '<div class="bpp-field-wrapper bpp-table-row">' +
-             labelRow +
-          '</div>' +
-          '<div data-list-entry-container>' +
-          '</div>' +
-        '</div>');
-
-  if (description) {
-    html.appendChild(entryFieldDescription(translate, description, { show: 'showTable' }));
-  }
-
-  var factory = {
-    id: id,
-    html: html,
-
-    get: function(element, node) {
-      var boElements = elements(element, node, this.__invalidValues);
-
-      var invalidValues = this.__invalidValues;
-
-      delete this.__invalidValues;
-
-      forEach(invalidValues, function(value, idx) {
-        var element = boElements[idx];
-
-        forEach(modelProperties, function(prop) {
-          element[prop] = value[prop];
-        });
-      });
-
-      return boElements;
-    },
-
-    set: function(element, values, node) {
-      var action = this.__action || {};
-      delete this.__action;
-
-      if (action.id === 'delete-element') {
-        return removeElement(element, node, action.idx);
-      }
-      else if (action.id === 'add-element') {
-        return addElement(element, node);
-      }
-      else if (canUpdate) {
-        var commands = [],
-            valuesToValidate = values;
-
-        if (typeof options.validate !== 'function') {
-          valuesToValidate = diff(element, node, values, elements(element, node), editable);
-        }
-
-        var self = this;
-
-        forEach(valuesToValidate, function(value) {
-          var validationError,
-              idx = values.indexOf(value);
-
-          if (typeof options.validate === 'function') {
-            validationError = options.validate(element, value, node, idx);
-          }
-
-          if (!validationError) {
-            var cmd = updateElement(element, value, node, idx);
-
-            if (cmd) {
-              commands.push(cmd);
-            }
-          } else {
-
-            // cache invalid value in an object by index as key
-            self.__invalidValues = self.__invalidValues || {};
-            self.__invalidValues[idx] = value;
-
-            // execute a command, which does not do anything
-            commands.push(cmdHelper.updateProperties(element, {}));
-          }
-        });
-
-        return commands;
-      }
-    },
-    createListEntryTemplate: function(value, index, selectBox) {
-      return createInputRowTemplate(modelProperties, canRemove);
-    },
-
-    addElement: function(element, node, event, scopeNode) {
-      var template = domify(createInputRowTemplate(modelProperties, canRemove));
-
-      var container = getContainer(node);
-      container.appendChild(template);
-
-      this.__action = {
-        id: 'add-element'
-      };
-
-      return true;
-    },
-
-    deleteElement: function(element, node, event, scopeNode) {
-      var container = getContainer(node);
-      var rowToDelete = event.delegateTarget.parentNode;
-      var idx = parseInt(domAttr(rowToDelete, 'data-index'), 10);
-
-      container.removeChild(rowToDelete);
-
-      this.__action = {
-        id: 'delete-element',
-        idx: idx
-      };
-
-      return true;
-    },
-
-    editable: function(element, rowNode, input, prop, value, idx) {
-      var entryNode = domClosest(rowNode, '[data-entry]');
-      return editable(element, entryNode, prop, idx);
-    },
-
-    show: function(element, entryNode, node, scopeNode) {
-      entryNode = getEntryNode(entryNode);
-      return show(element, entryNode, node, scopeNode);
-    },
-
-    showTable: function(element, entryNode, node, scopeNode) {
-      entryNode = getEntryNode(entryNode);
-      var elems = elements(element, entryNode);
-      return elems && elems.length && (!canBeShown || show(element, entryNode, node, scopeNode));
-    },
-
-    validateListItem: function(element, value, node, idx) {
-      if (typeof options.validate === 'function') {
-        return options.validate(element, value, node, idx);
-      }
-    }
-
-  };
-
-  // Update/set the selection on the correct position.
-  // It's the same code like for an input value in the PropertiesPanel.js.
-  if (setControlValue) {
-    factory.setControlValue = function(element, rowNode, input, prop, value, idx) {
-      var entryNode = getEntryNode(rowNode);
-
-      var isReadOnly = domAttr(input, 'readonly');
-      var oldValue = input.value;
-
-      var selection;
-
-      // prevents input fields from having the value 'undefined'
-      if (value === undefined) {
-        value = '';
-      }
-
-      // when the attribute 'readonly' exists, ignore the comparison
-      // with 'oldValue' and 'value'
-      if (!!isReadOnly && oldValue === value) {
-        return;
-      }
-
-      // update selection on undo/redo
-      if (document.activeElement === input) {
-        selection = updateSelection(getSelection(input), oldValue, value);
-      }
-
-      setControlValue(element, entryNode, input, prop, value, idx);
-
-      if (selection) {
-        setSelection(input, selection);
-      }
-
-    };
-  }
-
-  return factory;
-
-};
-
-},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"lodash/filter":563,"lodash/forEach":567,"lodash/keys":584,"min-dom":601,"selection-update":611}],45:[function(require,module,exports){
-'use strict';
-
-var domify = require('min-dom').domify;
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-
-var textBox = function(translate, options, defaultParameters) {
-
-  var resource = defaultParameters,
-      label = options.label || resource.id,
-      canBeShown = !!options.show && typeof options.show === 'function',
-      description = options.description;
-
-  resource.html =
-    domify('<label for="camunda-' + escapeHTML(resource.id) + '" ' +
-    (canBeShown ? 'data-show="isShown"' : '') +
-    '>' + label + '</label>' +
-    '<div class="bpp-field-wrapper" ' +
-    (canBeShown ? 'data-show="isShown"' : '') +
-    '>' +
-      '<div contenteditable="true" id="camunda-' + escapeHTML(resource.id) + '" ' +
-            'name="' + escapeHTML(options.modelProperty) + '" />' +
-    '</div>');
-
-  // add description below text box entry field
-  if (description) {
-    resource.html.appendChild(entryFieldDescription(translate, description, { show: canBeShown && 'isShown' }));
-  }
-
-  if (canBeShown) {
-    resource.isShown = function() {
-      return options.show.apply(resource, arguments);
-    };
-  }
-
-  resource.cssClasses = ['bpp-textbox'];
-
-  return resource;
-};
-
-module.exports = textBox;
-
-},{"../Utils":28,"./EntryFieldDescription":40,"min-dom":601}],46:[function(require,module,exports){
-'use strict';
-
-var escapeHTML = require('../Utils').escapeHTML;
-
-var domify = require('min-dom').domify,
-    domQuery = require('min-dom').query;
-
-var entryFieldDescription = require('./EntryFieldDescription');
-
-
-var textField = function(translate, options, defaultParameters) {
-
-  // Default action for the button next to the input-field
-  var defaultButtonAction = function(element, inputNode) {
-    var input = domQuery('input[name="' + options.modelProperty + '"]', inputNode);
-    input.value = '';
-
-    return true;
-  };
-
-  // default method to determine if the button should be visible
-  var defaultButtonShow = function(element, inputNode) {
-    var input = domQuery('input[name="' + options.modelProperty + '"]', inputNode);
-
-    return input.value !== '';
-  };
-
-
-  var resource = defaultParameters,
-      label = options.label || resource.id,
-      dataValueLabel = options.dataValueLabel,
-      buttonLabel = (options.buttonLabel || 'X'),
-      actionName = (typeof options.buttonAction != 'undefined') ? options.buttonAction.name : 'clear',
-      actionMethod = (typeof options.buttonAction != 'undefined') ? options.buttonAction.method : defaultButtonAction,
-      showName = (typeof options.buttonShow != 'undefined') ? options.buttonShow.name : 'canClear',
-      showMethod = (typeof options.buttonShow != 'undefined') ? options.buttonShow.method : defaultButtonShow,
-      canBeDisabled = !!options.disabled && typeof options.disabled === 'function',
-      canBeHidden = !!options.hidden && typeof options.hidden === 'function',
-      description = options.description;
-
-  resource.html =
-    domify('<label for="camunda-' + escapeHTML(resource.id) + '" ' +
-      (canBeDisabled ? 'data-disable="isDisabled" ' : '') +
-      (canBeHidden ? 'data-show="isHidden" ' : '') +
-      (dataValueLabel ? 'data-value="' + escapeHTML(dataValueLabel) + '"' : '') + '>'+ escapeHTML(label) +'</label>' +
-    '<div class="bpp-field-wrapper" ' +
-      (canBeDisabled ? 'data-disable="isDisabled"' : '') +
-      (canBeHidden ? 'data-show="isHidden"' : '') +
-      '>' +
-      '<input id="camunda-' + escapeHTML(resource.id) + '" type="text" name="' + escapeHTML(options.modelProperty) + '" ' +
-        (canBeDisabled ? 'data-disable="isDisabled"' : '') +
-        (canBeHidden ? 'data-show="isHidden"' : '') +
-        ' />' +
-      '<button class="action-button ' + escapeHTML(actionName) + '" data-action="' + escapeHTML(actionName) + '" data-show="' + escapeHTML(showName) + '" ' +
-        (canBeDisabled ? 'data-disable="isDisabled"' : '') +
-        (canBeHidden ? ' data-show="isHidden"' : '') + '>' +
-        '<span>' + escapeHTML(buttonLabel) + '</span>' +
-      '</button>' +
-    '</div>');
-
-  // add description below text input entry field
-  if (description) {
-    resource.html.appendChild(entryFieldDescription(translate, description, { show: canBeHidden && 'isHidden' }));
-  }
-
-  resource[actionName] = actionMethod;
-  resource[showName] = showMethod;
-
-  if (canBeDisabled) {
-    resource.isDisabled = function() {
-      return options.disabled.apply(resource, arguments);
-    };
-  }
-
-  if (canBeHidden) {
-    resource.isHidden = function() {
-      return !options.hidden.apply(resource, arguments);
-    };
-  }
-
-  resource.cssClasses = ['bpp-textfield'];
-
-  return resource;
-};
-
-module.exports = textField;
-
-},{"../Utils":28,"./EntryFieldDescription":40,"min-dom":601}],47:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
@@ -6065,65 +5931,7 @@ var toggleSwitch = function(translate, options, defaultParameters) {
 
 module.exports = toggleSwitch;
 
-},{"../Utils":28,"../helper/CmdHelper":50,"./EntryFieldDescription":40,"bpmn-js/lib/util/ModelUtil":194,"min-dom":601}],48:[function(require,module,exports){
-'use strict';
-
-var textField = require('./TextInputEntryFactory');
-
-/**
- * This function is a wrapper around TextInputEntryFactory.
- * It adds functionality to cache an invalid value entered in the
- * text input, instead of setting it on the business object.
- */
-var validationAwareTextField = function(translate, options, defaultParameters) {
-
-  var modelProperty = options.modelProperty;
-
-  defaultParameters.get = function(element, node) {
-    var value = this.__lastInvalidValue;
-
-    delete this.__lastInvalidValue;
-
-    var properties = {};
-
-    properties[modelProperty] = value !== undefined ? value : options.getProperty(element, node);
-
-    return properties;
-  };
-
-  defaultParameters.set = function(element, values, node) {
-    var validationErrors = validate.apply(this, [ element, values, node ]),
-        propertyValue = values[modelProperty];
-
-    // make sure we do not update the id
-    if (validationErrors && validationErrors[modelProperty]) {
-      this.__lastInvalidValue = propertyValue;
-
-      return options.setProperty(element, {}, node);
-    } else {
-      var properties = {};
-
-      properties[modelProperty] = propertyValue;
-
-      return options.setProperty(element, properties, node);
-    }
-  };
-
-  var validate = defaultParameters.validate = function(element, values, node) {
-    var value = values[modelProperty] || this.__lastInvalidValue;
-
-    var property = {};
-    property[modelProperty] = value;
-
-    return options.validate(element, property, node);
-  };
-
-  return textField(translate, options, defaultParameters);
-};
-
-module.exports = validationAwareTextField;
-
-},{"./TextInputEntryFactory":46}],49:[function(require,module,exports){
+},{"../Utils":41,"../helper/CmdHelper":53,"./EntryFieldDescription":49,"bpmn-js/lib/util/ModelUtil":187,"min-dom":594}],52:[function(require,module,exports){
 'use strict';
 
 var collectionAdd = require('diagram-js/lib/util/Collections').add,
@@ -6155,7 +5963,7 @@ CategoryHelper.createCategoryValue = function(definitions, bpmnFactory) {
   return categoryValue;
 
 };
-},{"bpmn-js/lib/util/ModelUtil":194,"diagram-js/lib/util/Collections":372}],50:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":187,"diagram-js/lib/util/Collections":365}],53:[function(require,module,exports){
 'use strict';
 
 var CmdHelper = {};
@@ -6235,7 +6043,7 @@ CmdHelper.setList = function(element, businessObject, listPropertyName, updatedO
   };
 };
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 var ElementHelper = {};
@@ -6260,7 +6068,7 @@ ElementHelper.createElement = function(elementType, properties, parent, factory)
   return element;
 };
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
@@ -6319,7 +6127,7 @@ EventDefinitionHelper.getConditionalEventDefinition = function(element) {
   return this.getEventDefinition(element, 'bpmn:ConditionalEventDefinition');
 };
 
-},{"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],53:[function(require,module,exports){
+},{"bpmn-js/lib/util/ModelUtil":187,"lodash/forEach":560}],56:[function(require,module,exports){
 'use strict';
 
 var is = require('bpmn-js/lib/util/ModelUtil').is,
@@ -6356,7 +6164,7 @@ ParticipantHelper.getProcessBusinessObject = function(element, propertyName) {
 
   return properties;
 };
-},{"./CmdHelper":50,"bpmn-js/lib/util/ModelUtil":194}],54:[function(require,module,exports){
+},{"./CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],57:[function(require,module,exports){
 module.exports = {
   __depends__: [
     require('./cmd'),
@@ -6366,923 +6174,7 @@ module.exports = {
   propertiesPanel: [ 'type', require('./PropertiesPanel') ]
 };
 
-},{"./PropertiesPanel":27,"./cmd":34,"diagram-js/lib/i18n/translate":355}],55:[function(require,module,exports){
-'use strict';
-
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    isAny = require('bpmn-js/lib/features/modeling/util/ModelingUtil').isAny,
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    eventDefinitionHelper = require('../../../helper/EventDefinitionHelper');
-
-var forEach = require('lodash/forEach');
-
-var message = require('./implementation/MessageEventDefinition'),
-    signal = require('./implementation/SignalEventDefinition'),
-    error = require('./implementation/ErrorEventDefinition'),
-    escalation = require('./implementation/EscalationEventDefinition'),
-    timer = require('./implementation/TimerEventDefinition'),
-    compensation = require('./implementation/CompensateEventDefinition'),
-    condition = require('./implementation/ConditionalEventDefinition');
-
-
-module.exports = function(group, element, bpmnFactory, elementRegistry, translate) {
-  var events = [
-    'bpmn:StartEvent',
-    'bpmn:EndEvent',
-    'bpmn:IntermediateThrowEvent',
-    'bpmn:BoundaryEvent',
-    'bpmn:IntermediateCatchEvent'
-  ];
-
-  // Message and Signal Event Definition
-  forEach(events, function(event) {
-    if (is(element, event)) {
-
-      var messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element),
-          signalEventDefinition = eventDefinitionHelper.getSignalEventDefinition(element);
-
-      if (messageEventDefinition) {
-        message(group, element, bpmnFactory, messageEventDefinition, translate);
-      }
-
-      if (signalEventDefinition) {
-        signal(group, element, bpmnFactory, signalEventDefinition, translate);
-      }
-
-    }
-  });
-
-  // Special Case: Receive Task
-  if (is(element, 'bpmn:ReceiveTask')) {
-    message(group, element, bpmnFactory, getBusinessObject(element), translate);
-  }
-
-  // Error Event Definition
-  var errorEvents = [
-    'bpmn:StartEvent',
-    'bpmn:BoundaryEvent',
-    'bpmn:EndEvent'
-  ];
-
-  forEach(errorEvents, function(event) {
-    if (is(element, event)) {
-
-      var errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(element);
-
-      if (errorEventDefinition) {
-
-        error(group, element, bpmnFactory, errorEventDefinition, translate);
-      }
-    }
-  });
-
-  // Escalation Event Definition
-  var escalationEvents = [
-    'bpmn:StartEvent',
-    'bpmn:BoundaryEvent',
-    'bpmn:IntermediateThrowEvent',
-    'bpmn:EndEvent'
-  ];
-
-  forEach(escalationEvents, function(event) {
-    if (is(element, event)) {
-
-      var showEscalationCodeVariable = is(element, 'bpmn:StartEvent') || is(element, 'bpmn:BoundaryEvent');
-
-      // get business object
-      var escalationEventDefinition = eventDefinitionHelper.getEscalationEventDefinition(element);
-
-      if (escalationEventDefinition) {
-        escalation(group, element, bpmnFactory, escalationEventDefinition, showEscalationCodeVariable,
-          translate);
-      }
-    }
-
-  });
-
-  // Timer Event Definition
-  var timerEvents = [
-    'bpmn:StartEvent',
-    'bpmn:BoundaryEvent',
-    'bpmn:IntermediateCatchEvent'
-  ];
-
-  forEach(timerEvents, function(event) {
-    if (is(element, event)) {
-
-      // get business object
-      var timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(element);
-
-      if (timerEventDefinition) {
-        timer(group, element, bpmnFactory, timerEventDefinition, translate);
-      }
-    }
-  });
-
-  // Compensate Event Definition
-  var compensationEvents = [
-    'bpmn:EndEvent',
-    'bpmn:IntermediateThrowEvent'
-  ];
-
-  forEach(compensationEvents, function(event) {
-    if (is(element, event)) {
-
-      // get business object
-      var compensateEventDefinition = eventDefinitionHelper.getCompensateEventDefinition(element);
-
-      if (compensateEventDefinition) {
-        compensation(group, element, bpmnFactory, compensateEventDefinition, elementRegistry, translate);
-      }
-    }
-  });
-
-
-  // Conditional Event Definition
-  var conditionalEvents = [
-    'bpmn:StartEvent',
-    'bpmn:BoundaryEvent',
-    'bpmn:IntermediateThrowEvent',
-    'bpmn:IntermediateCatchEvent'
-  ];
-
-  if (isAny(element, conditionalEvents)) {
-
-    // get business object
-    var conditionalEventDefinition = eventDefinitionHelper.getConditionalEventDefinition(element);
-
-    if (conditionalEventDefinition) {
-      condition(group, element, bpmnFactory, conditionalEventDefinition, elementRegistry, translate);
-    }
-  }
-
-};
-
-},{"../../../helper/EventDefinitionHelper":52,"./implementation/CompensateEventDefinition":56,"./implementation/ConditionalEventDefinition":57,"./implementation/ErrorEventDefinition":59,"./implementation/EscalationEventDefinition":60,"./implementation/MessageEventDefinition":62,"./implementation/SignalEventDefinition":63,"./implementation/TimerEventDefinition":64,"bpmn-js/lib/features/modeling/util/ModelingUtil":165,"bpmn-js/lib/util/ModelUtil":194,"lodash/forEach":567}],56:[function(require,module,exports){
-'use strict';
-
-var entryFactory = require('../../../../factory/EntryFactory');
-
-var cmdHelper = require('../../../../helper/CmdHelper'),
-    eventDefinitionHelper = require('../../../../helper/EventDefinitionHelper'),
-    utils = require('../../../../Utils');
-
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    is = require('bpmn-js/lib/util/ModelUtil').is;
-
-var forEach = require('lodash/forEach'),
-    find = require('lodash/find'),
-    filter = require('lodash/filter');
-
-
-function getContainedActivities(element) {
-  return getFlowElements(element, 'bpmn:Activity');
-}
-
-function getContainedBoundaryEvents(element) {
-  return getFlowElements(element, 'bpmn:BoundaryEvent');
-}
-
-function getFlowElements(element, type) {
-  return utils.filterElementsByType(element.flowElements, type);
-}
-
-function isCompensationEventAttachedToActivity(activity, boundaryEvents) {
-  var activityId = activity.id;
-  var boundaryEvent = find(boundaryEvents, function(boundaryEvent) {
-    var compensateEventDefinition = eventDefinitionHelper.getCompensateEventDefinition(boundaryEvent);
-    var attachedToRef = boundaryEvent.attachedToRef;
-    return compensateEventDefinition && attachedToRef && attachedToRef.id === activityId;
-  });
-  return !!boundaryEvent;
-}
-
-// subprocess: only when it is not triggeredByEvent
-// activity: only when it attach a compensation boundary event
-// callActivity: no limitation
-function canActivityBeCompensated(activity, boundaryEvents) {
-  return (is(activity, 'bpmn:SubProcess') && !activity.triggeredByEvent) ||
-          is(activity, 'bpmn:CallActivity') ||
-          isCompensationEventAttachedToActivity(activity, boundaryEvents);
-}
-
-function getActivitiesForCompensation(element) {
-  var boundaryEvents = getContainedBoundaryEvents(element);
-  return filter(getContainedActivities(element), function(activity) {
-    return canActivityBeCompensated(activity, boundaryEvents);
-  });
-}
-
-function getActivitiesForActivityRef(element) {
-  var bo = getBusinessObject(element);
-  var parent = bo.$parent;
-
-  var activitiesForActivityRef = getActivitiesForCompensation(parent);
-
-  // if throwing compensation event is in an event sub process:
-  // get also all activities outside of the event sub process
-  if (is(parent, 'bpmn:SubProcess') && parent.triggeredByEvent) {
-    parent = parent.$parent;
-    if (parent) {
-      activitiesForActivityRef = activitiesForActivityRef.concat(getActivitiesForCompensation(parent));
-    }
-
-  }
-
-  return activitiesForActivityRef;
-}
-
-function createActivityRefOptions(element) {
-  var options = [ { value: '' } ];
-
-  var activities = getActivitiesForActivityRef(element);
-  forEach(activities, function(activity) {
-    var activityId = activity.id;
-    var name = (activity.name ? (activity.name + ' ') : '') + '(id=' + activityId + ')';
-    options.push({ value: activityId, name: name });
-  });
-
-  return options;
-}
-
-
-module.exports = function(group, element, bpmnFactory, compensateEventDefinition, elementRegistry, translate) {
-
-  group.entries.push(entryFactory.checkbox(translate, {
-    id: 'wait-for-completion',
-    label: translate('Wait for Completion'),
-    modelProperty: 'waitForCompletion',
-
-    get: function(element, node) {
-      return {
-        waitForCompletion: compensateEventDefinition.waitForCompletion
-      };
-    },
-
-    set: function(element, values) {
-      values.waitForCompletion = values.waitForCompletion || false;
-      return cmdHelper.updateBusinessObject(element, compensateEventDefinition, values);
-    }
-  }));
-
-  group.entries.push(entryFactory.selectBox(translate, {
-    id: 'activity-ref',
-    label: translate('Activity Ref'),
-    selectOptions: createActivityRefOptions(element),
-    modelProperty: 'activityRef',
-
-    get: function(element, node) {
-      var activityRef = compensateEventDefinition.activityRef;
-      activityRef = activityRef && activityRef.id;
-      return {
-        activityRef: activityRef || ''
-      };
-    },
-
-    set: function(element, values) {
-      var activityRef = values.activityRef || undefined;
-      activityRef = activityRef && getBusinessObject(elementRegistry.get(activityRef));
-      return cmdHelper.updateBusinessObject(element, compensateEventDefinition, {
-        activityRef: activityRef
-      });
-    }
-  }));
-
-};
-
-},{"../../../../Utils":28,"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"../../../../helper/EventDefinitionHelper":52,"bpmn-js/lib/util/ModelUtil":194,"lodash/filter":563,"lodash/find":564,"lodash/forEach":567}],57:[function(require,module,exports){
-'use strict';
-
-var entryFactory = require('../../../../factory/EntryFactory'),
-    cmdHelper = require('../../../../helper/CmdHelper');
-
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    isEventSubProcess = require('bpmn-js/lib/util/DiUtil').isEventSubProcess;
-
-module.exports = function(group, element, bpmnFactory, conditionalEventDefinition, elementRegistry, translate) {
-
-  var getValue = function(modelProperty) {
-    return function(element) {
-      var modelPropertyValue = conditionalEventDefinition.get('camunda:' + modelProperty);
-      var value = {};
-
-      value[modelProperty] = modelPropertyValue;
-      return value;
-    };
-  };
-
-  var setValue = function(modelProperty) {
-    return function(element, values) {
-      var props = {};
-
-      props['camunda:' + modelProperty] = values[modelProperty] || undefined;
-
-      return cmdHelper.updateBusinessObject(element, conditionalEventDefinition, props);
-    };
-  };
-
-  group.entries.push(entryFactory.textField(translate, {
-    id: 'variableName',
-    label: translate('Variable Name'),
-    modelProperty : 'variableName',
-
-    get: getValue('variableName'),
-    set: setValue('variableName')
-  }));
-
-  var isConditionalStartEvent =
-    is(element, 'bpmn:StartEvent') && !isEventSubProcess(element.parent);
-
-  if (!isConditionalStartEvent) {
-    group.entries.push(entryFactory.textField(translate, {
-      id: 'variableEvents',
-      label: translate('Variable Events'),
-      description: translate('Specify more than one variable change event as a comma separated list.'),
-      modelProperty : 'variableEvents',
-
-      get: getValue('variableEvents'),
-      set: setValue('variableEvents')
-    }));
-  }
-};
-
-},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"bpmn-js/lib/util/DiUtil":192,"bpmn-js/lib/util/ModelUtil":194}],58:[function(require,module,exports){
-'use strict';
-
-var entryFactory = require('../../../../factory/EntryFactory');
-
-var cmdHelper = require('../../../../helper/CmdHelper');
-
-/**
- * Create an entry to modify a property of an element which
- * is referenced by a event definition.
- *
- * @param  {djs.model.Base} element
- * @param  {ModdleElement} definition
- * @param  {BpmnFactory} bpmnFactory
- * @param  {Object} options
- * @param  {string} options.id the id of the entry
- * @param  {string} options.label the label of the entry
- * @param  {string} options.referenceProperty the name of referencing property
- * @param  {string} options.modelProperty the name of property to modify
- * @param  {string} options.shouldValidate a flag indicate whether to validate or not
- *
- * @return {Array<Object>} return an array containing the entries
- */
-module.exports = function(element, definition, bpmnFactory, translate, options) {
-
-  var id = options.id || 'element-property';
-  var label = options.label;
-  var referenceProperty = options.referenceProperty;
-  var modelProperty = options.modelProperty || 'name';
-  var shouldValidate = options.shouldValidate || false;
-
-  var entry = entryFactory.textField(translate, {
-    id: id,
-    label: label,
-    modelProperty: modelProperty,
-
-    get: function(element, node) {
-      var reference = definition.get(referenceProperty);
-      var props = {};
-      props[modelProperty] = reference && reference.get(modelProperty);
-      return props;
-    },
-
-    set: function(element, values, node) {
-      var reference = definition.get(referenceProperty);
-      var props = {};
-      props[modelProperty] = values[modelProperty] || undefined;
-      return cmdHelper.updateBusinessObject(element, reference, props);
-    },
-
-    hidden: function(element, node) {
-      return !definition.get(referenceProperty);
-    }
-  });
-
-  if (shouldValidate) {
-    entry.validate = function(element, values, node) {
-      var reference = definition.get(referenceProperty);
-      if (reference && !values[modelProperty]) {
-        var validationErrors = {};
-        validationErrors[modelProperty] = 'Must provide a value';
-        return validationErrors;
-      }
-    };
-  }
-
-  return [ entry ];
-};
-
-},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50}],59:[function(require,module,exports){
-'use strict';
-
-var eventDefinitionReference = require('./EventDefinitionReference'),
-    elementReferenceProperty = require('./ElementReferenceProperty');
-
-
-module.exports = function(group, element, bpmnFactory, errorEventDefinition, translate) {
-
-
-  group.entries = group.entries.concat(eventDefinitionReference(element, errorEventDefinition, bpmnFactory, {
-    label: translate('Error'),
-    elementName: 'error',
-    elementType: 'bpmn:Error',
-    referenceProperty: 'errorRef',
-    newElementIdPrefix: 'Error_'
-  }));
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, errorEventDefinition, bpmnFactory, translate, {
-      id: 'error-element-name',
-      label: translate('Error Name'),
-      referenceProperty: 'errorRef',
-      modelProperty: 'name',
-      shouldValidate: true
-    })
-  );
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, errorEventDefinition, bpmnFactory, translate, {
-      id: 'error-element-code',
-      label: translate('Error Code'),
-      referenceProperty: 'errorRef',
-      modelProperty: 'errorCode'
-    })
-  );
-
-};
-
-},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],60:[function(require,module,exports){
-'use strict';
-
-var entryFactory = require('../../../../factory/EntryFactory'),
-    cmdHelper = require('../../../../helper/CmdHelper');
-
-var eventDefinitionReference = require('./EventDefinitionReference'),
-    elementReferenceProperty = require('./ElementReferenceProperty');
-
-
-module.exports = function(group, element, bpmnFactory, escalationEventDefinition, showEscalationCodeVariable, translate) {
-
-  group.entries = group.entries.concat(eventDefinitionReference(element, escalationEventDefinition, bpmnFactory, {
-    label: translate('Escalation'),
-    elementName: 'escalation',
-    elementType: 'bpmn:Escalation',
-    referenceProperty: 'escalationRef',
-    newElementIdPrefix: 'Escalation_'
-  }));
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, escalationEventDefinition, bpmnFactory, translate, {
-      id: 'escalation-element-name',
-      label: translate('Escalation Name'),
-      referenceProperty: 'escalationRef',
-      modelProperty: 'name',
-      shouldValidate: true
-    })
-  );
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, escalationEventDefinition, bpmnFactory, translate, {
-      id: 'escalation-element-code',
-      label: translate('Escalation Code'),
-      referenceProperty: 'escalationRef',
-      modelProperty: 'escalationCode'
-    })
-  );
-
-
-  if (showEscalationCodeVariable) {
-    group.entries.push(entryFactory.textField(translate, {
-      id : 'escalationCodeVariable',
-      label : translate('Escalation Code Variable'),
-      modelProperty : 'escalationCodeVariable',
-
-      get: function(element) {
-        var codeVariable = escalationEventDefinition.get('camunda:escalationCodeVariable');
-        return {
-          escalationCodeVariable: codeVariable
-        };
-      },
-
-      set: function(element, values) {
-        return cmdHelper.updateBusinessObject(element, escalationEventDefinition, {
-          'camunda:escalationCodeVariable': values.escalationCodeVariable || undefined
-        });
-      }
-    }));
-  }
-};
-
-},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],61:[function(require,module,exports){
-'use strict';
-
-var cmdHelper = require('../../../../helper/CmdHelper');
-
-var domQuery = require('min-dom').query,
-    domify = require('min-dom').domify,
-    domAttr = require('min-dom').attr;
-
-var forEach = require('lodash/forEach'),
-    find = require('lodash/find');
-
-var elementHelper = require('../../../../helper/ElementHelper');
-var utils = require('../../../../Utils'),
-    escapeHTML = utils.escapeHTML;
-
-var selector = 'select[name=selectedElement]';
-
-/**
- * Get select box containing all elements.
- *
- * @param {DOMElement} node
- *
- * @return {DOMElement} the select box
- */
-function getSelectBox(node) {
-  return domQuery(selector, node.parentElement);
-}
-
-/**
- * Find element by given id.
- *
- * @param {ModdleElement} eventDefinition
- *
- * @return {ModdleElement} an element
- */
-function findElementById(eventDefinition, type, id) {
-  var elements = utils.findRootElementsByType(eventDefinition, type);
-  return find(elements, function(element) {
-    return element.id === id;
-  });
-}
-
-/**
- * Create an entry to modify the reference to an element from an
- * event definition.
- *
- * @param  {djs.model.Base} element
- * @param  {ModdleElement} definition
- * @param  {BpmnFactory} bpmnFactory
- * @param  {Object} options
- * @param  {string} options.label the label of the entry
- * @param  {string} options.description the description of the entry
- * @param  {string} options.elementName the name of the element
- * @param  {string} options.elementType the type of the element
- * @param  {string} options.referenceProperty the name of referencing property
- * @param  {string} options.newElementIdPrefix the prefix of a new created element
- *
- * @return {Array<Object>} return an array containing the entries
- */
-module.exports = function(element, definition, bpmnFactory, options) {
-
-  var elementName = options.elementName || '',
-      elementType = options.elementType,
-      referenceProperty = options.referenceProperty;
-
-  var newElementIdPrefix = options.newElementIdPrefix || 'elem_';
-
-  var label = options.label || '',
-      description = options.description || '';
-
-  var entries = [];
-
-  entries.push({
-
-    id: 'event-definitions-' + elementName,
-    description: description,
-    html: '<div class="bpp-row bpp-select">' +
-             '<label for="camunda-' + escapeHTML(elementName) + '">' + escapeHTML(label) + '</label>' +
-             '<div class="bpp-field-wrapper">' +
-               '<select id="camunda-' + escapeHTML(elementName) + '" name="selectedElement" data-value>' +
-               '</select>' +
-               '<button class="action-button add" id="addElement" data-action="addElement"><span>+</span></button>' +
-             '</div>' +
-          '</div>',
-
-    get: function(element, entryNode) {
-      utils.updateOptionsDropDown(selector, definition, elementType, entryNode);
-      var reference = definition.get(referenceProperty);
-      return {
-        selectedElement: (reference && reference.id) || ''
-      };
-    },
-
-    set: function(element, values) {
-      var selection = values.selectedElement;
-
-      var props = {};
-
-      if (!selection || typeof selection === 'undefined') {
-
-        // remove reference to element
-        props[referenceProperty] = undefined;
-        return cmdHelper.updateBusinessObject(element, definition, props);
-      }
-
-      var commands = [];
-
-      var selectedElement = findElementById(definition, elementType, selection);
-      if (!selectedElement) {
-        var root = utils.getRoot(definition);
-
-        // create a new element
-        selectedElement = elementHelper.createElement(elementType, { name: selection }, root, bpmnFactory);
-        commands.push(cmdHelper.addAndRemoveElementsFromList(element, root, 'rootElements', null, [ selectedElement ]));
-      }
-
-      // update reference to element
-      props[referenceProperty] = selectedElement;
-      commands.push(cmdHelper.updateBusinessObject(element, definition, props));
-
-      return commands;
-    },
-
-    addElement: function(element, inputNode) {
-
-      // note: this generated id will be used as name
-      // of the element and not as id
-      var id = utils.nextId(newElementIdPrefix);
-
-      var optionTemplate = domify('<option value="' + escapeHTML(id) + '"> (id='+escapeHTML(id)+')' + '</option>');
-
-      // add new option
-      var selectBox = getSelectBox(inputNode);
-      selectBox.insertBefore(optionTemplate, selectBox.firstChild);
-
-      // select new element in the select box
-      forEach(selectBox, function(option) {
-        if (option.value === id) {
-          domAttr(option, 'selected', 'selected');
-        } else {
-          domAttr(option, 'selected', null);
-        }
-      });
-
-      return true;
-    }
-
-  });
-
-  return entries;
-
-};
-
-},{"../../../../Utils":28,"../../../../helper/CmdHelper":50,"../../../../helper/ElementHelper":51,"lodash/find":564,"lodash/forEach":567,"min-dom":601}],62:[function(require,module,exports){
-'use strict';
-
-var eventDefinitionReference = require('./EventDefinitionReference'),
-    elementReferenceProperty = require('./ElementReferenceProperty');
-
-
-module.exports = function(group, element, bpmnFactory, messageEventDefinition, translate) {
-
-  group.entries = group.entries.concat(eventDefinitionReference(element, messageEventDefinition, bpmnFactory, {
-    label: translate('Message'),
-    elementName: 'message',
-    elementType: 'bpmn:Message',
-    referenceProperty: 'messageRef',
-    newElementIdPrefix: 'Message_'
-  }));
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, messageEventDefinition, bpmnFactory, translate, {
-      id: 'message-element-name',
-      label: translate('Message Name'),
-      referenceProperty: 'messageRef',
-      modelProperty: 'name',
-      shouldValidate: true
-    })
-  );
-
-};
-
-},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],63:[function(require,module,exports){
-'use strict';
-
-var eventDefinitionReference = require('./EventDefinitionReference'),
-    elementReferenceProperty = require('./ElementReferenceProperty');
-
-
-module.exports = function(group, element, bpmnFactory, signalEventDefinition, translate) {
-
-  group.entries = group.entries.concat(eventDefinitionReference(element, signalEventDefinition, bpmnFactory, {
-    label: translate('Signal'),
-    elementName: 'signal',
-    elementType: 'bpmn:Signal',
-    referenceProperty: 'signalRef',
-    newElementIdPrefix: 'Signal_'
-  }));
-
-
-  group.entries = group.entries.concat(
-    elementReferenceProperty(element, signalEventDefinition, bpmnFactory, translate, {
-      id: 'signal-element-name',
-      label: translate('Signal Name'),
-      referenceProperty: 'signalRef',
-      modelProperty: 'name',
-      shouldValidate: true
-    })
-  );
-
-};
-
-},{"./ElementReferenceProperty":58,"./EventDefinitionReference":61}],64:[function(require,module,exports){
-'use strict';
-
-var elementHelper = require('../../../../helper/ElementHelper'),
-    cmdHelper = require('../../../../helper/CmdHelper');
-
-var entryFactory = require('../../../../factory/EntryFactory');
-
-/**
- * Get the timer definition type for a given timer event definition.
- *
- * @param {ModdleElement<bpmn:TimerEventDefinition>} timer
- *
- * @return {string|undefined} the timer definition type
- */
-function getTimerDefinitionType(timer) {
-
-  if (!timer) {
-    return;
-  }
-
-  var timeDate = timer.get('timeDate');
-  if (typeof timeDate !== 'undefined') {
-    return 'timeDate';
-  }
-
-  var timeCycle = timer.get('timeCycle');
-  if (typeof timeCycle !== 'undefined') {
-    return 'timeCycle';
-  }
-
-  var timeDuration = timer.get('timeDuration');
-  if (typeof timeDuration !== 'undefined') {
-    return 'timeDuration';
-  }
-}
-
-/**
- * Get the actual timer event definition based on option, whether it's a getter
- * to fetch the timer event definition or the exact event definition itself
- *
- * @param {ModdleElement<bpmn:TimerEventDefinition>|Function} timerOrFunction
- * @param {Shape} element
- * @param {HTMLElement} node
- *
- * @return ModdleElement<bpmn:TimerEventDefinition>
- */
-function getTimerDefinition(timerOrFunction, element, node) {
-  if (typeof timerOrFunction === 'function') {
-    return timerOrFunction(element, node);
-  }
-
-  return timerOrFunction;
-}
-
-/**
- * Creates 'bpmn:FormalExpression' element.
- *
- * @param {ModdleElement} parent
- * @param {string} body
- * @param {BpmnFactory} bpmnFactory
- *
- * @return {ModdleElement<bpmn:FormalExpression>} a formal expression
- */
-function createFormalExpression(parent, body, bpmnFactory) {
-  body = body || undefined;
-  return elementHelper.createElement('bpmn:FormalExpression', { body: body }, parent, bpmnFactory);
-}
-
-function TimerEventDefinition(group, element, bpmnFactory, timerEventDefinition, translate, options) {
-
-  var selectOptions = [
-    { value: 'timeDate', name: translate('Date') },
-    { value: 'timeDuration', name: translate('Duration') },
-    { value: 'timeCycle', name: translate('Cycle') }
-  ];
-
-  var prefix = options && options.idPrefix,
-      createTimerEventDefinition = options && options.createTimerEventDefinition;
-
-
-  group.entries.push(entryFactory.selectBox(translate, {
-    id: prefix + 'timer-event-definition-type',
-    label: translate('Timer Definition Type'),
-    selectOptions: selectOptions,
-    emptyParameter: true,
-    modelProperty: 'timerDefinitionType',
-
-    get: function(element, node) {
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node);
-
-      return {
-        timerDefinitionType: getTimerDefinitionType(timerDefinition) || ''
-      };
-    },
-
-    set: function(element, values, node) {
-      var props = {
-        timeDuration: undefined,
-        timeDate: undefined,
-        timeCycle: undefined
-      };
-
-
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
-          newType = values.timerDefinitionType;
-
-      if (!timerDefinition && typeof createTimerEventDefinition === 'function') {
-        timerDefinition = createTimerEventDefinition(element, node);
-      }
-
-      if (values.timerDefinitionType) {
-        var oldType = getTimerDefinitionType(timerDefinition);
-
-        var value;
-        if (oldType) {
-          var definition = timerDefinition.get(oldType);
-          value = definition.get('body');
-        }
-
-        props[newType] = createFormalExpression(timerDefinition, value, bpmnFactory);
-      }
-
-      return cmdHelper.updateBusinessObject(element, timerDefinition, props);
-    },
-
-    hidden: function(element, node) {
-      return getTimerDefinition(timerEventDefinition, element, node) === undefined;
-    }
-
-  }));
-
-
-  group.entries.push(entryFactory.textField(translate, {
-    id: prefix + 'timer-event-definition',
-    label: translate('Timer Definition'),
-    modelProperty: 'timerDefinition',
-
-    get: function(element, node) {
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
-          type = getTimerDefinitionType(timerDefinition),
-          definition = type && timerDefinition.get(type),
-          value = definition && definition.get('body');
-
-      return {
-        timerDefinition: value
-      };
-    },
-
-    set: function(element, values, node) {
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
-          type = getTimerDefinitionType(timerDefinition),
-          definition = type && timerDefinition.get(type);
-
-      if (definition) {
-        return cmdHelper.updateBusinessObject(element, definition, {
-          body: values.timerDefinition || undefined
-        });
-      }
-    },
-
-    validate: function(element, node) {
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node),
-          type = getTimerDefinitionType(timerDefinition),
-          definition = type && timerDefinition.get(type);
-
-      if (definition) {
-        var value = definition.get('body');
-        if (!value) {
-          return {
-            timerDefinition: translate('Must provide a value')
-          };
-        }
-      }
-    },
-
-    hidden: function(element, node) {
-      var timerDefinition = getTimerDefinition(timerEventDefinition, element, node);
-
-      return !getTimerDefinitionType(timerDefinition);
-    }
-
-  }));
-
-}
-
-module.exports = TimerEventDefinition;
-
-},{"../../../../factory/EntryFactory":39,"../../../../helper/CmdHelper":50,"../../../../helper/ElementHelper":51}],65:[function(require,module,exports){
+},{"./PropertiesPanel":40,"./cmd":47,"diagram-js/lib/i18n/translate":348}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7362,7 +6254,7 @@ BaseModeler.prototype._collectIds = function (definitions, elementsById) {
   }
 };
 
-},{"./BaseViewer":66,"ids":391,"inherits":392}],66:[function(require,module,exports){
+},{"./BaseViewer":59,"ids":384,"inherits":385}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8072,7 +6964,7 @@ function addProjectLogo(container) {
 }
 /* </project-logo> */
 
-},{"./import/Importer":188,"./util/CompatibilityUtil":191,"./util/PoweredByUtil":195,"bpmn-moddle":196,"diagram-js":201,"inherits":392,"min-dash":600,"min-dom":601,"tiny-svg":612}],67:[function(require,module,exports){
+},{"./import/Importer":181,"./util/CompatibilityUtil":184,"./util/PoweredByUtil":188,"bpmn-moddle":189,"diagram-js":194,"inherits":385,"min-dash":593,"min-dom":594,"tiny-svg":605}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8265,7 +7157,7 @@ _alignElements.default, _autoPlace.default, _autoScroll.default, _autoResize.def
 
 Modeler.prototype._modules = [].concat(_Viewer.default.prototype._modules, Modeler.prototype._interactionModules, Modeler.prototype._modelingModules);
 
-},{"./BaseModeler":65,"./NavigatedViewer":68,"./Viewer":69,"./features/auto-place":78,"./features/auto-resize":81,"./features/context-pad":83,"./features/copy-paste":86,"./features/distribute-elements":90,"./features/editor-actions":92,"./features/grid-snapping":98,"./features/interaction-events":100,"./features/keyboard":102,"./features/label-editing":107,"./features/modeling":163,"./features/palette":169,"./features/replace-preview":174,"./features/search":181,"./features/snapping":185,"./util/CompatibilityUtil":191,"diagram-js/lib/features/align-elements":217,"diagram-js/lib/features/auto-scroll":227,"diagram-js/lib/features/bendpoints":234,"diagram-js/lib/features/connect":241,"diagram-js/lib/features/connection-preview":243,"diagram-js/lib/features/create":250,"diagram-js/lib/features/keyboard-move-selection":272,"diagram-js/lib/features/move":310,"diagram-js/lib/features/resize":328,"diagram-js/lib/navigation/keyboard-move":363,"diagram-js/lib/navigation/movecanvas":365,"diagram-js/lib/navigation/touch":366,"diagram-js/lib/navigation/zoomscroll":369,"inherits":392}],68:[function(require,module,exports){
+},{"./BaseModeler":58,"./NavigatedViewer":61,"./Viewer":62,"./features/auto-place":71,"./features/auto-resize":74,"./features/context-pad":76,"./features/copy-paste":79,"./features/distribute-elements":83,"./features/editor-actions":85,"./features/grid-snapping":91,"./features/interaction-events":93,"./features/keyboard":95,"./features/label-editing":100,"./features/modeling":156,"./features/palette":162,"./features/replace-preview":167,"./features/search":174,"./features/snapping":178,"./util/CompatibilityUtil":184,"diagram-js/lib/features/align-elements":210,"diagram-js/lib/features/auto-scroll":220,"diagram-js/lib/features/bendpoints":227,"diagram-js/lib/features/connect":234,"diagram-js/lib/features/connection-preview":236,"diagram-js/lib/features/create":243,"diagram-js/lib/features/keyboard-move-selection":265,"diagram-js/lib/features/move":303,"diagram-js/lib/features/resize":321,"diagram-js/lib/navigation/keyboard-move":356,"diagram-js/lib/navigation/movecanvas":358,"diagram-js/lib/navigation/touch":359,"diagram-js/lib/navigation/zoomscroll":362,"inherits":385}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8298,7 +7190,7 @@ function NavigatedViewer(options) {
 NavigatedViewer.prototype._navigationModules = [_keyboardMove.default, _movecanvas.default, _zoomscroll.default];
 NavigatedViewer.prototype._modules = [].concat(_Viewer.default.prototype._modules, NavigatedViewer.prototype._navigationModules);
 
-},{"./Viewer":69,"diagram-js/lib/navigation/keyboard-move":363,"diagram-js/lib/navigation/movecanvas":365,"diagram-js/lib/navigation/zoomscroll":369,"inherits":392}],69:[function(require,module,exports){
+},{"./Viewer":62,"diagram-js/lib/navigation/keyboard-move":356,"diagram-js/lib/navigation/movecanvas":358,"diagram-js/lib/navigation/zoomscroll":362,"inherits":385}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8377,7 +7269,7 @@ Viewer.prototype._modules = [_core.default, _translate.default, _selection.defau
 
 Viewer.prototype._moddleExtensions = {};
 
-},{"./BaseViewer":66,"./core":70,"diagram-js/lib/features/overlays":315,"diagram-js/lib/features/selection":337,"diagram-js/lib/i18n/translate":355,"inherits":392}],70:[function(require,module,exports){
+},{"./BaseViewer":59,"./core":63,"diagram-js/lib/features/overlays":308,"diagram-js/lib/features/selection":330,"diagram-js/lib/i18n/translate":348,"inherits":385}],63:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8396,7 +7288,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../draw":75,"../import":190}],71:[function(require,module,exports){
+},{"../draw":68,"../import":183}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8505,7 +7397,7 @@ function getRectPath(shape) {
   return (0, _RenderUtil.componentsToPath)(rectPath);
 }
 
-},{"diagram-js/lib/util/RenderUtil":386,"min-dash":600}],72:[function(require,module,exports){
+},{"diagram-js/lib/util/RenderUtil":379,"min-dash":593}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10249,7 +9141,7 @@ BpmnRenderer.prototype.getShapePath = function (element) {
   return (0, _BpmnRenderUtil.getRectPath)(element);
 };
 
-},{"../features/label-editing/LabelUtil":105,"../util/DiUtil":192,"../util/ModelUtil":194,"./BpmnRenderUtil":71,"diagram-js/lib/draw/BaseRenderer":212,"diagram-js/lib/util/RenderUtil":386,"diagram-js/lib/util/SvgTransformUtil":387,"ids":391,"inherits":392,"min-dash":600,"min-dom":601,"tiny-svg":612}],73:[function(require,module,exports){
+},{"../features/label-editing/LabelUtil":98,"../util/DiUtil":185,"../util/ModelUtil":187,"./BpmnRenderUtil":64,"diagram-js/lib/draw/BaseRenderer":205,"diagram-js/lib/util/RenderUtil":379,"diagram-js/lib/util/SvgTransformUtil":380,"ids":384,"inherits":385,"min-dash":593,"min-dom":594,"tiny-svg":605}],66:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10651,7 +9543,7 @@ function format(str, obj) {
   });
 }
 
-},{}],74:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10768,7 +9660,7 @@ function TextRenderer(config) {
 
 TextRenderer.$inject = ['config.textRenderer'];
 
-},{"diagram-js/lib/util/Text":388,"min-dash":600}],75:[function(require,module,exports){
+},{"diagram-js/lib/util/Text":381,"min-dash":593}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10792,7 +9684,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnRenderer":72,"./PathMap":73,"./TextRenderer":74}],76:[function(require,module,exports){
+},{"./BpmnRenderer":65,"./PathMap":66,"./TextRenderer":67}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10817,7 +9709,7 @@ function AutoPlace(eventBus) {
 
 AutoPlace.$inject = ['eventBus'];
 
-},{"./BpmnAutoPlaceUtil":77}],77:[function(require,module,exports){
+},{"./BpmnAutoPlaceUtil":70}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10945,7 +9837,7 @@ function getDataElementPosition(source, element) {
   return (0, _AutoPlaceUtil.findFreePosition)(source, element, position, (0, _AutoPlaceUtil.generateGetNextPosition)(nextPositionDirection));
 }
 
-},{"../../util/ModelUtil":194,"../modeling/util/ModelingUtil":165,"diagram-js/lib/features/auto-place/AutoPlaceUtil":222,"diagram-js/lib/layout/LayoutUtil":359}],78:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"../modeling/util/ModelingUtil":158,"diagram-js/lib/features/auto-place/AutoPlaceUtil":215,"diagram-js/lib/layout/LayoutUtil":352}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10966,7 +9858,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnAutoPlace":76,"diagram-js/lib/features/auto-place":223}],79:[function(require,module,exports){
+},{"./BpmnAutoPlace":69,"diagram-js/lib/features/auto-place":216}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11008,7 +9900,7 @@ BpmnAutoResize.prototype.resize = function (target, newBounds, hints) {
   }
 };
 
-},{"../../util/ModelUtil":194,"diagram-js/lib/features/auto-resize/AutoResize":224,"inherits":392}],80:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"diagram-js/lib/features/auto-resize/AutoResize":217,"inherits":385}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11060,7 +9952,7 @@ BpmnAutoResizeProvider.prototype.canResize = function (elements, target) {
   return canResize;
 };
 
-},{"../../util/ModelUtil":194,"diagram-js/lib/features/auto-resize/AutoResizeProvider":225,"inherits":392,"min-dash":600}],81:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"diagram-js/lib/features/auto-resize/AutoResizeProvider":218,"inherits":385,"min-dash":593}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11081,7 +9973,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnAutoResize":79,"./BpmnAutoResizeProvider":80}],82:[function(require,module,exports){
+},{"./BpmnAutoResize":72,"./BpmnAutoResizeProvider":73}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11422,7 +10314,7 @@ function isEventType(eventBo, type, definition) {
   return isType && isDefinition;
 }
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194,"../modeling/util/LaneUtil":164,"../modeling/util/ModelingUtil":165,"diagram-js/lib/util/Mouse":382,"min-dash":600}],83:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187,"../modeling/util/LaneUtil":157,"../modeling/util/ModelingUtil":158,"diagram-js/lib/util/Mouse":375,"min-dash":593}],76:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11453,7 +10345,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../popup-menu":171,"./ContextPadProvider":82,"diagram-js-direct-editing":198,"diagram-js/lib/features/connect":241,"diagram-js/lib/features/context-pad":245,"diagram-js/lib/features/create":250,"diagram-js/lib/features/selection":337}],84:[function(require,module,exports){
+},{"../popup-menu":164,"./ContextPadProvider":75,"diagram-js-direct-editing":191,"diagram-js/lib/features/connect":234,"diagram-js/lib/features/context-pad":238,"diagram-js/lib/features/create":243,"diagram-js/lib/features/selection":330}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11585,7 +10477,7 @@ function isLabel(element) {
   return !!element.labelTarget;
 }
 
-},{"../../util/ModelUtil":194,"min-dash":600}],85:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"min-dash":593}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11833,7 +10725,7 @@ function is(element, type) {
   return element && typeof element.$instanceOf === 'function' && element.$instanceOf(type);
 }
 
-},{"min-dash":600}],86:[function(require,module,exports){
+},{"min-dash":593}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11857,7 +10749,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnCopyPaste":84,"./ModdleCopy":85,"diagram-js/lib/features/copy-paste":247}],87:[function(require,module,exports){
+},{"./BpmnCopyPaste":77,"./ModdleCopy":78,"diagram-js/lib/features/copy-paste":240}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11895,7 +10787,7 @@ function BpmnDiOrdering(eventBus, canvas) {
 
 BpmnDiOrdering.$inject = ['eventBus', 'canvas'];
 
-},{"../../draw/BpmnRenderUtil":71,"../../util/ModelUtil":194,"diagram-js/lib/util/Elements":374,"min-dash":600}],88:[function(require,module,exports){
+},{"../../draw/BpmnRenderUtil":64,"../../util/ModelUtil":187,"diagram-js/lib/util/Elements":367,"min-dash":593}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11913,7 +10805,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../di-ordering/BpmnDiOrdering":87}],89:[function(require,module,exports){
+},{"../di-ordering/BpmnDiOrdering":80}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11940,7 +10832,7 @@ function BpmnDistributeElements(distributeElements) {
 
 BpmnDistributeElements.$inject = ['distributeElements'];
 
-},{"../modeling/util/ModelingUtil":165,"min-dash":600}],90:[function(require,module,exports){
+},{"../modeling/util/ModelingUtil":158,"min-dash":593}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11961,7 +10853,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnDistributeElements":89,"diagram-js/lib/features/distribute-elements":252}],91:[function(require,module,exports){
+},{"./BpmnDistributeElements":82,"diagram-js/lib/features/distribute-elements":245}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12130,7 +11022,7 @@ BpmnEditorActions.prototype._registerDefaultActions = function (injector) {
   }
 };
 
-},{"../../util/ModelUtil":194,"diagram-js/lib/features/editor-actions/EditorActions":255,"diagram-js/lib/util/Elements":374,"inherits":392,"min-dash":600}],92:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"diagram-js/lib/features/editor-actions/EditorActions":248,"diagram-js/lib/util/Elements":367,"inherits":385,"min-dash":593}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12150,7 +11042,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnEditorActions":91,"diagram-js/lib/features/editor-actions":256}],93:[function(require,module,exports){
+},{"./BpmnEditorActions":84,"diagram-js/lib/features/editor-actions":249}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12177,7 +11069,7 @@ function BpmnGridSnapping(eventBus) {
 
 BpmnGridSnapping.$inject = ['eventBus'];
 
-},{"../modeling/util/ModelingUtil":165}],94:[function(require,module,exports){
+},{"../modeling/util/ModelingUtil":158}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12233,7 +11125,7 @@ function isHorizontal(axis) {
   return axis === 'x';
 }
 
-},{"../../../util/ModelUtil":194,"../../auto-place/BpmnAutoPlaceUtil":77,"diagram-js/lib/layout/LayoutUtil":359}],95:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../../auto-place/BpmnAutoPlaceUtil":70,"diagram-js/lib/layout/LayoutUtil":352}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12272,7 +11164,7 @@ function CreateParticipantBehavior(canvas, eventBus, gridSnapping) {
 
 CreateParticipantBehavior.$inject = ['canvas', 'eventBus', 'gridSnapping'];
 
-},{"../../../util/ModelUtil":194}],96:[function(require,module,exports){
+},{"../../../util/ModelUtil":187}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12409,7 +11301,7 @@ function snapSegment(gridSnapping, segmentStart, segmentEnd) {
   return [segmentStart, segmentEnd];
 }
 
-},{"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/util/Geometry":377,"inherits":392,"min-dash":600}],97:[function(require,module,exports){
+},{"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/util/Geometry":370,"inherits":385,"min-dash":593}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12433,7 +11325,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./AutoPlaceBehavior":94,"./CreateParticipantBehavior":95,"./LayoutConnectionBehavior":96}],98:[function(require,module,exports){
+},{"./AutoPlaceBehavior":87,"./CreateParticipantBehavior":88,"./LayoutConnectionBehavior":89}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12456,7 +11348,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnGridSnapping":93,"./behavior":97,"diagram-js/lib/features/grid-snapping":264}],99:[function(require,module,exports){
+},{"./BpmnGridSnapping":86,"./behavior":90,"diagram-js/lib/features/grid-snapping":257}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12553,7 +11445,7 @@ BpmnInteractionEvents.prototype.createSubProcessHit = function (element, gfx) {
   return true;
 };
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194}],100:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12571,7 +11463,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnInteractionEvents":99}],101:[function(require,module,exports){
+},{"./BpmnInteractionEvents":92}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12713,7 +11605,7 @@ BpmnKeyboardBindings.prototype.registerBindings = function (keyboard, editorActi
   });
 };
 
-},{"diagram-js/lib/features/keyboard/KeyboardBindings":274,"inherits":392}],102:[function(require,module,exports){
+},{"diagram-js/lib/features/keyboard/KeyboardBindings":267,"inherits":385}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12734,7 +11626,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnKeyboardBindings":101,"diagram-js/lib/features/keyboard":276}],103:[function(require,module,exports){
+},{"./BpmnKeyboardBindings":94,"diagram-js/lib/features/keyboard":269}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12835,7 +11727,7 @@ function getStrokeColor(element, defaultColor) {
   return bo.di.get('stroke') || defaultColor || 'black';
 }
 
-},{"../../util/ModelUtil":194,"diagram-js/lib/util/SvgTransformUtil":387,"tiny-svg":612}],104:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"diagram-js/lib/util/SvgTransformUtil":380,"tiny-svg":605}],97:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13180,7 +12072,7 @@ function isEmptyText(label) {
   return !label || !label.trim();
 }
 
-},{"../../util/DiUtil":192,"../../util/LabelUtil":193,"../../util/ModelUtil":194,"../modeling/behavior/util/CategoryUtil":147,"../modeling/util/ModelingUtil":165,"./LabelUtil":105,"min-dash":600}],105:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/LabelUtil":186,"../../util/ModelUtil":187,"../modeling/behavior/util/CategoryUtil":140,"../modeling/util/ModelingUtil":158,"./LabelUtil":98,"min-dash":593}],98:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13243,7 +12135,7 @@ function setLabel(element, text, isExternal) {
   return element;
 }
 
-},{"../../util/ModelUtil":194}],106:[function(require,module,exports){
+},{"../../util/ModelUtil":187}],99:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13358,7 +12250,7 @@ function isEmptyText(label) {
   return !label || !label.trim();
 }
 
-},{"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"../LabelUtil":105}],107:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"../LabelUtil":98}],100:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13386,7 +12278,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./LabelEditingPreview":103,"./LabelEditingProvider":104,"diagram-js-direct-editing":198,"diagram-js/lib/features/change-support":236,"diagram-js/lib/features/resize":328}],108:[function(require,module,exports){
+},{"./LabelEditingPreview":96,"./LabelEditingProvider":97,"diagram-js-direct-editing":191,"diagram-js/lib/features/change-support":229,"diagram-js/lib/features/resize":321}],101:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13482,7 +12374,7 @@ BpmnFactory.prototype.createDiPlane = function (semantic) {
   });
 };
 
-},{"../../util/ModelUtil":194,"./util/ModelingUtil":165,"min-dash":600}],109:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"./util/ModelingUtil":158,"min-dash":593}],102:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13821,7 +12713,7 @@ function getBoundaryEventTargetLayout(attachOrientation, targetOrientation, atta
   }
 }
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194,"diagram-js/lib/layout/BaseLayouter":357,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/layout/ManhattanLayout":360,"inherits":392,"min-dash":600}],110:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187,"diagram-js/lib/layout/BaseLayouter":350,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/layout/ManhattanLayout":353,"inherits":385,"min-dash":593}],103:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14375,7 +13267,7 @@ function ifBpmn(fn) {
   };
 }
 
-},{"../../util/ModelUtil":194,"./util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/model":361,"diagram-js/lib/util/Collections":372,"inherits":392,"min-dash":600}],111:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"./util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/model":354,"diagram-js/lib/util/Collections":365,"inherits":385,"min-dash":593}],104:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14649,7 +13541,7 @@ function applyAttribute(element, attrs, attributeName) {
   delete attrs[attributeName];
 }
 
-},{"../../util/DiUtil":192,"../../util/LabelUtil":193,"../../util/ModelUtil":194,"diagram-js/lib/core/ElementFactory":207,"inherits":392,"min-dash":600}],112:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/LabelUtil":186,"../../util/ModelUtil":187,"diagram-js/lib/core/ElementFactory":200,"inherits":385,"min-dash":593}],105:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14851,7 +13743,7 @@ Modeling.prototype.setColor = function (elements, colors) {
   });
 };
 
-},{"../label-editing/cmd/UpdateLabelHandler":106,"./cmd/AddLaneHandler":153,"./cmd/IdClaimHandler":154,"./cmd/ResizeLaneHandler":155,"./cmd/SetColorHandler":156,"./cmd/SplitLaneHandler":157,"./cmd/UpdateCanvasRootHandler":158,"./cmd/UpdateFlowNodeRefsHandler":159,"./cmd/UpdateModdlePropertiesHandler":160,"./cmd/UpdatePropertiesHandler":161,"diagram-js/lib/features/modeling/Modeling":281,"inherits":392}],113:[function(require,module,exports){
+},{"../label-editing/cmd/UpdateLabelHandler":99,"./cmd/AddLaneHandler":146,"./cmd/IdClaimHandler":147,"./cmd/ResizeLaneHandler":148,"./cmd/SetColorHandler":149,"./cmd/SplitLaneHandler":150,"./cmd/UpdateCanvasRootHandler":151,"./cmd/UpdateFlowNodeRefsHandler":152,"./cmd/UpdateModdlePropertiesHandler":153,"./cmd/UpdatePropertiesHandler":154,"diagram-js/lib/features/modeling/Modeling":274,"inherits":385}],106:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15073,7 +13965,7 @@ function isAligned(orientation) {
   return ALIGNMENTS.indexOf(orientation) !== -1;
 }
 
-},{"../../../util/LabelUtil":193,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/Math":381,"inherits":392}],114:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/Math":374,"inherits":385}],107:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15116,7 +14008,7 @@ function AppendBehavior(eventBus, elementFactory, bpmnRules) {
 (0, _inherits.default)(AppendBehavior, _CommandInterceptor.default);
 AppendBehavior.$inject = ['eventBus', 'elementFactory', 'bpmnRules'];
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],115:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],108:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15154,7 +14046,7 @@ function AssociationBehavior(injector, modeling) {
 (0, _inherits.default)(AssociationBehavior, _CommandInterceptor.default);
 AssociationBehavior.$inject = ['injector', 'modeling'];
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392,"min-dash":600}],116:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385,"min-dash":593}],109:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15247,7 +14139,7 @@ function shouldReplace(shape, host) {
   return !(0, _LabelUtil.isLabel)(shape) && (0, _ModelingUtil.isAny)(shape, ['bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent']) && !!host;
 }
 
-},{"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"../util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],117:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"../util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],110:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15308,7 +14200,7 @@ function BoundaryEventBehavior(eventBus, modeling) {
 BoundaryEventBehavior.$inject = ['eventBus', 'modeling'];
 (0, _inherits.default)(BoundaryEventBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392,"min-dash":600}],118:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385,"min-dash":593}],111:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15342,7 +14234,7 @@ function CreateBehavior(injector) {
 CreateBehavior.$inject = ['injector'];
 (0, _inherits.default)(CreateBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"../util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],119:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],112:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15380,7 +14272,7 @@ function CreateDataObjectBehavior(eventBus, bpmnFactory, moddle) {
 CreateDataObjectBehavior.$inject = ['eventBus', 'bpmnFactory', 'moddle'];
 (0, _inherits.default)(CreateDataObjectBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],120:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],113:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15602,7 +14494,7 @@ function findParticipant(elements) {
   });
 }
 
-},{"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/Elements":374,"inherits":392,"min-dash":600}],121:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/Elements":367,"inherits":385,"min-dash":593}],114:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15735,7 +14627,7 @@ function ifDataInputAssociation(fn) {
   };
 }
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/util/Collections":372,"inherits":392,"min-dash":600}],122:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/util/Collections":365,"inherits":385,"min-dash":593}],115:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15905,7 +14797,7 @@ function getAncestor(element, type) {
   }
 }
 
-},{"../../../util/ModelUtil":194,"../cmd/UpdateSemanticParentHandler":162,"../util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],123:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../cmd/UpdateSemanticParentHandler":155,"../util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],116:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16004,7 +14896,7 @@ function DeleteLaneBehavior(eventBus, modeling, spaceTool) {
 DeleteLaneBehavior.$inject = ['eventBus', 'modeling', 'spaceTool'];
 (0, _inherits.default)(DeleteLaneBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"../util/LaneUtil":164,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/util/Elements":374,"inherits":392}],124:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/LaneUtil":157,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/util/Elements":367,"inherits":385}],117:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16093,7 +14985,7 @@ function includes(array, item) {
   return array.indexOf(item) !== -1;
 }
 
-},{"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],125:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],118:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16270,7 +15162,7 @@ function copy(obj) {
   return (0, _minDash.assign)({}, obj);
 }
 
-},{"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/LineIntersection":380,"inherits":392,"min-dash":600}],126:[function(require,module,exports){
+},{"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/LineIntersection":373,"inherits":385,"min-dash":593}],119:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16347,7 +15239,7 @@ function isSequenceFlow(connection) {
   return (0, _ModelUtil.is)(connection, 'bpmn:SequenceFlow');
 }
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],127:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],120:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16432,7 +15324,7 @@ function FixHoverBehavior(elementRegistry, eventBus, canvas) {
 
 FixHoverBehavior.$inject = ['elementRegistry', 'eventBus', 'canvas'];
 
-},{"../../../util/ModelUtil":194,"../util/LaneUtil":164,"../util/ModelingUtil":165}],128:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/LaneUtil":157,"../util/ModelingUtil":158}],121:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16612,7 +15504,7 @@ function GroupBehavior(bpmnFactory, canvas, elementRegistry, eventBus, injector,
 GroupBehavior.$inject = ['bpmnFactory', 'canvas', 'elementRegistry', 'eventBus', 'injector', 'moddleCopy'];
 (0, _inherits.default)(GroupBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"./util/CategoryUtil":147,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/util/Collections":372,"inherits":392}],129:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"./util/CategoryUtil":140,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/util/Collections":365,"inherits":385}],122:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16680,7 +15572,7 @@ function getDistance(p1, p2) {
   return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 }
 
-},{"./util/LineIntersect":151,"diagram-js/lib/layout/LayoutUtil":359}],130:[function(require,module,exports){
+},{"./util/LineIntersect":144,"diagram-js/lib/layout/LayoutUtil":352}],123:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16721,7 +15613,7 @@ function IsHorizontalFix(eventBus) {
 IsHorizontalFix.$inject = ['eventBus'];
 (0, _inherits.default)(IsHorizontalFix, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"../util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],131:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],124:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17041,7 +15933,7 @@ function getNearestLine(point, lines) {
   return sorted[0].line;
 }
 
-},{"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"../../label-editing/LabelUtil":105,"./util/GeometricUtil":148,"./util/LabelLayoutUtil":149,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/AttachUtil":370,"diagram-js/lib/util/PositionUtil":384,"inherits":392,"min-dash":600}],132:[function(require,module,exports){
+},{"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"../../label-editing/LabelUtil":98,"./util/GeometricUtil":141,"./util/LabelLayoutUtil":142,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/AttachUtil":363,"diagram-js/lib/util/PositionUtil":377,"inherits":385,"min-dash":593}],125:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17079,7 +15971,7 @@ function ModelingFeedback(eventBus, tooltips, translate) {
 
 ModelingFeedback.$inject = ['eventBus', 'tooltips', 'translate'];
 
-},{"../../../util/ModelUtil":194}],133:[function(require,module,exports){
+},{"../../../util/ModelUtil":187}],126:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17145,7 +16037,7 @@ function getNewWaypoints(inWaypoints, outWaypoints) {
   }
 }
 
-},{"../../../util/ModelUtil":194,"./util/LineIntersect":151,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],134:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"./util/LineIntersect":144,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],127:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17194,7 +16086,7 @@ function RemoveParticipantBehavior(eventBus, modeling) {
 RemoveParticipantBehavior.$inject = ['eventBus', 'modeling'];
 (0, _inherits.default)(RemoveParticipantBehavior, _CommandInterceptor.default);
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],135:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17361,7 +16253,7 @@ function ReplaceConnectionBehavior(eventBus, modeling, bpmnRules, injector) {
 (0, _inherits.default)(ReplaceConnectionBehavior, _CommandInterceptor.default);
 ReplaceConnectionBehavior.$inject = ['eventBus', 'modeling', 'bpmnRules', 'injector'];
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392,"min-dash":600}],136:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385,"min-dash":593}],129:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17460,7 +16352,7 @@ ReplaceElementBehaviour.prototype.replaceElements = function (elements, newEleme
 
 ReplaceElementBehaviour.$inject = ['bpmnReplace', 'bpmnRules', 'elementRegistry', 'injector', 'modeling', 'selection'];
 
-},{"../../../util/DiUtil":192,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392,"min-dash":600}],137:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385,"min-dash":593}],130:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17530,7 +16422,7 @@ function ResizeBehavior(eventBus) {
 
 ResizeBehavior.$inject = ['eventBus'];
 
-},{"../../../util/DiUtil":192,"../../../util/ModelUtil":194,"./util/ResizeUtil":152}],138:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"../../../util/ModelUtil":187,"./util/ResizeUtil":145}],131:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17589,7 +16481,7 @@ function ResizeLaneBehavior(eventBus, modeling) {
 
 ResizeLaneBehavior.$inject = ['eventBus', 'modeling'];
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/Mouse":382}],139:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/Mouse":375}],132:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17746,7 +16638,7 @@ function hasAnyEventDefinition(element, types) {
   });
 }
 
-},{"../../../util/DiUtil":192,"../../../util/ModelUtil":194,"../util/ModelingUtil":165,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/util/Collections":372,"inherits":392,"min-dash":600}],140:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"../../../util/ModelUtil":187,"../util/ModelingUtil":158,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/util/Collections":365,"inherits":385,"min-dash":593}],133:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17864,7 +16756,7 @@ function findResizedLane(lanes, resizeStart) {
   }
 }
 
-},{"../../../util/DiUtil":192,"../../../util/ModelUtil":194,"../util/LaneUtil":164,"./ResizeBehavior":137,"min-dash":600}],141:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"../../../util/ModelUtil":187,"../util/LaneUtil":157,"./ResizeBehavior":130,"min-dash":593}],134:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17915,7 +16807,7 @@ function getStartEventPosition(shape) {
   };
 }
 
-},{"../../../util/DiUtil.js":192,"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],142:[function(require,module,exports){
+},{"../../../util/DiUtil.js":185,"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],135:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18036,7 +16928,7 @@ function filterVisible(elements) {
   });
 }
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"diagram-js/lib/features/resize/ResizeUtil":327,"inherits":392}],143:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"diagram-js/lib/features/resize/ResizeUtil":320,"inherits":385}],136:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18097,7 +16989,7 @@ function UnclaimIdBehavior(canvas, injector, moddle, modeling) {
 (0, _inherits.default)(UnclaimIdBehavior, _CommandInterceptor.default);
 UnclaimIdBehavior.$inject = ['canvas', 'injector', 'moddle', 'modeling'];
 
-},{"../../../util/DiUtil":192,"../../../util/LabelUtil":193,"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],144:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"../../../util/LabelUtil":186,"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],137:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18150,7 +17042,7 @@ function isDefaultFlow(connection, source) {
   return sourceBo.get('default') === sequenceFlow;
 }
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],145:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],138:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18274,7 +17166,7 @@ function UpdateContext() {
   };
 }
 
-},{"../../../util/ModelUtil":194,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392}],146:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385}],139:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18388,7 +17280,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./AdaptiveLabelPositioningBehavior":113,"./AppendBehavior":114,"./AssociationBehavior":115,"./AttachEventBehavior":116,"./BoundaryEventBehavior":117,"./CreateBehavior":118,"./CreateDataObjectBehavior":119,"./CreateParticipantBehavior":120,"./DataInputAssociationBehavior":121,"./DataStoreBehavior":122,"./DeleteLaneBehavior":123,"./DetachEventBehavior":124,"./DropOnFlowBehavior":125,"./EventBasedGatewayBehavior":126,"./FixHoverBehavior":127,"./GroupBehavior":128,"./ImportDockingFix":129,"./IsHorizontalFix":130,"./LabelBehavior":131,"./ModelingFeedback":132,"./RemoveElementBehavior":133,"./RemoveParticipantBehavior":134,"./ReplaceConnectionBehavior":135,"./ReplaceElementBehaviour":136,"./ResizeBehavior":137,"./ResizeLaneBehavior":138,"./RootElementReferenceBehavior":139,"./SpaceToolBehavior":140,"./SubProcessStartEventBehavior":141,"./ToggleElementCollapseBehaviour":142,"./UnclaimIdBehavior":143,"./UnsetDefaultFlowBehavior":144,"./UpdateFlowNodeRefsBehavior":145}],147:[function(require,module,exports){
+},{"./AdaptiveLabelPositioningBehavior":106,"./AppendBehavior":107,"./AssociationBehavior":108,"./AttachEventBehavior":109,"./BoundaryEventBehavior":110,"./CreateBehavior":111,"./CreateDataObjectBehavior":112,"./CreateParticipantBehavior":113,"./DataInputAssociationBehavior":114,"./DataStoreBehavior":115,"./DeleteLaneBehavior":116,"./DetachEventBehavior":117,"./DropOnFlowBehavior":118,"./EventBasedGatewayBehavior":119,"./FixHoverBehavior":120,"./GroupBehavior":121,"./ImportDockingFix":122,"./IsHorizontalFix":123,"./LabelBehavior":124,"./ModelingFeedback":125,"./RemoveElementBehavior":126,"./RemoveParticipantBehavior":127,"./ReplaceConnectionBehavior":128,"./ReplaceElementBehaviour":129,"./ResizeBehavior":130,"./ResizeLaneBehavior":131,"./RootElementReferenceBehavior":132,"./SpaceToolBehavior":133,"./SubProcessStartEventBehavior":134,"./ToggleElementCollapseBehaviour":135,"./UnclaimIdBehavior":136,"./UnsetDefaultFlowBehavior":137,"./UpdateFlowNodeRefsBehavior":138}],140:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18420,7 +17312,7 @@ function createCategoryValue(definitions, bpmnFactory) {
   return categoryValue;
 }
 
-},{"../../../../util/ModelUtil":194,"diagram-js/lib/util/Collections":372}],148:[function(require,module,exports){
+},{"../../../../util/ModelUtil":187,"diagram-js/lib/util/Collections":365}],141:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18553,7 +17445,7 @@ function getDistancePointPoint(point1, point2) {
   });
 }
 
-},{}],149:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18756,7 +17648,7 @@ function getRelativeFootPosition(line, foot) {
   return length === 0 ? 0 : lengthToFoot / length;
 }
 
-},{"./GeometricUtil":148,"./LineAttachmentUtil":150,"diagram-js/lib/layout/LayoutUtil":359}],150:[function(require,module,exports){
+},{"./GeometricUtil":141,"./LineAttachmentUtil":143,"diagram-js/lib/layout/LayoutUtil":352}],143:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18971,7 +17863,7 @@ function pointsEqual(p1, p2) {
   return abs(p1.x - p2.x) <= EQUAL_THRESHOLD && abs(p1.y - p2.y) <= EQUAL_THRESHOLD;
 }
 
-},{}],151:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19012,7 +17904,7 @@ function lineIntersect(l1s, l1e, l2s, l2e) {
   };
 }
 
-},{}],152:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19133,7 +18025,7 @@ function getParticipantResizeConstraints(laneShape, resizeDirection, balanced) {
   };
 }
 
-},{"../../../../util/ModelUtil":194,"../../../modeling/util/LaneUtil":164,"../ResizeBehavior":137,"diagram-js/lib/layout/LayoutUtil":359}],153:[function(require,module,exports){
+},{"../../../../util/ModelUtil":187,"../../../modeling/util/LaneUtil":157,"../ResizeBehavior":130,"diagram-js/lib/layout/LayoutUtil":352}],146:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19219,7 +18111,7 @@ AddLaneHandler.prototype.preExecute = function (context) {
   }, laneParent);
 };
 
-},{"../util/LaneUtil":164,"diagram-js/lib/util/Elements":374,"min-dash":600}],154:[function(require,module,exports){
+},{"../util/LaneUtil":157,"diagram-js/lib/util/Elements":367,"min-dash":593}],147:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19263,7 +18155,7 @@ IdClaimHandler.prototype.revert = function (context) {
   }
 };
 
-},{}],155:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19374,7 +18266,7 @@ ResizeLaneHandler.prototype.resizeSpace = function (shape, newBounds) {
   }
 };
 
-},{"../../../util/ModelUtil":194,"../util/LaneUtil":164,"diagram-js/lib/features/resize/ResizeUtil":327,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/Elements":374}],156:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/LaneUtil":157,"diagram-js/lib/features/resize/ResizeUtil":320,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/Elements":367}],149:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19423,7 +18315,7 @@ SetColorHandler.prototype.postExecute = function (context) {
   });
 };
 
-},{"min-dash":600}],157:[function(require,module,exports){
+},{"min-dash":593}],150:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19498,7 +18390,7 @@ SplitLaneHandler.prototype.preExecute = function (context) {
   }
 };
 
-},{"../util/LaneUtil":164}],158:[function(require,module,exports){
+},{"../util/LaneUtil":157}],151:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19560,7 +18452,7 @@ UpdateCanvasRootHandler.prototype.revert = function (context) {
   // return [ newRoot, oldRoot ];
 };
 
-},{"diagram-js/lib/util/Collections":372}],159:[function(require,module,exports){
+},{"diagram-js/lib/util/Collections":365}],152:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19717,7 +18609,7 @@ UpdateFlowNodeRefsHandler.prototype.revert = function (context) {
   // return [ ... ];
 };
 
-},{"../../../util/ModelUtil":194,"../util/LaneUtil":164,"diagram-js/lib/layout/LayoutUtil":359,"diagram-js/lib/util/Collections":372}],160:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"../util/LaneUtil":157,"diagram-js/lib/layout/LayoutUtil":352,"diagram-js/lib/util/Collections":365}],153:[function(require,module,exports){
 'use strict';
 
 var reduce = require('min-dash').reduce,
@@ -19809,7 +18701,7 @@ function getAllDataObjectReferences(dataObject, elementRegistry) {
     );
   });
 }
-},{"../../../util/ModelUtil":194,"min-dash":600}],161:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"min-dash":593}],154:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20008,7 +18900,7 @@ function unwrapBusinessObjects(properties) {
   return unwrappedProps;
 }
 
-},{"../../../util/ModelUtil":194,"min-dash":600}],162:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"min-dash":593}],155:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20046,7 +18938,7 @@ UpdateSemanticParentHandler.prototype.revert = function (context) {
   this._bpmnUpdater.updateDiParent(dataStoreBo.di, oldDiParent);
 };
 
-},{}],163:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20104,7 +18996,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../di-ordering":88,"../ordering":167,"../replace":177,"../rules":179,"./BpmnFactory":108,"./BpmnLayouter":109,"./BpmnUpdater":110,"./ElementFactory":111,"./Modeling":112,"./behavior":146,"diagram-js/lib/command":205,"diagram-js/lib/features/attach-support":219,"diagram-js/lib/features/change-support":236,"diagram-js/lib/features/label-support":278,"diagram-js/lib/features/selection":337,"diagram-js/lib/features/space-tool":347,"diagram-js/lib/features/tooltips":351,"diagram-js/lib/layout/CroppingConnectionDocking":358}],164:[function(require,module,exports){
+},{"../di-ordering":81,"../ordering":160,"../replace":170,"../rules":172,"./BpmnFactory":101,"./BpmnLayouter":102,"./BpmnUpdater":103,"./ElementFactory":104,"./Modeling":105,"./behavior":139,"diagram-js/lib/command":198,"diagram-js/lib/features/attach-support":212,"diagram-js/lib/features/change-support":229,"diagram-js/lib/features/label-support":271,"diagram-js/lib/features/selection":330,"diagram-js/lib/features/space-tool":340,"diagram-js/lib/features/tooltips":344,"diagram-js/lib/layout/CroppingConnectionDocking":351}],157:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20245,7 +19137,7 @@ function computeLanesResize(shape, newBounds) {
   return resizeNeeded;
 }
 
-},{"../../../util/ModelUtil":194,"./ModelingUtil":165,"diagram-js/lib/features/resize/ResizeUtil":327,"diagram-js/lib/layout/LayoutUtil":359}],165:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"./ModelingUtil":158,"diagram-js/lib/features/resize/ResizeUtil":320,"diagram-js/lib/layout/LayoutUtil":352}],158:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20295,7 +19187,7 @@ function getParent(element, anyType) {
   return null;
 }
 
-},{"../../../util/ModelUtil":194,"min-dash":600}],166:[function(require,module,exports){
+},{"../../../util/ModelUtil":187,"min-dash":593}],159:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20472,7 +19364,7 @@ function BpmnOrderingProvider(eventBus, canvas, translate) {
 BpmnOrderingProvider.$inject = ['eventBus', 'canvas', 'translate'];
 (0, _inherits.default)(BpmnOrderingProvider, _OrderingProvider.default);
 
-},{"../modeling/util/ModelingUtil":165,"diagram-js/lib/features/ordering/OrderingProvider":311,"inherits":392,"min-dash":600}],167:[function(require,module,exports){
+},{"../modeling/util/ModelingUtil":158,"diagram-js/lib/features/ordering/OrderingProvider":304,"inherits":385,"min-dash":593}],160:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20493,7 +19385,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnOrderingProvider":166,"diagram-js/lib/i18n/translate":355}],168:[function(require,module,exports){
+},{"./BpmnOrderingProvider":159,"diagram-js/lib/i18n/translate":348}],161:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20656,7 +19548,7 @@ PaletteProvider.prototype.getPaletteEntries = function (element) {
   return actions;
 };
 
-},{"min-dash":600}],169:[function(require,module,exports){
+},{"min-dash":593}],162:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20689,7 +19581,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./PaletteProvider":168,"diagram-js/lib/features/create":250,"diagram-js/lib/features/global-connect":258,"diagram-js/lib/features/hand-tool":266,"diagram-js/lib/features/lasso-tool":280,"diagram-js/lib/features/palette":317,"diagram-js/lib/features/space-tool":347,"diagram-js/lib/i18n/translate":355}],170:[function(require,module,exports){
+},{"./PaletteProvider":161,"diagram-js/lib/features/create":243,"diagram-js/lib/features/global-connect":251,"diagram-js/lib/features/hand-tool":259,"diagram-js/lib/features/lasso-tool":273,"diagram-js/lib/features/palette":310,"diagram-js/lib/features/space-tool":340,"diagram-js/lib/i18n/translate":348}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21220,7 +20112,7 @@ ReplaceMenuProvider.prototype._getAdHocEntry = function (element) {
   return adHocEntry;
 };
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194,"../replace/ReplaceOptions":176,"./util/TypeUtil":172,"min-dash":600}],171:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187,"../replace/ReplaceOptions":169,"./util/TypeUtil":165,"min-dash":593}],164:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21243,7 +20135,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../replace":177,"./ReplaceMenuProvider":170,"diagram-js/lib/features/popup-menu":319}],172:[function(require,module,exports){
+},{"../replace":170,"./ReplaceMenuProvider":163,"diagram-js/lib/features/popup-menu":312}],165:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21277,7 +20169,7 @@ function isDifferentType(element) {
   };
 }
 
-},{"../../../util/DiUtil":192,"../../../util/ModelUtil":194}],173:[function(require,module,exports){
+},{"../../../util/DiUtil":185,"../../../util/ModelUtil":187}],166:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21390,7 +20282,7 @@ function BpmnReplacePreview(eventBus, elementRegistry, elementFactory, canvas, p
 BpmnReplacePreview.$inject = ['eventBus', 'elementRegistry', 'elementFactory', 'canvas', 'previewSupport'];
 (0, _inherits.default)(BpmnReplacePreview, _CommandInterceptor.default);
 
-},{"css.escape":197,"diagram-js/lib/command/CommandInterceptor":203,"inherits":392,"min-dash":600,"min-dom":601,"tiny-svg":612}],174:[function(require,module,exports){
+},{"css.escape":190,"diagram-js/lib/command/CommandInterceptor":196,"inherits":385,"min-dash":593,"min-dom":594,"tiny-svg":605}],167:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21411,7 +20303,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnReplacePreview":173,"diagram-js/lib/features/preview-support":321}],175:[function(require,module,exports){
+},{"./BpmnReplacePreview":166,"diagram-js/lib/features/preview-support":314}],168:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21641,7 +20533,7 @@ function intersection(a1, a2) {
   });
 }
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194,"../copy-paste/ModdleCopy":85,"../modeling/util/ModelingUtil":165,"min-dash":600}],176:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187,"../copy-paste/ModdleCopy":78,"../modeling/util/ModelingUtil":158,"min-dash":593}],169:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22395,7 +21287,7 @@ var PARTICIPANT = [{
 }];
 exports.PARTICIPANT = PARTICIPANT;
 
-},{}],177:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22419,7 +21311,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../copy-paste":86,"./BpmnReplace":175,"diagram-js/lib/features/replace":323,"diagram-js/lib/features/selection":337}],178:[function(require,module,exports){
+},{"../copy-paste":79,"./BpmnReplace":168,"diagram-js/lib/features/replace":316,"diagram-js/lib/features/selection":330}],171:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23162,7 +22054,7 @@ function getRootElement(element) {
   return (0, _ModelingUtil.getParent)(element, 'bpmn:Process') || (0, _ModelingUtil.getParent)(element, 'bpmn:Collaboration');
 }
 
-},{"../../util/DiUtil":192,"../../util/LabelUtil":193,"../../util/ModelUtil":194,"../modeling/util/ModelingUtil":165,"../snapping/BpmnSnappingUtil":184,"diagram-js/lib/features/rules/RuleProvider":329,"inherits":392,"min-dash":600}],179:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/LabelUtil":186,"../../util/ModelUtil":187,"../modeling/util/ModelingUtil":158,"../snapping/BpmnSnappingUtil":177,"diagram-js/lib/features/rules/RuleProvider":322,"inherits":385,"min-dash":593}],172:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23183,7 +22075,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnRules":178,"diagram-js/lib/features/rules":331}],180:[function(require,module,exports){
+},{"./BpmnRules":171,"diagram-js/lib/features/rules":324}],173:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23300,7 +22192,7 @@ function matchAndSplit(text, pattern) {
   return tokens;
 }
 
-},{"../label-editing/LabelUtil":105,"min-dash":600}],181:[function(require,module,exports){
+},{"../label-editing/LabelUtil":98,"min-dash":593}],174:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23321,7 +22213,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnSearchProvider":180,"diagram-js/lib/features/search-pad":333}],182:[function(require,module,exports){
+},{"./BpmnSearchProvider":173,"diagram-js/lib/features/search-pad":326}],175:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23509,7 +22401,7 @@ function isReverse(context) {
   return hover && source && hover === source;
 }
 
-},{"../../util/ModelUtil":194,"../modeling/util/ModelingUtil":165,"diagram-js/lib/features/keyboard/KeyboardUtil":275,"diagram-js/lib/features/snapping/SnapUtil":341,"diagram-js/lib/layout/LayoutUtil":359,"min-dash":600}],183:[function(require,module,exports){
+},{"../../util/ModelUtil":187,"../modeling/util/ModelingUtil":158,"diagram-js/lib/features/keyboard/KeyboardUtil":268,"diagram-js/lib/features/snapping/SnapUtil":334,"diagram-js/lib/layout/LayoutUtil":352,"min-dash":593}],176:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23719,7 +22611,7 @@ function getDockingSnapOrigin(docking, isMove, event) {
   };
 }
 
-},{"../../util/DiUtil":192,"../../util/ModelUtil":194,"./BpmnSnappingUtil":184,"diagram-js/lib/features/snapping/CreateMoveSnapping":338,"diagram-js/lib/features/snapping/SnapUtil":341,"diagram-js/lib/layout/LayoutUtil":359,"inherits":392,"min-dash":600}],184:[function(require,module,exports){
+},{"../../util/DiUtil":185,"../../util/ModelUtil":187,"./BpmnSnappingUtil":177,"diagram-js/lib/features/snapping/CreateMoveSnapping":331,"diagram-js/lib/features/snapping/SnapUtil":334,"diagram-js/lib/layout/LayoutUtil":352,"inherits":385,"min-dash":593}],177:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23739,7 +22631,7 @@ function getBoundaryAttachment(position, targetBounds) {
   }
 }
 
-},{"diagram-js/lib/layout/LayoutUtil":359}],185:[function(require,module,exports){
+},{"diagram-js/lib/layout/LayoutUtil":352}],178:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23763,7 +22655,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnConnectSnapping":182,"./BpmnCreateMoveSnapping":183,"diagram-js/lib/features/snapping":343}],186:[function(require,module,exports){
+},{"./BpmnConnectSnapping":175,"./BpmnCreateMoveSnapping":176,"diagram-js/lib/features/snapping":336}],179:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24059,7 +22951,7 @@ function isFrameElement(semantic) {
   return (0, _ModelUtil.is)(semantic, 'bpmn:Group');
 }
 
-},{"../features/label-editing/LabelUtil":105,"../util/DiUtil":192,"../util/LabelUtil":193,"../util/ModelUtil":194,"./Util":189,"diagram-js/lib/layout/LayoutUtil":359,"min-dash":600}],187:[function(require,module,exports){
+},{"../features/label-editing/LabelUtil":98,"../util/DiUtil":185,"../util/LabelUtil":186,"../util/ModelUtil":187,"./Util":182,"diagram-js/lib/layout/LayoutUtil":352,"min-dash":593}],180:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24484,7 +23376,7 @@ function BpmnTreeWalker(handler, translate) {
   };
 }
 
-},{"./Util":189,"min-dash":600,"object-refs":605}],188:[function(require,module,exports){
+},{"./Util":182,"min-dash":593,"object-refs":598}],181:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24580,7 +23472,7 @@ function importBpmnDiagram(diagram, definitions, bpmnDiagram) {
   });
 }
 
-},{"./BpmnTreeWalker":187}],189:[function(require,module,exports){
+},{"./BpmnTreeWalker":180}],182:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24596,7 +23488,7 @@ function elementToString(e) {
   return '<' + e.$type + (e.id ? ' id="' + e.id : '') + '" />';
 }
 
-},{}],190:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24616,7 +23508,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnImporter":186,"diagram-js/lib/i18n/translate":355}],191:[function(require,module,exports){
+},{"./BpmnImporter":179,"diagram-js/lib/i18n/translate":348}],184:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24664,7 +23556,7 @@ function wrapForCompatibility(api) {
   };
 }
 
-},{"min-dash":600}],192:[function(require,module,exports){
+},{"min-dash":593}],185:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24733,7 +23625,7 @@ function hasCompensateEventDefinition(element) {
   return hasEventDefinition(element, 'bpmn:CompensateEventDefinition');
 }
 
-},{"./ModelUtil":194,"min-dash":600}],193:[function(require,module,exports){
+},{"./ModelUtil":187,"min-dash":593}],186:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24886,7 +23778,7 @@ function isLabel(element) {
   return element && !!element.labelTarget;
 }
 
-},{"./ModelUtil":194,"min-dash":600}],194:[function(require,module,exports){
+},{"./ModelUtil":187,"min-dash":593}],187:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24920,7 +23812,7 @@ function getBusinessObject(element) {
   return element && element.businessObject || element;
 }
 
-},{}],195:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24965,7 +23857,7 @@ function open() {
   document.body.appendChild(lightbox);
 }
 
-},{"min-dom":601}],196:[function(require,module,exports){
+},{"min-dom":594}],189:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27610,7 +26502,7 @@ function simple(additionalPackages, options) {
 var _default = simple;
 exports.default = _default;
 
-},{"min-dash":600,"moddle":604,"moddle-xml":603}],197:[function(require,module,exports){
+},{"min-dash":593,"moddle":597,"moddle-xml":596}],190:[function(require,module,exports){
 (function (global){(function (){
 /*! https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
 ;(function(root, factory) {
@@ -27720,7 +26612,7 @@ exports.default = _default;
 }));
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],198:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27741,7 +26633,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./lib/DirectEditing":199,"diagram-js/lib/features/interaction-events":270}],199:[function(require,module,exports){
+},{"./lib/DirectEditing":192,"diagram-js/lib/features/interaction-events":263}],192:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27914,7 +26806,7 @@ DirectEditing.prototype.activate = function (element) {
   return !!context;
 };
 
-},{"./TextBox":200,"min-dash":600}],200:[function(require,module,exports){
+},{"./TextBox":193,"min-dash":593}],193:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28290,7 +27182,7 @@ TextBox.prototype.setSelection = function (container, offset) {
   selection.addRange(range);
 };
 
-},{"min-dash":600,"min-dom":601}],201:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594}],194:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28307,7 +27199,7 @@ var _Diagram = _interopRequireDefault(require("./lib/Diagram"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./lib/Diagram":202}],202:[function(require,module,exports){
+},{"./lib/Diagram":195}],195:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28505,7 +27397,7 @@ Diagram.prototype.clear = function () {
   this.get('eventBus').fire('diagram.clear');
 };
 
-},{"./core":211,"didi":389}],203:[function(require,module,exports){
+},{"./core":204,"didi":382}],196:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28637,7 +27529,7 @@ var hooks = ['canExecute', 'preExecute', 'preExecuted', 'execute', 'executed', '
   };
 });
 
-},{"min-dash":600}],204:[function(require,module,exports){
+},{"min-dash":593}],197:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29129,7 +28021,7 @@ CommandStack.prototype._setHandler = function (command, handler) {
   this._handlerMap[command] = handler;
 };
 
-},{"min-dash":600}],205:[function(require,module,exports){
+},{"min-dash":593}],198:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29146,7 +28038,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./CommandStack":204}],206:[function(require,module,exports){
+},{"./CommandStack":197}],199:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30121,7 +29013,7 @@ Canvas.prototype.resized = function () {
   this._eventBus.fire('canvas.resized');
 };
 
-},{"../util/Collections":372,"../util/Elements":374,"min-dash":600,"tiny-svg":612}],207:[function(require,module,exports){
+},{"../util/Collections":365,"../util/Elements":367,"min-dash":593,"tiny-svg":605}],200:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30175,7 +29067,7 @@ ElementFactory.prototype.create = function (type, attrs) {
   return (0, _model.create)(type, attrs);
 };
 
-},{"../model":361,"min-dash":600}],208:[function(require,module,exports){
+},{"../model":354,"min-dash":593}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30412,7 +29304,7 @@ ElementRegistry.prototype._validateId = function (id) {
   }
 };
 
-},{"tiny-svg":612}],209:[function(require,module,exports){
+},{"tiny-svg":605}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30893,7 +29785,7 @@ function invokeFunction(fn, args) {
   return fn.apply(null, args);
 }
 
-},{"min-dash":600}],210:[function(require,module,exports){
+},{"min-dash":593}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31117,7 +30009,7 @@ function prependTo(newNode, parentNode, siblingNode) {
   parentNode.insertBefore(newNode, node);
 }
 
-},{"../util/Elements":374,"../util/GraphicsUtil":378,"../util/SvgTransformUtil":387,"min-dash":600,"min-dom":601,"tiny-svg":612}],211:[function(require,module,exports){
+},{"../util/Elements":367,"../util/GraphicsUtil":371,"../util/SvgTransformUtil":380,"min-dash":593,"min-dom":594,"tiny-svg":605}],204:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31150,7 +30042,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../draw":215,"./Canvas":206,"./ElementFactory":207,"./ElementRegistry":208,"./EventBus":209,"./GraphicsFactory":210}],212:[function(require,module,exports){
+},{"../draw":208,"./Canvas":199,"./ElementFactory":200,"./ElementRegistry":201,"./EventBus":202,"./GraphicsFactory":203}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31245,7 +30137,7 @@ BaseRenderer.prototype.getShapePath = function () {};
 
 BaseRenderer.prototype.getConnectionPath = function () {};
 
-},{}],213:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31353,7 +30245,7 @@ DefaultRenderer.prototype.getConnectionPath = function getConnectionPath(connect
 
 DefaultRenderer.$inject = ['eventBus', 'styles'];
 
-},{"../util/Elements":374,"../util/RenderUtil":386,"./BaseRenderer":212,"inherits":392,"tiny-svg":612}],214:[function(require,module,exports){
+},{"../util/Elements":367,"../util/RenderUtil":379,"./BaseRenderer":205,"inherits":385,"tiny-svg":605}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31427,7 +30319,7 @@ function Styles() {
   };
 }
 
-},{"min-dash":600}],215:[function(require,module,exports){
+},{"min-dash":593}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31448,7 +30340,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./DefaultRenderer":213,"./Styles":214}],216:[function(require,module,exports){
+},{"./DefaultRenderer":206,"./Styles":207}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31612,7 +30504,7 @@ AlignElements.prototype.trigger = function (elements, type) {
   modeling.alignElements(sortedElements, alignment);
 };
 
-},{"min-dash":600}],217:[function(require,module,exports){
+},{"min-dash":593}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31630,7 +30522,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./AlignElements":216}],218:[function(require,module,exports){
+},{"./AlignElements":209}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31912,7 +30804,7 @@ function includes(array, item) {
   return array.indexOf(item) !== -1;
 }
 
-},{"../../command/CommandInterceptor":203,"../../util/AttachUtil":370,"../../util/Removal":385,"inherits":392,"min-dash":600}],219:[function(require,module,exports){
+},{"../../command/CommandInterceptor":196,"../../util/AttachUtil":363,"../../util/Removal":378,"inherits":385,"min-dash":593}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31933,7 +30825,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../rules":331,"./AttachSupport":218}],220:[function(require,module,exports){
+},{"../rules":324,"./AttachSupport":211}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32017,7 +30909,7 @@ function getNewShapePosition(source, element, hints) {
   };
 }
 
-},{"../../layout/LayoutUtil":359,"./AutoPlaceUtil":222}],221:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"./AutoPlaceUtil":215}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32039,7 +30931,7 @@ function AutoPlaceSelectionBehavior(eventBus, selection) {
 
 AutoPlaceSelectionBehavior.$inject = ['eventBus', 'selection'];
 
-},{}],222:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32311,7 +31203,7 @@ function noneFilter() {
   return true;
 }
 
-},{"../../layout/LayoutUtil":359,"min-dash":600}],223:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"min-dash":593}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32332,7 +31224,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./AutoPlace":220,"./AutoPlaceSelectionBehavior":221}],224:[function(require,module,exports){
+},{"./AutoPlace":213,"./AutoPlaceSelectionBehavior":214}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32601,7 +31493,7 @@ function getResizeDirections(oldBounds, newBounds) {
   return directions;
 }
 
-},{"../../command/CommandInterceptor":203,"../../layout/LayoutUtil":359,"../../util/Elements":374,"inherits":392,"min-dash":600}],225:[function(require,module,exports){
+},{"../../command/CommandInterceptor":196,"../../layout/LayoutUtil":352,"../../util/Elements":367,"inherits":385,"min-dash":593}],218:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32642,7 +31534,7 @@ AutoResizeProvider.prototype.canResize = function (elements, target) {
   return false;
 };
 
-},{"../rules/RuleProvider":329,"inherits":392}],226:[function(require,module,exports){
+},{"../rules/RuleProvider":322,"inherits":385}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32773,7 +31665,7 @@ AutoScroll.prototype._toBorderPoint = function (event) {
   };
 };
 
-},{"../../util/Event":376,"min-dash":600}],227:[function(require,module,exports){
+},{"../../util/Event":369,"min-dash":593}],220:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32794,7 +31686,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"./AutoScroll":226}],228:[function(require,module,exports){
+},{"../dragging":247,"./AutoScroll":219}],221:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33008,7 +31900,7 @@ function isReverse(context) {
   }
 }
 
-},{"../../layout/LayoutUtil":359}],229:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352}],222:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33187,7 +32079,7 @@ function BendpointMovePreview(bendpointMove, injector, eventBus, canvas) {
 
 BendpointMovePreview.$inject = ['bendpointMove', 'injector', 'eventBus', 'canvas'];
 
-},{"../../util/SvgTransformUtil":387,"./BendpointMove":228,"./BendpointUtil":231,"tiny-svg":612}],230:[function(require,module,exports){
+},{"../../util/SvgTransformUtil":380,"./BendpointMove":221,"./BendpointUtil":224,"tiny-svg":605}],223:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33384,7 +32276,7 @@ function BendpointSnapping(eventBus) {
 
 BendpointSnapping.$inject = ['eventBus'];
 
-},{"../snapping/SnapUtil":341,"min-dash":600}],231:[function(require,module,exports){
+},{"../snapping/SnapUtil":334,"min-dash":593}],224:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33524,7 +32416,7 @@ function calculateHitWidth(segmentStart, segmentEnd, alignment) {
   return alignment === 'h' ? calculateSegmentMoveRegion(segmentLengthXAxis) : calculateSegmentMoveRegion(segmentLengthYAxis);
 }
 
-},{"../../util/Event":376,"../../util/Geometry":377,"../../util/LineIntersection":380,"../../util/SvgTransformUtil":387,"tiny-svg":612}],232:[function(require,module,exports){
+},{"../../util/Event":369,"../../util/Geometry":370,"../../util/LineIntersection":373,"../../util/SvgTransformUtil":380,"tiny-svg":605}],225:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33879,7 +32771,7 @@ function getDraggerVisual(draggerGfx) {
   return (0, _minDom.query)('.djs-visual', draggerGfx);
 }
 
-},{"../../util/EscapeUtil":375,"../../util/Geometry":377,"../../util/Mouse":382,"../../util/SvgTransformUtil":387,"./BendpointUtil":231,"min-dash":600,"min-dom":601,"tiny-svg":612}],233:[function(require,module,exports){
+},{"../../util/EscapeUtil":368,"../../util/Geometry":370,"../../util/Mouse":375,"../../util/SvgTransformUtil":380,"./BendpointUtil":224,"min-dash":593,"min-dom":594,"tiny-svg":605}],226:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34221,7 +33113,7 @@ function ConnectionSegmentMove(injector, eventBus, canvas, dragging, graphicsFac
 
 ConnectionSegmentMove.$inject = ['injector', 'eventBus', 'canvas', 'dragging', 'graphicsFactory', 'modeling'];
 
-},{"../../layout/LayoutUtil":359,"../../util/Geometry":377,"../../util/SvgTransformUtil":387,"./BendpointUtil":231,"tiny-svg":612}],234:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"../../util/Geometry":370,"../../util/SvgTransformUtil":380,"./BendpointUtil":224,"tiny-svg":605}],227:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34256,7 +33148,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../rules":331,"./BendpointMove":228,"./BendpointMovePreview":229,"./BendpointSnapping":230,"./Bendpoints":232,"./ConnectionSegmentMove":233}],235:[function(require,module,exports){
+},{"../dragging":247,"../rules":324,"./BendpointMove":221,"./BendpointMovePreview":222,"./BendpointSnapping":223,"./Bendpoints":225,"./ConnectionSegmentMove":226}],228:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34314,7 +33206,7 @@ function ChangeSupport(eventBus, canvas, elementRegistry, graphicsFactory) {
 
 ChangeSupport.$inject = ['eventBus', 'canvas', 'elementRegistry', 'graphicsFactory'];
 
-},{"../../util/Elements":374}],236:[function(require,module,exports){
+},{"../../util/Elements":367}],229:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34332,7 +33224,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./ChangeSupport":235}],237:[function(require,module,exports){
+},{"./ChangeSupport":228}],230:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34363,7 +33255,7 @@ Clipboard.prototype.isEmpty = function () {
   return !this._data;
 };
 
-},{}],238:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34380,7 +33272,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Clipboard":237}],239:[function(require,module,exports){
+},{"./Clipboard":230}],232:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34509,7 +33401,7 @@ function isReverse(context) {
   return hover && source && hover === source && source !== target;
 }
 
-},{"../../layout/LayoutUtil":359,"min-dash":600}],240:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"min-dash":593}],233:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34591,7 +33483,7 @@ function ConnectPreview(injector, eventBus, canvas) {
 
 ConnectPreview.$inject = ['injector', 'eventBus', 'canvas'];
 
-},{"./Connect":239}],241:[function(require,module,exports){
+},{"./Connect":232}],234:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34619,7 +33511,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../rules":331,"../selection":337,"./Connect":239,"./ConnectPreview":240}],242:[function(require,module,exports){
+},{"../dragging":247,"../rules":324,"../selection":330,"./Connect":232,"./ConnectPreview":233}],235:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34888,7 +33780,7 @@ function ensureConnectionAttrs(canConnect) {
   }
 }
 
-},{"../../layout/LayoutUtil":359,"min-dash":600,"tiny-svg":612}],243:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"min-dash":593,"tiny-svg":605}],236:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34906,7 +33798,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./ConnectionPreview":242}],244:[function(require,module,exports){
+},{"./ConnectionPreview":235}],237:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35234,7 +34126,7 @@ function addClasses(element, classNames) {
   });
 }
 
-},{"min-dash":600,"min-dom":601}],245:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594}],238:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35256,7 +34148,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../interaction-events":270,"../overlays":315,"./ContextPad":244}],246:[function(require,module,exports){
+},{"../interaction-events":263,"../overlays":308,"./ContextPad":237}],239:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35785,7 +34677,7 @@ function removeElement(element, elements) {
   return elements.splice(index, 1);
 }
 
-},{"../../util/Elements":374,"min-dash":600}],247:[function(require,module,exports){
+},{"../../util/Elements":367,"min-dash":593}],240:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35812,7 +34704,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../clipboard":238,"../create":250,"../mouse":307,"../rules":331,"./CopyPaste":246}],248:[function(require,module,exports){
+},{"../clipboard":231,"../create":243,"../mouse":300,"../rules":324,"./CopyPaste":239}],241:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36133,7 +35025,7 @@ function isLabel(element) {
   return !!element.labelTarget;
 }
 
-},{"../../util/Elements":374,"min-dash":600}],249:[function(require,module,exports){
+},{"../../util/Elements":367,"min-dash":593}],242:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36212,7 +35104,7 @@ function CreatePreview(canvas, eventBus, graphicsFactory, previewSupport, styles
 
 CreatePreview.$inject = ['canvas', 'eventBus', 'graphicsFactory', 'previewSupport', 'styles'];
 
-},{"../../util/GraphicsUtil":378,"../../util/SvgTransformUtil":387,"tiny-svg":612}],250:[function(require,module,exports){
+},{"../../util/GraphicsUtil":371,"../../util/SvgTransformUtil":380,"tiny-svg":605}],243:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36242,7 +35134,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../preview-support":321,"../rules":331,"../selection":337,"./Create":248,"./CreatePreview":249}],251:[function(require,module,exports){
+},{"../dragging":247,"../preview-support":314,"../rules":324,"../selection":330,"./Create":241,"./CreatePreview":242}],244:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36447,7 +35339,7 @@ DistributeElements.prototype._findRange = function (element) {
   };
 };
 
-},{"min-dash":600}],252:[function(require,module,exports){
+},{"min-dash":593}],245:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36465,7 +35357,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./DistributeElements":251}],253:[function(require,module,exports){
+},{"./DistributeElements":244}],246:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36965,7 +35857,7 @@ function Dragging(eventBus, canvas, selection, elementRegistry) {
 
 Dragging.$inject = ['eventBus', 'canvas', 'selection', 'elementRegistry'];
 
-},{"../../util/ClickTrap":371,"../../util/Cursor":373,"../../util/Event":376,"../../util/PositionUtil":384,"min-dash":600,"min-dom":601}],254:[function(require,module,exports){
+},{"../../util/ClickTrap":364,"../../util/Cursor":366,"../../util/Event":369,"../../util/PositionUtil":377,"min-dash":593,"min-dom":594}],247:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36987,7 +35879,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../hover-fix":268,"../selection":337,"./Dragging":253}],255:[function(require,module,exports){
+},{"../hover-fix":261,"../selection":330,"./Dragging":246}],248:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37237,7 +36129,7 @@ function error(action, message) {
   return new Error(action + ' ' + message);
 }
 
-},{"min-dash":600}],256:[function(require,module,exports){
+},{"min-dash":593}],249:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37255,7 +36147,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./EditorActions":255}],257:[function(require,module,exports){
+},{"./EditorActions":248}],250:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37373,7 +36265,7 @@ GlobalConnect.prototype.canStartConnect = function (startTarget) {
   });
 };
 
-},{}],258:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37401,7 +36293,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../connect":241,"../dragging":254,"../mouse":307,"../rules":331,"../tool-manager":349,"./GlobalConnect":257}],259:[function(require,module,exports){
+},{"../connect":234,"../dragging":247,"../mouse":300,"../rules":324,"../tool-manager":342,"./GlobalConnect":250}],252:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37710,7 +36602,7 @@ function isWest(direction) {
   return direction.indexOf('w') !== -1;
 }
 
-},{"../keyboard/KeyboardUtil":275,"../snapping/SnapUtil":341,"./GridUtil":260,"min-dash":600}],260:[function(require,module,exports){
+},{"../keyboard/KeyboardUtil":268,"../snapping/SnapUtil":334,"./GridUtil":253,"min-dash":593}],253:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37729,7 +36621,7 @@ function quantize(value, quantum, fn) {
   return Math[fn](value / quantum) * quantum;
 }
 
-},{}],261:[function(require,module,exports){
+},{}],254:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37894,7 +36786,7 @@ ResizeBehavior.prototype.snapVertically = function (newBounds, directions) {
   return newBounds;
 };
 
-},{"../../../command/CommandInterceptor":203,"inherits":392,"min-dash":600}],262:[function(require,module,exports){
+},{"../../../command/CommandInterceptor":196,"inherits":385,"min-dash":593}],255:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37933,7 +36825,7 @@ function SpaceToolBehavior(eventBus, gridSnapping) {
 
 SpaceToolBehavior.$inject = ['eventBus', 'gridSnapping'];
 
-},{}],263:[function(require,module,exports){
+},{}],256:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37954,7 +36846,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./ResizeBehavior":261,"./SpaceToolBehavior":262}],264:[function(require,module,exports){
+},{"./ResizeBehavior":254,"./SpaceToolBehavior":255}],257:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37975,7 +36867,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./GridSnapping":259,"./behavior":263}],265:[function(require,module,exports){
+},{"./GridSnapping":252,"./behavior":256}],258:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38113,7 +37005,7 @@ function isSpace(keyEvent) {
   return (0, _KeyboardUtil.isKey)(' ', keyEvent);
 }
 
-},{"../../features/keyboard/KeyboardUtil":275,"../../util/Mouse":382}],266:[function(require,module,exports){
+},{"../../features/keyboard/KeyboardUtil":268,"../../util/Mouse":375}],259:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38136,7 +37028,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../mouse":307,"../tool-manager":349,"./HandTool":265}],267:[function(require,module,exports){
+},{"../mouse":300,"../tool-manager":342,"./HandTool":258}],260:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38271,7 +37163,7 @@ function getGfx(target) {
   return (0, _minDom.closest)(target, 'svg, .djs-element', true);
 }
 
-},{"../../util/Event":376,"min-dom":601}],268:[function(require,module,exports){
+},{"../../util/Event":369,"min-dom":594}],261:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38289,7 +37181,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./HoverFix":267}],269:[function(require,module,exports){
+},{"./HoverFix":260}],262:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38731,7 +37623,7 @@ InteractionEvents.$inject = ['eventBus', 'elementRegistry', 'styles'];
  * @property {Event} originalEvent
  */
 
-},{"../../util/Mouse":382,"../../util/RenderUtil":386,"min-dash":600,"min-dom":601,"tiny-svg":612}],270:[function(require,module,exports){
+},{"../../util/Mouse":375,"../../util/RenderUtil":379,"min-dash":593,"min-dom":594,"tiny-svg":605}],263:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38749,7 +37641,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./InteractionEvents":269}],271:[function(require,module,exports){
+},{"./InteractionEvents":262}],264:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38865,7 +37757,7 @@ function KeyboardMoveSelection(config, keyboard, modeling, rules, selection) {
 
 KeyboardMoveSelection.$inject = ['config.keyboardMoveSelection', 'keyboard', 'modeling', 'rules', 'selection'];
 
-},{"min-dash":600}],272:[function(require,module,exports){
+},{"min-dash":593}],265:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38888,7 +37780,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../keyboard":276,"../selection":337,"./KeyboardMoveSelection":271}],273:[function(require,module,exports){
+},{"../keyboard":269,"../selection":330,"./KeyboardMoveSelection":264}],266:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39053,7 +37945,7 @@ function isInput(target) {
   return target && ((0, _minDom.matches)(target, 'input, textarea') || target.contentEditable === 'true');
 }
 
-},{"./KeyboardUtil":275,"min-dash":600,"min-dom":601}],274:[function(require,module,exports){
+},{"./KeyboardUtil":268,"min-dash":593,"min-dom":594}],267:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39212,7 +38104,7 @@ KeyboardBindings.prototype.registerBindings = function (keyboard, editorActions)
   });
 };
 
-},{"./KeyboardUtil":275}],275:[function(require,module,exports){
+},{"./KeyboardUtil":268}],268:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39267,7 +38159,7 @@ function isShift(event) {
   return event.shiftKey;
 }
 
-},{"min-dash":600}],276:[function(require,module,exports){
+},{"min-dash":593}],269:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39288,7 +38180,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Keyboard":273,"./KeyboardBindings":274}],277:[function(require,module,exports){
+},{"./Keyboard":266,"./KeyboardBindings":267}],270:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39422,7 +38314,7 @@ function removeLabels(elements) {
   });
 }
 
-},{"../../command/CommandInterceptor":203,"../../util/Collections":372,"../../util/Removal":385,"inherits":392,"min-dash":600}],278:[function(require,module,exports){
+},{"../../command/CommandInterceptor":196,"../../util/Collections":365,"../../util/Removal":378,"inherits":385,"min-dash":593}],271:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39440,7 +38332,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./LabelSupport":277}],279:[function(require,module,exports){
+},{"./LabelSupport":270}],272:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39644,7 +38536,7 @@ function toBBox(event) {
   return bbox;
 }
 
-},{"../../util/Elements":374,"../../util/Mouse":382,"min-dash":600,"tiny-svg":612}],280:[function(require,module,exports){
+},{"../../util/Elements":367,"../../util/Mouse":375,"min-dash":593,"tiny-svg":605}],273:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39667,7 +38559,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../mouse":307,"../tool-manager":349,"./LassoTool":279}],281:[function(require,module,exports){
+},{"../mouse":300,"../tool-manager":342,"./LassoTool":272}],274:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40173,7 +39065,7 @@ Modeling.prototype.toggleCollapse = function (shape, hints) {
   this._commandStack.execute('shape.toggleCollapse', context);
 };
 
-},{"../../model":361,"./cmd/AlignElementsHandler":282,"./cmd/AppendShapeHandler":283,"./cmd/CreateConnectionHandler":284,"./cmd/CreateElementsHandler":285,"./cmd/CreateLabelHandler":286,"./cmd/CreateShapeHandler":287,"./cmd/DeleteConnectionHandler":288,"./cmd/DeleteElementsHandler":289,"./cmd/DeleteShapeHandler":290,"./cmd/DistributeElementsHandler":291,"./cmd/LayoutConnectionHandler":292,"./cmd/MoveConnectionHandler":293,"./cmd/MoveElementsHandler":294,"./cmd/MoveShapeHandler":295,"./cmd/ReconnectConnectionHandler":296,"./cmd/ReplaceShapeHandler":297,"./cmd/ResizeShapeHandler":298,"./cmd/SpaceToolHandler":299,"./cmd/ToggleShapeCollapseHandler":300,"./cmd/UpdateAttachmentHandler":301,"./cmd/UpdateWaypointsHandler":302,"min-dash":600}],282:[function(require,module,exports){
+},{"../../model":354,"./cmd/AlignElementsHandler":275,"./cmd/AppendShapeHandler":276,"./cmd/CreateConnectionHandler":277,"./cmd/CreateElementsHandler":278,"./cmd/CreateLabelHandler":279,"./cmd/CreateShapeHandler":280,"./cmd/DeleteConnectionHandler":281,"./cmd/DeleteElementsHandler":282,"./cmd/DeleteShapeHandler":283,"./cmd/DistributeElementsHandler":284,"./cmd/LayoutConnectionHandler":285,"./cmd/MoveConnectionHandler":286,"./cmd/MoveElementsHandler":287,"./cmd/MoveShapeHandler":288,"./cmd/ReconnectConnectionHandler":289,"./cmd/ReplaceShapeHandler":290,"./cmd/ResizeShapeHandler":291,"./cmd/SpaceToolHandler":292,"./cmd/ToggleShapeCollapseHandler":293,"./cmd/UpdateAttachmentHandler":294,"./cmd/UpdateWaypointsHandler":295,"min-dash":593}],275:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40224,7 +39116,7 @@ AlignElements.prototype.preExecute = function (context) {
 
 AlignElements.prototype.postExecute = function (context) {};
 
-},{"min-dash":600}],283:[function(require,module,exports){
+},{"min-dash":593}],276:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40293,7 +39185,7 @@ function existsConnection(source, target) {
   });
 }
 
-},{"min-dash":600}],284:[function(require,module,exports){
+},{"min-dash":593}],277:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40356,7 +39248,7 @@ CreateConnectionHandler.prototype.revert = function (context) {
   return connection;
 };
 
-},{}],285:[function(require,module,exports){
+},{}],278:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40434,7 +39326,7 @@ function isConnection(element) {
   return !!element.waypoints;
 }
 
-},{"../../../util/Elements":374,"min-dash":600}],286:[function(require,module,exports){
+},{"../../../util/Elements":367,"min-dash":593}],279:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40499,7 +39391,7 @@ function ensureValidDimensions(label) {
   });
 }
 
-},{"./CreateShapeHandler":287,"inherits":392}],287:[function(require,module,exports){
+},{"./CreateShapeHandler":280,"inherits":385}],280:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40572,7 +39464,7 @@ CreateShapeHandler.prototype.revert = function (context) {
   return shape;
 };
 
-},{"min-dash":600}],288:[function(require,module,exports){
+},{"min-dash":593}],281:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40626,7 +39518,7 @@ DeleteConnectionHandler.prototype.revert = function (context) {
   return connection;
 };
 
-},{"../../../util/Collections":372}],289:[function(require,module,exports){
+},{"../../../util/Collections":365}],282:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40662,7 +39554,7 @@ DeleteElementsHandler.prototype.postExecute = function (context) {
   });
 };
 
-},{"min-dash":600}],290:[function(require,module,exports){
+},{"min-dash":593}],283:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40754,7 +39646,7 @@ function isConnection(element) {
   return element.waypoints;
 }
 
-},{"../../../util/Collections":372,"../../../util/Removal":385}],291:[function(require,module,exports){
+},{"../../../util/Collections":365,"../../../util/Removal":378}],284:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40896,7 +39788,7 @@ DistributeElements.prototype.preExecute = function (context) {
 
 DistributeElements.prototype.postExecute = function (context) {};
 
-},{"min-dash":600}],292:[function(require,module,exports){
+},{"min-dash":593}],285:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40932,7 +39824,7 @@ LayoutConnectionHandler.prototype.revert = function (context) {
   return connection;
 };
 
-},{"min-dash":600}],293:[function(require,module,exports){
+},{"min-dash":593}],286:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41003,7 +39895,7 @@ MoveConnectionHandler.prototype.revert = function (context) {
   return connection;
 };
 
-},{"../../../util/Collections":372,"min-dash":600}],294:[function(require,module,exports){
+},{"../../../util/Collections":365,"min-dash":593}],287:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41040,7 +39932,7 @@ MoveElementsHandler.prototype.postExecute = function (context) {
   this._helper.moveClosure(context.closure, context.delta, context.newParent, context.newHost, primaryShape);
 };
 
-},{"./helper/MoveHelper":305}],295:[function(require,module,exports){
+},{"./helper/MoveHelper":298}],288:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41140,7 +40032,7 @@ MoveShapeHandler.prototype.getNewParent = function (context) {
   return context.newParent || context.shape.parent;
 };
 
-},{"../../../util/Collections":372,"./helper/AnchorsHelper":303,"./helper/MoveHelper":305,"min-dash":600}],296:[function(require,module,exports){
+},{"../../../util/Collections":365,"./helper/AnchorsHelper":296,"./helper/MoveHelper":298,"min-dash":593}],289:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41248,7 +40140,7 @@ function getDocking(point) {
   return point.original || point;
 }
 
-},{"min-dash":600}],297:[function(require,module,exports){
+},{"min-dash":593}],290:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41380,7 +40272,7 @@ ReplaceShapeHandler.prototype.reconnectEnd = function (connection, newTarget, do
   this._modeling.reconnectEnd(connection, newTarget, dockingPoint, hints);
 };
 
-},{"./helper/AnchorsHelper":303,"min-dash":600}],298:[function(require,module,exports){
+},{"./helper/AnchorsHelper":296,"min-dash":593}],291:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41482,7 +40374,7 @@ ResizeShapeHandler.prototype.revert = function (context) {
   return shape;
 };
 
-},{"./helper/AnchorsHelper":303,"min-dash":600}],299:[function(require,module,exports){
+},{"./helper/AnchorsHelper":296,"min-dash":593}],292:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41662,7 +40554,7 @@ function getBounds(shape) {
   };
 }
 
-},{"../../space-tool/SpaceUtil":346,"./helper/AnchorsHelper":303,"min-dash":600}],300:[function(require,module,exports){
+},{"../../space-tool/SpaceUtil":339,"./helper/AnchorsHelper":296,"min-dash":593}],293:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41754,7 +40646,7 @@ function restoreVisibilityRecursive(elements, lastState) {
   return result;
 }
 
-},{"min-dash":600}],301:[function(require,module,exports){
+},{"min-dash":593}],294:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41820,7 +40712,7 @@ function addAttacher(host, attacher, idx) {
   (0, _Collections.add)(attachers, attacher, idx);
 }
 
-},{"../../../util/Collections":372}],302:[function(require,module,exports){
+},{"../../../util/Collections":365}],295:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41845,7 +40737,7 @@ UpdateWaypointsHandler.prototype.revert = function (context) {
   return connection;
 };
 
-},{}],303:[function(require,module,exports){
+},{}],296:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41950,7 +40842,7 @@ function getOriginal(point) {
   return point.original || point;
 }
 
-},{"../../../../layout/LayoutUtil":359,"../../../../util/AttachUtil":370,"min-dash":600}],304:[function(require,module,exports){
+},{"../../../../layout/LayoutUtil":352,"../../../../util/AttachUtil":363,"min-dash":593}],297:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41980,7 +40872,7 @@ MoveClosure.prototype.addAll = function (elements, isTopLevel) {
   return this;
 };
 
-},{"../../../../util/Elements":374,"min-dash":600}],305:[function(require,module,exports){
+},{"../../../../util/Elements":367,"min-dash":593}],298:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42083,7 +40975,7 @@ MoveHelper.prototype.getClosure = function (elements) {
   return new _MoveClosure.default().addAll(elements, true);
 };
 
-},{"./AnchorsHelper":303,"./MoveClosure":304,"min-dash":600}],306:[function(require,module,exports){
+},{"./AnchorsHelper":296,"./MoveClosure":297,"min-dash":593}],299:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42132,7 +41024,7 @@ function createMoveEvent(x, y) {
   return event;
 }
 
-},{}],307:[function(require,module,exports){
+},{}],300:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42150,7 +41042,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Mouse":306}],308:[function(require,module,exports){
+},{"./Mouse":299}],301:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42373,7 +41265,7 @@ function removeNested(elements) {
   });
 }
 
-},{"../../util/Event":376,"../../util/Mouse":382,"min-dash":600}],309:[function(require,module,exports){
+},{"../../util/Event":369,"../../util/Mouse":375,"min-dash":593}],302:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42582,7 +41474,7 @@ function isConnection(element) {
   return element.waypoints;
 }
 
-},{"../../util/Elements":374,"../../util/SvgTransformUtil":387,"min-dash":600,"tiny-svg":612}],310:[function(require,module,exports){
+},{"../../util/Elements":367,"../../util/SvgTransformUtil":380,"min-dash":593,"tiny-svg":605}],303:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42616,7 +41508,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../interaction-events":270,"../outline":313,"../preview-support":321,"../rules":331,"../selection":337,"./Move":308,"./MovePreview":309}],311:[function(require,module,exports){
+},{"../dragging":247,"../interaction-events":263,"../outline":306,"../preview-support":314,"../rules":324,"../selection":330,"./Move":301,"./MovePreview":302}],304:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42712,7 +41604,7 @@ OrderingProvider.prototype.getOrdering = function (element, newParent) {
 
 (0, _inherits.default)(OrderingProvider, _CommandInterceptor.default);
 
-},{"../../command/CommandInterceptor":203,"inherits":392}],312:[function(require,module,exports){
+},{"../../command/CommandInterceptor":196,"inherits":385}],305:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42820,7 +41712,7 @@ Outline.prototype.updateConnectionOutline = function (outline, connection) {
 
 Outline.$inject = ['eventBus', 'styles', 'elementRegistry'];
 
-},{"../../util/Elements":374,"min-dash":600,"min-dom":601,"tiny-svg":612}],313:[function(require,module,exports){
+},{"../../util/Elements":367,"min-dash":593,"min-dom":594,"tiny-svg":605}],306:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42838,7 +41730,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Outline":312}],314:[function(require,module,exports){
+},{"./Outline":305}],307:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43398,7 +42290,7 @@ function setTransform(el, transform) {
   });
 }
 
-},{"../../util/Elements":374,"../../util/IdGenerator":379,"min-dash":600,"min-dom":601}],315:[function(require,module,exports){
+},{"../../util/Elements":367,"../../util/IdGenerator":372,"min-dash":593,"min-dom":594}],308:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43416,7 +42308,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Overlays":314}],316:[function(require,module,exports){
+},{"./Overlays":307}],309:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43822,7 +42714,7 @@ function addPaletteEntries(entries, provider) {
   return entries;
 }
 
-},{"min-dash":600,"min-dom":601}],317:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594}],310:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43840,7 +42732,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Palette":316}],318:[function(require,module,exports){
+},{"./Palette":309}],311:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44378,7 +43270,7 @@ function setTransform(element, transform) {
   });
 }
 
-},{"min-dash":600,"min-dom":601}],319:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594}],312:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44396,7 +43288,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./PopupMenu":318}],320:[function(require,module,exports){
+},{"./PopupMenu":311}],313:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44606,7 +43498,7 @@ function canHaveMarker(node) {
   return NODES_CAN_HAVE_MARKER.indexOf(node.nodeName) !== -1;
 }
 
-},{"../../util/GraphicsUtil":378,"min-dash":600,"min-dom":601,"tiny-svg":612}],321:[function(require,module,exports){
+},{"../../util/GraphicsUtil":371,"min-dash":593,"min-dom":594,"tiny-svg":605}],314:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44624,7 +43516,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./PreviewSupport":320}],322:[function(require,module,exports){
+},{"./PreviewSupport":313}],315:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44677,7 +43569,7 @@ Replace.prototype.replaceElement = function (oldElement, newElementData, options
   }), options);
 };
 
-},{"min-dash":600}],323:[function(require,module,exports){
+},{"min-dash":593}],316:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44695,7 +43587,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Replace":322}],324:[function(require,module,exports){
+},{"./Replace":315}],317:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44944,7 +43836,7 @@ function getCursor(direction) {
   }
 }
 
-},{"../../layout/LayoutUtil":359,"./ResizeUtil":327,"min-dash":600}],325:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"./ResizeUtil":320,"min-dash":593}],318:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45114,7 +44006,7 @@ function getHandleOffset(direction) {
   return offset;
 }
 
-},{"../../util/Mouse":382,"../../util/SvgTransformUtil":387,"./Resize":324,"min-dash":600,"min-dom":601,"tiny-svg":612}],326:[function(require,module,exports){
+},{"../../util/Mouse":375,"../../util/SvgTransformUtil":380,"./Resize":317,"min-dash":593,"min-dom":594,"tiny-svg":605}],319:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45201,7 +44093,7 @@ function ResizePreview(eventBus, canvas, previewSupport) {
 
 ResizePreview.$inject = ['eventBus', 'canvas', 'previewSupport'];
 
-},{"tiny-svg":612}],327:[function(require,module,exports){
+},{"tiny-svg":605}],320:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45434,7 +44326,7 @@ function computeChildrenBBox(shapeOrChildren, padding) {
   }
 }
 
-},{"../../layout/LayoutUtil":359,"../../util/Elements":374,"min-dash":600}],328:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"../../util/Elements":367,"min-dash":593}],321:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45465,7 +44357,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../preview-support":321,"../rules":331,"./Resize":324,"./ResizeHandles":325,"./ResizePreview":326}],329:[function(require,module,exports){
+},{"../dragging":247,"../preview-support":314,"../rules":324,"./Resize":317,"./ResizeHandles":318,"./ResizePreview":319}],322:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45560,7 +44452,7 @@ RuleProvider.prototype.addRule = function (actions, priority, fn) {
 
 RuleProvider.prototype.init = function () {};
 
-},{"../../command/CommandInterceptor":203,"inherits":392}],330:[function(require,module,exports){
+},{"../../command/CommandInterceptor":196,"inherits":385}],323:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45613,7 +44505,7 @@ Rules.prototype.allowed = function (action, context) {
   return allowed === undefined ? true : allowed;
 };
 
-},{}],331:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45631,7 +44523,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Rules":330}],332:[function(require,module,exports){
+},{"./Rules":323}],325:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46146,7 +45038,7 @@ SearchPad.RESULT_HTML = '<div class="djs-search-result"></div>';
 SearchPad.RESULT_PRIMARY_HTML = '<div class="djs-search-result-primary"></div>';
 SearchPad.RESULT_SECONDARY_HTML = '<p class="djs-search-result-secondary"></p>';
 
-},{"../../util/Elements":374,"../../util/EscapeUtil":375,"min-dom":601}],333:[function(require,module,exports){
+},{"../../util/Elements":367,"../../util/EscapeUtil":368,"min-dom":594}],326:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46168,7 +45060,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../overlays":315,"../selection":337,"./SearchPad":332}],334:[function(require,module,exports){
+},{"../overlays":308,"../selection":330,"./SearchPad":325}],327:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46265,7 +45157,7 @@ Selection.prototype.select = function (elements, add) {
   });
 };
 
-},{"min-dash":600}],335:[function(require,module,exports){
+},{"min-dash":593}],328:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46364,7 +45256,7 @@ function isShown(element) {
   return !element.hidden;
 }
 
-},{"../../util/Mouse":382,"min-dash":600}],336:[function(require,module,exports){
+},{"../../util/Mouse":375,"min-dash":593}],329:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46432,7 +45324,7 @@ function SelectionVisuals(events, canvas, selection, styles) {
 
 SelectionVisuals.$inject = ['eventBus', 'canvas', 'selection', 'styles'];
 
-},{"min-dash":600}],337:[function(require,module,exports){
+},{"min-dash":593}],330:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46461,7 +45353,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../interaction-events":270,"../outline":313,"./Selection":334,"./SelectionBehavior":335,"./SelectionVisuals":336}],338:[function(require,module,exports){
+},{"../interaction-events":263,"../outline":306,"./Selection":327,"./SelectionBehavior":328,"./SelectionVisuals":329}],331:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46637,7 +45529,7 @@ function isLabel(element) {
   return !!element.labelTarget;
 }
 
-},{"../keyboard/KeyboardUtil":275,"./SnapContext":340,"./SnapUtil":341,"min-dash":600}],339:[function(require,module,exports){
+},{"../keyboard/KeyboardUtil":268,"./SnapContext":333,"./SnapUtil":334,"min-dash":593}],332:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46791,7 +45683,7 @@ function isVertical(direction) {
   return direction === 'e' || direction === 'w';
 }
 
-},{"../../layout/LayoutUtil":359,"../keyboard/KeyboardUtil":275,"./SnapContext":340,"./SnapUtil":341,"min-dash":600}],340:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"../keyboard/KeyboardUtil":268,"./SnapContext":333,"./SnapUtil":334,"min-dash":593}],333:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46960,7 +45852,7 @@ SnapPoints.prototype.initDefaults = function (defaultSnaps) {
   });
 };
 
-},{"./SnapUtil":341,"min-dash":600}],341:[function(require,module,exports){
+},{"./SnapUtil":334,"min-dash":593}],334:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47113,7 +46005,7 @@ function getChildren(parent) {
   return parent.children || [];
 }
 
-},{}],342:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47263,7 +46155,7 @@ Snapping.prototype.hide = function () {
   });
 };
 
-},{"./SnapUtil":341,"min-dash":600,"tiny-svg":612}],343:[function(require,module,exports){
+},{"./SnapUtil":334,"min-dash":593,"tiny-svg":605}],336:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47287,7 +46179,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./CreateMoveSnapping":338,"./ResizeSnapping":339,"./Snapping":342}],344:[function(require,module,exports){
+},{"./CreateMoveSnapping":331,"./ResizeSnapping":332,"./Snapping":335}],337:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47689,7 +46581,7 @@ function isLabel(element) {
   return !!element.labelTarget;
 }
 
-},{"../../layout/LayoutUtil":359,"../../util/Cursor":373,"../../util/Elements":374,"../../util/Mouse":382,"./SpaceUtil":346,"min-dash":600}],345:[function(require,module,exports){
+},{"../../layout/LayoutUtil":352,"../../util/Cursor":366,"../../util/Elements":367,"../../util/Mouse":375,"./SpaceUtil":339,"min-dash":593}],338:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47936,7 +46828,7 @@ function isConnection(element) {
   return element.waypoints;
 }
 
-},{"../../util/SvgTransformUtil":387,"min-dash":600,"tiny-svg":612}],346:[function(require,module,exports){
+},{"../../util/SvgTransformUtil":380,"min-dash":593,"tiny-svg":605}],339:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48075,7 +46967,7 @@ function resizeBounds(bounds, direction, delta) {
   }
 }
 
-},{"min-dash":600}],347:[function(require,module,exports){
+},{"min-dash":593}],340:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48107,7 +46999,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"../mouse":307,"../preview-support":321,"../rules":331,"../tool-manager":349,"./SpaceTool":344,"./SpaceToolPreview":345}],348:[function(require,module,exports){
+},{"../dragging":247,"../mouse":300,"../preview-support":314,"../rules":324,"../tool-manager":342,"./SpaceTool":337,"./SpaceToolPreview":338}],341:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48217,7 +47109,7 @@ function isPaletteClick(event) {
   return target && (0, _minDom.closest)(target, '.group[data-group="tools"]');
 }
 
-},{"min-dash":600,"min-dom":601}],349:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594}],342:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48238,7 +47130,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../dragging":254,"./ToolManager":348}],350:[function(require,module,exports){
+},{"../dragging":247,"./ToolManager":341}],343:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48564,7 +47456,7 @@ Tooltips.prototype._init = function () {
   });
 };
 
-},{"../../util/IdGenerator":379,"min-dash":600,"min-dom":601}],351:[function(require,module,exports){
+},{"../../util/IdGenerator":372,"min-dash":593,"min-dom":594}],344:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48582,7 +47474,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Tooltips":350}],352:[function(require,module,exports){
+},{"./Tooltips":343}],345:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48633,7 +47525,7 @@ TouchFix.prototype.addBBoxMarker = function (svg) {
   (0, _tinySvg.append)(svg, rect2);
 };
 
-},{"tiny-svg":612}],353:[function(require,module,exports){
+},{"tiny-svg":605}],346:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48934,7 +47826,7 @@ function TouchInteractionEvents(injector, canvas, eventBus, elementRegistry, int
 
 TouchInteractionEvents.$inject = ['injector', 'canvas', 'eventBus', 'elementRegistry', 'interactionEvents', 'touchFix'];
 
-},{"../../util/Event":376,"hammerjs":390,"min-dash":600,"min-dom":601}],354:[function(require,module,exports){
+},{"../../util/Event":369,"hammerjs":383,"min-dash":593,"min-dom":594}],347:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48958,7 +47850,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../interaction-events":270,"./TouchFix":352,"./TouchInteractionEvents":353}],355:[function(require,module,exports){
+},{"../interaction-events":263,"./TouchFix":345,"./TouchInteractionEvents":346}],348:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48975,7 +47867,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./translate":356}],356:[function(require,module,exports){
+},{"./translate":349}],349:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49008,7 +47900,7 @@ function translate(template, replacements) {
   });
 }
 
-},{}],357:[function(require,module,exports){
+},{}],350:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49046,7 +47938,7 @@ BaseLayouter.prototype.layoutConnection = function (connection, hints) {
   return [hints.connectionStart || (0, _LayoutUtil.getMid)(hints.source || connection.source), hints.connectionEnd || (0, _LayoutUtil.getMid)(hints.target || connection.target)];
 };
 
-},{"./LayoutUtil":359}],358:[function(require,module,exports){
+},{"./LayoutUtil":352}],351:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49135,7 +48027,7 @@ CroppingConnectionDocking.prototype._getGfx = function (element) {
   return this._elementRegistry.getGraphics(element);
 };
 
-},{"./LayoutUtil":359,"min-dash":600}],359:[function(require,module,exports){
+},{"./LayoutUtil":352,"min-dash":593}],352:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49335,7 +48227,7 @@ function filterRedundantWaypoints(waypoints) {
   return waypoints;
 }
 
-},{"../util/Geometry":377,"min-dash":600,"path-intersection":608}],360:[function(require,module,exports){
+},{"../util/Geometry":370,"min-dash":593,"path-intersection":601}],353:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50049,7 +48941,7 @@ function withoutRedundantPoints(waypoints) {
   }, []);
 }
 
-},{"../util/Geometry":377,"./LayoutUtil":359,"min-dash":600}],361:[function(require,module,exports){
+},{"../util/Geometry":370,"./LayoutUtil":352,"min-dash":593}],354:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50325,7 +49217,7 @@ function create(type, attrs) {
   return (0, _minDash.assign)(new Type(), attrs);
 }
 
-},{"inherits":392,"min-dash":600,"object-refs":605}],362:[function(require,module,exports){
+},{"inherits":385,"min-dash":593,"object-refs":598}],355:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50433,7 +49325,7 @@ function KeyboardMove(config, keyboard, canvas) {
 
 KeyboardMove.$inject = ['config.keyboardMove', 'keyboard', 'canvas'];
 
-},{"min-dash":600}],363:[function(require,module,exports){
+},{"min-dash":593}],356:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50454,7 +49346,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../../features/keyboard":276,"./KeyboardMove":362}],364:[function(require,module,exports){
+},{"../../features/keyboard":269,"./KeyboardMove":355}],357:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50564,7 +49456,7 @@ function length(point) {
   return Math.sqrt(Math.pow(point.x, 2) + Math.pow(point.y, 2));
 }
 
-},{"../../util/ClickTrap":371,"../../util/Cursor":373,"../../util/Event":376,"../../util/PositionUtil":384,"min-dom":601}],365:[function(require,module,exports){
+},{"../../util/ClickTrap":364,"../../util/Cursor":366,"../../util/Event":369,"../../util/PositionUtil":377,"min-dom":594}],358:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50582,7 +49474,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./MoveCanvas":364}],366:[function(require,module,exports){
+},{"./MoveCanvas":357}],359:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50599,7 +49491,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../../features/touch":354}],367:[function(require,module,exports){
+},{"../../features/touch":347}],360:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50797,7 +49689,7 @@ ZoomScroll.prototype._init = function (newEnabled) {
   this.toggle(newEnabled);
 };
 
-},{"../../util/Math":381,"./ZoomUtil":368,"min-dash":600,"min-dom":601}],368:[function(require,module,exports){
+},{"../../util/Math":374,"./ZoomUtil":361,"min-dash":593,"min-dom":594}],361:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50826,7 +49718,7 @@ function cap(range, scale) {
   return Math.max(range.min, Math.min(range.max, scale));
 }
 
-},{"../../util/Math":381}],369:[function(require,module,exports){
+},{"../../util/Math":374}],362:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50844,7 +49736,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./ZoomScroll":367}],370:[function(require,module,exports){
+},{"./ZoomScroll":360}],363:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50981,7 +49873,7 @@ function isVerticallyMoved(oldTRBL, newTRBL) {
   return oldTRBL.top !== newTRBL.top && oldTRBL.bottom !== newTRBL.bottom;
 }
 
-},{"../layout/LayoutUtil":359,"./PositionUtil":384}],371:[function(require,module,exports){
+},{"../layout/LayoutUtil":352,"./PositionUtil":377}],364:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51008,7 +49900,7 @@ function install(eventBus, eventName) {
   };
 }
 
-},{}],372:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51102,7 +49994,7 @@ function indexOf(collection, element) {
   return collection.indexOf(element);
 }
 
-},{}],373:[function(require,module,exports){
+},{}],366:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51134,7 +50026,7 @@ function has(mode) {
   return classes.has('djs-cursor-' + mode);
 }
 
-},{"min-dom":601}],374:[function(require,module,exports){
+},{"min-dom":594}],367:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51472,7 +50364,7 @@ function copyObject(src1, src2) {
   return (0, _minDash.assign)({}, src1 || {}, src2 || {});
 }
 
-},{"min-dash":600}],375:[function(require,module,exports){
+},{"min-dash":593}],368:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51505,7 +50397,7 @@ function escapeHTML(str) {
   });
 }
 
-},{"css.escape":197}],376:[function(require,module,exports){
+},{"css.escape":190}],369:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51548,7 +50440,7 @@ function toPoint(event) {
   } : null;
 }
 
-},{}],377:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51697,7 +50589,7 @@ function getMidPoint(p, q) {
   };
 }
 
-},{"min-dash":600}],378:[function(require,module,exports){
+},{"min-dash":593}],371:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51735,7 +50627,7 @@ function getChildren(gfx) {
   return gfx.parentNode.childNodes[1];
 }
 
-},{}],379:[function(require,module,exports){
+},{}],372:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51771,7 +50663,7 @@ IdGenerator.prototype.next = function () {
   return this._prefix + ++this._counter;
 };
 
-},{}],380:[function(require,module,exports){
+},{}],373:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51874,7 +50766,7 @@ function getApproxIntersection(waypoints, reference) {
   return getBendpointIntersection(waypoints, reference) || getPathIntersection(waypoints, reference);
 }
 
-},{"./Geometry":377,"path-intersection":608}],381:[function(require,module,exports){
+},{"./Geometry":370,"path-intersection":601}],374:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51898,7 +50790,7 @@ function log10(x) {
   return Math.log(x) / Math.log(10);
 }
 
-},{"./PositionUtil":384}],382:[function(require,module,exports){
+},{"./PositionUtil":377}],375:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51960,7 +50852,7 @@ function hasSecondaryModifier(event) {
   return isPrimaryButton(event) && originalEvent.shiftKey;
 }
 
-},{"./Event":376,"./Platform":383}],383:[function(require,module,exports){
+},{"./Event":369,"./Platform":376}],376:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51972,7 +50864,7 @@ function isMac() {
   return /mac/i.test(navigator.platform);
 }
 
-},{}],384:[function(require,module,exports){
+},{}],377:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51995,7 +50887,7 @@ function delta(a, b) {
   };
 }
 
-},{}],385:[function(require,module,exports){
+},{}],378:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52037,7 +50929,7 @@ function saveClear(collection, removeFn) {
   return collection;
 }
 
-},{}],386:[function(require,module,exports){
+},{}],379:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52084,7 +50976,7 @@ function updateLine(gfx, points) {
   return gfx;
 }
 
-},{"tiny-svg":612}],387:[function(require,module,exports){
+},{"tiny-svg":605}],380:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52148,7 +51040,7 @@ function scale(gfx, amount) {
   (0, _tinySvg.transform)(gfx, scale);
 }
 
-},{"tiny-svg":612}],388:[function(require,module,exports){
+},{"tiny-svg":605}],381:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52488,7 +51380,7 @@ function getLineHeight(style) {
   }
 }
 
-},{"min-dash":600,"tiny-svg":612}],389:[function(require,module,exports){
+},{"min-dash":593,"tiny-svg":605}],382:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52812,7 +51704,7 @@ function Injector(modules, parent) {
   this.createChild = createChild;
 }
 
-},{}],390:[function(require,module,exports){
+},{}],383:[function(require,module,exports){
 /*! Hammer.JS - v2.0.7 - 2016-04-22
  * http://hammerjs.github.io/
  *
@@ -55457,7 +54349,7 @@ if (typeof define === 'function' && define.amd) {
 
 })(window, document, 'Hammer');
 
-},{}],391:[function(require,module,exports){
+},{}],384:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -55633,7 +54525,7 @@ Ids.prototype.clear = function () {
 var _default = Ids;
 exports.default = _default;
 
-},{}],392:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -55662,7 +54554,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],393:[function(require,module,exports){
+},{}],386:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -55671,7 +54563,7 @@ var DataView = getNative(root, 'DataView');
 
 module.exports = DataView;
 
-},{"./_getNative":492,"./_root":539}],394:[function(require,module,exports){
+},{"./_getNative":485,"./_root":532}],387:[function(require,module,exports){
 var hashClear = require('./_hashClear'),
     hashDelete = require('./_hashDelete'),
     hashGet = require('./_hashGet'),
@@ -55705,7 +54597,7 @@ Hash.prototype.set = hashSet;
 
 module.exports = Hash;
 
-},{"./_hashClear":500,"./_hashDelete":501,"./_hashGet":502,"./_hashHas":503,"./_hashSet":504}],395:[function(require,module,exports){
+},{"./_hashClear":493,"./_hashDelete":494,"./_hashGet":495,"./_hashHas":496,"./_hashSet":497}],388:[function(require,module,exports){
 var baseCreate = require('./_baseCreate'),
     baseLodash = require('./_baseLodash');
 
@@ -55735,7 +54627,7 @@ LazyWrapper.prototype.constructor = LazyWrapper;
 
 module.exports = LazyWrapper;
 
-},{"./_baseCreate":422,"./_baseLodash":444}],396:[function(require,module,exports){
+},{"./_baseCreate":415,"./_baseLodash":437}],389:[function(require,module,exports){
 var listCacheClear = require('./_listCacheClear'),
     listCacheDelete = require('./_listCacheDelete'),
     listCacheGet = require('./_listCacheGet'),
@@ -55769,7 +54661,7 @@ ListCache.prototype.set = listCacheSet;
 
 module.exports = ListCache;
 
-},{"./_listCacheClear":515,"./_listCacheDelete":516,"./_listCacheGet":517,"./_listCacheHas":518,"./_listCacheSet":519}],397:[function(require,module,exports){
+},{"./_listCacheClear":508,"./_listCacheDelete":509,"./_listCacheGet":510,"./_listCacheHas":511,"./_listCacheSet":512}],390:[function(require,module,exports){
 var baseCreate = require('./_baseCreate'),
     baseLodash = require('./_baseLodash');
 
@@ -55793,7 +54685,7 @@ LodashWrapper.prototype.constructor = LodashWrapper;
 
 module.exports = LodashWrapper;
 
-},{"./_baseCreate":422,"./_baseLodash":444}],398:[function(require,module,exports){
+},{"./_baseCreate":415,"./_baseLodash":437}],391:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -55802,7 +54694,7 @@ var Map = getNative(root, 'Map');
 
 module.exports = Map;
 
-},{"./_getNative":492,"./_root":539}],399:[function(require,module,exports){
+},{"./_getNative":485,"./_root":532}],392:[function(require,module,exports){
 var mapCacheClear = require('./_mapCacheClear'),
     mapCacheDelete = require('./_mapCacheDelete'),
     mapCacheGet = require('./_mapCacheGet'),
@@ -55836,7 +54728,7 @@ MapCache.prototype.set = mapCacheSet;
 
 module.exports = MapCache;
 
-},{"./_mapCacheClear":520,"./_mapCacheDelete":521,"./_mapCacheGet":522,"./_mapCacheHas":523,"./_mapCacheSet":524}],400:[function(require,module,exports){
+},{"./_mapCacheClear":513,"./_mapCacheDelete":514,"./_mapCacheGet":515,"./_mapCacheHas":516,"./_mapCacheSet":517}],393:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -55845,7 +54737,7 @@ var Promise = getNative(root, 'Promise');
 
 module.exports = Promise;
 
-},{"./_getNative":492,"./_root":539}],401:[function(require,module,exports){
+},{"./_getNative":485,"./_root":532}],394:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -55854,7 +54746,7 @@ var Set = getNative(root, 'Set');
 
 module.exports = Set;
 
-},{"./_getNative":492,"./_root":539}],402:[function(require,module,exports){
+},{"./_getNative":485,"./_root":532}],395:[function(require,module,exports){
 var MapCache = require('./_MapCache'),
     setCacheAdd = require('./_setCacheAdd'),
     setCacheHas = require('./_setCacheHas');
@@ -55883,7 +54775,7 @@ SetCache.prototype.has = setCacheHas;
 
 module.exports = SetCache;
 
-},{"./_MapCache":399,"./_setCacheAdd":540,"./_setCacheHas":541}],403:[function(require,module,exports){
+},{"./_MapCache":392,"./_setCacheAdd":533,"./_setCacheHas":534}],396:[function(require,module,exports){
 var ListCache = require('./_ListCache'),
     stackClear = require('./_stackClear'),
     stackDelete = require('./_stackDelete'),
@@ -55912,7 +54804,7 @@ Stack.prototype.set = stackSet;
 
 module.exports = Stack;
 
-},{"./_ListCache":396,"./_stackClear":547,"./_stackDelete":548,"./_stackGet":549,"./_stackHas":550,"./_stackSet":551}],404:[function(require,module,exports){
+},{"./_ListCache":389,"./_stackClear":540,"./_stackDelete":541,"./_stackGet":542,"./_stackHas":543,"./_stackSet":544}],397:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -55920,7 +54812,7 @@ var Symbol = root.Symbol;
 
 module.exports = Symbol;
 
-},{"./_root":539}],405:[function(require,module,exports){
+},{"./_root":532}],398:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -55928,7 +54820,7 @@ var Uint8Array = root.Uint8Array;
 
 module.exports = Uint8Array;
 
-},{"./_root":539}],406:[function(require,module,exports){
+},{"./_root":532}],399:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -55937,7 +54829,7 @@ var WeakMap = getNative(root, 'WeakMap');
 
 module.exports = WeakMap;
 
-},{"./_getNative":492,"./_root":539}],407:[function(require,module,exports){
+},{"./_getNative":485,"./_root":532}],400:[function(require,module,exports){
 /**
  * A faster alternative to `Function#apply`, this function invokes `func`
  * with the `this` binding of `thisArg` and the arguments of `args`.
@@ -55960,7 +54852,7 @@ function apply(func, thisArg, args) {
 
 module.exports = apply;
 
-},{}],408:[function(require,module,exports){
+},{}],401:[function(require,module,exports){
 /**
  * A specialized version of `baseAggregator` for arrays.
  *
@@ -55984,7 +54876,7 @@ function arrayAggregator(array, setter, iteratee, accumulator) {
 
 module.exports = arrayAggregator;
 
-},{}],409:[function(require,module,exports){
+},{}],402:[function(require,module,exports){
 /**
  * A specialized version of `_.forEach` for arrays without support for
  * iteratee shorthands.
@@ -56008,7 +54900,7 @@ function arrayEach(array, iteratee) {
 
 module.exports = arrayEach;
 
-},{}],410:[function(require,module,exports){
+},{}],403:[function(require,module,exports){
 /**
  * A specialized version of `_.filter` for arrays without support for
  * iteratee shorthands.
@@ -56035,7 +54927,7 @@ function arrayFilter(array, predicate) {
 
 module.exports = arrayFilter;
 
-},{}],411:[function(require,module,exports){
+},{}],404:[function(require,module,exports){
 var baseIndexOf = require('./_baseIndexOf');
 
 /**
@@ -56054,7 +54946,7 @@ function arrayIncludes(array, value) {
 
 module.exports = arrayIncludes;
 
-},{"./_baseIndexOf":434}],412:[function(require,module,exports){
+},{"./_baseIndexOf":427}],405:[function(require,module,exports){
 /**
  * This function is like `arrayIncludes` except that it accepts a comparator.
  *
@@ -56078,7 +54970,7 @@ function arrayIncludesWith(array, value, comparator) {
 
 module.exports = arrayIncludesWith;
 
-},{}],413:[function(require,module,exports){
+},{}],406:[function(require,module,exports){
 var baseTimes = require('./_baseTimes'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray'),
@@ -56129,7 +55021,7 @@ function arrayLikeKeys(value, inherited) {
 
 module.exports = arrayLikeKeys;
 
-},{"./_baseTimes":454,"./_isIndex":507,"./isArguments":571,"./isArray":572,"./isBuffer":575,"./isTypedArray":582}],414:[function(require,module,exports){
+},{"./_baseTimes":447,"./_isIndex":500,"./isArguments":564,"./isArray":565,"./isBuffer":568,"./isTypedArray":575}],407:[function(require,module,exports){
 /**
  * A specialized version of `_.map` for arrays without support for iteratee
  * shorthands.
@@ -56152,7 +55044,7 @@ function arrayMap(array, iteratee) {
 
 module.exports = arrayMap;
 
-},{}],415:[function(require,module,exports){
+},{}],408:[function(require,module,exports){
 /**
  * Appends the elements of `values` to `array`.
  *
@@ -56174,7 +55066,7 @@ function arrayPush(array, values) {
 
 module.exports = arrayPush;
 
-},{}],416:[function(require,module,exports){
+},{}],409:[function(require,module,exports){
 /**
  * A specialized version of `_.reduce` for arrays without support for
  * iteratee shorthands.
@@ -56202,7 +55094,7 @@ function arrayReduce(array, iteratee, accumulator, initAccum) {
 
 module.exports = arrayReduce;
 
-},{}],417:[function(require,module,exports){
+},{}],410:[function(require,module,exports){
 /**
  * A specialized version of `_.some` for arrays without support for iteratee
  * shorthands.
@@ -56227,7 +55119,7 @@ function arraySome(array, predicate) {
 
 module.exports = arraySome;
 
-},{}],418:[function(require,module,exports){
+},{}],411:[function(require,module,exports){
 var baseAssignValue = require('./_baseAssignValue'),
     eq = require('./eq');
 
@@ -56257,7 +55149,7 @@ function assignValue(object, key, value) {
 
 module.exports = assignValue;
 
-},{"./_baseAssignValue":421,"./eq":562}],419:[function(require,module,exports){
+},{"./_baseAssignValue":414,"./eq":555}],412:[function(require,module,exports){
 var eq = require('./eq');
 
 /**
@@ -56280,7 +55172,7 @@ function assocIndexOf(array, key) {
 
 module.exports = assocIndexOf;
 
-},{"./eq":562}],420:[function(require,module,exports){
+},{"./eq":555}],413:[function(require,module,exports){
 var baseEach = require('./_baseEach');
 
 /**
@@ -56303,7 +55195,7 @@ function baseAggregator(collection, setter, iteratee, accumulator) {
 
 module.exports = baseAggregator;
 
-},{"./_baseEach":424}],421:[function(require,module,exports){
+},{"./_baseEach":417}],414:[function(require,module,exports){
 var defineProperty = require('./_defineProperty');
 
 /**
@@ -56330,7 +55222,7 @@ function baseAssignValue(object, key, value) {
 
 module.exports = baseAssignValue;
 
-},{"./_defineProperty":481}],422:[function(require,module,exports){
+},{"./_defineProperty":474}],415:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /** Built-in value references. */
@@ -56362,7 +55254,7 @@ var baseCreate = (function() {
 
 module.exports = baseCreate;
 
-},{"./isObject":579}],423:[function(require,module,exports){
+},{"./isObject":572}],416:[function(require,module,exports){
 var SetCache = require('./_SetCache'),
     arrayIncludes = require('./_arrayIncludes'),
     arrayIncludesWith = require('./_arrayIncludesWith'),
@@ -56431,7 +55323,7 @@ function baseDifference(array, values, iteratee, comparator) {
 
 module.exports = baseDifference;
 
-},{"./_SetCache":402,"./_arrayIncludes":411,"./_arrayIncludesWith":412,"./_arrayMap":414,"./_baseUnary":456,"./_cacheHas":459}],424:[function(require,module,exports){
+},{"./_SetCache":395,"./_arrayIncludes":404,"./_arrayIncludesWith":405,"./_arrayMap":407,"./_baseUnary":449,"./_cacheHas":452}],417:[function(require,module,exports){
 var baseForOwn = require('./_baseForOwn'),
     createBaseEach = require('./_createBaseEach');
 
@@ -56447,7 +55339,7 @@ var baseEach = createBaseEach(baseForOwn);
 
 module.exports = baseEach;
 
-},{"./_baseForOwn":429,"./_createBaseEach":470}],425:[function(require,module,exports){
+},{"./_baseForOwn":422,"./_createBaseEach":463}],418:[function(require,module,exports){
 var baseEach = require('./_baseEach');
 
 /**
@@ -56470,7 +55362,7 @@ function baseFilter(collection, predicate) {
 
 module.exports = baseFilter;
 
-},{"./_baseEach":424}],426:[function(require,module,exports){
+},{"./_baseEach":417}],419:[function(require,module,exports){
 /**
  * The base implementation of `_.findIndex` and `_.findLastIndex` without
  * support for iteratee shorthands.
@@ -56496,7 +55388,7 @@ function baseFindIndex(array, predicate, fromIndex, fromRight) {
 
 module.exports = baseFindIndex;
 
-},{}],427:[function(require,module,exports){
+},{}],420:[function(require,module,exports){
 var arrayPush = require('./_arrayPush'),
     isFlattenable = require('./_isFlattenable');
 
@@ -56536,7 +55428,7 @@ function baseFlatten(array, depth, predicate, isStrict, result) {
 
 module.exports = baseFlatten;
 
-},{"./_arrayPush":415,"./_isFlattenable":506}],428:[function(require,module,exports){
+},{"./_arrayPush":408,"./_isFlattenable":499}],421:[function(require,module,exports){
 var createBaseFor = require('./_createBaseFor');
 
 /**
@@ -56554,7 +55446,7 @@ var baseFor = createBaseFor();
 
 module.exports = baseFor;
 
-},{"./_createBaseFor":471}],429:[function(require,module,exports){
+},{"./_createBaseFor":464}],422:[function(require,module,exports){
 var baseFor = require('./_baseFor'),
     keys = require('./keys');
 
@@ -56572,7 +55464,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"./_baseFor":428,"./keys":584}],430:[function(require,module,exports){
+},{"./_baseFor":421,"./keys":577}],423:[function(require,module,exports){
 var castPath = require('./_castPath'),
     toKey = require('./_toKey');
 
@@ -56598,7 +55490,7 @@ function baseGet(object, path) {
 
 module.exports = baseGet;
 
-},{"./_castPath":461,"./_toKey":554}],431:[function(require,module,exports){
+},{"./_castPath":454,"./_toKey":547}],424:[function(require,module,exports){
 var arrayPush = require('./_arrayPush'),
     isArray = require('./isArray');
 
@@ -56620,7 +55512,7 @@ function baseGetAllKeys(object, keysFunc, symbolsFunc) {
 
 module.exports = baseGetAllKeys;
 
-},{"./_arrayPush":415,"./isArray":572}],432:[function(require,module,exports){
+},{"./_arrayPush":408,"./isArray":565}],425:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     getRawTag = require('./_getRawTag'),
     objectToString = require('./_objectToString');
@@ -56650,7 +55542,7 @@ function baseGetTag(value) {
 
 module.exports = baseGetTag;
 
-},{"./_Symbol":404,"./_getRawTag":494,"./_objectToString":533}],433:[function(require,module,exports){
+},{"./_Symbol":397,"./_getRawTag":487,"./_objectToString":526}],426:[function(require,module,exports){
 /**
  * The base implementation of `_.hasIn` without support for deep paths.
  *
@@ -56665,7 +55557,7 @@ function baseHasIn(object, key) {
 
 module.exports = baseHasIn;
 
-},{}],434:[function(require,module,exports){
+},{}],427:[function(require,module,exports){
 var baseFindIndex = require('./_baseFindIndex'),
     baseIsNaN = require('./_baseIsNaN'),
     strictIndexOf = require('./_strictIndexOf');
@@ -56687,7 +55579,7 @@ function baseIndexOf(array, value, fromIndex) {
 
 module.exports = baseIndexOf;
 
-},{"./_baseFindIndex":426,"./_baseIsNaN":439,"./_strictIndexOf":552}],435:[function(require,module,exports){
+},{"./_baseFindIndex":419,"./_baseIsNaN":432,"./_strictIndexOf":545}],428:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObjectLike = require('./isObjectLike');
 
@@ -56707,7 +55599,7 @@ function baseIsArguments(value) {
 
 module.exports = baseIsArguments;
 
-},{"./_baseGetTag":432,"./isObjectLike":580}],436:[function(require,module,exports){
+},{"./_baseGetTag":425,"./isObjectLike":573}],429:[function(require,module,exports){
 var baseIsEqualDeep = require('./_baseIsEqualDeep'),
     isObjectLike = require('./isObjectLike');
 
@@ -56737,7 +55629,7 @@ function baseIsEqual(value, other, bitmask, customizer, stack) {
 
 module.exports = baseIsEqual;
 
-},{"./_baseIsEqualDeep":437,"./isObjectLike":580}],437:[function(require,module,exports){
+},{"./_baseIsEqualDeep":430,"./isObjectLike":573}],430:[function(require,module,exports){
 var Stack = require('./_Stack'),
     equalArrays = require('./_equalArrays'),
     equalByTag = require('./_equalByTag'),
@@ -56822,7 +55714,7 @@ function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = baseIsEqualDeep;
 
-},{"./_Stack":403,"./_equalArrays":482,"./_equalByTag":483,"./_equalObjects":484,"./_getTag":496,"./isArray":572,"./isBuffer":575,"./isTypedArray":582}],438:[function(require,module,exports){
+},{"./_Stack":396,"./_equalArrays":475,"./_equalByTag":476,"./_equalObjects":477,"./_getTag":489,"./isArray":565,"./isBuffer":568,"./isTypedArray":575}],431:[function(require,module,exports){
 var Stack = require('./_Stack'),
     baseIsEqual = require('./_baseIsEqual');
 
@@ -56886,7 +55778,7 @@ function baseIsMatch(object, source, matchData, customizer) {
 
 module.exports = baseIsMatch;
 
-},{"./_Stack":403,"./_baseIsEqual":436}],439:[function(require,module,exports){
+},{"./_Stack":396,"./_baseIsEqual":429}],432:[function(require,module,exports){
 /**
  * The base implementation of `_.isNaN` without support for number objects.
  *
@@ -56900,7 +55792,7 @@ function baseIsNaN(value) {
 
 module.exports = baseIsNaN;
 
-},{}],440:[function(require,module,exports){
+},{}],433:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isMasked = require('./_isMasked'),
     isObject = require('./isObject'),
@@ -56949,7 +55841,7 @@ function baseIsNative(value) {
 
 module.exports = baseIsNative;
 
-},{"./_isMasked":512,"./_toSource":555,"./isFunction":577,"./isObject":579}],441:[function(require,module,exports){
+},{"./_isMasked":505,"./_toSource":548,"./isFunction":570,"./isObject":572}],434:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isLength = require('./isLength'),
     isObjectLike = require('./isObjectLike');
@@ -57011,7 +55903,7 @@ function baseIsTypedArray(value) {
 
 module.exports = baseIsTypedArray;
 
-},{"./_baseGetTag":432,"./isLength":578,"./isObjectLike":580}],442:[function(require,module,exports){
+},{"./_baseGetTag":425,"./isLength":571,"./isObjectLike":573}],435:[function(require,module,exports){
 var baseMatches = require('./_baseMatches'),
     baseMatchesProperty = require('./_baseMatchesProperty'),
     identity = require('./identity'),
@@ -57044,7 +55936,7 @@ function baseIteratee(value) {
 
 module.exports = baseIteratee;
 
-},{"./_baseMatches":446,"./_baseMatchesProperty":447,"./identity":570,"./isArray":572,"./property":589}],443:[function(require,module,exports){
+},{"./_baseMatches":439,"./_baseMatchesProperty":440,"./identity":563,"./isArray":565,"./property":582}],436:[function(require,module,exports){
 var isPrototype = require('./_isPrototype'),
     nativeKeys = require('./_nativeKeys');
 
@@ -57076,7 +55968,7 @@ function baseKeys(object) {
 
 module.exports = baseKeys;
 
-},{"./_isPrototype":513,"./_nativeKeys":531}],444:[function(require,module,exports){
+},{"./_isPrototype":506,"./_nativeKeys":524}],437:[function(require,module,exports){
 /**
  * The function whose prototype chain sequence wrappers inherit from.
  *
@@ -57088,7 +55980,7 @@ function baseLodash() {
 
 module.exports = baseLodash;
 
-},{}],445:[function(require,module,exports){
+},{}],438:[function(require,module,exports){
 var baseEach = require('./_baseEach'),
     isArrayLike = require('./isArrayLike');
 
@@ -57112,7 +56004,7 @@ function baseMap(collection, iteratee) {
 
 module.exports = baseMap;
 
-},{"./_baseEach":424,"./isArrayLike":573}],446:[function(require,module,exports){
+},{"./_baseEach":417,"./isArrayLike":566}],439:[function(require,module,exports){
 var baseIsMatch = require('./_baseIsMatch'),
     getMatchData = require('./_getMatchData'),
     matchesStrictComparable = require('./_matchesStrictComparable');
@@ -57136,7 +56028,7 @@ function baseMatches(source) {
 
 module.exports = baseMatches;
 
-},{"./_baseIsMatch":438,"./_getMatchData":491,"./_matchesStrictComparable":526}],447:[function(require,module,exports){
+},{"./_baseIsMatch":431,"./_getMatchData":484,"./_matchesStrictComparable":519}],440:[function(require,module,exports){
 var baseIsEqual = require('./_baseIsEqual'),
     get = require('./get'),
     hasIn = require('./hasIn'),
@@ -57171,7 +56063,7 @@ function baseMatchesProperty(path, srcValue) {
 
 module.exports = baseMatchesProperty;
 
-},{"./_baseIsEqual":436,"./_isKey":509,"./_isStrictComparable":514,"./_matchesStrictComparable":526,"./_toKey":554,"./get":568,"./hasIn":569}],448:[function(require,module,exports){
+},{"./_baseIsEqual":429,"./_isKey":502,"./_isStrictComparable":507,"./_matchesStrictComparable":519,"./_toKey":547,"./get":561,"./hasIn":562}],441:[function(require,module,exports){
 /**
  * The base implementation of `_.property` without support for deep paths.
  *
@@ -57187,7 +56079,7 @@ function baseProperty(key) {
 
 module.exports = baseProperty;
 
-},{}],449:[function(require,module,exports){
+},{}],442:[function(require,module,exports){
 var baseGet = require('./_baseGet');
 
 /**
@@ -57205,7 +56097,7 @@ function basePropertyDeep(path) {
 
 module.exports = basePropertyDeep;
 
-},{"./_baseGet":430}],450:[function(require,module,exports){
+},{"./_baseGet":423}],443:[function(require,module,exports){
 /**
  * The base implementation of `_.reduce` and `_.reduceRight`, without support
  * for iteratee shorthands, which iterates over `collection` using `eachFunc`.
@@ -57230,7 +56122,7 @@ function baseReduce(collection, iteratee, accumulator, initAccum, eachFunc) {
 
 module.exports = baseReduce;
 
-},{}],451:[function(require,module,exports){
+},{}],444:[function(require,module,exports){
 var identity = require('./identity'),
     overRest = require('./_overRest'),
     setToString = require('./_setToString');
@@ -57249,7 +56141,7 @@ function baseRest(func, start) {
 
 module.exports = baseRest;
 
-},{"./_overRest":535,"./_setToString":544,"./identity":570}],452:[function(require,module,exports){
+},{"./_overRest":528,"./_setToString":537,"./identity":563}],445:[function(require,module,exports){
 var identity = require('./identity'),
     metaMap = require('./_metaMap');
 
@@ -57268,7 +56160,7 @@ var baseSetData = !metaMap ? identity : function(func, data) {
 
 module.exports = baseSetData;
 
-},{"./_metaMap":529,"./identity":570}],453:[function(require,module,exports){
+},{"./_metaMap":522,"./identity":563}],446:[function(require,module,exports){
 var constant = require('./constant'),
     defineProperty = require('./_defineProperty'),
     identity = require('./identity');
@@ -57292,7 +56184,7 @@ var baseSetToString = !defineProperty ? identity : function(func, string) {
 
 module.exports = baseSetToString;
 
-},{"./_defineProperty":481,"./constant":560,"./identity":570}],454:[function(require,module,exports){
+},{"./_defineProperty":474,"./constant":553,"./identity":563}],447:[function(require,module,exports){
 /**
  * The base implementation of `_.times` without support for iteratee shorthands
  * or max array length checks.
@@ -57314,7 +56206,7 @@ function baseTimes(n, iteratee) {
 
 module.exports = baseTimes;
 
-},{}],455:[function(require,module,exports){
+},{}],448:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     arrayMap = require('./_arrayMap'),
     isArray = require('./isArray'),
@@ -57353,7 +56245,7 @@ function baseToString(value) {
 
 module.exports = baseToString;
 
-},{"./_Symbol":404,"./_arrayMap":414,"./isArray":572,"./isSymbol":581}],456:[function(require,module,exports){
+},{"./_Symbol":397,"./_arrayMap":407,"./isArray":565,"./isSymbol":574}],449:[function(require,module,exports){
 /**
  * The base implementation of `_.unary` without support for storing metadata.
  *
@@ -57369,7 +56261,7 @@ function baseUnary(func) {
 
 module.exports = baseUnary;
 
-},{}],457:[function(require,module,exports){
+},{}],450:[function(require,module,exports){
 var SetCache = require('./_SetCache'),
     arrayIncludes = require('./_arrayIncludes'),
     arrayIncludesWith = require('./_arrayIncludesWith'),
@@ -57443,7 +56335,7 @@ function baseUniq(array, iteratee, comparator) {
 
 module.exports = baseUniq;
 
-},{"./_SetCache":402,"./_arrayIncludes":411,"./_arrayIncludesWith":412,"./_cacheHas":459,"./_createSet":479,"./_setToArray":543}],458:[function(require,module,exports){
+},{"./_SetCache":395,"./_arrayIncludes":404,"./_arrayIncludesWith":405,"./_cacheHas":452,"./_createSet":472,"./_setToArray":536}],451:[function(require,module,exports){
 var baseDifference = require('./_baseDifference'),
     baseFlatten = require('./_baseFlatten'),
     baseUniq = require('./_baseUniq');
@@ -57481,7 +56373,7 @@ function baseXor(arrays, iteratee, comparator) {
 
 module.exports = baseXor;
 
-},{"./_baseDifference":423,"./_baseFlatten":427,"./_baseUniq":457}],459:[function(require,module,exports){
+},{"./_baseDifference":416,"./_baseFlatten":420,"./_baseUniq":450}],452:[function(require,module,exports){
 /**
  * Checks if a `cache` value for `key` exists.
  *
@@ -57496,7 +56388,7 @@ function cacheHas(cache, key) {
 
 module.exports = cacheHas;
 
-},{}],460:[function(require,module,exports){
+},{}],453:[function(require,module,exports){
 var identity = require('./identity');
 
 /**
@@ -57512,7 +56404,7 @@ function castFunction(value) {
 
 module.exports = castFunction;
 
-},{"./identity":570}],461:[function(require,module,exports){
+},{"./identity":563}],454:[function(require,module,exports){
 var isArray = require('./isArray'),
     isKey = require('./_isKey'),
     stringToPath = require('./_stringToPath'),
@@ -57535,7 +56427,7 @@ function castPath(value, object) {
 
 module.exports = castPath;
 
-},{"./_isKey":509,"./_stringToPath":553,"./isArray":572,"./toString":596}],462:[function(require,module,exports){
+},{"./_isKey":502,"./_stringToPath":546,"./isArray":565,"./toString":589}],455:[function(require,module,exports){
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMax = Math.max;
 
@@ -57576,7 +56468,7 @@ function composeArgs(args, partials, holders, isCurried) {
 
 module.exports = composeArgs;
 
-},{}],463:[function(require,module,exports){
+},{}],456:[function(require,module,exports){
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMax = Math.max;
 
@@ -57619,7 +56511,7 @@ function composeArgsRight(args, partials, holders, isCurried) {
 
 module.exports = composeArgsRight;
 
-},{}],464:[function(require,module,exports){
+},{}],457:[function(require,module,exports){
 /**
  * Copies the values of `source` to `array`.
  *
@@ -57641,7 +56533,7 @@ function copyArray(source, array) {
 
 module.exports = copyArray;
 
-},{}],465:[function(require,module,exports){
+},{}],458:[function(require,module,exports){
 var assignValue = require('./_assignValue'),
     baseAssignValue = require('./_baseAssignValue');
 
@@ -57683,7 +56575,7 @@ function copyObject(source, props, object, customizer) {
 
 module.exports = copyObject;
 
-},{"./_assignValue":418,"./_baseAssignValue":421}],466:[function(require,module,exports){
+},{"./_assignValue":411,"./_baseAssignValue":414}],459:[function(require,module,exports){
 var root = require('./_root');
 
 /** Used to detect overreaching core-js shims. */
@@ -57691,7 +56583,7 @@ var coreJsData = root['__core-js_shared__'];
 
 module.exports = coreJsData;
 
-},{"./_root":539}],467:[function(require,module,exports){
+},{"./_root":532}],460:[function(require,module,exports){
 /**
  * Gets the number of `placeholder` occurrences in `array`.
  *
@@ -57714,7 +56606,7 @@ function countHolders(array, placeholder) {
 
 module.exports = countHolders;
 
-},{}],468:[function(require,module,exports){
+},{}],461:[function(require,module,exports){
 var arrayAggregator = require('./_arrayAggregator'),
     baseAggregator = require('./_baseAggregator'),
     baseIteratee = require('./_baseIteratee'),
@@ -57739,7 +56631,7 @@ function createAggregator(setter, initializer) {
 
 module.exports = createAggregator;
 
-},{"./_arrayAggregator":408,"./_baseAggregator":420,"./_baseIteratee":442,"./isArray":572}],469:[function(require,module,exports){
+},{"./_arrayAggregator":401,"./_baseAggregator":413,"./_baseIteratee":435,"./isArray":565}],462:[function(require,module,exports){
 var baseRest = require('./_baseRest'),
     isIterateeCall = require('./_isIterateeCall');
 
@@ -57778,7 +56670,7 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"./_baseRest":451,"./_isIterateeCall":508}],470:[function(require,module,exports){
+},{"./_baseRest":444,"./_isIterateeCall":501}],463:[function(require,module,exports){
 var isArrayLike = require('./isArrayLike');
 
 /**
@@ -57812,7 +56704,7 @@ function createBaseEach(eachFunc, fromRight) {
 
 module.exports = createBaseEach;
 
-},{"./isArrayLike":573}],471:[function(require,module,exports){
+},{"./isArrayLike":566}],464:[function(require,module,exports){
 /**
  * Creates a base function for methods like `_.forIn` and `_.forOwn`.
  *
@@ -57839,7 +56731,7 @@ function createBaseFor(fromRight) {
 
 module.exports = createBaseFor;
 
-},{}],472:[function(require,module,exports){
+},{}],465:[function(require,module,exports){
 var createCtor = require('./_createCtor'),
     root = require('./_root');
 
@@ -57869,7 +56761,7 @@ function createBind(func, bitmask, thisArg) {
 
 module.exports = createBind;
 
-},{"./_createCtor":473,"./_root":539}],473:[function(require,module,exports){
+},{"./_createCtor":466,"./_root":532}],466:[function(require,module,exports){
 var baseCreate = require('./_baseCreate'),
     isObject = require('./isObject');
 
@@ -57908,7 +56800,7 @@ function createCtor(Ctor) {
 
 module.exports = createCtor;
 
-},{"./_baseCreate":422,"./isObject":579}],474:[function(require,module,exports){
+},{"./_baseCreate":415,"./isObject":572}],467:[function(require,module,exports){
 var apply = require('./_apply'),
     createCtor = require('./_createCtor'),
     createHybrid = require('./_createHybrid'),
@@ -57956,7 +56848,7 @@ function createCurry(func, bitmask, arity) {
 
 module.exports = createCurry;
 
-},{"./_apply":407,"./_createCtor":473,"./_createHybrid":476,"./_createRecurry":478,"./_getHolder":489,"./_replaceHolders":538,"./_root":539}],475:[function(require,module,exports){
+},{"./_apply":400,"./_createCtor":466,"./_createHybrid":469,"./_createRecurry":471,"./_getHolder":482,"./_replaceHolders":531,"./_root":532}],468:[function(require,module,exports){
 var baseIteratee = require('./_baseIteratee'),
     isArrayLike = require('./isArrayLike'),
     keys = require('./keys');
@@ -57983,7 +56875,7 @@ function createFind(findIndexFunc) {
 
 module.exports = createFind;
 
-},{"./_baseIteratee":442,"./isArrayLike":573,"./keys":584}],476:[function(require,module,exports){
+},{"./_baseIteratee":435,"./isArrayLike":566,"./keys":577}],469:[function(require,module,exports){
 var composeArgs = require('./_composeArgs'),
     composeArgsRight = require('./_composeArgsRight'),
     countHolders = require('./_countHolders'),
@@ -58077,7 +56969,7 @@ function createHybrid(func, bitmask, thisArg, partials, holders, partialsRight, 
 
 module.exports = createHybrid;
 
-},{"./_composeArgs":462,"./_composeArgsRight":463,"./_countHolders":467,"./_createCtor":473,"./_createRecurry":478,"./_getHolder":489,"./_reorder":537,"./_replaceHolders":538,"./_root":539}],477:[function(require,module,exports){
+},{"./_composeArgs":455,"./_composeArgsRight":456,"./_countHolders":460,"./_createCtor":466,"./_createRecurry":471,"./_getHolder":482,"./_reorder":530,"./_replaceHolders":531,"./_root":532}],470:[function(require,module,exports){
 var apply = require('./_apply'),
     createCtor = require('./_createCtor'),
     root = require('./_root');
@@ -58122,7 +57014,7 @@ function createPartial(func, bitmask, thisArg, partials) {
 
 module.exports = createPartial;
 
-},{"./_apply":407,"./_createCtor":473,"./_root":539}],478:[function(require,module,exports){
+},{"./_apply":400,"./_createCtor":466,"./_root":532}],471:[function(require,module,exports){
 var isLaziable = require('./_isLaziable'),
     setData = require('./_setData'),
     setWrapToString = require('./_setWrapToString');
@@ -58180,7 +57072,7 @@ function createRecurry(func, bitmask, wrapFunc, placeholder, thisArg, partials, 
 
 module.exports = createRecurry;
 
-},{"./_isLaziable":511,"./_setData":542,"./_setWrapToString":545}],479:[function(require,module,exports){
+},{"./_isLaziable":504,"./_setData":535,"./_setWrapToString":538}],472:[function(require,module,exports){
 var Set = require('./_Set'),
     noop = require('./noop'),
     setToArray = require('./_setToArray');
@@ -58201,7 +57093,7 @@ var createSet = !(Set && (1 / setToArray(new Set([,-0]))[1]) == INFINITY) ? noop
 
 module.exports = createSet;
 
-},{"./_Set":401,"./_setToArray":543,"./noop":587}],480:[function(require,module,exports){
+},{"./_Set":394,"./_setToArray":536,"./noop":580}],473:[function(require,module,exports){
 var baseSetData = require('./_baseSetData'),
     createBind = require('./_createBind'),
     createCurry = require('./_createCurry'),
@@ -58309,7 +57201,7 @@ function createWrap(func, bitmask, thisArg, partials, holders, argPos, ary, arit
 
 module.exports = createWrap;
 
-},{"./_baseSetData":452,"./_createBind":472,"./_createCurry":474,"./_createHybrid":476,"./_createPartial":477,"./_getData":487,"./_mergeData":528,"./_setData":542,"./_setWrapToString":545,"./toInteger":594}],481:[function(require,module,exports){
+},{"./_baseSetData":445,"./_createBind":465,"./_createCurry":467,"./_createHybrid":469,"./_createPartial":470,"./_getData":480,"./_mergeData":521,"./_setData":535,"./_setWrapToString":538,"./toInteger":587}],474:[function(require,module,exports){
 var getNative = require('./_getNative');
 
 var defineProperty = (function() {
@@ -58322,7 +57214,7 @@ var defineProperty = (function() {
 
 module.exports = defineProperty;
 
-},{"./_getNative":492}],482:[function(require,module,exports){
+},{"./_getNative":485}],475:[function(require,module,exports){
 var SetCache = require('./_SetCache'),
     arraySome = require('./_arraySome'),
     cacheHas = require('./_cacheHas');
@@ -58408,7 +57300,7 @@ function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalArrays;
 
-},{"./_SetCache":402,"./_arraySome":417,"./_cacheHas":459}],483:[function(require,module,exports){
+},{"./_SetCache":395,"./_arraySome":410,"./_cacheHas":452}],476:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     Uint8Array = require('./_Uint8Array'),
     eq = require('./eq'),
@@ -58522,7 +57414,7 @@ function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalByTag;
 
-},{"./_Symbol":404,"./_Uint8Array":405,"./_equalArrays":482,"./_mapToArray":525,"./_setToArray":543,"./eq":562}],484:[function(require,module,exports){
+},{"./_Symbol":397,"./_Uint8Array":398,"./_equalArrays":475,"./_mapToArray":518,"./_setToArray":536,"./eq":555}],477:[function(require,module,exports){
 var getAllKeys = require('./_getAllKeys');
 
 /** Used to compose bitmasks for value comparisons. */
@@ -58614,7 +57506,7 @@ function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalObjects;
 
-},{"./_getAllKeys":486}],485:[function(require,module,exports){
+},{"./_getAllKeys":479}],478:[function(require,module,exports){
 (function (global){(function (){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
@@ -58622,7 +57514,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 module.exports = freeGlobal;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],486:[function(require,module,exports){
+},{}],479:[function(require,module,exports){
 var baseGetAllKeys = require('./_baseGetAllKeys'),
     getSymbols = require('./_getSymbols'),
     keys = require('./keys');
@@ -58640,7 +57532,7 @@ function getAllKeys(object) {
 
 module.exports = getAllKeys;
 
-},{"./_baseGetAllKeys":431,"./_getSymbols":495,"./keys":584}],487:[function(require,module,exports){
+},{"./_baseGetAllKeys":424,"./_getSymbols":488,"./keys":577}],480:[function(require,module,exports){
 var metaMap = require('./_metaMap'),
     noop = require('./noop');
 
@@ -58657,7 +57549,7 @@ var getData = !metaMap ? noop : function(func) {
 
 module.exports = getData;
 
-},{"./_metaMap":529,"./noop":587}],488:[function(require,module,exports){
+},{"./_metaMap":522,"./noop":580}],481:[function(require,module,exports){
 var realNames = require('./_realNames');
 
 /** Used for built-in method references. */
@@ -58690,7 +57582,7 @@ function getFuncName(func) {
 
 module.exports = getFuncName;
 
-},{"./_realNames":536}],489:[function(require,module,exports){
+},{"./_realNames":529}],482:[function(require,module,exports){
 /**
  * Gets the argument placeholder value for `func`.
  *
@@ -58705,7 +57597,7 @@ function getHolder(func) {
 
 module.exports = getHolder;
 
-},{}],490:[function(require,module,exports){
+},{}],483:[function(require,module,exports){
 var isKeyable = require('./_isKeyable');
 
 /**
@@ -58725,7 +57617,7 @@ function getMapData(map, key) {
 
 module.exports = getMapData;
 
-},{"./_isKeyable":510}],491:[function(require,module,exports){
+},{"./_isKeyable":503}],484:[function(require,module,exports){
 var isStrictComparable = require('./_isStrictComparable'),
     keys = require('./keys');
 
@@ -58751,7 +57643,7 @@ function getMatchData(object) {
 
 module.exports = getMatchData;
 
-},{"./_isStrictComparable":514,"./keys":584}],492:[function(require,module,exports){
+},{"./_isStrictComparable":507,"./keys":577}],485:[function(require,module,exports){
 var baseIsNative = require('./_baseIsNative'),
     getValue = require('./_getValue');
 
@@ -58770,7 +57662,7 @@ function getNative(object, key) {
 
 module.exports = getNative;
 
-},{"./_baseIsNative":440,"./_getValue":497}],493:[function(require,module,exports){
+},{"./_baseIsNative":433,"./_getValue":490}],486:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /** Built-in value references. */
@@ -58778,7 +57670,7 @@ var getPrototype = overArg(Object.getPrototypeOf, Object);
 
 module.exports = getPrototype;
 
-},{"./_overArg":534}],494:[function(require,module,exports){
+},{"./_overArg":527}],487:[function(require,module,exports){
 var Symbol = require('./_Symbol');
 
 /** Used for built-in method references. */
@@ -58826,7 +57718,7 @@ function getRawTag(value) {
 
 module.exports = getRawTag;
 
-},{"./_Symbol":404}],495:[function(require,module,exports){
+},{"./_Symbol":397}],488:[function(require,module,exports){
 var arrayFilter = require('./_arrayFilter'),
     stubArray = require('./stubArray');
 
@@ -58858,7 +57750,7 @@ var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
 
 module.exports = getSymbols;
 
-},{"./_arrayFilter":410,"./stubArray":591}],496:[function(require,module,exports){
+},{"./_arrayFilter":403,"./stubArray":584}],489:[function(require,module,exports){
 var DataView = require('./_DataView'),
     Map = require('./_Map'),
     Promise = require('./_Promise'),
@@ -58918,7 +57810,7 @@ if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
 
 module.exports = getTag;
 
-},{"./_DataView":393,"./_Map":398,"./_Promise":400,"./_Set":401,"./_WeakMap":406,"./_baseGetTag":432,"./_toSource":555}],497:[function(require,module,exports){
+},{"./_DataView":386,"./_Map":391,"./_Promise":393,"./_Set":394,"./_WeakMap":399,"./_baseGetTag":425,"./_toSource":548}],490:[function(require,module,exports){
 /**
  * Gets the value at `key` of `object`.
  *
@@ -58933,7 +57825,7 @@ function getValue(object, key) {
 
 module.exports = getValue;
 
-},{}],498:[function(require,module,exports){
+},{}],491:[function(require,module,exports){
 /** Used to match wrap detail comments. */
 var reWrapDetails = /\{\n\/\* \[wrapped with (.+)\] \*/,
     reSplitDetails = /,? & /;
@@ -58952,7 +57844,7 @@ function getWrapDetails(source) {
 
 module.exports = getWrapDetails;
 
-},{}],499:[function(require,module,exports){
+},{}],492:[function(require,module,exports){
 var castPath = require('./_castPath'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray'),
@@ -58993,7 +57885,7 @@ function hasPath(object, path, hasFunc) {
 
 module.exports = hasPath;
 
-},{"./_castPath":461,"./_isIndex":507,"./_toKey":554,"./isArguments":571,"./isArray":572,"./isLength":578}],500:[function(require,module,exports){
+},{"./_castPath":454,"./_isIndex":500,"./_toKey":547,"./isArguments":564,"./isArray":565,"./isLength":571}],493:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /**
@@ -59010,7 +57902,7 @@ function hashClear() {
 
 module.exports = hashClear;
 
-},{"./_nativeCreate":530}],501:[function(require,module,exports){
+},{"./_nativeCreate":523}],494:[function(require,module,exports){
 /**
  * Removes `key` and its value from the hash.
  *
@@ -59029,7 +57921,7 @@ function hashDelete(key) {
 
 module.exports = hashDelete;
 
-},{}],502:[function(require,module,exports){
+},{}],495:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used to stand-in for `undefined` hash values. */
@@ -59061,7 +57953,7 @@ function hashGet(key) {
 
 module.exports = hashGet;
 
-},{"./_nativeCreate":530}],503:[function(require,module,exports){
+},{"./_nativeCreate":523}],496:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used for built-in method references. */
@@ -59086,7 +57978,7 @@ function hashHas(key) {
 
 module.exports = hashHas;
 
-},{"./_nativeCreate":530}],504:[function(require,module,exports){
+},{"./_nativeCreate":523}],497:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used to stand-in for `undefined` hash values. */
@@ -59111,7 +58003,7 @@ function hashSet(key, value) {
 
 module.exports = hashSet;
 
-},{"./_nativeCreate":530}],505:[function(require,module,exports){
+},{"./_nativeCreate":523}],498:[function(require,module,exports){
 /** Used to match wrap detail comments. */
 var reWrapComment = /\{(?:\n\/\* \[wrapped with .+\] \*\/)?\n?/;
 
@@ -59136,7 +58028,7 @@ function insertWrapDetails(source, details) {
 
 module.exports = insertWrapDetails;
 
-},{}],506:[function(require,module,exports){
+},{}],499:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray');
@@ -59158,7 +58050,7 @@ function isFlattenable(value) {
 
 module.exports = isFlattenable;
 
-},{"./_Symbol":404,"./isArguments":571,"./isArray":572}],507:[function(require,module,exports){
+},{"./_Symbol":397,"./isArguments":564,"./isArray":565}],500:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -59185,7 +58077,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],508:[function(require,module,exports){
+},{}],501:[function(require,module,exports){
 var eq = require('./eq'),
     isArrayLike = require('./isArrayLike'),
     isIndex = require('./_isIndex'),
@@ -59217,7 +58109,7 @@ function isIterateeCall(value, index, object) {
 
 module.exports = isIterateeCall;
 
-},{"./_isIndex":507,"./eq":562,"./isArrayLike":573,"./isObject":579}],509:[function(require,module,exports){
+},{"./_isIndex":500,"./eq":555,"./isArrayLike":566,"./isObject":572}],502:[function(require,module,exports){
 var isArray = require('./isArray'),
     isSymbol = require('./isSymbol');
 
@@ -59248,7 +58140,7 @@ function isKey(value, object) {
 
 module.exports = isKey;
 
-},{"./isArray":572,"./isSymbol":581}],510:[function(require,module,exports){
+},{"./isArray":565,"./isSymbol":574}],503:[function(require,module,exports){
 /**
  * Checks if `value` is suitable for use as unique object key.
  *
@@ -59265,7 +58157,7 @@ function isKeyable(value) {
 
 module.exports = isKeyable;
 
-},{}],511:[function(require,module,exports){
+},{}],504:[function(require,module,exports){
 var LazyWrapper = require('./_LazyWrapper'),
     getData = require('./_getData'),
     getFuncName = require('./_getFuncName'),
@@ -59295,7 +58187,7 @@ function isLaziable(func) {
 
 module.exports = isLaziable;
 
-},{"./_LazyWrapper":395,"./_getData":487,"./_getFuncName":488,"./wrapperLodash":598}],512:[function(require,module,exports){
+},{"./_LazyWrapper":388,"./_getData":480,"./_getFuncName":481,"./wrapperLodash":591}],505:[function(require,module,exports){
 var coreJsData = require('./_coreJsData');
 
 /** Used to detect methods masquerading as native. */
@@ -59317,7 +58209,7 @@ function isMasked(func) {
 
 module.exports = isMasked;
 
-},{"./_coreJsData":466}],513:[function(require,module,exports){
+},{"./_coreJsData":459}],506:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -59337,7 +58229,7 @@ function isPrototype(value) {
 
 module.exports = isPrototype;
 
-},{}],514:[function(require,module,exports){
+},{}],507:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /**
@@ -59354,7 +58246,7 @@ function isStrictComparable(value) {
 
 module.exports = isStrictComparable;
 
-},{"./isObject":579}],515:[function(require,module,exports){
+},{"./isObject":572}],508:[function(require,module,exports){
 /**
  * Removes all key-value entries from the list cache.
  *
@@ -59369,7 +58261,7 @@ function listCacheClear() {
 
 module.exports = listCacheClear;
 
-},{}],516:[function(require,module,exports){
+},{}],509:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /** Used for built-in method references. */
@@ -59406,7 +58298,7 @@ function listCacheDelete(key) {
 
 module.exports = listCacheDelete;
 
-},{"./_assocIndexOf":419}],517:[function(require,module,exports){
+},{"./_assocIndexOf":412}],510:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -59427,7 +58319,7 @@ function listCacheGet(key) {
 
 module.exports = listCacheGet;
 
-},{"./_assocIndexOf":419}],518:[function(require,module,exports){
+},{"./_assocIndexOf":412}],511:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -59445,7 +58337,7 @@ function listCacheHas(key) {
 
 module.exports = listCacheHas;
 
-},{"./_assocIndexOf":419}],519:[function(require,module,exports){
+},{"./_assocIndexOf":412}],512:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -59473,7 +58365,7 @@ function listCacheSet(key, value) {
 
 module.exports = listCacheSet;
 
-},{"./_assocIndexOf":419}],520:[function(require,module,exports){
+},{"./_assocIndexOf":412}],513:[function(require,module,exports){
 var Hash = require('./_Hash'),
     ListCache = require('./_ListCache'),
     Map = require('./_Map');
@@ -59496,7 +58388,7 @@ function mapCacheClear() {
 
 module.exports = mapCacheClear;
 
-},{"./_Hash":394,"./_ListCache":396,"./_Map":398}],521:[function(require,module,exports){
+},{"./_Hash":387,"./_ListCache":389,"./_Map":391}],514:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -59516,7 +58408,7 @@ function mapCacheDelete(key) {
 
 module.exports = mapCacheDelete;
 
-},{"./_getMapData":490}],522:[function(require,module,exports){
+},{"./_getMapData":483}],515:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -59534,7 +58426,7 @@ function mapCacheGet(key) {
 
 module.exports = mapCacheGet;
 
-},{"./_getMapData":490}],523:[function(require,module,exports){
+},{"./_getMapData":483}],516:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -59552,7 +58444,7 @@ function mapCacheHas(key) {
 
 module.exports = mapCacheHas;
 
-},{"./_getMapData":490}],524:[function(require,module,exports){
+},{"./_getMapData":483}],517:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -59576,7 +58468,7 @@ function mapCacheSet(key, value) {
 
 module.exports = mapCacheSet;
 
-},{"./_getMapData":490}],525:[function(require,module,exports){
+},{"./_getMapData":483}],518:[function(require,module,exports){
 /**
  * Converts `map` to its key-value pairs.
  *
@@ -59596,7 +58488,7 @@ function mapToArray(map) {
 
 module.exports = mapToArray;
 
-},{}],526:[function(require,module,exports){
+},{}],519:[function(require,module,exports){
 /**
  * A specialized version of `matchesProperty` for source values suitable
  * for strict equality comparisons, i.e. `===`.
@@ -59618,7 +58510,7 @@ function matchesStrictComparable(key, srcValue) {
 
 module.exports = matchesStrictComparable;
 
-},{}],527:[function(require,module,exports){
+},{}],520:[function(require,module,exports){
 var memoize = require('./memoize');
 
 /** Used as the maximum memoize cache size. */
@@ -59646,7 +58538,7 @@ function memoizeCapped(func) {
 
 module.exports = memoizeCapped;
 
-},{"./memoize":586}],528:[function(require,module,exports){
+},{"./memoize":579}],521:[function(require,module,exports){
 var composeArgs = require('./_composeArgs'),
     composeArgsRight = require('./_composeArgsRight'),
     replaceHolders = require('./_replaceHolders');
@@ -59738,7 +58630,7 @@ function mergeData(data, source) {
 
 module.exports = mergeData;
 
-},{"./_composeArgs":462,"./_composeArgsRight":463,"./_replaceHolders":538}],529:[function(require,module,exports){
+},{"./_composeArgs":455,"./_composeArgsRight":456,"./_replaceHolders":531}],522:[function(require,module,exports){
 var WeakMap = require('./_WeakMap');
 
 /** Used to store function metadata. */
@@ -59746,7 +58638,7 @@ var metaMap = WeakMap && new WeakMap;
 
 module.exports = metaMap;
 
-},{"./_WeakMap":406}],530:[function(require,module,exports){
+},{"./_WeakMap":399}],523:[function(require,module,exports){
 var getNative = require('./_getNative');
 
 /* Built-in method references that are verified to be native. */
@@ -59754,7 +58646,7 @@ var nativeCreate = getNative(Object, 'create');
 
 module.exports = nativeCreate;
 
-},{"./_getNative":492}],531:[function(require,module,exports){
+},{"./_getNative":485}],524:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -59762,7 +58654,7 @@ var nativeKeys = overArg(Object.keys, Object);
 
 module.exports = nativeKeys;
 
-},{"./_overArg":534}],532:[function(require,module,exports){
+},{"./_overArg":527}],525:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `exports`. */
@@ -59794,7 +58686,7 @@ var nodeUtil = (function() {
 
 module.exports = nodeUtil;
 
-},{"./_freeGlobal":485}],533:[function(require,module,exports){
+},{"./_freeGlobal":478}],526:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -59818,7 +58710,7 @@ function objectToString(value) {
 
 module.exports = objectToString;
 
-},{}],534:[function(require,module,exports){
+},{}],527:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -59835,7 +58727,7 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
-},{}],535:[function(require,module,exports){
+},{}],528:[function(require,module,exports){
 var apply = require('./_apply');
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -59873,13 +58765,13 @@ function overRest(func, start, transform) {
 
 module.exports = overRest;
 
-},{"./_apply":407}],536:[function(require,module,exports){
+},{"./_apply":400}],529:[function(require,module,exports){
 /** Used to lookup unminified function names. */
 var realNames = {};
 
 module.exports = realNames;
 
-},{}],537:[function(require,module,exports){
+},{}],530:[function(require,module,exports){
 var copyArray = require('./_copyArray'),
     isIndex = require('./_isIndex');
 
@@ -59910,7 +58802,7 @@ function reorder(array, indexes) {
 
 module.exports = reorder;
 
-},{"./_copyArray":464,"./_isIndex":507}],538:[function(require,module,exports){
+},{"./_copyArray":457,"./_isIndex":500}],531:[function(require,module,exports){
 /** Used as the internal argument placeholder. */
 var PLACEHOLDER = '__lodash_placeholder__';
 
@@ -59941,7 +58833,7 @@ function replaceHolders(array, placeholder) {
 
 module.exports = replaceHolders;
 
-},{}],539:[function(require,module,exports){
+},{}],532:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */
@@ -59952,7 +58844,7 @@ var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
 
-},{"./_freeGlobal":485}],540:[function(require,module,exports){
+},{"./_freeGlobal":478}],533:[function(require,module,exports){
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
@@ -59973,7 +58865,7 @@ function setCacheAdd(value) {
 
 module.exports = setCacheAdd;
 
-},{}],541:[function(require,module,exports){
+},{}],534:[function(require,module,exports){
 /**
  * Checks if `value` is in the array cache.
  *
@@ -59989,7 +58881,7 @@ function setCacheHas(value) {
 
 module.exports = setCacheHas;
 
-},{}],542:[function(require,module,exports){
+},{}],535:[function(require,module,exports){
 var baseSetData = require('./_baseSetData'),
     shortOut = require('./_shortOut');
 
@@ -60011,7 +58903,7 @@ var setData = shortOut(baseSetData);
 
 module.exports = setData;
 
-},{"./_baseSetData":452,"./_shortOut":546}],543:[function(require,module,exports){
+},{"./_baseSetData":445,"./_shortOut":539}],536:[function(require,module,exports){
 /**
  * Converts `set` to an array of its values.
  *
@@ -60031,7 +58923,7 @@ function setToArray(set) {
 
 module.exports = setToArray;
 
-},{}],544:[function(require,module,exports){
+},{}],537:[function(require,module,exports){
 var baseSetToString = require('./_baseSetToString'),
     shortOut = require('./_shortOut');
 
@@ -60047,7 +58939,7 @@ var setToString = shortOut(baseSetToString);
 
 module.exports = setToString;
 
-},{"./_baseSetToString":453,"./_shortOut":546}],545:[function(require,module,exports){
+},{"./_baseSetToString":446,"./_shortOut":539}],538:[function(require,module,exports){
 var getWrapDetails = require('./_getWrapDetails'),
     insertWrapDetails = require('./_insertWrapDetails'),
     setToString = require('./_setToString'),
@@ -60070,7 +58962,7 @@ function setWrapToString(wrapper, reference, bitmask) {
 
 module.exports = setWrapToString;
 
-},{"./_getWrapDetails":498,"./_insertWrapDetails":505,"./_setToString":544,"./_updateWrapDetails":556}],546:[function(require,module,exports){
+},{"./_getWrapDetails":491,"./_insertWrapDetails":498,"./_setToString":537,"./_updateWrapDetails":549}],539:[function(require,module,exports){
 /** Used to detect hot functions by number of calls within a span of milliseconds. */
 var HOT_COUNT = 800,
     HOT_SPAN = 16;
@@ -60109,7 +59001,7 @@ function shortOut(func) {
 
 module.exports = shortOut;
 
-},{}],547:[function(require,module,exports){
+},{}],540:[function(require,module,exports){
 var ListCache = require('./_ListCache');
 
 /**
@@ -60126,7 +59018,7 @@ function stackClear() {
 
 module.exports = stackClear;
 
-},{"./_ListCache":396}],548:[function(require,module,exports){
+},{"./_ListCache":389}],541:[function(require,module,exports){
 /**
  * Removes `key` and its value from the stack.
  *
@@ -60146,7 +59038,7 @@ function stackDelete(key) {
 
 module.exports = stackDelete;
 
-},{}],549:[function(require,module,exports){
+},{}],542:[function(require,module,exports){
 /**
  * Gets the stack value for `key`.
  *
@@ -60162,7 +59054,7 @@ function stackGet(key) {
 
 module.exports = stackGet;
 
-},{}],550:[function(require,module,exports){
+},{}],543:[function(require,module,exports){
 /**
  * Checks if a stack value for `key` exists.
  *
@@ -60178,7 +59070,7 @@ function stackHas(key) {
 
 module.exports = stackHas;
 
-},{}],551:[function(require,module,exports){
+},{}],544:[function(require,module,exports){
 var ListCache = require('./_ListCache'),
     Map = require('./_Map'),
     MapCache = require('./_MapCache');
@@ -60214,7 +59106,7 @@ function stackSet(key, value) {
 
 module.exports = stackSet;
 
-},{"./_ListCache":396,"./_Map":398,"./_MapCache":399}],552:[function(require,module,exports){
+},{"./_ListCache":389,"./_Map":391,"./_MapCache":392}],545:[function(require,module,exports){
 /**
  * A specialized version of `_.indexOf` which performs strict equality
  * comparisons of values, i.e. `===`.
@@ -60239,7 +59131,7 @@ function strictIndexOf(array, value, fromIndex) {
 
 module.exports = strictIndexOf;
 
-},{}],553:[function(require,module,exports){
+},{}],546:[function(require,module,exports){
 var memoizeCapped = require('./_memoizeCapped');
 
 /** Used to match property names within property paths. */
@@ -60268,7 +59160,7 @@ var stringToPath = memoizeCapped(function(string) {
 
 module.exports = stringToPath;
 
-},{"./_memoizeCapped":527}],554:[function(require,module,exports){
+},{"./_memoizeCapped":520}],547:[function(require,module,exports){
 var isSymbol = require('./isSymbol');
 
 /** Used as references for various `Number` constants. */
@@ -60291,7 +59183,7 @@ function toKey(value) {
 
 module.exports = toKey;
 
-},{"./isSymbol":581}],555:[function(require,module,exports){
+},{"./isSymbol":574}],548:[function(require,module,exports){
 /** Used for built-in method references. */
 var funcProto = Function.prototype;
 
@@ -60319,7 +59211,7 @@ function toSource(func) {
 
 module.exports = toSource;
 
-},{}],556:[function(require,module,exports){
+},{}],549:[function(require,module,exports){
 var arrayEach = require('./_arrayEach'),
     arrayIncludes = require('./_arrayIncludes');
 
@@ -60367,7 +59259,7 @@ function updateWrapDetails(details, bitmask) {
 
 module.exports = updateWrapDetails;
 
-},{"./_arrayEach":409,"./_arrayIncludes":411}],557:[function(require,module,exports){
+},{"./_arrayEach":402,"./_arrayIncludes":404}],550:[function(require,module,exports){
 var LazyWrapper = require('./_LazyWrapper'),
     LodashWrapper = require('./_LodashWrapper'),
     copyArray = require('./_copyArray');
@@ -60392,7 +59284,7 @@ function wrapperClone(wrapper) {
 
 module.exports = wrapperClone;
 
-},{"./_LazyWrapper":395,"./_LodashWrapper":397,"./_copyArray":464}],558:[function(require,module,exports){
+},{"./_LazyWrapper":388,"./_LodashWrapper":390,"./_copyArray":457}],551:[function(require,module,exports){
 var assignValue = require('./_assignValue'),
     copyObject = require('./_copyObject'),
     createAssigner = require('./_createAssigner'),
@@ -60452,7 +59344,7 @@ var assign = createAssigner(function(object, source) {
 
 module.exports = assign;
 
-},{"./_assignValue":418,"./_copyObject":465,"./_createAssigner":469,"./_isPrototype":513,"./isArrayLike":573,"./keys":584}],559:[function(require,module,exports){
+},{"./_assignValue":411,"./_copyObject":458,"./_createAssigner":462,"./_isPrototype":506,"./isArrayLike":566,"./keys":577}],552:[function(require,module,exports){
 var baseRest = require('./_baseRest'),
     createWrap = require('./_createWrap'),
     getHolder = require('./_getHolder'),
@@ -60511,7 +59403,7 @@ bind.placeholder = {};
 
 module.exports = bind;
 
-},{"./_baseRest":451,"./_createWrap":480,"./_getHolder":489,"./_replaceHolders":538}],560:[function(require,module,exports){
+},{"./_baseRest":444,"./_createWrap":473,"./_getHolder":482,"./_replaceHolders":531}],553:[function(require,module,exports){
 /**
  * Creates a function that returns `value`.
  *
@@ -60539,7 +59431,7 @@ function constant(value) {
 
 module.exports = constant;
 
-},{}],561:[function(require,module,exports){
+},{}],554:[function(require,module,exports){
 var isObject = require('./isObject'),
     now = require('./now'),
     toNumber = require('./toNumber');
@@ -60732,7 +59624,7 @@ function debounce(func, wait, options) {
 
 module.exports = debounce;
 
-},{"./isObject":579,"./now":588,"./toNumber":595}],562:[function(require,module,exports){
+},{"./isObject":572,"./now":581,"./toNumber":588}],555:[function(require,module,exports){
 /**
  * Performs a
  * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
@@ -60771,7 +59663,7 @@ function eq(value, other) {
 
 module.exports = eq;
 
-},{}],563:[function(require,module,exports){
+},{}],556:[function(require,module,exports){
 var arrayFilter = require('./_arrayFilter'),
     baseFilter = require('./_baseFilter'),
     baseIteratee = require('./_baseIteratee'),
@@ -60825,7 +59717,7 @@ function filter(collection, predicate) {
 
 module.exports = filter;
 
-},{"./_arrayFilter":410,"./_baseFilter":425,"./_baseIteratee":442,"./isArray":572}],564:[function(require,module,exports){
+},{"./_arrayFilter":403,"./_baseFilter":418,"./_baseIteratee":435,"./isArray":565}],557:[function(require,module,exports){
 var createFind = require('./_createFind'),
     findIndex = require('./findIndex');
 
@@ -60869,7 +59761,7 @@ var find = createFind(findIndex);
 
 module.exports = find;
 
-},{"./_createFind":475,"./findIndex":565}],565:[function(require,module,exports){
+},{"./_createFind":468,"./findIndex":558}],558:[function(require,module,exports){
 var baseFindIndex = require('./_baseFindIndex'),
     baseIteratee = require('./_baseIteratee'),
     toInteger = require('./toInteger');
@@ -60926,7 +59818,7 @@ function findIndex(array, predicate, fromIndex) {
 
 module.exports = findIndex;
 
-},{"./_baseFindIndex":426,"./_baseIteratee":442,"./toInteger":594}],566:[function(require,module,exports){
+},{"./_baseFindIndex":419,"./_baseIteratee":435,"./toInteger":587}],559:[function(require,module,exports){
 var baseFlatten = require('./_baseFlatten');
 
 /** Used as references for various `Number` constants. */
@@ -60953,7 +59845,7 @@ function flattenDeep(array) {
 
 module.exports = flattenDeep;
 
-},{"./_baseFlatten":427}],567:[function(require,module,exports){
+},{"./_baseFlatten":420}],560:[function(require,module,exports){
 var arrayEach = require('./_arrayEach'),
     baseEach = require('./_baseEach'),
     castFunction = require('./_castFunction'),
@@ -60996,7 +59888,7 @@ function forEach(collection, iteratee) {
 
 module.exports = forEach;
 
-},{"./_arrayEach":409,"./_baseEach":424,"./_castFunction":460,"./isArray":572}],568:[function(require,module,exports){
+},{"./_arrayEach":402,"./_baseEach":417,"./_castFunction":453,"./isArray":565}],561:[function(require,module,exports){
 var baseGet = require('./_baseGet');
 
 /**
@@ -61031,7 +59923,7 @@ function get(object, path, defaultValue) {
 
 module.exports = get;
 
-},{"./_baseGet":430}],569:[function(require,module,exports){
+},{"./_baseGet":423}],562:[function(require,module,exports){
 var baseHasIn = require('./_baseHasIn'),
     hasPath = require('./_hasPath');
 
@@ -61067,7 +59959,7 @@ function hasIn(object, path) {
 
 module.exports = hasIn;
 
-},{"./_baseHasIn":433,"./_hasPath":499}],570:[function(require,module,exports){
+},{"./_baseHasIn":426,"./_hasPath":492}],563:[function(require,module,exports){
 /**
  * This method returns the first argument it receives.
  *
@@ -61090,7 +59982,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],571:[function(require,module,exports){
+},{}],564:[function(require,module,exports){
 var baseIsArguments = require('./_baseIsArguments'),
     isObjectLike = require('./isObjectLike');
 
@@ -61128,7 +60020,7 @@ var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsAr
 
 module.exports = isArguments;
 
-},{"./_baseIsArguments":435,"./isObjectLike":580}],572:[function(require,module,exports){
+},{"./_baseIsArguments":428,"./isObjectLike":573}],565:[function(require,module,exports){
 /**
  * Checks if `value` is classified as an `Array` object.
  *
@@ -61156,7 +60048,7 @@ var isArray = Array.isArray;
 
 module.exports = isArray;
 
-},{}],573:[function(require,module,exports){
+},{}],566:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isLength = require('./isLength');
 
@@ -61191,7 +60083,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 
-},{"./isFunction":577,"./isLength":578}],574:[function(require,module,exports){
+},{"./isFunction":570,"./isLength":571}],567:[function(require,module,exports){
 var isArrayLike = require('./isArrayLike'),
     isObjectLike = require('./isObjectLike');
 
@@ -61226,7 +60118,7 @@ function isArrayLikeObject(value) {
 
 module.exports = isArrayLikeObject;
 
-},{"./isArrayLike":573,"./isObjectLike":580}],575:[function(require,module,exports){
+},{"./isArrayLike":566,"./isObjectLike":573}],568:[function(require,module,exports){
 var root = require('./_root'),
     stubFalse = require('./stubFalse');
 
@@ -61266,7 +60158,7 @@ var isBuffer = nativeIsBuffer || stubFalse;
 
 module.exports = isBuffer;
 
-},{"./_root":539,"./stubFalse":592}],576:[function(require,module,exports){
+},{"./_root":532,"./stubFalse":585}],569:[function(require,module,exports){
 var baseKeys = require('./_baseKeys'),
     getTag = require('./_getTag'),
     isArguments = require('./isArguments'),
@@ -61345,7 +60237,7 @@ function isEmpty(value) {
 
 module.exports = isEmpty;
 
-},{"./_baseKeys":443,"./_getTag":496,"./_isPrototype":513,"./isArguments":571,"./isArray":572,"./isArrayLike":573,"./isBuffer":575,"./isTypedArray":582}],577:[function(require,module,exports){
+},{"./_baseKeys":436,"./_getTag":489,"./_isPrototype":506,"./isArguments":564,"./isArray":565,"./isArrayLike":566,"./isBuffer":568,"./isTypedArray":575}],570:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObject = require('./isObject');
 
@@ -61384,7 +60276,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{"./_baseGetTag":432,"./isObject":579}],578:[function(require,module,exports){
+},{"./_baseGetTag":425,"./isObject":572}],571:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -61421,7 +60313,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],579:[function(require,module,exports){
+},{}],572:[function(require,module,exports){
 /**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
@@ -61454,7 +60346,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],580:[function(require,module,exports){
+},{}],573:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -61485,7 +60377,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],581:[function(require,module,exports){
+},{}],574:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObjectLike = require('./isObjectLike');
 
@@ -61516,7 +60408,7 @@ function isSymbol(value) {
 
 module.exports = isSymbol;
 
-},{"./_baseGetTag":432,"./isObjectLike":580}],582:[function(require,module,exports){
+},{"./_baseGetTag":425,"./isObjectLike":573}],575:[function(require,module,exports){
 var baseIsTypedArray = require('./_baseIsTypedArray'),
     baseUnary = require('./_baseUnary'),
     nodeUtil = require('./_nodeUtil');
@@ -61545,7 +60437,7 @@ var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedA
 
 module.exports = isTypedArray;
 
-},{"./_baseIsTypedArray":441,"./_baseUnary":456,"./_nodeUtil":532}],583:[function(require,module,exports){
+},{"./_baseIsTypedArray":434,"./_baseUnary":449,"./_nodeUtil":525}],576:[function(require,module,exports){
 var baseAssignValue = require('./_baseAssignValue'),
     createAggregator = require('./_createAggregator');
 
@@ -61583,7 +60475,7 @@ var keyBy = createAggregator(function(result, value, key) {
 
 module.exports = keyBy;
 
-},{"./_baseAssignValue":421,"./_createAggregator":468}],584:[function(require,module,exports){
+},{"./_baseAssignValue":414,"./_createAggregator":461}],577:[function(require,module,exports){
 var arrayLikeKeys = require('./_arrayLikeKeys'),
     baseKeys = require('./_baseKeys'),
     isArrayLike = require('./isArrayLike');
@@ -61622,7 +60514,7 @@ function keys(object) {
 
 module.exports = keys;
 
-},{"./_arrayLikeKeys":413,"./_baseKeys":443,"./isArrayLike":573}],585:[function(require,module,exports){
+},{"./_arrayLikeKeys":406,"./_baseKeys":436,"./isArrayLike":566}],578:[function(require,module,exports){
 var arrayMap = require('./_arrayMap'),
     baseIteratee = require('./_baseIteratee'),
     baseMap = require('./_baseMap'),
@@ -61677,7 +60569,7 @@ function map(collection, iteratee) {
 
 module.exports = map;
 
-},{"./_arrayMap":414,"./_baseIteratee":442,"./_baseMap":445,"./isArray":572}],586:[function(require,module,exports){
+},{"./_arrayMap":407,"./_baseIteratee":435,"./_baseMap":438,"./isArray":565}],579:[function(require,module,exports){
 var MapCache = require('./_MapCache');
 
 /** Error message constants. */
@@ -61752,7 +60644,7 @@ memoize.Cache = MapCache;
 
 module.exports = memoize;
 
-},{"./_MapCache":399}],587:[function(require,module,exports){
+},{"./_MapCache":392}],580:[function(require,module,exports){
 /**
  * This method returns `undefined`.
  *
@@ -61771,7 +60663,7 @@ function noop() {
 
 module.exports = noop;
 
-},{}],588:[function(require,module,exports){
+},{}],581:[function(require,module,exports){
 var root = require('./_root');
 
 /**
@@ -61796,7 +60688,7 @@ var now = function() {
 
 module.exports = now;
 
-},{"./_root":539}],589:[function(require,module,exports){
+},{"./_root":532}],582:[function(require,module,exports){
 var baseProperty = require('./_baseProperty'),
     basePropertyDeep = require('./_basePropertyDeep'),
     isKey = require('./_isKey'),
@@ -61830,7 +60722,7 @@ function property(path) {
 
 module.exports = property;
 
-},{"./_baseProperty":448,"./_basePropertyDeep":449,"./_isKey":509,"./_toKey":554}],590:[function(require,module,exports){
+},{"./_baseProperty":441,"./_basePropertyDeep":442,"./_isKey":502,"./_toKey":547}],583:[function(require,module,exports){
 var arrayReduce = require('./_arrayReduce'),
     baseEach = require('./_baseEach'),
     baseIteratee = require('./_baseIteratee'),
@@ -61883,7 +60775,7 @@ function reduce(collection, iteratee, accumulator) {
 
 module.exports = reduce;
 
-},{"./_arrayReduce":416,"./_baseEach":424,"./_baseIteratee":442,"./_baseReduce":450,"./isArray":572}],591:[function(require,module,exports){
+},{"./_arrayReduce":409,"./_baseEach":417,"./_baseIteratee":435,"./_baseReduce":443,"./isArray":565}],584:[function(require,module,exports){
 /**
  * This method returns a new empty array.
  *
@@ -61908,7 +60800,7 @@ function stubArray() {
 
 module.exports = stubArray;
 
-},{}],592:[function(require,module,exports){
+},{}],585:[function(require,module,exports){
 /**
  * This method returns `false`.
  *
@@ -61928,7 +60820,7 @@ function stubFalse() {
 
 module.exports = stubFalse;
 
-},{}],593:[function(require,module,exports){
+},{}],586:[function(require,module,exports){
 var toNumber = require('./toNumber');
 
 /** Used as references for various `Number` constants. */
@@ -61972,7 +60864,7 @@ function toFinite(value) {
 
 module.exports = toFinite;
 
-},{"./toNumber":595}],594:[function(require,module,exports){
+},{"./toNumber":588}],587:[function(require,module,exports){
 var toFinite = require('./toFinite');
 
 /**
@@ -62010,7 +60902,7 @@ function toInteger(value) {
 
 module.exports = toInteger;
 
-},{"./toFinite":593}],595:[function(require,module,exports){
+},{"./toFinite":586}],588:[function(require,module,exports){
 var isObject = require('./isObject'),
     isSymbol = require('./isSymbol');
 
@@ -62078,7 +60970,7 @@ function toNumber(value) {
 
 module.exports = toNumber;
 
-},{"./isObject":579,"./isSymbol":581}],596:[function(require,module,exports){
+},{"./isObject":572,"./isSymbol":574}],589:[function(require,module,exports){
 var baseToString = require('./_baseToString');
 
 /**
@@ -62108,7 +61000,7 @@ function toString(value) {
 
 module.exports = toString;
 
-},{"./_baseToString":455}],597:[function(require,module,exports){
+},{"./_baseToString":448}],590:[function(require,module,exports){
 var arrayEach = require('./_arrayEach'),
     baseCreate = require('./_baseCreate'),
     baseForOwn = require('./_baseForOwn'),
@@ -62175,7 +61067,7 @@ function transform(object, iteratee, accumulator) {
 
 module.exports = transform;
 
-},{"./_arrayEach":409,"./_baseCreate":422,"./_baseForOwn":429,"./_baseIteratee":442,"./_getPrototype":493,"./isArray":572,"./isBuffer":575,"./isFunction":577,"./isObject":579,"./isTypedArray":582}],598:[function(require,module,exports){
+},{"./_arrayEach":402,"./_baseCreate":415,"./_baseForOwn":422,"./_baseIteratee":435,"./_getPrototype":486,"./isArray":565,"./isBuffer":568,"./isFunction":570,"./isObject":572,"./isTypedArray":575}],591:[function(require,module,exports){
 var LazyWrapper = require('./_LazyWrapper'),
     LodashWrapper = require('./_LodashWrapper'),
     baseLodash = require('./_baseLodash'),
@@ -62324,7 +61216,7 @@ lodash.prototype.constructor = lodash;
 
 module.exports = lodash;
 
-},{"./_LazyWrapper":395,"./_LodashWrapper":397,"./_baseLodash":444,"./_wrapperClone":557,"./isArray":572,"./isObjectLike":580}],599:[function(require,module,exports){
+},{"./_LazyWrapper":388,"./_LodashWrapper":390,"./_baseLodash":437,"./_wrapperClone":550,"./isArray":565,"./isObjectLike":573}],592:[function(require,module,exports){
 var arrayFilter = require('./_arrayFilter'),
     baseRest = require('./_baseRest'),
     baseXor = require('./_baseXor'),
@@ -62354,7 +61246,7 @@ var xor = baseRest(function(arrays) {
 
 module.exports = xor;
 
-},{"./_arrayFilter":410,"./_baseRest":451,"./_baseXor":458,"./isArrayLikeObject":574}],600:[function(require,module,exports){
+},{"./_arrayFilter":403,"./_baseRest":444,"./_baseXor":451,"./isArrayLikeObject":567}],593:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -63018,7 +61910,7 @@ function merge(target) {
   return target;
 }
 
-},{}],601:[function(require,module,exports){
+},{}],594:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -63525,7 +62417,7 @@ function remove(el) {
   el.parentNode && el.parentNode.removeChild(el);
 }
 
-},{}],602:[function(require,module,exports){
+},{}],595:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -63592,7 +62484,7 @@ function mitt(all) {
 var _default = mitt;
 exports.default = _default;
 
-},{}],603:[function(require,module,exports){
+},{}],596:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -65205,7 +64097,7 @@ function Writer(options) {
   };
 }
 
-},{"min-dash":600,"moddle":604,"saxen":609}],604:[function(require,module,exports){
+},{"min-dash":593,"moddle":597,"saxen":602}],597:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -66050,11 +64942,11 @@ Moddle.prototype.getTypeDescriptor = function (type) {
   return this.registry.typeMap[type];
 };
 
-},{"min-dash":600}],605:[function(require,module,exports){
+},{"min-dash":593}],598:[function(require,module,exports){
 module.exports = require('./lib/refs');
 
 module.exports.Collection = require('./lib/collection');
-},{"./lib/collection":606,"./lib/refs":607}],606:[function(require,module,exports){
+},{"./lib/collection":599,"./lib/refs":600}],599:[function(require,module,exports){
 'use strict';
 
 /**
@@ -66175,7 +65067,7 @@ function isExtended(collection) {
 module.exports.extend = extend;
 
 module.exports.isExtended = isExtended;
-},{}],607:[function(require,module,exports){
+},{}],600:[function(require,module,exports){
 'use strict';
 
 var Collection = require('./collection');
@@ -66378,7 +65270,7 @@ module.exports = Refs;
  * @property {boolean} [collection=false]
  * @property {boolean} [enumerable=false]
  */
-},{"./collection":606}],608:[function(require,module,exports){
+},{"./collection":599}],601:[function(require,module,exports){
 'use strict';
 
 /**
@@ -67299,7 +66191,7 @@ function pathToCurve(path) {
 
 module.exports = findPathIntersections;
 
-},{}],609:[function(require,module,exports){
+},{}],602:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68375,7 +67267,7 @@ function Parser(options) {
 
 }
 
-},{}],610:[function(require,module,exports){
+},{}],603:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68741,7 +67633,7 @@ function get($el) {
 
 create.get = get;
 
-},{"min-dash":600,"min-dom":601,"mitt":602}],611:[function(require,module,exports){
+},{"min-dash":593,"min-dom":594,"mitt":595}],604:[function(require,module,exports){
 'use strict';
 
 /**
@@ -68893,7 +67785,7 @@ function splitStr(str, position) {
     after: str.substring(position)
   };
 }
-},{}],612:[function(require,module,exports){
+},{}],605:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69742,4 +68634,4 @@ function transform(node, transforms) {
   return transformList.consolidate();
 }
 
-},{}]},{},[1,2,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,23,24,12]);
+},{}]},{},[1,2,6,7,8,9,10,11,12,13,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,15]);
