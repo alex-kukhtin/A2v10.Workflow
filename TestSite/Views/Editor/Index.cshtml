@@ -11,7 +11,9 @@
 <ul class="bpmn-editor-toolbar">
 	<li>
 		<button class="btn btn-sm btn-outline-primary" id="tb-save">Save</button>
-		<button class="btn btn-sm btn-outline-primary" id="tb-download">Download</button>
+		<button class="btn btn-sm btn-outline-primary" id="tb-download">Console</button>
+		<a class="btn btn-sm btn-outline-primary" id="tb-fromdb" href="/workflow/download/@ViewBag.Id">Download</a>
+		<input type="file" id="tb-upload">
 	</li>
 </ul>
 
@@ -42,6 +44,20 @@
 			ev.preventDefault();
 			event.returnValue = ''; // chrome
 		}
+	});
+
+	document.getElementById('tb-upload').addEventListener('change', ev => {
+		ev.preventDefault();
+		ev.stopPropagation();
+		let files = ev.target.files;
+		if (!files.length) return;
+		let file = files[0];
+		let fr = new FileReader();
+		fr.onload = function (e) {
+			let text = e.target.result;
+			bpmnModeler.importXML(text);
+		};
+		fr.readAsText(file);
 	});
 
 	document.getElementById('tb-save').addEventListener('click', ev => {

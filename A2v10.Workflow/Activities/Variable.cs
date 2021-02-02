@@ -55,4 +55,18 @@ namespace A2v10.Workflow
 		}
 
 	}
+
+	public class ExternalVariable : Variable, IExternalVariable
+	{
+		public ExternalVariable(IVariable var, String activityId)
+		{
+			Name = var.Name;
+			Type = var.Type;
+			Dir = var.Dir;
+			External = var.External;
+			Value = var.Value;
+			ActivityId = activityId;
+		}
+		public String ActivityId { get; }
+	}
 }

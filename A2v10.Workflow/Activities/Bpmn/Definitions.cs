@@ -21,8 +21,20 @@ namespace A2v10.Workflow.Bpmn
 
 		public List<Object> Children { get; init; }
 
+		public IActivity Root() => GetRoot();
+
 		public Process Process => Children.OfType<Process>().FirstOrDefault();
 
-		public IActivity Root => Process;
+		public IActivity GetRoot()
+		{
+			var collaboration = Children.OfType<Collaboration>().FirstOrDefault();
+			if (collaboration != null)
+			{
+
+				collaboration.AddProcesses(Children.OfType<Process>());
+				return collaboration;
+			}
+			return Process;
+		}
 	}
 }

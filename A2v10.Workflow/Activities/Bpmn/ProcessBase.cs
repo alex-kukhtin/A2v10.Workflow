@@ -41,7 +41,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			_onComplete = storage.GetCallback(ON_COMPLETE);
 			_token = storage.GetToken(TOKEN);
-			storage.GetTokenList(TOKEN, _tokens);
+			storage.GetTokenList(TOKENS, _tokens);
 		}
 		#endregion
 

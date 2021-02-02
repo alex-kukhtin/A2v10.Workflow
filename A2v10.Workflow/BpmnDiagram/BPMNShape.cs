@@ -14,6 +14,7 @@ namespace A2v10.Workflow.Bpmn.Diagram
 #pragma warning disable IDE1006 // Naming Styles
 		public Boolean isMarkerVisible {get; init;}
 		public Boolean isExpanded { get; init; }
+		public Boolean isHorizontal { get; init; }
 #pragma warning restore IDE1006 // Naming Styles
 	}
 }

@@ -89,7 +89,7 @@ namespace A2v10.Workflow.Serialization
 			var obj = XamlServices.Parse(text, XamlServicesOptions.BpmnXamlOptions);
 			return obj switch
 			{
-				IActivityWrapper activityWrapper => activityWrapper.Root,
+				IActivityWrapper activityWrapper => activityWrapper.Root(),
 				IActivity activity => activity,
 				_ => null,
 			};

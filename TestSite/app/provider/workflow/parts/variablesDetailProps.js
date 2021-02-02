@@ -3,6 +3,7 @@ import entryFactory from '../../lib/factory/entryFactory';
 
 import { validateId } from 'bpmn-js-properties-panel/lib/Utils';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 import extensionElementsImpl from './impl/extensionElements';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
@@ -95,7 +96,7 @@ export default function VariablesDetailProps(group, element, translate) {
 
 	group.entries.push(valueProp);
 
-	if (is(element, "bpmn:Process")) {
+	if (isAny(element, ['bpmn:Process', 'bpmn:Collaboration','bpmn:Participant'])) {
 		group.entries.push(entryFactory.checkbox(translate, {
 			id: 'var_external',
 			label: 'External',

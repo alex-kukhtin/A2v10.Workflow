@@ -105,9 +105,11 @@ namespace A2v10.Workflow
 
 		public ExpandoObject GetExternalVariables(ExpandoObject state)
 		{
-			if (_root is not IScoped scopedRoot)
-				return null;
-			var variables = scopedRoot.Variables;
+			List<IVariable> variables = null;
+			if (_root is IExternalScoped extScoped)
+				variables = extScoped.ExternalVariables();
+			else if (_root is IScoped scoped)
+				variables = scoped.Variables;
 			if (variables == null || variables.Count == 0)
 				return null;
 			var result = new ExpandoObject();
@@ -121,13 +123,20 @@ namespace A2v10.Workflow
 				{
 					var ve = new ExpandoObject();
 					ve.Set("Name", v.Name);
-					ve.Set("Value", rootValues.Get<Object>(v.Name));
+					if (v is IExternalVariable extVar)
+					{
+						var rv = values.Get<ExpandoObject>(extVar.ActivityId);
+						ve.Set("Value", rv.Get<Object>(v.Name));
+					}
+					else
+						ve.Set("Value", rootValues.Get<Object>(v.Name));
 					list.Add(ve);
 				}
 				if (list.Count > 0)
 					result.Set(propName, list);
 
 			};
+
 			AddList(VariableType.BigInt, "BigInt");
 			AddList(VariableType.String, "String");
 			AddList(VariableType.Guid, "Guid");

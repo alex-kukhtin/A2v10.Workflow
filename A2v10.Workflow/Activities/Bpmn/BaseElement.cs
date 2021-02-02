@@ -12,6 +12,11 @@ namespace A2v10.Workflow.Bpmn
 
 		public List<BaseElement> Children { get; init; }
 
+
+		public IEnumerable<T> Elems<T>() where T : BaseElement => Children.OfType<T>();
+
+		public T Elem<T>() where T : BaseElement => Children.OfType<T>().FirstOrDefault();
+
 		public IEnumerable<TResult> ExtensionElements<TResult>()
 		{
 			if (this.Children == null)

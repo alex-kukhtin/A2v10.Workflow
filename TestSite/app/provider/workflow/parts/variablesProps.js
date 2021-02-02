@@ -2,8 +2,8 @@
 import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-import { is } from 'bpmn-js/lib/util/ModelUtil';
 import extensionElementsImpl from './impl/extensionElements';
+import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 const variablesHtml = `
 <div class="bpp-row bpp-element-list">
@@ -23,7 +23,7 @@ const variablesHtml = `
 
 export default function addVariables(group, element, bpmnFactory, translate) {
 
-	if (!is(element, 'bpmn:Process') && !is(element, 'bpmn:SubProcess'))
+	if (!isAny(element, ['bpmn:Process', 'bpmn:SubProcess', 'bpmn:Collaboration','bpmn:Participant']))
 		return;
 	group.entries.push({
 		id: 'Variables',

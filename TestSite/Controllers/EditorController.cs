@@ -30,7 +30,7 @@ namespace TestSite.Controllers
 
 		public async Task<IActionResult> Get(String id = null)
 		{
-			String source = null;
+			String source;
 			if (!String.IsNullOrEmpty(id))
 			{
 				var elem = await _workflowCatalog.LoadBodyAsync(id);

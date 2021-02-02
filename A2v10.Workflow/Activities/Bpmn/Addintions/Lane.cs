@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace A2v10.Workflow.Interfaces
+namespace A2v10.Workflow.Bpmn
 {
-	public interface IActivityWrapper
+	public class Lane : BaseElement
 	{
-		IActivity Root();
+		public String Name { get; init; }
 	}
 }

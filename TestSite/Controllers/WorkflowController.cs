@@ -20,7 +20,7 @@ namespace TestSite.Controllers
 		private readonly IWorkflowCatalog _catalog;
 		private readonly IWorkflowStorage _storage;
 
-		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog, IWorkflowStorage storage, ITracker tracker)
+		public WorkflowController(IWorkflowEngine engine, IWorkflowCatalog catalog, IWorkflowStorage storage)
 		{
 			_engine = engine;
 			_catalog = catalog;
@@ -86,6 +86,21 @@ namespace TestSite.Controllers
 			var inst = await _engine.CreateAsync(new Identity() { Id = model.Id });
 			await _engine.RunAsync(inst.Id, prms);
 			return Redirect("/");
+		}
+
+		public async Task<IActionResult> Download(String id)
+		{
+			String xml = await _storage.LoadSourceAsync(new Identity()
+			{
+				Id = id,
+				Version = 0
+			});
+			Response.Headers.Add("Content-Disposition", $"{id}.xml");
+			return new ContentResult()
+			{
+				Content = xml,
+				ContentType = "text/xml",
+			};
 		}
 	}
 }

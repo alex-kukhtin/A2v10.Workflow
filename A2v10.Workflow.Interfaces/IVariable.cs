@@ -35,4 +35,9 @@ namespace A2v10.Workflow.Interfaces
 
 		String Assignment();
 	}
+
+	public interface IExternalVariable : IVariable
+	{
+		public String ActivityId { get; }
+	}
 }

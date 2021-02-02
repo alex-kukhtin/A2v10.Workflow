@@ -26,10 +26,6 @@ namespace A2v10.Workflow.Bpmn
 			return Enumerable.Empty<IActivity>();
 		}
 
-		public IEnumerable<T> Elems<T>() where T : BaseElement => Children.OfType<T>();
-
-		public T Elem<T>() where T : BaseElement => Children.OfType<T>().FirstOrDefault();
-
 		public abstract ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete);
 
 		public virtual void OnEndInit()

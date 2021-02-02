@@ -3001,6 +3001,8 @@ var _Utils = require("bpmn-js-properties-panel/lib/Utils");
 
 var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
 
+var _ModelingUtil = require("bpmn-js/lib/features/modeling/util/ModelingUtil");
+
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
@@ -3121,7 +3123,7 @@ function VariablesDetailProps(group, element, translate) {
 
   group.entries.push(valueProp);
 
-  if ((0, _ModelUtil.is)(element, "bpmn:Process")) {
+  if ((0, _ModelingUtil.isAny)(element, ['bpmn:Process', 'bpmn:Collaboration', 'bpmn:Participant'])) {
     group.entries.push(_entryFactory.default.checkbox(translate, {
       id: 'var_external',
       label: 'External',
@@ -3139,7 +3141,7 @@ function VariablesDetailProps(group, element, translate) {
   }
 }
 
-},{"../../lib/factory/entryFactory":9,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],37:[function(require,module,exports){
+},{"../../lib/factory/entryFactory":9,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/Utils":41,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/features/modeling/util/ModelingUtil":158,"bpmn-js/lib/util/ModelUtil":187}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3151,9 +3153,9 @@ var _ElementHelper = _interopRequireDefault(require("bpmn-js-properties-panel/li
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
 
-var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
-
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
+
+var _ModelingUtil = require("bpmn-js/lib/features/modeling/util/ModelingUtil");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3174,7 +3176,7 @@ const variablesHtml = `
 `;
 
 function addVariables(group, element, bpmnFactory, translate) {
-  if (!(0, _ModelUtil.is)(element, 'bpmn:Process') && !(0, _ModelUtil.is)(element, 'bpmn:SubProcess')) return;
+  if (!(0, _ModelingUtil.isAny)(element, ['bpmn:Process', 'bpmn:SubProcess', 'bpmn:Collaboration', 'bpmn:Participant'])) return;
   group.entries.push({
     id: 'Variables',
     html: variablesHtml,
@@ -3275,7 +3277,7 @@ function addVariables(group, element, bpmnFactory, translate) {
   });
 }
 
-},{"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"bpmn-js/lib/util/ModelUtil":187}],38:[function(require,module,exports){
+},{"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js-properties-panel/lib/helper/ElementHelper":54,"bpmn-js/lib/features/modeling/util/ModelingUtil":158}],38:[function(require,module,exports){
 module.exports = require('./lib');
 
 },{"./lib":57}],39:[function(require,module,exports){
