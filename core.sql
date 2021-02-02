@@ -164,7 +164,7 @@ begin
 			RN=row_number() over (partition by c.Id order by c.[Version] desc)
 		from a2wf.Workflows c
 	) cs on cs.Id=v.Id and cs.RN=1
-	where not (v.[Format]=cs.[Format] and v.[Text]=cs.[Text]);
+	where cs.Id is null or not (v.[Format]=cs.[Format] and v.[Text]=cs.[Text]);
 
 end
 go
