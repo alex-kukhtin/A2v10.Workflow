@@ -21,6 +21,8 @@ namespace A2v10.Workflow.Tracker
 			: base()
 		{
 			_action = action;
+			if (result is ExpandoObject exp)
+				result = exp.SerializeSimple();
 			String strResult = result != null ? $", result:{result}" : String.Empty;
 			Message = $"Script:{action}: {{id: {refer}, name: '{name}'{strResult}}}";
 		}

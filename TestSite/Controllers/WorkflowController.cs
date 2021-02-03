@@ -90,15 +90,11 @@ namespace TestSite.Controllers
 
 		public async Task<IActionResult> Download(String id)
 		{
-			String xml = await _storage.LoadSourceAsync(new Identity()
-			{
-				Id = id,
-				Version = 0
-			});
+			var wfElem = await _catalog.LoadBodyAsync(id);
 			Response.Headers.Add("Content-Disposition", $"{id}.xml");
 			return new ContentResult()
 			{
-				Content = xml,
+				Content = wfElem.Body,
 				ContentType = "text/xml",
 			};
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,7 +61,7 @@ namespace A2v10.Workflow.Interfaces.Api
 	{
 		Guid InstanceId { get; }
 		String Bookmark { get; }
-		Object Result { get; }
+		ExpandoObject Result { get; }
 	}
 
 	public interface IResumeProcessResponse : IResponse

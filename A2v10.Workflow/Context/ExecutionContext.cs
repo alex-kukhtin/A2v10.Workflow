@@ -128,8 +128,9 @@ namespace A2v10.Workflow
 			{
 				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, $"{{bookmark:'{bookmark}'}}"));
 				return action(this, bookmark, result);
-			}
-			return new ValueTask();
+			} 
+			else
+				throw new WorkflowExecption($"Bookmark '{bookmark}' not found");
 		}
 	}
 }

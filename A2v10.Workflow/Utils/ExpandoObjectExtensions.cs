@@ -52,5 +52,28 @@ namespace A2v10.Workflow
 		{
 			return (expobj as IDictionary<String, Object>).Keys;
 		}
+
+		public static String SerializeSimple(this ExpandoObject expobj)
+		{
+			if (expobj == null)
+				return null;
+
+			static String ToString(Object val)
+			{
+				if (val == null)
+					return null;
+				if (val is String)
+					return $"'{val.ToString().Replace("'", "\\'")}'";
+				return val.ToString();
+			}
+
+			List<String> arr = new List<String>();
+			foreach (var (k, v) in expobj)
+			{
+				arr.Add($"{k}:{ToString(v)}");
+			}
+			return $"{{{String.Join(", ", arr)}}}";
+		}
+
 	}
 }

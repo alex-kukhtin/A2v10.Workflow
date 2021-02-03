@@ -61,9 +61,10 @@ namespace TestSite.Controllers
 			var stateJson = model.Eval<String>("Instance.State");
 			var stateObj = JsonConvert.DeserializeObject<ExpandoObject>(stateJson ?? "{}");
 			var bk = stateObj.Eval<ExpandoObject>("Bookmarks") as IDictionary<String, Object>;
-			foreach (var (k, v) in bk)
+			foreach (var (k, _) in bk)
 			{
-				await _engine.ResumeAsync(id, k, null);
+				var exp = JsonConvert.DeserializeObject<ExpandoObject>("{Answer:'Success'}");
+				await _engine.ResumeAsync(id, k, exp);
 			}
 			return LocalRedirect("/instance/index");
 		}

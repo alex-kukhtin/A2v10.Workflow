@@ -84,7 +84,7 @@ namespace A2v10.Workflow.WebApi
 		[JsonProperty(PropertyName = "bookmark")]
 		public string Bookmark { get; set; }
 		[JsonProperty(PropertyName = "result", ItemConverterType = typeof(ExpandoObjectConverter))]
-		public object Result { get; set; }
+		public ExpandoObject Result { get; set; }
 	}
 
 	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]

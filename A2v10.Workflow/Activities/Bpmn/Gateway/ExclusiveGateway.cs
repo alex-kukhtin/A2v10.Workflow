@@ -28,6 +28,7 @@ namespace A2v10.Workflow.Bpmn
 				// join flows
 				return Parent.FindElement<SequenceFlow>(Outgoing.ElementAt(0).Text);
 			}
+
 			foreach (var og in Outgoing)
 			{
 				var flow = Parent.FindElement<SequenceFlow>(og.Text);
