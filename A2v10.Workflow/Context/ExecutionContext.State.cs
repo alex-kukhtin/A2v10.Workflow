@@ -17,12 +17,13 @@ namespace A2v10.Workflow
 				if (activity is IStorable storable)
 				{
 					ActivityStorage storage = new ActivityStorage(StorageState.Storing, _activities);
-					storable.Store(storage);
-					if (storage.Value.Any())
+					if (storage is ICanComplete canComplete && !canComplete.IsComplete)
+						storable.Store(storage);
+					if (storage.Value.IsNotEmpty())
 						actState.Set(refer, storage.Value);
 				}
 			}
-			if (!actState.Any())
+			if (actState.IsEmpty())
 				return null;
 			return actState;
 		}
@@ -34,24 +35,25 @@ namespace A2v10.Workflow
 			foreach (var refer in state.Keys())
 			{
 				if (_activities.TryGetValue(refer, out IActivity activity))
+				{
 					if (activity is IStorable storable)
 					{
 						var storage = new ActivityStorage(StorageState.Loading, _activities, state.Get<ExpandoObject>(refer));
 						storable.Restore(storage);
 					}
+				}
 			}
 		}
 
 		ExpandoObject GetScriptVariables()
 		{
 			var vars = new ExpandoObject();
-			var varsD = vars as IDictionary<String, Object>;
 			foreach (var (refer, activity) in _activities)
 			{
 				if (activity is IScoped)
-					varsD.Add(refer, _script.Evaluate<ExpandoObject>(refer, "Store"));
+					vars.SetNotNull(refer, _script.Evaluate<ExpandoObject>(refer, "Store"));
 			}
-			if (varsD.Count == 0)
+			if (vars.IsEmpty())
 				return null;
 			return vars;
 		}
@@ -140,9 +142,9 @@ namespace A2v10.Workflow
 			AddList(VariableType.BigInt, "BigInt");
 			AddList(VariableType.String, "String");
 			AddList(VariableType.Guid, "Guid");
-			if (result.Any())
-				return result;
-			return null;
+			if (result.IsEmpty())
+				return null;
+			return result;
 		}
 
 		public List<Object> GetExternalBookmarks()
@@ -162,7 +164,7 @@ namespace A2v10.Workflow
 		public WorkflowExecutionStatus GetExecutionStatus()
 		{
 			WorkflowExecutionStatus status = WorkflowExecutionStatus.Complete;
-			if (_bookmarks.Any())
+			if (_bookmarks.Count > 0)
 				status = WorkflowExecutionStatus.Idle;
 			return status;
 		}

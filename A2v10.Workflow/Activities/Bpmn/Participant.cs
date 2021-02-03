@@ -29,6 +29,12 @@ namespace A2v10.Workflow.Bpmn
 					yield return elem;
 		}
 
+		internal void EnsureChildren()
+		{
+			if (Children == null)
+				Children = new List<BaseElement>();
+		}
+
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			var process = Children.OfType<Process>().FirstOrDefault(itm => itm.Id == ProcessRef);

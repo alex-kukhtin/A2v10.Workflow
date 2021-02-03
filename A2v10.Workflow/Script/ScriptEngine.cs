@@ -121,7 +121,8 @@ namespace A2v10.Workflow
 			var func = GetFunc(refer, name);
 			if (func == null)
 				throw new WorkflowExecption($"Script element {refer}.{name} not found");
-			var arg = JsValue.FromObject(_engine, result);
+			// result must be not null
+			var arg = JsValue.FromObject(_engine, result ?? new ExpandoObject());
 			func(JsValue.Undefined, new JsValue[] { arg });
 		}
 	}

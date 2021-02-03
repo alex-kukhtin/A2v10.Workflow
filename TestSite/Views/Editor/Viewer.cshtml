@@ -1,0 +1,24 @@
+﻿@model List<dynamic>
+@{
+	Layout = "_Layout_Viewer";
+	ViewData["Title"] = "Viewer";
+}
+
+<div id="canvas">
+</div>
+
+@section Scripts {
+
+<script src="~/js/dist/bpmn-viewer.min.js"></script>
+
+<script>
+	let bpmnViewer = window.BpmnViewer;
+	let id = '@ViewBag.Id';
+	fetch(`/Editor/Get/${id}`).then(resp => {
+		resp.text().then(text => {
+			bpmnViewer.importXML(text);
+		});
+	});
+</script>
+
+}

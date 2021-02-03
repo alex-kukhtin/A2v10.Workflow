@@ -54,5 +54,11 @@ namespace TestSite.Controllers
 			});
 			return new EmptyResult();
 		}
+
+		public IActionResult Viewer(String id)
+		{
+			ViewBag.Id = id;
+			return View();
+		}
 	}
 }

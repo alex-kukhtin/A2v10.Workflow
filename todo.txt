@@ -4,15 +4,17 @@
 8. Bindings ????
 10. Bookmark reply (result)?
 12. RemoveBookmak for Cancel activity
-14. Activity.Id - Guid?
-17. SaveInstance - Bookmarks field
 18. Timer
-19. ActivityName for designer and tools
 20. IInstance.State - New, Complete, Idle, Fail,
 21. Parallel => CompletionCondition: Any|All
 
+22. SqlServerTracker = ActivityId מעהוכüםמ
+
+23. BPMN. Task parallel, sequence, loop
+
+24. Unlock instance after EXCEPTION
 
 Xaml
 ----
 2. TypeConverters
-3. MarkupExtensions
+3. MarkupExtensions (disable for bpmn)

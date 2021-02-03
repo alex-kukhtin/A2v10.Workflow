@@ -21,19 +21,10 @@ namespace A2v10.Workflow.Bpmn
 			return new ValueTask();
 		}
 
-		public override void Store(IActivityStorage storage)
-		{
-			base.Store(storage);
-		}
-
-		public override void Restore(IActivityStorage storage)
-		{
-			base.Restore(storage);
-		}
-
 		[StoreName("OnUserTaskComplete")]
 		ValueTask OnUserTaskComplete(IExecutionContext context, String bookmark, Object result)
 		{
+			IsComplete = true;
 			context.RemoveBookmark(bookmark);
 			context.ExecuteResult(Id, nameof(Script), result);
 			return CompleteBody(context);

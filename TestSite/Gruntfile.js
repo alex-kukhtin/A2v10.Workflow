@@ -14,20 +14,22 @@ module.exports = function (grunt) {
 			},
 			app: {
 				files: {
-					'wwwroot/js/dist/index.js': ['app/**/*.js']
+					'wwwroot/js/dist/bpmn-editor.js': ['app/bpmn-editor.js'],
+					'wwwroot/js/dist/bpmn-viewer.js': ['app/bpmn-viewer.js']
 				}
 			}
 		},
 		terser: {
 			options: {
 				ecma: '2016',
-				mangle: false
+				mangle: false /*does not work for modeler*/
 			},
 			app: {
 				files: {
-					"wwwroot/js/dist/index.min.js": ['wwwroot/js/dist/index.js']
+					"wwwroot/js/dist/bpmn-editor.min.js": ['wwwroot/js/dist/bpmn-editor.js'],
+					"wwwroot/js/dist/bpmn-viewer.min.js": ['wwwroot/js/dist/bpmn-viewer.js']
 				}
-			}
+			},
 		},
 		watch: {
 			files: ["app/**/*.js"],

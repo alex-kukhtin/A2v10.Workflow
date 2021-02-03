@@ -8,11 +8,13 @@ namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class BpmnTask : FlowElement, IStorable
+	public class BpmnTask : FlowElement, IStorable, ICanComplete
 	{
 
 		protected ExecutingAction _onComplete;
 		protected IToken _token;
+		
+		public Boolean IsComplete { get; protected set; }
 
 		protected virtual Boolean CanInduceIdle => false;
 

@@ -12,9 +12,15 @@ namespace A2v10.Workflow.Bpmn
 	public class Collaboration : BpmnActivity, IScoped, IExternalScoped
 	{
 		#region IScoped
-
 		public List<IVariable> Variables => Elem<ExtensionElements>()?.GetVariables();
 
+		public void BuildScript(IScriptBuilder builder)
+		{
+			builder.AddVariables(Variables);
+		}
+		#endregion
+
+		#region IExternalScoped
 		public List<IVariable> ExternalVariables()
 		{
 			var vars = Variables;
@@ -36,12 +42,8 @@ namespace A2v10.Workflow.Bpmn
 				return null;
 			return lst;
 		}
-
-		public void BuildScript(IScriptBuilder builder)
-		{
-			builder.AddVariables(Variables);
-		}
 		#endregion
+
 
 		public override IEnumerable<IActivity> EnumChildren()
 		{
@@ -56,7 +58,10 @@ namespace A2v10.Workflow.Bpmn
 				return;
 			foreach (var participant in Children.OfType<Participant>())
 			{
-				var prc = processes.First(p => p.Id == participant.ProcessRef);
+				var prc = processes.FirstOrDefault(p => p.Id == participant.ProcessRef);
+				if (prc == null)
+					throw new WorkflowExecption($"Process '{participant.ProcessRef}' not found");
+				participant.EnsureChildren();
 				participant.Children.Add(prc);
 			}
 		}

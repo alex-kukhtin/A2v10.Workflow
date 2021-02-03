@@ -10,7 +10,7 @@ namespace A2v10.Workflow.Bpmn
 	{
 		public String Id { get; init; }
 
-		public List<BaseElement> Children { get; init; }
+		public List<BaseElement> Children { get; set; }
 
 
 		public IEnumerable<T> Elems<T>() where T : BaseElement => Children.OfType<T>();

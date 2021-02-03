@@ -1,5 +1,6 @@
 ﻿
 
-23. TestSite - добавить просмотр (не редактирование!) bpmn
-24. Сформировать скрипты для Viewer
-25. terser - minify: mangle: true
+25. terser - minify: mangle: true ???
+26. Variables prop part - переставить кнопки добавить/удалить.
+
+

@@ -1,4 +1,6 @@
-﻿using A2v10.Data.Interfaces;
+﻿using A2v10.Data;
+using A2v10.Data.Interfaces;
+using A2v10.Workflow.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -13,10 +15,12 @@ namespace TestSite.Controllers
 	public class InstanceController : Controller
 	{
 		private readonly IDbContext _dbContext;
+		private readonly IWorkflowEngine _engine;
 
-		public InstanceController(IDbContext dbContext)
+		public InstanceController(IDbContext dbContext, IWorkflowEngine engine)
 		{
 			_dbContext = dbContext;
+			_engine = engine;
 		}
 
 
@@ -45,6 +49,23 @@ namespace TestSite.Controllers
 				Instance = model.Eval<ExpandoObject>("Instance")
 			};
 			return View(instOpenModel);
+		}
+
+
+		public async Task<IActionResult> Resume(Guid id)
+		{
+			var prms = new ExpandoObject();
+			prms.TryAdd("Id", id);
+			var model = await _dbContext.LoadModelAsync(null, "a2wfui.[Instance.Load]", prms);
+
+			var stateJson = model.Eval<String>("Instance.State");
+			var stateObj = JsonConvert.DeserializeObject<ExpandoObject>(stateJson ?? "{}");
+			var bk = stateObj.Eval<ExpandoObject>("Bookmarks") as IDictionary<String, Object>;
+			foreach (var (k, v) in bk)
+			{
+				await _engine.ResumeAsync(id, k, null);
+			}
+			return LocalRedirect("/instance/index");
 		}
 	}
 }

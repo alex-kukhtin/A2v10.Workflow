@@ -21,6 +21,16 @@ namespace A2v10.Workflow
 			d.Add(name, value);
 		}
 
+		public static Boolean IsEmpty(this ExpandoObject expobj)
+		{
+			return expobj == null || (expobj as IDictionary<String, Object>).Count == 0;
+		}
+
+		public static Boolean IsNotEmpty(this ExpandoObject expobj)
+		{
+			return expobj != null && (expobj as IDictionary<String, Object>).Count > 0;
+		}
+
 		public static void SetNotNull<T>(this ExpandoObject expobj, String name, T value) where T : class
 		{
 			if (value == null)

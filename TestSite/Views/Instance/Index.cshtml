@@ -35,8 +35,12 @@
 				<td>@inst.DateCreated.ToString()</td>
 				<td>@inst.DateModified.ToString()</td>
 				<td>@(inst.Lock != null && inst.Lock != Guid.Empty ? inst.Lock.ToString(): "")</td>
-				<td>
+				<td style="white-space:nowrap">
 					<a class="btn btn-primary btn-sm" href="/instance/open/@inst.Id">View</a>
+					@if (inst.ExecutionStatus == "Idle")
+					{
+						<a class="btn btn-info btn-sm" href="/instance/resume/@inst.Id">Resume</a>
+					}
 				</td>
 			</tr>
 			}
