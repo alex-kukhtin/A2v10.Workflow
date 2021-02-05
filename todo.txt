@@ -2,17 +2,19 @@
 
 7. Activity ctor: DI
 8. Bindings ????
+
 10. Bookmark reply (result)?
 12. RemoveBookmak for Cancel activity
 18. Timer
-20. IInstance.State - New, Complete, Idle, Fail,
-21. Parallel => CompletionCondition: Any|All
 
-22. SqlServerTracker = ActivityId отдельно
+21. Parallel => CompletionCondition: Any|All
 
 23. BPMN. Task parallel, sequence, loop
 
 24. Unlock instance after EXCEPTION
+25. Все-таки сделать Object в Api/Reply
+26. BpmnViwer - подсветка посещенных элементов
+
 
 Xaml
 ----

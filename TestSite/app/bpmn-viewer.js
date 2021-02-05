@@ -3,6 +3,7 @@ import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
 
 /*see: https://github.com/bpmn-io/bpmn-js/tree/develop/lib*/
 
+/*
 let canvas = document.getElementById('canvas');
 
 let bpmnViewer = new BpmnViewer({
@@ -11,5 +12,6 @@ let bpmnViewer = new BpmnViewer({
 		bindTo: window
 	}
 });
+*/
 
-window.BpmnViewer = bpmnViewer;
+window.BpmnViewer = BpmnViewer;

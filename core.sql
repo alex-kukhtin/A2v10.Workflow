@@ -139,9 +139,17 @@ begin
 			constraint DF_InstanceTrack_EventTime default(getutcdate()),
 		Kind int,
 		[Action] int,
+		Activity nvarchar(255),
 		[Message] nvarchar(max)
 	);
 	create index IDX_InstanceTrack_InstanceId on a2wf.InstanceTrack (InstanceId) with (fillfactor = 70);
+end
+go
+------------------------------------------------
+-- TODO: remove
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceTrack' and COLUMN_NAME=N'Activity')
+begin
+	alter table a2wf.InstanceTrack add Activity nvarchar(255);
 end
 go
 ------------------------------------------------
@@ -309,6 +317,7 @@ create type a2wf.[InstanceTrack.TableType] as table
 	EventTime datetime,
 	[Kind] int,
 	[Action] int,
+	Activity nvarchar(255),
 	[Message] nvarchar(max)
 )
 go
@@ -458,8 +467,8 @@ begin
 		(s.InstanceId, s.[Bookmark], s.WorkflowId)
 	when not matched by source then delete;
 
-	insert into a2wf.InstanceTrack(InstanceId, RecordNumber, EventTime, [Kind], [Action], [Message])
-	select i.Id, RecordNumber, EventTime, [Kind], [Action], [Message] from 
+	insert into a2wf.InstanceTrack(InstanceId, RecordNumber, EventTime, [Kind], [Action], [Activity], [Message])
+	select i.Id, RecordNumber, EventTime, [Kind], [Action], [Activity], [Message] from 
 	@TrackRecords r inner join @Instance i on r.ParentGUID = i.[GUID];
 
 	commit tran;

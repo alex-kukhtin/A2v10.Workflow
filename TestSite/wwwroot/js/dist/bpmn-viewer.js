@@ -6,14 +6,18 @@ var _NavigatedViewer = _interopRequireDefault(require("bpmn-js/lib/NavigatedView
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*see: https://github.com/bpmn-io/bpmn-js/tree/develop/lib*/
+
+/*
 let canvas = document.getElementById('canvas');
-let bpmnViewer = new _NavigatedViewer.default({
-  container: canvas,
-  keyboard: {
-    bindTo: window
-  }
+
+let bpmnViewer = new BpmnViewer({
+	container: canvas,
+	keyboard: {
+		bindTo: window
+	}
 });
-window.BpmnViewer = bpmnViewer;
+*/
+window.BpmnViewer = _NavigatedViewer.default;
 
 },{"bpmn-js/lib/NavigatedViewer":3}],2:[function(require,module,exports){
 "use strict";

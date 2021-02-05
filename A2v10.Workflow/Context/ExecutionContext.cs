@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Tracker;
 
@@ -84,7 +82,7 @@ namespace A2v10.Workflow
 
 		public void SetBookmark(String bookmark, ResumeAction onComplete)
 		{
-			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Execute, $"{{bookmark:'{bookmark}'}}"));
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Bookmark, $"{{bookmark:'{bookmark}'}}"));
 			_bookmarks.Add(bookmark, onComplete);
 		}
 
