@@ -12,7 +12,15 @@
 <script src="~/js/dist/bpmn-viewer.min.js"></script>
 
 <script>
-	let bpmnViewer = window.BpmnViewer;
+	const canvas = document.getElementById('canvas');
+
+	const bpmnViewer = new window.BpmnViewer({
+		container: canvas,
+		keyboard: {
+			bindTo: window
+		}
+	});
+
 	let id = '@ViewBag.Id';
 	fetch(`/Editor/Get/${id}`).then(resp => {
 		resp.text().then(text => {
