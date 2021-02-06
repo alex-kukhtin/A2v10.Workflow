@@ -35,7 +35,8 @@ namespace A2v10.Workflow.WebApi
 	{
 		[JsonProperty(PropertyName = "instanceId")]
 		public Guid InstanceId { get; set; }
-		[JsonProperty(PropertyName = "parameters", ItemConverterType = typeof(ExpandoObjectConverter))]
+		[JsonProperty(PropertyName = "parameters")]
+		[JsonConverter(typeof(ExpandoObjectConverter))]
 		public ExpandoObject Parameters { get; set; }
 
 		object IRunProcessRequest.Parameters => Parameters;
@@ -57,7 +58,8 @@ namespace A2v10.Workflow.WebApi
 		public string Workflow { get; set; }
 		[JsonProperty(PropertyName = "version")]
 		public int Version { get; set; }
-		[JsonProperty(PropertyName = "parameters", ItemConverterType = typeof(ExpandoObjectConverter))]
+		[JsonProperty(PropertyName = "parameters")]
+		[JsonConverter(typeof(ExpandoObjectConverter))]
 		public ExpandoObject Parameters { get; set; }
 
 		IIdentity IStartProcessRequest.Identity => new Identity(Workflow, Version);
@@ -83,8 +85,9 @@ namespace A2v10.Workflow.WebApi
 		public Guid InstanceId { get; set; }
 		[JsonProperty(PropertyName = "bookmark")]
 		public string Bookmark { get; set; }
-		[JsonProperty(PropertyName = "result", ItemConverterType = typeof(ExpandoObjectConverter))]
-		public ExpandoObject Result { get; set; }
+		[JsonProperty(PropertyName = "result")]
+		[JsonConverter(typeof(ExpandoObjectConverter))]
+		public Object Result { get; set; }
 	}
 
 	[JsonObject(MemberSerialization = MemberSerialization.OptIn, ItemNullValueHandling = NullValueHandling.Ignore)]
