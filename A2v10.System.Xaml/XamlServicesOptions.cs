@@ -10,8 +10,9 @@ namespace A2v10.System.Xaml
 
 	public class XamlServicesOptions
 	{
-		public NamespaceDef[] Namespaces { get; set; }
-		public Dictionary<String, String> Aliases { get; set; }
+		public NamespaceDef[] Namespaces { get; init; }
+		public Dictionary<String, String> Aliases { get; init; }
+		public Boolean DisableMarkupExtensions { get; init; }
 
 
 		private static readonly NamespaceDef[] BPMNNamespaces = new NamespaceDef[] {
@@ -28,7 +29,8 @@ namespace A2v10.System.Xaml
 				Namespaces = BPMNNamespaces,
 				Aliases = new Dictionary<String, String>() {
 					{ "Task", "BpmnTask" }
-				}
+				},
+				DisableMarkupExtensions = true
 			};
 	}
 }

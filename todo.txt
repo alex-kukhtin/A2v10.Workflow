@@ -12,7 +12,6 @@
 23. BPMN. Task parallel, sequence, loop
 
 24. Unlock instance after EXCEPTION
-25. Все-таки сделать Object в Api/Reply
 26. BpmnViwer - подсветка посещенных элементов
 
 
