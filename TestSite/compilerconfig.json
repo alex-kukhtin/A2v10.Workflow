@@ -2,5 +2,9 @@
 	{
 		"outputFile": "wwwroot/css/editor.css",
 		"inputFile": "Scss/editor.scss"
+	},
+	{
+		"outputFile": "wwwroot/css/properties-panels.css",
+		"inputFile": "Scss/bpmn-js-properties-panel.scss"
 	}
 ]

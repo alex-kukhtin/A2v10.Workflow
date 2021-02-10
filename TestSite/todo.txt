@@ -1,6 +1,5 @@
 ﻿
 
 25. terser - minify: mangle: true ???
-26. Variables prop part - переставить кнопки добавить/удалить.
-
+27.
 

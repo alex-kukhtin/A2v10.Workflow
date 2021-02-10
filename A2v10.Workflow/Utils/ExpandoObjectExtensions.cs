@@ -15,6 +15,12 @@ namespace A2v10.Workflow
 			return default;
 		}
 
+		public static void Add(this ExpandoObject expobj, String name, Object value)
+		{
+			var d = expobj as IDictionary<String, Object>;
+			d.Add(name, value);
+		}
+
 		public static void Set<T>(this ExpandoObject expobj, String name, T value)
 		{
 			var d = expobj as IDictionary<String, Object>;

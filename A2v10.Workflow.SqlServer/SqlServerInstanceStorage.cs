@@ -2,6 +2,7 @@
 using System;
 using System.Dynamic;
 using System.Threading.Tasks;
+
 using A2v10.Data.Interfaces;
 using A2v10.Workflow.Interfaces;
 
@@ -23,8 +24,11 @@ namespace A2v10.Workflow.SqlServer
 		#region IInstanceStorage
 		public async Task<IInstance> Load(Guid instanceId)
 		{
-			var prms = new ExpandoObject();
-			prms.Set<Guid>("Id", instanceId);
+			var prms = new ExpandoObject()
+			{
+				{ "Id", instanceId }
+			};
+
 			var eo = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Instance.Load]", prms);
 			if (eo == null)
 				throw new SqlServerStorageException($"Instance '{instanceId}' not found");
@@ -48,32 +52,39 @@ namespace A2v10.Workflow.SqlServer
 
 		public async Task Create(IInstance instance)
 		{
-			var ieo = new ExpandoObject();
-			ieo.Set("Id", instance.Id);
-			ieo.Set("Parent", instance.Parent);
-			ieo.Set("Version", instance.Workflow.Identity.Version);
-			ieo.Set("WorkflowId", instance.Workflow.Identity.Id);
-			ieo.Set("ExecutionStatus", instance.ExecutionStatus.ToString());
+			var ieo = new ExpandoObject() 
+			{
+				{ "Id", instance.Id },
+				{ "Parent", instance.Parent},
+				{ "Version", instance.Workflow.Identity.Version},
+				{ "WorkflowId", instance.Workflow.Identity.Id },
+				{ "ExecutionStatus", instance.ExecutionStatus.ToString() }
+			};
 			await _dbContext.ExecuteExpandoAsync(null, $"{Definitions.SqlSchema}.[Instance.Create]", ieo);
 		}
 
 		public async Task Save(IInstance instance)
 		{
-			var ieo = new ExpandoObject();
-			ieo.Set("Id", instance.Id);
-			ieo.Set("WorkflowId", instance.Workflow.Identity.Id);
-			ieo.Set("ExecutionStatus", instance.ExecutionStatus.ToString());
-			ieo.Set("Lock", instance.Lock);
-			ieo.Set("State", _serializer.Serialize(instance.State));
-
 			var instanceData = instance.InstanceData;
-			ieo.Set("Variables", instanceData.ExternalVariables);
-			ieo.Set("Bookmarks", instanceData.ExternalBookmarks);
-			ieo.Set("TrackRecords", instanceData.TrackRecords);
 
-			var root = new ExpandoObject();
-			root.Set("Instance", ieo);
-			await _dbContext.SaveModelAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root);
+			var ieo = new ExpandoObject() 
+			{
+				{ "Id", instance.Id },
+				{ "WorkflowId", instance.Workflow.Identity.Id},
+				{ "ExecutionStatus", instance.ExecutionStatus.ToString() },
+				{ "Lock", instance.Lock },
+				{ "State", _serializer.Serialize(instance.State) },
+				{ "Variables", instanceData.ExternalVariables },
+				{ "Bookmarks", instanceData.ExternalBookmarks},
+				{ "TrackRecords", instanceData.TrackRecords }
+			};
+
+			var root = new ExpandoObject()
+			{
+				{"Instance", ieo }
+			};
+
+			_ = await _dbContext.SaveModelAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root);
 		}
 
 		#endregion
