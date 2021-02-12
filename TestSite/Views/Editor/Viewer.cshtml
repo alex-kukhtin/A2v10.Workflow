@@ -12,21 +12,37 @@
 <script src="~/js/dist/bpmn-viewer.min.js"></script>
 
 <script>
-	const canvas = document.getElementById('canvas');
 
-	const bpmnViewer = new window.BpmnViewer({
-		container: canvas,
-		keyboard: {
-			bindTo: window
-		}
-	});
+	const bpmnViewer = window.BpmnViewer.create('canvas');
 
 	let id = '@ViewBag.Id';
 	fetch(`/Editor/Get/${id}`).then(resp => {
 		resp.text().then(text => {
-			bpmnViewer.importXML(text);
+			bpmnViewer.importXML(text).then(x => {
+				paint();
+			});
 		});
 	});
+
+	function paint() {
+		var modeling = bpmnViewer.get('modeling');
+		console.dir(modeling);
+		var registry = bpmnViewer.get('elementRegistry');
+		console.dir(registry);
+
+		var elementsToColor = [registry.get('SequenceFlow_0h21x7r')];
+
+		modeling.setColor(elementsToColor, {
+			stroke: 'red',
+			fill:'blue'
+		});
+
+		let act = registry.get('Activity_1q4vvhs');
+		modeling.setColor(act, {
+			fill: '#FFFACD',
+			stroke: 'red'
+		});
+	}
 </script>
 
 }

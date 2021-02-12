@@ -17,5 +17,12 @@ namespace A2v10.Workflow.Bpmn
 		{
 			return Items?.OfType<Variables>().FirstOrDefault()?.Items?.OfType<IVariable>()?.ToList();
 		}
+
+		public String GetGlobalScript()
+		{
+			var scriptElem = Items.OfType<GlobalScript>().FirstOrDefault();
+			return scriptElem?.Text;
+		}
+
 	}
 }

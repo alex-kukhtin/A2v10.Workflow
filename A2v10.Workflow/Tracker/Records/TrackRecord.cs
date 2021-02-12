@@ -4,13 +4,6 @@ using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Tracker
 {
-	public enum TrackRecordKind 
-	{
-		// see: db
-		Activity = 0,
-		Script = 1,
-	}
-
 	public abstract class TrackRecord : ITrackRecord
 	{
 		public DateTime EventTime { get; }

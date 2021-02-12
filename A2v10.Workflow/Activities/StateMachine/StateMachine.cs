@@ -11,6 +11,7 @@ namespace A2v10.Workflow
 	public class StateMachine : Activity, IStorable, IScoped
 	{
 		public List<IVariable> Variables { get; set; }
+		public String GlobalScript { get; set; }
 
 		public List<StateBase> States { get; set; }
 

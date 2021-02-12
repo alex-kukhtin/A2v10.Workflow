@@ -4,15 +4,6 @@ using System.Dynamic;
 
 namespace A2v10.Workflow.Tracker
 {
-	public enum ActivityTrackAction
-	{
-		// see: db
-		Schedule = 0,
-		Execute  = 1,
-		Bookmark = 2,
-		Resume   = 3
-	}
-
 	public class ActivityTrackRecord : TrackRecord
 	{
 		private readonly ActivityTrackAction _action;

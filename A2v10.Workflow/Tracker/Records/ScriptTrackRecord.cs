@@ -1,4 +1,5 @@
 ﻿
+using A2v10.Workflow.Interfaces;
 using System;
 using System.Dynamic;
 
@@ -30,7 +31,7 @@ namespace A2v10.Workflow.Tracker
 		public override ExpandoObject ToExpandoObject(int no)
 		{
 			var eo = CreateExpando(no);
-			eo.Set("Kind", (Int32)TrackRecordKind.Script);
+			eo.Set("Kind", (Int32) TrackRecordKind.Script);
 			eo.Set("Action", (Int32) _action);
 			return eo;
 		}

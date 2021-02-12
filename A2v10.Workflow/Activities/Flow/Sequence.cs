@@ -12,6 +12,7 @@ namespace A2v10.Workflow
 	{
 		public List<IActivity> Activities { get; set; }
 		public List<IVariable> Variables { get; set; }
+		public String GlobalScript { get; set; }
 
 		ExecutingAction _onComplete;
 		Int32 _next;

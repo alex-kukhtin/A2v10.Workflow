@@ -475,6 +475,21 @@ begin
 end
 go
 ------------------------------------------------
+create or alter procedure a2wf.[Instance.Execption]
+@UserId bigint = null,
+@InstanceId uniqueidentifier,
+@Action int,
+@Kind int,
+@Message nvarchar(max)
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+	insert into a2wf.InstanceTrack(InstanceId, Kind, [Action], [Message], RecordNumber)
+	values (@InstanceId, @Kind, @Action, @Message, 0);
+end
+go
+------------------------------------------------
 create or alter procedure a2wf.[Catalog.Load]
 @UserId bigint = null,
 @Id nvarchar(255)

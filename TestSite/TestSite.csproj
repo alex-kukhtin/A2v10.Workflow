@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="A2v10.Data.Core" Version="10.0.7251" />
+    <PackageReference Include="A2v10.Data.Core" Version="10.0.7252" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
 

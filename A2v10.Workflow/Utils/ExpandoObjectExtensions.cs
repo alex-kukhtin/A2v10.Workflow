@@ -21,6 +21,19 @@ namespace A2v10.Workflow
 			d.Add(name, value);
 		}
 
+		public static ExpandoObject Clone(this ExpandoObject expobj)
+		{
+			var rv = new ExpandoObject();
+			foreach (var (k, v) in expobj)
+			{
+				if (v is ExpandoObject vexp)
+					rv.Add(k, vexp.Clone());
+				else
+					rv.Add(k, v);
+			}
+			return rv;
+		}
+
 		public static void Set<T>(this ExpandoObject expobj, String name, T value)
 		{
 			var d = expobj as IDictionary<String, Object>;

@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 
 using A2v10.Workflow.Interfaces;
-using A2v10.Workflow;
 using A2v10.Workflow.SqlServer;
 
-namespace TestSite.Config
+namespace A2v10.Workflow.WebHost
 {
-	public class AppScriptNativeObjects : IScriptNativeObjectProvider
+	public class ScriptNativeObjects : IScriptNativeObjectProvider
 	{
 		private readonly NativeType[] _nativeTypes = new NativeType[] {
 			new NativeType() {Name = "Database", Type = typeof(ScriptNativeDatabase)},

@@ -90,10 +90,27 @@ namespace A2v10.Workflow.SqlServer
 			if (instanceData.Deferred != null) {
 				batches = new List<BatchProcedure>();
 				foreach (var defer in instanceData.Deferred.Where(d => d.Type == DeferredElementType.Sql))
-					batches.Add(new BatchProcedure(defer.Name, defer.Parameters));
+				{
+					var epxParam = defer.Parameters.Clone();
+					epxParam.Add("InstanceId", instance.Id);
+					batches.Add(new BatchProcedure(defer.Name, epxParam));
+				}
 			}
 
 			_ = await _dbContext.SaveModelBatchAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root, null, batches);
+		}
+
+
+		public Task WriteException(Guid id, Exception ex)
+		{
+			var tr = new SqlTrackRecord()
+			{
+				Action = ActivityTrackAction.Exception,
+				Kind = TrackRecordKind.Activity,
+				InstanceId = id,
+				Message = ex.ToString()
+			};
+			return _dbContext.ExecuteAsync<SqlTrackRecord>(null, $"{Definitions.SqlSchema}.[Instance.Execption]", tr);
 		}
 
 		#endregion

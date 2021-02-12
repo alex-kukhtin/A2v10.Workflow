@@ -10,20 +10,20 @@ using A2v10.Workflow.Interfaces.Api;
 
 namespace A2v10.Workflow
 {
-	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi, IDeferredTarget
+	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
 		private readonly ITracker _tracker;
+		private readonly IDeferredTarget _deferredTarget;
 
-		private readonly Lazy<List<DeferredElement>> _deferred = new Lazy<List<DeferredElement>>();
-
-		public WorkflowEngine(IServiceProvider serviceProvider, ITracker tracker)
+		public WorkflowEngine(IServiceProvider serviceProvider, ITracker tracker, IDeferredTarget deferredTarget)
 		{
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_workflowStorage = _serviceProvider.GetService<IWorkflowStorage>() ?? throw new NullReferenceException("IWorkflowStorage");
 			_instanceStorage = _serviceProvider.GetService<IInstanceStorage>() ?? throw new NullReferenceException("IInstanceStorage");
+			_deferredTarget = deferredTarget ?? throw new NullReferenceException("IDeferredTarget");
 			_tracker = tracker;
 		}
 
@@ -62,22 +62,39 @@ namespace A2v10.Workflow
 
 		public async ValueTask<IInstance> RunAsync(Guid id, Object args = null)
 		{
-			IInstance instance = await _instanceStorage.Load(id);
-			return await RunAsync(instance, args);
+			try
+			{
+				IInstance instance = await _instanceStorage.Load(id);
+				return await RunAsync(instance, args);
+			} 
+			catch (Exception ex)
+			{
+				await _instanceStorage.WriteException(id, ex);
+				throw;
+			}
+
 		}
 
 
 		public async ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null)
 		{
-			var inst = await _instanceStorage.Load(id);
-			inst.Workflow.Root.OnEndInit();
-			var context = new ExecutionContext(_serviceProvider, _tracker, inst.Workflow.Root);
-			context.SetState(inst.State);
-			await context.ResumeAsync(bookmark, reply);
-			await context.RunAsync();
-			SetInstanceState(inst, context);
-			await _instanceStorage.Save(inst);
-			return inst;
+			try
+			{
+				var inst = await _instanceStorage.Load(id);
+				inst.Workflow.Root.OnEndInit();
+				var context = new ExecutionContext(_serviceProvider, _tracker, inst.Workflow.Root);
+				context.SetState(inst.State);
+				await context.ResumeAsync(bookmark, reply);
+				await context.RunAsync();
+				SetInstanceState(inst, context);
+				await _instanceStorage.Save(inst);
+				return inst;
+			} 
+			catch (Exception ex)
+			{
+				await _instanceStorage.WriteException(id, ex);
+				throw;
+			}
 		}
 
 		void SetInstanceState(IInstance inst, ExecutionContext context)
@@ -90,7 +107,7 @@ namespace A2v10.Workflow
 				ExternalVariables = context.GetExternalVariables(inst.State),
 				ExternalBookmarks = context.GetExternalBookmarks(),
 				TrackRecords = context.GetTrackRecords(),
-				Deferred = _deferred.IsValueCreated ? _deferred.Value : null
+				Deferred = _deferredTarget.Deferred
 			};
 			inst.InstanceData = instData;
 		}
@@ -126,12 +143,5 @@ namespace A2v10.Workflow
 			await RunAsync(prm.InstanceId, prm.Parameters);
 			return new ResumeProcessResponse();
 		}
-
-		#region IDeferredTarget
-		public void AddDefferd(DeferredElement elem)
-		{
-			_deferred.Value.Add(elem);
-		}
-		#endregion
 	}
 }

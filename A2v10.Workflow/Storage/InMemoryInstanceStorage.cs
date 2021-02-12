@@ -54,5 +54,11 @@ namespace A2v10.Workflow.Storage
 				throw new WorkflowExecption($"Instance storage. Instance with id = {instance.Id} not found");
 			return Task.CompletedTask;
 		}
+
+		public Task WriteException(Guid id, Exception ex)
+		{
+			return Task.CompletedTask;
+		}
+
 	}
 }

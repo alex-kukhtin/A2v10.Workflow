@@ -12,6 +12,9 @@
 
 24. Unlock instance after EXCEPTION
 26. BpmnViwer - подсветка посещенных элементов
+27. Workflow.Publish - Save generated script
+28. Process:GlobalScript
+29. JS editor
 
 
 Xaml

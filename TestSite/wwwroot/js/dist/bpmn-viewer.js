@@ -3,6 +3,8 @@
 
 var _NavigatedViewer = _interopRequireDefault(require("bpmn-js/lib/NavigatedViewer"));
 
+var _modeling = _interopRequireDefault(require("bpmn-js/lib/features/modeling"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*see: https://github.com/bpmn-io/bpmn-js/tree/develop/lib*/
@@ -17,9 +19,20 @@ let bpmnViewer = new BpmnViewer({
 	}
 });
 */
-window.BpmnViewer = _NavigatedViewer.default;
+window.BpmnViewer = {
+  create: function (canvasId) {
+    let canvas = document.getElementById(canvasId);
+    return new _NavigatedViewer.default({
+      container: canvas,
+      keyboard: {
+        bindTo: window
+      },
+      additionalModules: [_modeling.default]
+    });
+  }
+};
 
-},{"bpmn-js/lib/NavigatedViewer":3}],2:[function(require,module,exports){
+},{"bpmn-js/lib/NavigatedViewer":3,"bpmn-js/lib/features/modeling":73}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -729,7 +742,7 @@ function addProjectLogo(container) {
 }
 /* </project-logo> */
 
-},{"./import/Importer":14,"./util/CompatibilityUtil":17,"./util/PoweredByUtil":21,"bpmn-moddle":22,"diagram-js":23,"inherits":77,"min-dash":78,"min-dom":79,"tiny-svg":87}],3:[function(require,module,exports){
+},{"./import/Importer":85,"./util/CompatibilityUtil":88,"./util/PoweredByUtil":92,"bpmn-moddle":93,"diagram-js":94,"inherits":218,"min-dash":219,"min-dom":220,"tiny-svg":228}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -762,7 +775,7 @@ function NavigatedViewer(options) {
 NavigatedViewer.prototype._navigationModules = [_keyboardMove.default, _movecanvas.default, _zoomscroll.default];
 NavigatedViewer.prototype._modules = [].concat(_Viewer.default.prototype._modules, NavigatedViewer.prototype._navigationModules);
 
-},{"./Viewer":4,"diagram-js/lib/navigation/keyboard-move":54,"diagram-js/lib/navigation/movecanvas":56,"diagram-js/lib/navigation/zoomscroll":59,"inherits":77}],4:[function(require,module,exports){
+},{"./Viewer":4,"diagram-js/lib/navigation/keyboard-move":192,"diagram-js/lib/navigation/movecanvas":194,"diagram-js/lib/navigation/zoomscroll":197,"inherits":218}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -841,7 +854,7 @@ Viewer.prototype._modules = [_core.default, _translate.default, _selection.defau
 
 Viewer.prototype._moddleExtensions = {};
 
-},{"./BaseViewer":2,"./core":5,"diagram-js/lib/features/overlays":44,"diagram-js/lib/features/selection":48,"diagram-js/lib/i18n/translate":49,"inherits":77}],5:[function(require,module,exports){
+},{"./BaseViewer":2,"./core":5,"diagram-js/lib/features/overlays":163,"diagram-js/lib/features/selection":175,"diagram-js/lib/i18n/translate":184,"inherits":218}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -860,7 +873,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../draw":10,"../import":16}],6:[function(require,module,exports){
+},{"../draw":10,"../import":87}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -969,7 +982,7 @@ function getRectPath(shape) {
   return (0, _RenderUtil.componentsToPath)(rectPath);
 }
 
-},{"diagram-js/lib/util/RenderUtil":72,"min-dash":78}],7:[function(require,module,exports){
+},{"diagram-js/lib/util/RenderUtil":213,"min-dash":219}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2713,7 +2726,7 @@ BpmnRenderer.prototype.getShapePath = function (element) {
   return (0, _BpmnRenderUtil.getRectPath)(element);
 };
 
-},{"../features/label-editing/LabelUtil":11,"../util/DiUtil":18,"../util/ModelUtil":20,"./BpmnRenderUtil":6,"diagram-js/lib/draw/BaseRenderer":31,"diagram-js/lib/util/RenderUtil":72,"diagram-js/lib/util/SvgTransformUtil":73,"ids":76,"inherits":77,"min-dash":78,"min-dom":79,"tiny-svg":87}],8:[function(require,module,exports){
+},{"../features/label-editing/LabelUtil":16,"../util/DiUtil":89,"../util/ModelUtil":91,"./BpmnRenderUtil":6,"diagram-js/lib/draw/BaseRenderer":105,"diagram-js/lib/util/RenderUtil":213,"diagram-js/lib/util/SvgTransformUtil":214,"ids":217,"inherits":218,"min-dash":219,"min-dom":220,"tiny-svg":228}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3232,7 +3245,7 @@ function TextRenderer(config) {
 
 TextRenderer.$inject = ['config.textRenderer'];
 
-},{"diagram-js/lib/util/Text":74,"min-dash":78}],10:[function(require,module,exports){
+},{"diagram-js/lib/util/Text":215,"min-dash":219}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3257,6 +3270,466 @@ var _default = {
 exports.default = _default;
 
 },{"./BpmnRenderer":7,"./PathMap":8,"./TextRenderer":9}],11:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnCopyPaste;
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _minDash = require("min-dash");
+
+function copyProperties(source, target, properties) {
+  if (!(0, _minDash.isArray)(properties)) {
+    properties = [properties];
+  }
+
+  (0, _minDash.forEach)(properties, function (property) {
+    if (!(0, _minDash.isUndefined)(source[property])) {
+      target[property] = source[property];
+    }
+  });
+}
+
+function removeProperties(element, properties) {
+  if (!(0, _minDash.isArray)(properties)) {
+    properties = [properties];
+  }
+
+  (0, _minDash.forEach)(properties, function (property) {
+    if (element[property]) {
+      delete element[property];
+    }
+  });
+}
+
+var LOW_PRIORITY = 750;
+
+function BpmnCopyPaste(bpmnFactory, eventBus, moddleCopy) {
+  eventBus.on('copyPaste.copyElement', LOW_PRIORITY, function (context) {
+    var descriptor = context.descriptor,
+        element = context.element;
+    var businessObject = descriptor.oldBusinessObject = (0, _ModelUtil.getBusinessObject)(element);
+    descriptor.type = element.type;
+    copyProperties(businessObject, descriptor, 'name');
+    descriptor.di = {}; // fill and stroke will be set to DI
+
+    copyProperties(businessObject.di, descriptor.di, ['fill', 'stroke']);
+    copyProperties(businessObject.di, descriptor, 'isExpanded');
+
+    if (isLabel(descriptor)) {
+      return descriptor;
+    } // default sequence flow
+
+
+    if (businessObject.default) {
+      descriptor.default = businessObject.default.id;
+    }
+  });
+  eventBus.on('moddleCopy.canCopyProperty', function (context) {
+    var parent = context.parent,
+        property = context.property,
+        propertyName = context.propertyName,
+        bpmnProcess;
+
+    if (propertyName === 'processRef' && (0, _ModelUtil.is)(parent, 'bpmn:Participant') && (0, _ModelUtil.is)(property, 'bpmn:Process')) {
+      bpmnProcess = bpmnFactory.create('bpmn:Process'); // return copy of process
+
+      return moddleCopy.copyElement(property, bpmnProcess);
+    }
+  });
+  var references;
+
+  function resolveReferences(descriptor, cache) {
+    var businessObject = (0, _ModelUtil.getBusinessObject)(descriptor); // default sequence flows
+
+    if (descriptor.default) {
+      // relationship cannot be resolved immediately
+      references[descriptor.default] = {
+        element: businessObject,
+        property: 'default'
+      };
+    } // boundary events
+
+
+    if (descriptor.host) {
+      // relationship can be resolved immediately
+      (0, _ModelUtil.getBusinessObject)(descriptor).attachedToRef = (0, _ModelUtil.getBusinessObject)(cache[descriptor.host]);
+    }
+
+    references = (0, _minDash.omit)(references, (0, _minDash.reduce)(references, function (array, reference, key) {
+      var element = reference.element,
+          property = reference.property;
+
+      if (key === descriptor.id) {
+        element[property] = businessObject;
+        array.push(descriptor.id);
+      }
+
+      return array;
+    }, []));
+  }
+
+  eventBus.on('copyPaste.pasteElements', function () {
+    references = {};
+  });
+  eventBus.on('copyPaste.pasteElement', function (context) {
+    var cache = context.cache,
+        descriptor = context.descriptor,
+        oldBusinessObject = descriptor.oldBusinessObject,
+        newBusinessObject; // do NOT copy business object if external label
+
+    if (isLabel(descriptor)) {
+      descriptor.businessObject = (0, _ModelUtil.getBusinessObject)(cache[descriptor.labelTarget]);
+      return;
+    }
+
+    newBusinessObject = bpmnFactory.create(oldBusinessObject.$type);
+    descriptor.businessObject = moddleCopy.copyElement(oldBusinessObject, newBusinessObject); // resolve references e.g. default sequence flow
+
+    resolveReferences(descriptor, cache);
+    copyProperties(descriptor, newBusinessObject, ['isExpanded', 'name']);
+    removeProperties(descriptor, 'oldBusinessObject');
+  });
+}
+
+BpmnCopyPaste.$inject = ['bpmnFactory', 'eventBus', 'moddleCopy']; // helpers //////////
+
+function isLabel(element) {
+  return !!element.labelTarget;
+}
+
+},{"../../util/ModelUtil":91,"min-dash":219}],12:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ModdleCopy;
+exports.getPropertyNames = getPropertyNames;
+
+var _minDash = require("min-dash");
+
+var DISALLOWED_PROPERTIES = ['artifacts', 'dataInputAssociations', 'dataOutputAssociations', 'default', 'flowElements', 'lanes', 'incoming', 'outgoing'];
+/**
+ * @typedef {Function} <moddleCopy.canCopyProperties> listener
+ *
+ * @param {Object} context
+ * @param {Array<string>} context.propertyNames
+ * @param {ModdleElement} context.sourceElement
+ * @param {ModdleElement} context.targetElement
+ *
+ * @returns {Array<string>|boolean} - Return properties to be copied or false to disallow
+ * copying.
+ */
+
+/**
+ * @typedef {Function} <moddleCopy.canCopyProperty> listener
+ *
+ * @param {Object} context
+ * @param {ModdleElement} context.parent
+ * @param {*} context.property
+ * @param {string} context.propertyName
+ *
+ * @returns {*|boolean} - Return copied property or false to disallow
+ * copying.
+ */
+
+/**
+ * @typedef {Function} <moddleCopy.canSetCopiedProperty> listener
+ *
+ * @param {Object} context
+ * @param {ModdleElement} context.parent
+ * @param {*} context.property
+ * @param {string} context.propertyName
+ *
+ * @returns {boolean} - Return false to disallow
+ * setting copied property.
+ */
+
+/**
+ * Utility for copying model properties from source element to target element.
+ *
+ * @param {EventBus} eventBus
+ * @param {BpmnFactory} bpmnFactory
+ * @param {BpmnModdle} moddle
+ */
+
+function ModdleCopy(eventBus, bpmnFactory, moddle) {
+  this._bpmnFactory = bpmnFactory;
+  this._eventBus = eventBus;
+  this._moddle = moddle; // copy extension elements last
+
+  eventBus.on('moddleCopy.canCopyProperties', function (context) {
+    var propertyNames = context.propertyNames;
+
+    if (!propertyNames || !propertyNames.length) {
+      return;
+    }
+
+    return (0, _minDash.sortBy)(propertyNames, function (propertyName) {
+      return propertyName === 'extensionElements';
+    });
+  }); // default check whether property can be copied
+
+  eventBus.on('moddleCopy.canCopyProperty', function (context) {
+    var parent = context.parent,
+        parentDescriptor = (0, _minDash.isObject)(parent) && parent.$descriptor,
+        propertyName = context.propertyName;
+
+    if (propertyName && DISALLOWED_PROPERTIES.indexOf(propertyName) !== -1) {
+      // disallow copying property
+      return false;
+    }
+
+    if (propertyName && parentDescriptor && !(0, _minDash.find)(parentDescriptor.properties, (0, _minDash.matchPattern)({
+      name: propertyName
+    }))) {
+      // disallow copying property
+      return false;
+    }
+  }); // do NOT allow to copy empty extension elements
+
+  eventBus.on('moddleCopy.canSetCopiedProperty', function (context) {
+    var property = context.property;
+
+    if (is(property, 'bpmn:ExtensionElements') && (!property.values || !property.values.length)) {
+      // disallow setting copied property
+      return false;
+    }
+  });
+}
+
+ModdleCopy.$inject = ['eventBus', 'bpmnFactory', 'moddle'];
+/**
+ * Copy model properties of source element to target element.
+ *
+ * @param {ModdleElement} sourceElement
+ * @param {ModdleElement} targetElement
+ * @param {Array<string>} [propertyNames]
+ *
+ * @param {ModdleElement}
+ */
+
+ModdleCopy.prototype.copyElement = function (sourceElement, targetElement, propertyNames) {
+  var self = this;
+
+  if (propertyNames && !(0, _minDash.isArray)(propertyNames)) {
+    propertyNames = [propertyNames];
+  }
+
+  propertyNames = propertyNames || getPropertyNames(sourceElement.$descriptor);
+
+  var canCopyProperties = this._eventBus.fire('moddleCopy.canCopyProperties', {
+    propertyNames: propertyNames,
+    sourceElement: sourceElement,
+    targetElement: targetElement
+  });
+
+  if (canCopyProperties === false) {
+    return targetElement;
+  }
+
+  if ((0, _minDash.isArray)(canCopyProperties)) {
+    propertyNames = canCopyProperties;
+  } // copy properties
+
+
+  (0, _minDash.forEach)(propertyNames, function (propertyName) {
+    var sourceProperty;
+
+    if ((0, _minDash.has)(sourceElement, propertyName)) {
+      sourceProperty = sourceElement.get(propertyName);
+    }
+
+    var copiedProperty = self.copyProperty(sourceProperty, targetElement, propertyName);
+
+    var canSetProperty = self._eventBus.fire('moddleCopy.canSetCopiedProperty', {
+      parent: targetElement,
+      property: copiedProperty,
+      propertyName: propertyName
+    });
+
+    if (canSetProperty === false) {
+      return;
+    }
+
+    if ((0, _minDash.isDefined)(copiedProperty)) {
+      targetElement.set(propertyName, copiedProperty);
+    }
+  });
+  return targetElement;
+};
+/**
+ * Copy model property.
+ *
+ * @param {*} property
+ * @param {ModdleElement} parent
+ * @param {string} propertyName
+ *
+ * @returns {*}
+ */
+
+
+ModdleCopy.prototype.copyProperty = function (property, parent, propertyName) {
+  var self = this; // allow others to copy property
+
+  var copiedProperty = this._eventBus.fire('moddleCopy.canCopyProperty', {
+    parent: parent,
+    property: property,
+    propertyName: propertyName
+  }); // return if copying is NOT allowed
+
+
+  if (copiedProperty === false) {
+    return;
+  }
+
+  if (copiedProperty) {
+    if ((0, _minDash.isObject)(copiedProperty) && copiedProperty.$type && !copiedProperty.$parent) {
+      copiedProperty.$parent = parent;
+    }
+
+    return copiedProperty;
+  }
+
+  var propertyDescriptor = this._moddle.getPropertyDescriptor(parent, propertyName); // do NOT copy Ids and references
+
+
+  if (propertyDescriptor.isId || propertyDescriptor.isReference) {
+    return;
+  } // copy arrays
+
+
+  if ((0, _minDash.isArray)(property)) {
+    return (0, _minDash.reduce)(property, function (childProperties, childProperty) {
+      // recursion
+      copiedProperty = self.copyProperty(childProperty, parent, propertyName); // copying might NOT be allowed
+
+      if (copiedProperty) {
+        copiedProperty.$parent = parent;
+        return childProperties.concat(copiedProperty);
+      }
+
+      return childProperties;
+    }, []);
+  } // copy model elements
+
+
+  if ((0, _minDash.isObject)(property) && property.$type) {
+    if (this._moddle.getElementDescriptor(property).isGeneric) {
+      return;
+    }
+
+    copiedProperty = self._bpmnFactory.create(property.$type);
+    copiedProperty.$parent = parent; // recursion
+
+    copiedProperty = self.copyElement(property, copiedProperty);
+    return copiedProperty;
+  } // copy primitive properties
+
+
+  return property;
+}; // helpers //////////
+
+
+function getPropertyNames(descriptor, keepDefaultProperties) {
+  return (0, _minDash.reduce)(descriptor.properties, function (properties, property) {
+    if (keepDefaultProperties && property.default) {
+      return properties;
+    }
+
+    return properties.concat(property.name);
+  }, []);
+}
+
+function is(element, type) {
+  return element && typeof element.$instanceOf === 'function' && element.$instanceOf(type);
+}
+
+},{"min-dash":219}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _copyPaste = _interopRequireDefault(require("diagram-js/lib/features/copy-paste"));
+
+var _BpmnCopyPaste = _interopRequireDefault(require("./BpmnCopyPaste"));
+
+var _ModdleCopy = _interopRequireDefault(require("./ModdleCopy"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_copyPaste.default],
+  __init__: ['bpmnCopyPaste', 'moddleCopy'],
+  bpmnCopyPaste: ['type', _BpmnCopyPaste.default],
+  moddleCopy: ['type', _ModdleCopy.default]
+};
+exports.default = _default;
+
+},{"./BpmnCopyPaste":11,"./ModdleCopy":12,"diagram-js/lib/features/copy-paste":116}],14:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnDiOrdering;
+
+var _BpmnRenderUtil = require("../../draw/BpmnRenderUtil");
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _minDash = require("min-dash");
+
+var _Elements = require("diagram-js/lib/util/Elements");
+
+var HIGH_PRIORITY = 2000;
+
+function BpmnDiOrdering(eventBus, canvas) {
+  eventBus.on('saveXML.start', HIGH_PRIORITY, orderDi);
+
+  function orderDi() {
+    var root = canvas.getRootElement(),
+        rootDi = (0, _ModelUtil.getBusinessObject)(root).di,
+        elements,
+        diElements;
+    elements = (0, _Elements.selfAndAllChildren)([root], false); // only bpmndi:Shape and bpmndi:Edge can be direct children of bpmndi:Plane
+
+    elements = (0, _minDash.filter)(elements, function (element) {
+      return element !== root && !element.labelTarget;
+    });
+    diElements = (0, _minDash.map)(elements, _BpmnRenderUtil.getDi);
+    rootDi.set('planeElement', diElements);
+  }
+}
+
+BpmnDiOrdering.$inject = ['eventBus', 'canvas'];
+
+},{"../../draw/BpmnRenderUtil":6,"../../util/ModelUtil":91,"diagram-js/lib/util/Elements":202,"min-dash":219}],15:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _BpmnDiOrdering = _interopRequireDefault(require("../di-ordering/BpmnDiOrdering"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['bpmnDiOrdering'],
+  bpmnDiOrdering: ['type', _BpmnDiOrdering.default]
+};
+exports.default = _default;
+
+},{"../di-ordering/BpmnDiOrdering":14}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3319,7 +3792,8267 @@ function setLabel(element, text, isExternal) {
   return element;
 }
 
-},{"../../util/ModelUtil":20}],12:[function(require,module,exports){
+},{"../../util/ModelUtil":91}],17:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateLabelHandler;
+
+var _LabelUtil = require("../LabelUtil");
+
+var _LabelUtil2 = require("../../../util/LabelUtil");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var NULL_DIMENSIONS = {
+  width: 0,
+  height: 0
+};
+/**
+ * A handler that updates the text of a BPMN element.
+ */
+
+function UpdateLabelHandler(modeling, textRenderer) {
+  /**
+   * Set the label and return the changed elements.
+   *
+   * Element parameter can be label itself or connection (i.e. sequence flow).
+   *
+   * @param {djs.model.Base} element
+   * @param {string} text
+   */
+  function setText(element, text) {
+    // external label if present
+    var label = element.label || element;
+    var labelTarget = element.labelTarget || element;
+    (0, _LabelUtil.setLabel)(label, text, labelTarget !== label);
+    return [label, labelTarget];
+  }
+
+  function preExecute(ctx) {
+    var element = ctx.element,
+        businessObject = element.businessObject,
+        newLabel = ctx.newLabel;
+
+    if (!(0, _LabelUtil2.isLabel)(element) && (0, _LabelUtil2.isLabelExternal)(element) && !(0, _LabelUtil2.hasExternalLabel)(element) && !isEmptyText(newLabel)) {
+      // create label
+      var paddingTop = 7;
+      var labelCenter = (0, _LabelUtil2.getExternalLabelMid)(element);
+      labelCenter = {
+        x: labelCenter.x,
+        y: labelCenter.y + paddingTop
+      };
+      modeling.createLabel(element, labelCenter, {
+        id: businessObject.id + '_label',
+        businessObject: businessObject
+      });
+    }
+  }
+
+  function execute(ctx) {
+    ctx.oldLabel = (0, _LabelUtil.getLabel)(ctx.element);
+    return setText(ctx.element, ctx.newLabel);
+  }
+
+  function revert(ctx) {
+    return setText(ctx.element, ctx.oldLabel);
+  }
+
+  function postExecute(ctx) {
+    var element = ctx.element,
+        label = element.label || element,
+        newLabel = ctx.newLabel,
+        newBounds = ctx.newBounds,
+        hints = ctx.hints || {}; // ignore internal labels for elements except text annotations
+
+    if (!(0, _LabelUtil2.isLabel)(label) && !(0, _ModelUtil.is)(label, 'bpmn:TextAnnotation')) {
+      return;
+    }
+
+    if ((0, _LabelUtil2.isLabel)(label) && isEmptyText(newLabel)) {
+      if (hints.removeShape !== false) {
+        modeling.removeShape(label, {
+          unsetLabel: false
+        });
+      }
+
+      return;
+    }
+
+    var text = (0, _LabelUtil.getLabel)(label); // resize element based on label _or_ pre-defined bounds
+
+    if (typeof newBounds === 'undefined') {
+      newBounds = textRenderer.getExternalLabelBounds(label, text);
+    } // setting newBounds to false or _null_ will
+    // disable the postExecute resize operation
+
+
+    if (newBounds) {
+      modeling.resizeShape(label, newBounds, NULL_DIMENSIONS);
+    }
+  } // API
+
+
+  this.preExecute = preExecute;
+  this.execute = execute;
+  this.revert = revert;
+  this.postExecute = postExecute;
+}
+
+UpdateLabelHandler.$inject = ['modeling', 'textRenderer']; // helpers ///////////////////////
+
+function isEmptyText(label) {
+  return !label || !label.trim();
+}
+
+},{"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"../LabelUtil":16}],18:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnFactory;
+
+var _minDash = require("min-dash");
+
+var _ModelingUtil = require("./util/ModelingUtil");
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+function BpmnFactory(moddle) {
+  this._model = moddle;
+}
+
+BpmnFactory.$inject = ['moddle'];
+
+BpmnFactory.prototype._needsId = function (element) {
+  return (0, _ModelingUtil.isAny)(element, ['bpmn:RootElement', 'bpmn:FlowElement', 'bpmn:MessageFlow', 'bpmn:DataAssociation', 'bpmn:Artifact', 'bpmn:Participant', 'bpmn:Lane', 'bpmn:LaneSet', 'bpmn:Process', 'bpmn:Collaboration', 'bpmndi:BPMNShape', 'bpmndi:BPMNEdge', 'bpmndi:BPMNDiagram', 'bpmndi:BPMNPlane', 'bpmn:Property', 'bpmn:CategoryValue']);
+};
+
+BpmnFactory.prototype._ensureId = function (element) {
+  // generate semantic ids for elements
+  // bpmn:SequenceFlow -> SequenceFlow_ID
+  var prefix;
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:Activity')) {
+    prefix = 'Activity';
+  } else if ((0, _ModelUtil.is)(element, 'bpmn:Event')) {
+    prefix = 'Event';
+  } else if ((0, _ModelUtil.is)(element, 'bpmn:Gateway')) {
+    prefix = 'Gateway';
+  } else if ((0, _ModelingUtil.isAny)(element, ['bpmn:SequenceFlow', 'bpmn:MessageFlow'])) {
+    prefix = 'Flow';
+  } else {
+    prefix = (element.$type || '').replace(/^[^:]*:/g, '');
+  }
+
+  prefix += '_';
+
+  if (!element.id && this._needsId(element)) {
+    element.id = this._model.ids.nextPrefixed(prefix, element);
+  }
+};
+
+BpmnFactory.prototype.create = function (type, attrs) {
+  var element = this._model.create(type, attrs || {});
+
+  this._ensureId(element);
+
+  return element;
+};
+
+BpmnFactory.prototype.createDiLabel = function () {
+  return this.create('bpmndi:BPMNLabel', {
+    bounds: this.createDiBounds()
+  });
+};
+
+BpmnFactory.prototype.createDiShape = function (semantic, bounds, attrs) {
+  return this.create('bpmndi:BPMNShape', (0, _minDash.assign)({
+    bpmnElement: semantic,
+    bounds: this.createDiBounds(bounds)
+  }, attrs));
+};
+
+BpmnFactory.prototype.createDiBounds = function (bounds) {
+  return this.create('dc:Bounds', bounds);
+};
+
+BpmnFactory.prototype.createDiWaypoints = function (waypoints) {
+  var self = this;
+  return (0, _minDash.map)(waypoints, function (pos) {
+    return self.createDiWaypoint(pos);
+  });
+};
+
+BpmnFactory.prototype.createDiWaypoint = function (point) {
+  return this.create('dc:Point', (0, _minDash.pick)(point, ['x', 'y']));
+};
+
+BpmnFactory.prototype.createDiEdge = function (semantic, waypoints, attrs) {
+  return this.create('bpmndi:BPMNEdge', (0, _minDash.assign)({
+    bpmnElement: semantic
+  }, attrs));
+};
+
+BpmnFactory.prototype.createDiPlane = function (semantic) {
+  return this.create('bpmndi:BPMNPlane', {
+    bpmnElement: semantic
+  });
+};
+
+},{"../../util/ModelUtil":91,"./util/ModelingUtil":75,"min-dash":219}],19:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnLayouter;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _minDash = require("min-dash");
+
+var _BaseLayouter = _interopRequireDefault(require("diagram-js/lib/layout/BaseLayouter"));
+
+var _ManhattanLayout = require("diagram-js/lib/layout/ManhattanLayout");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _DiUtil = require("../../util/DiUtil");
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ATTACH_ORIENTATION_PADDING = -10,
+    BOUNDARY_TO_HOST_THRESHOLD = 40;
+var oppositeOrientationMapping = {
+  'top': 'bottom',
+  'top-right': 'bottom-left',
+  'top-left': 'bottom-right',
+  'right': 'left',
+  'bottom': 'top',
+  'bottom-right': 'top-left',
+  'bottom-left': 'top-right',
+  'left': 'right'
+};
+var orientationDirectionMapping = {
+  top: 't',
+  right: 'r',
+  bottom: 'b',
+  left: 'l'
+};
+
+function BpmnLayouter() {}
+
+(0, _inherits.default)(BpmnLayouter, _BaseLayouter.default);
+
+BpmnLayouter.prototype.layoutConnection = function (connection, hints) {
+  if (!hints) {
+    hints = {};
+  }
+
+  var source = hints.source || connection.source,
+      target = hints.target || connection.target,
+      waypoints = hints.waypoints || connection.waypoints,
+      connectionStart = hints.connectionStart,
+      connectionEnd = hints.connectionEnd;
+  var manhattanOptions, updatedWaypoints;
+
+  if (!connectionStart) {
+    connectionStart = getConnectionDocking(waypoints && waypoints[0], source);
+  }
+
+  if (!connectionEnd) {
+    connectionEnd = getConnectionDocking(waypoints && waypoints[waypoints.length - 1], target);
+  } // TODO(nikku): support vertical modeling
+  // and invert preferredLayouts accordingly
+
+
+  if ((0, _ModelUtil.is)(connection, 'bpmn:Association') || (0, _ModelUtil.is)(connection, 'bpmn:DataAssociation')) {
+    if (waypoints && !isCompensationAssociation(source, target)) {
+      return [].concat([connectionStart], waypoints.slice(1, -1), [connectionEnd]);
+    }
+  }
+
+  if ((0, _ModelUtil.is)(connection, 'bpmn:MessageFlow')) {
+    manhattanOptions = getMessageFlowManhattanOptions(source, target);
+  } else if ((0, _ModelUtil.is)(connection, 'bpmn:SequenceFlow') || isCompensationAssociation(source, target)) {
+    // layout all connection between flow elements h:h, except for
+    // (1) outgoing of boundary events -> layout based on attach orientation and target orientation
+    // (2) incoming/outgoing of gateways -> v:h for outgoing, h:v for incoming
+    // (3) loops
+    if (source === target) {
+      manhattanOptions = {
+        preferredLayouts: getLoopPreferredLayout(source, connection)
+      };
+    } else if ((0, _ModelUtil.is)(source, 'bpmn:BoundaryEvent')) {
+      manhattanOptions = {
+        preferredLayouts: getBoundaryEventPreferredLayouts(source, target, connectionEnd)
+      };
+    } else if (isExpandedSubProcess(source) || isExpandedSubProcess(target)) {
+      manhattanOptions = getSubProcessManhattanOptions(source);
+    } else if ((0, _ModelUtil.is)(source, 'bpmn:Gateway')) {
+      manhattanOptions = {
+        preferredLayouts: ['v:h']
+      };
+    } else if ((0, _ModelUtil.is)(target, 'bpmn:Gateway')) {
+      manhattanOptions = {
+        preferredLayouts: ['h:v']
+      };
+    } else {
+      manhattanOptions = {
+        preferredLayouts: ['h:h']
+      };
+    }
+  }
+
+  if (manhattanOptions) {
+    manhattanOptions = (0, _minDash.assign)(manhattanOptions, hints);
+    updatedWaypoints = (0, _ManhattanLayout.withoutRedundantPoints)((0, _ManhattanLayout.repairConnection)(source, target, connectionStart, connectionEnd, waypoints, manhattanOptions));
+  }
+
+  return updatedWaypoints || [connectionStart, connectionEnd];
+}; // helpers //////////
+
+
+function getAttachOrientation(attachedElement) {
+  var hostElement = attachedElement.host;
+  return (0, _LayoutUtil.getOrientation)((0, _LayoutUtil.getMid)(attachedElement), hostElement, ATTACH_ORIENTATION_PADDING);
+}
+
+function getMessageFlowManhattanOptions(source, target) {
+  return {
+    preferredLayouts: ['straight', 'v:v'],
+    preserveDocking: getMessageFlowPreserveDocking(source, target)
+  };
+}
+
+function getMessageFlowPreserveDocking(source, target) {
+  // (1) docking element connected to participant has precedence
+  if ((0, _ModelUtil.is)(target, 'bpmn:Participant')) {
+    return 'source';
+  }
+
+  if ((0, _ModelUtil.is)(source, 'bpmn:Participant')) {
+    return 'target';
+  } // (2) docking element connected to expanded sub-process has precedence
+
+
+  if (isExpandedSubProcess(target)) {
+    return 'source';
+  }
+
+  if (isExpandedSubProcess(source)) {
+    return 'target';
+  } // (3) docking event has precedence
+
+
+  if ((0, _ModelUtil.is)(target, 'bpmn:Event')) {
+    return 'target';
+  }
+
+  if ((0, _ModelUtil.is)(source, 'bpmn:Event')) {
+    return 'source';
+  }
+
+  return null;
+}
+
+function getSubProcessManhattanOptions(source) {
+  return {
+    preferredLayouts: ['straight', 'h:h'],
+    preserveDocking: getSubProcessPreserveDocking(source)
+  };
+}
+
+function getSubProcessPreserveDocking(source) {
+  return isExpandedSubProcess(source) ? 'target' : 'source';
+}
+
+function getConnectionDocking(point, shape) {
+  return point ? point.original || point : (0, _LayoutUtil.getMid)(shape);
+}
+
+function isCompensationAssociation(source, target) {
+  return (0, _ModelUtil.is)(target, 'bpmn:Activity') && (0, _ModelUtil.is)(source, 'bpmn:BoundaryEvent') && target.businessObject.isForCompensation;
+}
+
+function isExpandedSubProcess(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:SubProcess') && (0, _DiUtil.isExpanded)(element);
+}
+
+function isSame(a, b) {
+  return a === b;
+}
+
+function isAnyOrientation(orientation, orientations) {
+  return orientations.indexOf(orientation) !== -1;
+}
+
+function getHorizontalOrientation(orientation) {
+  var matches = /right|left/.exec(orientation);
+  return matches && matches[0];
+}
+
+function getVerticalOrientation(orientation) {
+  var matches = /top|bottom/.exec(orientation);
+  return matches && matches[0];
+}
+
+function isOppositeOrientation(a, b) {
+  return oppositeOrientationMapping[a] === b;
+}
+
+function isOppositeHorizontalOrientation(a, b) {
+  var horizontalOrientation = getHorizontalOrientation(a);
+  var oppositeHorizontalOrientation = oppositeOrientationMapping[horizontalOrientation];
+  return b.indexOf(oppositeHorizontalOrientation) !== -1;
+}
+
+function isOppositeVerticalOrientation(a, b) {
+  var verticalOrientation = getVerticalOrientation(a);
+  var oppositeVerticalOrientation = oppositeOrientationMapping[verticalOrientation];
+  return b.indexOf(oppositeVerticalOrientation) !== -1;
+}
+
+function isHorizontalOrientation(orientation) {
+  return orientation === 'right' || orientation === 'left';
+}
+
+function getLoopPreferredLayout(source, connection) {
+  var waypoints = connection.waypoints;
+  var orientation = waypoints && waypoints.length && (0, _LayoutUtil.getOrientation)(waypoints[0], source);
+
+  if (orientation === 'top') {
+    return ['t:r'];
+  } else if (orientation === 'right') {
+    return ['r:b'];
+  } else if (orientation === 'left') {
+    return ['l:t'];
+  }
+
+  return ['b:l'];
+}
+
+function getBoundaryEventPreferredLayouts(source, target, end) {
+  var sourceMid = (0, _LayoutUtil.getMid)(source),
+      targetMid = (0, _LayoutUtil.getMid)(target),
+      attachOrientation = getAttachOrientation(source),
+      sourceLayout,
+      targetLayout;
+  var isLoop = isSame(source.host, target);
+  var attachedToSide = isAnyOrientation(attachOrientation, ['top', 'right', 'bottom', 'left']);
+  var targetOrientation = (0, _LayoutUtil.getOrientation)(targetMid, sourceMid, {
+    x: source.width / 2 + target.width / 2,
+    y: source.height / 2 + target.height / 2
+  });
+
+  if (isLoop) {
+    return getBoundaryEventLoopLayout(attachOrientation, attachedToSide, source, target, end);
+  } // source layout
+
+
+  sourceLayout = getBoundaryEventSourceLayout(attachOrientation, targetOrientation, attachedToSide); // target layout
+
+  targetLayout = getBoundaryEventTargetLayout(attachOrientation, targetOrientation, attachedToSide);
+  return [sourceLayout + ':' + targetLayout];
+}
+
+function getBoundaryEventLoopLayout(attachOrientation, attachedToSide, source, target, end) {
+  var orientation = attachedToSide ? attachOrientation : getVerticalOrientation(attachOrientation),
+      sourceLayout = orientationDirectionMapping[orientation],
+      targetLayout;
+
+  if (attachedToSide) {
+    if (isHorizontalOrientation(attachOrientation)) {
+      targetLayout = shouldConnectToSameSide('y', source, target, end) ? 'h' : 'b';
+    } else {
+      targetLayout = shouldConnectToSameSide('x', source, target, end) ? 'v' : 'l';
+    }
+  } else {
+    targetLayout = 'v';
+  }
+
+  return [sourceLayout + ':' + targetLayout];
+}
+
+function shouldConnectToSameSide(axis, source, target, end) {
+  var threshold = BOUNDARY_TO_HOST_THRESHOLD;
+  return !(areCloseOnAxis(axis, end, target, threshold) || areCloseOnAxis(axis, end, {
+    x: target.x + target.width,
+    y: target.y + target.height
+  }, threshold) || areCloseOnAxis(axis, end, (0, _LayoutUtil.getMid)(source), threshold));
+}
+
+function areCloseOnAxis(axis, a, b, threshold) {
+  return Math.abs(a[axis] - b[axis]) < threshold;
+}
+
+function getBoundaryEventSourceLayout(attachOrientation, targetOrientation, attachedToSide) {
+  // attached to either top, right, bottom or left side
+  if (attachedToSide) {
+    return orientationDirectionMapping[attachOrientation];
+  } // attached to either top-right, top-left, bottom-right or bottom-left corner
+  // same vertical or opposite horizontal orientation
+
+
+  if (isSame(getVerticalOrientation(attachOrientation), getVerticalOrientation(targetOrientation)) || isOppositeOrientation(getHorizontalOrientation(attachOrientation), getHorizontalOrientation(targetOrientation))) {
+    return orientationDirectionMapping[getVerticalOrientation(attachOrientation)];
+  } // fallback
+
+
+  return orientationDirectionMapping[getHorizontalOrientation(attachOrientation)];
+}
+
+function getBoundaryEventTargetLayout(attachOrientation, targetOrientation, attachedToSide) {
+  // attached to either top, right, bottom or left side
+  if (attachedToSide) {
+    if (isHorizontalOrientation(attachOrientation)) {
+      // orientation is right or left
+      // opposite horizontal orientation or same orientation
+      if (isOppositeHorizontalOrientation(attachOrientation, targetOrientation) || isSame(attachOrientation, targetOrientation)) {
+        return 'h';
+      } // fallback
+
+
+      return 'v';
+    } else {
+      // orientation is top or bottom
+      // opposite vertical orientation or same orientation
+      if (isOppositeVerticalOrientation(attachOrientation, targetOrientation) || isSame(attachOrientation, targetOrientation)) {
+        return 'v';
+      } // fallback
+
+
+      return 'h';
+    }
+  } // attached to either top-right, top-left, bottom-right or bottom-left corner
+  // orientation is right, left
+  // or same vertical orientation but also right or left
+
+
+  if (isHorizontalOrientation(targetOrientation) || isSame(getVerticalOrientation(attachOrientation), getVerticalOrientation(targetOrientation)) && getHorizontalOrientation(targetOrientation)) {
+    return 'h';
+  } else {
+    return 'v';
+  }
+}
+
+},{"../../util/DiUtil":89,"../../util/ModelUtil":91,"diagram-js/lib/layout/BaseLayouter":186,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/layout/ManhattanLayout":189,"inherits":218,"min-dash":219}],20:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnUpdater;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _model = require("diagram-js/lib/model");
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _ModelingUtil = require("./util/ModelingUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A handler responsible for updating the underlying BPMN 2.0 XML + DI
+ * once changes on the diagram happen
+ */
+function BpmnUpdater(eventBus, bpmnFactory, connectionDocking, translate) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this._bpmnFactory = bpmnFactory;
+  this._translate = translate;
+  var self = this; // connection cropping //////////////////////
+  // crop connection ends during create/update
+
+  function cropConnection(e) {
+    var context = e.context,
+        hints = context.hints || {},
+        connection;
+
+    if (!context.cropped && hints.createElementsBehavior !== false) {
+      connection = context.connection;
+      connection.waypoints = connectionDocking.getCroppedWaypoints(connection);
+      context.cropped = true;
+    }
+  }
+
+  this.executed(['connection.layout', 'connection.create'], cropConnection);
+  this.reverted(['connection.layout'], function (e) {
+    delete e.context.cropped;
+  }); // BPMN + DI update //////////////////////
+  // update parent
+
+  function updateParent(e) {
+    var context = e.context;
+    self.updateParent(context.shape || context.connection, context.oldParent);
+  }
+
+  function reverseUpdateParent(e) {
+    var context = e.context;
+    var element = context.shape || context.connection,
+        // oldParent is the (old) new parent, because we are undoing
+    oldParent = context.parent || context.newParent;
+    self.updateParent(element, oldParent);
+  }
+
+  this.executed(['shape.move', 'shape.create', 'shape.delete', 'connection.create', 'connection.move', 'connection.delete'], ifBpmn(updateParent));
+  this.reverted(['shape.move', 'shape.create', 'shape.delete', 'connection.create', 'connection.move', 'connection.delete'], ifBpmn(reverseUpdateParent));
+  /*
+   * ## Updating Parent
+   *
+   * When morphing a Process into a Collaboration or vice-versa,
+   * make sure that both the *semantic* and *di* parent of each element
+   * is updated.
+   *
+   */
+
+  function updateRoot(event) {
+    var context = event.context,
+        oldRoot = context.oldRoot,
+        children = oldRoot.children;
+    (0, _minDash.forEach)(children, function (child) {
+      if ((0, _ModelUtil.is)(child, 'bpmn:BaseElement')) {
+        self.updateParent(child);
+      }
+    });
+  }
+
+  this.executed(['canvas.updateRoot'], updateRoot);
+  this.reverted(['canvas.updateRoot'], updateRoot); // update bounds
+
+  function updateBounds(e) {
+    var shape = e.context.shape;
+
+    if (!(0, _ModelUtil.is)(shape, 'bpmn:BaseElement')) {
+      return;
+    }
+
+    self.updateBounds(shape);
+  }
+
+  this.executed(['shape.move', 'shape.create', 'shape.resize'], ifBpmn(function (event) {
+    // exclude labels because they're handled separately during shape.changed
+    if (event.context.shape.type === 'label') {
+      return;
+    }
+
+    updateBounds(event);
+  }));
+  this.reverted(['shape.move', 'shape.create', 'shape.resize'], ifBpmn(function (event) {
+    // exclude labels because they're handled separately during shape.changed
+    if (event.context.shape.type === 'label') {
+      return;
+    }
+
+    updateBounds(event);
+  })); // Handle labels separately. This is necessary, because the label bounds have to be updated
+  // every time its shape changes, not only on move, create and resize.
+
+  eventBus.on('shape.changed', function (event) {
+    if (event.element.type === 'label') {
+      updateBounds({
+        context: {
+          shape: event.element
+        }
+      });
+    }
+  }); // attach / detach connection
+
+  function updateConnection(e) {
+    self.updateConnection(e.context);
+  }
+
+  this.executed(['connection.create', 'connection.move', 'connection.delete', 'connection.reconnect'], ifBpmn(updateConnection));
+  this.reverted(['connection.create', 'connection.move', 'connection.delete', 'connection.reconnect'], ifBpmn(updateConnection)); // update waypoints
+
+  function updateConnectionWaypoints(e) {
+    self.updateConnectionWaypoints(e.context.connection);
+  }
+
+  this.executed(['connection.layout', 'connection.move', 'connection.updateWaypoints'], ifBpmn(updateConnectionWaypoints));
+  this.reverted(['connection.layout', 'connection.move', 'connection.updateWaypoints'], ifBpmn(updateConnectionWaypoints)); // update conditional/default flows
+
+  this.executed('connection.reconnect', ifBpmn(function (event) {
+    var context = event.context,
+        connection = context.connection,
+        oldSource = context.oldSource,
+        newSource = context.newSource,
+        connectionBo = (0, _ModelUtil.getBusinessObject)(connection),
+        oldSourceBo = (0, _ModelUtil.getBusinessObject)(oldSource),
+        newSourceBo = (0, _ModelUtil.getBusinessObject)(newSource); // remove condition from connection on reconnect to new source
+    // if new source can NOT have condional sequence flow
+
+    if (connectionBo.conditionExpression && !(0, _ModelingUtil.isAny)(newSourceBo, ['bpmn:Activity', 'bpmn:ExclusiveGateway', 'bpmn:InclusiveGateway'])) {
+      context.oldConditionExpression = connectionBo.conditionExpression;
+      delete connectionBo.conditionExpression;
+    } // remove default from old source flow on reconnect to new source
+    // if source changed
+
+
+    if (oldSource !== newSource && oldSourceBo.default === connectionBo) {
+      context.oldDefault = oldSourceBo.default;
+      delete oldSourceBo.default;
+    }
+  }));
+  this.reverted('connection.reconnect', ifBpmn(function (event) {
+    var context = event.context,
+        connection = context.connection,
+        oldSource = context.oldSource,
+        newSource = context.newSource,
+        connectionBo = (0, _ModelUtil.getBusinessObject)(connection),
+        oldSourceBo = (0, _ModelUtil.getBusinessObject)(oldSource),
+        newSourceBo = (0, _ModelUtil.getBusinessObject)(newSource); // add condition to connection on revert reconnect to new source
+
+    if (context.oldConditionExpression) {
+      connectionBo.conditionExpression = context.oldConditionExpression;
+    } // add default to old source on revert reconnect to new source
+
+
+    if (context.oldDefault) {
+      oldSourceBo.default = context.oldDefault;
+      delete newSourceBo.default;
+    }
+  })); // update attachments
+
+  function updateAttachment(e) {
+    self.updateAttachment(e.context);
+  }
+
+  this.executed(['element.updateAttachment'], ifBpmn(updateAttachment));
+  this.reverted(['element.updateAttachment'], ifBpmn(updateAttachment));
+}
+
+(0, _inherits.default)(BpmnUpdater, _CommandInterceptor.default);
+BpmnUpdater.$inject = ['eventBus', 'bpmnFactory', 'connectionDocking', 'translate']; // implementation //////////////////////
+
+BpmnUpdater.prototype.updateAttachment = function (context) {
+  var shape = context.shape,
+      businessObject = shape.businessObject,
+      host = shape.host;
+  businessObject.attachedToRef = host && host.businessObject;
+};
+
+BpmnUpdater.prototype.updateParent = function (element, oldParent) {
+  // do not update BPMN 2.0 label parent
+  if (element instanceof _model.Label) {
+    return;
+  } // data stores in collaborations are handled separately by DataStoreBehavior
+
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:DataStoreReference') && element.parent && (0, _ModelUtil.is)(element.parent, 'bpmn:Collaboration')) {
+    return;
+  }
+
+  var parentShape = element.parent;
+  var businessObject = element.businessObject,
+      parentBusinessObject = parentShape && parentShape.businessObject,
+      parentDi = parentBusinessObject && parentBusinessObject.di;
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:FlowNode')) {
+    this.updateFlowNodeRefs(businessObject, parentBusinessObject, oldParent && oldParent.businessObject);
+  }
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:DataOutputAssociation')) {
+    if (element.source) {
+      parentBusinessObject = element.source.businessObject;
+    } else {
+      parentBusinessObject = null;
+    }
+  }
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:DataInputAssociation')) {
+    if (element.target) {
+      parentBusinessObject = element.target.businessObject;
+    } else {
+      parentBusinessObject = null;
+    }
+  }
+
+  this.updateSemanticParent(businessObject, parentBusinessObject);
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:DataObjectReference') && businessObject.dataObjectRef) {
+    this.updateSemanticParent(businessObject.dataObjectRef, parentBusinessObject);
+  }
+
+  this.updateDiParent(businessObject.di, parentDi);
+};
+
+BpmnUpdater.prototype.updateBounds = function (shape) {
+  var di = shape.businessObject.di;
+  var target = shape instanceof _model.Label ? this._getLabel(di) : di;
+  var bounds = target.bounds;
+
+  if (!bounds) {
+    bounds = this._bpmnFactory.createDiBounds();
+    target.set('bounds', bounds);
+  }
+
+  (0, _minDash.assign)(bounds, {
+    x: shape.x,
+    y: shape.y,
+    width: shape.width,
+    height: shape.height
+  });
+};
+
+BpmnUpdater.prototype.updateFlowNodeRefs = function (businessObject, newContainment, oldContainment) {
+  if (oldContainment === newContainment) {
+    return;
+  }
+
+  var oldRefs, newRefs;
+
+  if ((0, _ModelUtil.is)(oldContainment, 'bpmn:Lane')) {
+    oldRefs = oldContainment.get('flowNodeRef');
+    (0, _Collections.remove)(oldRefs, businessObject);
+  }
+
+  if ((0, _ModelUtil.is)(newContainment, 'bpmn:Lane')) {
+    newRefs = newContainment.get('flowNodeRef');
+    (0, _Collections.add)(newRefs, businessObject);
+  }
+}; // update existing sourceElement and targetElement di information
+
+
+BpmnUpdater.prototype.updateDiConnection = function (di, newSource, newTarget) {
+  if (di.sourceElement && di.sourceElement.bpmnElement !== newSource) {
+    di.sourceElement = newSource && newSource.di;
+  }
+
+  if (di.targetElement && di.targetElement.bpmnElement !== newTarget) {
+    di.targetElement = newTarget && newTarget.di;
+  }
+};
+
+BpmnUpdater.prototype.updateDiParent = function (di, parentDi) {
+  if (parentDi && !(0, _ModelUtil.is)(parentDi, 'bpmndi:BPMNPlane')) {
+    parentDi = parentDi.$parent;
+  }
+
+  if (di.$parent === parentDi) {
+    return;
+  }
+
+  var planeElements = (parentDi || di.$parent).get('planeElement');
+
+  if (parentDi) {
+    planeElements.push(di);
+    di.$parent = parentDi;
+  } else {
+    (0, _Collections.remove)(planeElements, di);
+    di.$parent = null;
+  }
+};
+
+function getDefinitions(element) {
+  while (element && !(0, _ModelUtil.is)(element, 'bpmn:Definitions')) {
+    element = element.$parent;
+  }
+
+  return element;
+}
+
+BpmnUpdater.prototype.getLaneSet = function (container) {
+  var laneSet, laneSets; // bpmn:Lane
+
+  if ((0, _ModelUtil.is)(container, 'bpmn:Lane')) {
+    laneSet = container.childLaneSet;
+
+    if (!laneSet) {
+      laneSet = this._bpmnFactory.create('bpmn:LaneSet');
+      container.childLaneSet = laneSet;
+      laneSet.$parent = container;
+    }
+
+    return laneSet;
+  } // bpmn:Participant
+
+
+  if ((0, _ModelUtil.is)(container, 'bpmn:Participant')) {
+    container = container.processRef;
+  } // bpmn:FlowElementsContainer
+
+
+  laneSets = container.get('laneSets');
+  laneSet = laneSets[0];
+
+  if (!laneSet) {
+    laneSet = this._bpmnFactory.create('bpmn:LaneSet');
+    laneSet.$parent = container;
+    laneSets.push(laneSet);
+  }
+
+  return laneSet;
+};
+
+BpmnUpdater.prototype.updateSemanticParent = function (businessObject, newParent, visualParent) {
+  var containment,
+      translate = this._translate;
+
+  if (businessObject.$parent === newParent) {
+    return;
+  }
+
+  if ((0, _ModelUtil.is)(businessObject, 'bpmn:DataInput') || (0, _ModelUtil.is)(businessObject, 'bpmn:DataOutput')) {
+    if ((0, _ModelUtil.is)(newParent, 'bpmn:Participant') && 'processRef' in newParent) {
+      newParent = newParent.processRef;
+    } // already in correct ioSpecification
+
+
+    if ('ioSpecification' in newParent && newParent.ioSpecification === businessObject.$parent) {
+      return;
+    }
+  }
+
+  if ((0, _ModelUtil.is)(businessObject, 'bpmn:Lane')) {
+    if (newParent) {
+      newParent = this.getLaneSet(newParent);
+    }
+
+    containment = 'lanes';
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:FlowElement')) {
+    if (newParent) {
+      if ((0, _ModelUtil.is)(newParent, 'bpmn:Participant')) {
+        newParent = newParent.processRef;
+      } else if ((0, _ModelUtil.is)(newParent, 'bpmn:Lane')) {
+        do {
+          // unwrap Lane -> LaneSet -> (Lane | FlowElementsContainer)
+          newParent = newParent.$parent.$parent;
+        } while ((0, _ModelUtil.is)(newParent, 'bpmn:Lane'));
+      }
+    }
+
+    containment = 'flowElements';
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:Artifact')) {
+    while (newParent && !(0, _ModelUtil.is)(newParent, 'bpmn:Process') && !(0, _ModelUtil.is)(newParent, 'bpmn:SubProcess') && !(0, _ModelUtil.is)(newParent, 'bpmn:Collaboration')) {
+      if ((0, _ModelUtil.is)(newParent, 'bpmn:Participant')) {
+        newParent = newParent.processRef;
+        break;
+      } else {
+        newParent = newParent.$parent;
+      }
+    }
+
+    containment = 'artifacts';
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:MessageFlow')) {
+    containment = 'messageFlows';
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:Participant')) {
+    containment = 'participants'; // make sure the participants process is properly attached / detached
+    // from the XML document
+
+    var process = businessObject.processRef,
+        definitions;
+
+    if (process) {
+      definitions = getDefinitions(businessObject.$parent || newParent);
+
+      if (businessObject.$parent) {
+        (0, _Collections.remove)(definitions.get('rootElements'), process);
+        process.$parent = null;
+      }
+
+      if (newParent) {
+        (0, _Collections.add)(definitions.get('rootElements'), process);
+        process.$parent = definitions;
+      }
+    }
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:DataOutputAssociation')) {
+    containment = 'dataOutputAssociations';
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:DataInputAssociation')) {
+    containment = 'dataInputAssociations';
+  }
+
+  if (!containment) {
+    throw new Error(translate('no parent for {element} in {parent}', {
+      element: businessObject.id,
+      parent: newParent.id
+    }));
+  }
+
+  var children;
+
+  if (businessObject.$parent) {
+    // remove from old parent
+    children = businessObject.$parent.get(containment);
+    (0, _Collections.remove)(children, businessObject);
+  }
+
+  if (!newParent) {
+    businessObject.$parent = null;
+  } else {
+    // add to new parent
+    children = newParent.get(containment);
+    children.push(businessObject);
+    businessObject.$parent = newParent;
+  }
+
+  if (visualParent) {
+    var diChildren = visualParent.get(containment);
+    (0, _Collections.remove)(children, businessObject);
+
+    if (newParent) {
+      if (!diChildren) {
+        diChildren = [];
+        newParent.set(containment, diChildren);
+      }
+
+      diChildren.push(businessObject);
+    }
+  }
+};
+
+BpmnUpdater.prototype.updateConnectionWaypoints = function (connection) {
+  connection.businessObject.di.set('waypoint', this._bpmnFactory.createDiWaypoints(connection.waypoints));
+};
+
+BpmnUpdater.prototype.updateConnection = function (context) {
+  var connection = context.connection,
+      businessObject = (0, _ModelUtil.getBusinessObject)(connection),
+      newSource = (0, _ModelUtil.getBusinessObject)(connection.source),
+      newTarget = (0, _ModelUtil.getBusinessObject)(connection.target),
+      visualParent;
+
+  if (!(0, _ModelUtil.is)(businessObject, 'bpmn:DataAssociation')) {
+    var inverseSet = (0, _ModelUtil.is)(businessObject, 'bpmn:SequenceFlow');
+
+    if (businessObject.sourceRef !== newSource) {
+      if (inverseSet) {
+        (0, _Collections.remove)(businessObject.sourceRef && businessObject.sourceRef.get('outgoing'), businessObject);
+
+        if (newSource && newSource.get('outgoing')) {
+          newSource.get('outgoing').push(businessObject);
+        }
+      }
+
+      businessObject.sourceRef = newSource;
+    }
+
+    if (businessObject.targetRef !== newTarget) {
+      if (inverseSet) {
+        (0, _Collections.remove)(businessObject.targetRef && businessObject.targetRef.get('incoming'), businessObject);
+
+        if (newTarget && newTarget.get('incoming')) {
+          newTarget.get('incoming').push(businessObject);
+        }
+      }
+
+      businessObject.targetRef = newTarget;
+    }
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:DataInputAssociation')) {
+    // handle obnoxious isMsome sourceRef
+    businessObject.get('sourceRef')[0] = newSource;
+    visualParent = context.parent || context.newParent || newTarget;
+    this.updateSemanticParent(businessObject, newTarget, visualParent);
+  } else if ((0, _ModelUtil.is)(businessObject, 'bpmn:DataOutputAssociation')) {
+    visualParent = context.parent || context.newParent || newSource;
+    this.updateSemanticParent(businessObject, newSource, visualParent); // targetRef = new target
+
+    businessObject.targetRef = newTarget;
+  }
+
+  this.updateConnectionWaypoints(connection);
+  this.updateDiConnection(businessObject.di, newSource, newTarget);
+}; // helpers //////////////////////
+
+
+BpmnUpdater.prototype._getLabel = function (di) {
+  if (!di.label) {
+    di.label = this._bpmnFactory.createDiLabel();
+  }
+
+  return di.label;
+};
+/**
+ * Make sure the event listener is only called
+ * if the touched element is a BPMN element.
+ *
+ * @param  {Function} fn
+ * @return {Function} guarded function
+ */
+
+
+function ifBpmn(fn) {
+  return function (event) {
+    var context = event.context,
+        element = context.shape || context.connection;
+
+    if ((0, _ModelUtil.is)(element, 'bpmn:BaseElement')) {
+      fn(event);
+    }
+  };
+}
+
+},{"../../util/ModelUtil":91,"./util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/model":190,"diagram-js/lib/util/Collections":200,"inherits":218,"min-dash":219}],21:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ElementFactory;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _DiUtil = require("../../util/DiUtil");
+
+var _ElementFactory = _interopRequireDefault(require("diagram-js/lib/core/ElementFactory"));
+
+var _LabelUtil = require("../../util/LabelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A bpmn-aware factory for diagram-js shapes
+ */
+function ElementFactory(bpmnFactory, moddle, translate) {
+  _ElementFactory.default.call(this);
+
+  this._bpmnFactory = bpmnFactory;
+  this._moddle = moddle;
+  this._translate = translate;
+}
+
+(0, _inherits.default)(ElementFactory, _ElementFactory.default);
+ElementFactory.$inject = ['bpmnFactory', 'moddle', 'translate'];
+ElementFactory.prototype.baseCreate = _ElementFactory.default.prototype.create;
+
+ElementFactory.prototype.create = function (elementType, attrs) {
+  // no special magic for labels,
+  // we assume their businessObjects have already been created
+  // and wired via attrs
+  if (elementType === 'label') {
+    return this.baseCreate(elementType, (0, _minDash.assign)({
+      type: 'label'
+    }, _LabelUtil.DEFAULT_LABEL_SIZE, attrs));
+  }
+
+  return this.createBpmnElement(elementType, attrs);
+};
+
+ElementFactory.prototype.createBpmnElement = function (elementType, attrs) {
+  var size,
+      translate = this._translate;
+  attrs = attrs || {};
+  var businessObject = attrs.businessObject;
+
+  if (!businessObject) {
+    if (!attrs.type) {
+      throw new Error(translate('no shape type specified'));
+    }
+
+    businessObject = this._bpmnFactory.create(attrs.type);
+  }
+
+  if (!businessObject.di) {
+    if (elementType === 'root') {
+      businessObject.di = this._bpmnFactory.createDiPlane(businessObject, [], {
+        id: businessObject.id + '_di'
+      });
+    } else if (elementType === 'connection') {
+      businessObject.di = this._bpmnFactory.createDiEdge(businessObject, [], {
+        id: businessObject.id + '_di'
+      });
+    } else {
+      businessObject.di = this._bpmnFactory.createDiShape(businessObject, {}, {
+        id: businessObject.id + '_di'
+      });
+    }
+  }
+
+  if ((0, _ModelUtil.is)(businessObject, 'bpmn:Group')) {
+    attrs = (0, _minDash.assign)({
+      isFrame: true
+    }, attrs);
+  }
+
+  if (attrs.di) {
+    (0, _minDash.assign)(businessObject.di, attrs.di);
+    delete attrs.di;
+  }
+
+  applyAttributes(businessObject, attrs, ['processRef', 'isInterrupting', 'associationDirection', 'isForCompensation']);
+
+  if (attrs.isExpanded) {
+    applyAttribute(businessObject.di, attrs, 'isExpanded');
+  }
+
+  if ((0, _ModelUtil.is)(businessObject, 'bpmn:ExclusiveGateway')) {
+    businessObject.di.isMarkerVisible = true;
+  }
+
+  var eventDefinitions, newEventDefinition;
+
+  if (attrs.eventDefinitionType) {
+    eventDefinitions = businessObject.get('eventDefinitions') || [];
+    newEventDefinition = this._bpmnFactory.create(attrs.eventDefinitionType, attrs.eventDefinitionAttrs);
+
+    if (attrs.eventDefinitionType === 'bpmn:ConditionalEventDefinition') {
+      newEventDefinition.condition = this._bpmnFactory.create('bpmn:FormalExpression');
+    }
+
+    eventDefinitions.push(newEventDefinition);
+    newEventDefinition.$parent = businessObject;
+    businessObject.eventDefinitions = eventDefinitions;
+    delete attrs.eventDefinitionType;
+  }
+
+  size = this._getDefaultSize(businessObject);
+  attrs = (0, _minDash.assign)({
+    businessObject: businessObject,
+    id: businessObject.id
+  }, size, attrs);
+  return this.baseCreate(elementType, attrs);
+};
+
+ElementFactory.prototype._getDefaultSize = function (semantic) {
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:SubProcess')) {
+    if ((0, _DiUtil.isExpanded)(semantic)) {
+      return {
+        width: 350,
+        height: 200
+      };
+    } else {
+      return {
+        width: 100,
+        height: 80
+      };
+    }
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Task')) {
+    return {
+      width: 100,
+      height: 80
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Gateway')) {
+    return {
+      width: 50,
+      height: 50
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Event')) {
+    return {
+      width: 36,
+      height: 36
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Participant')) {
+    if ((0, _DiUtil.isExpanded)(semantic)) {
+      return {
+        width: 600,
+        height: 250
+      };
+    } else {
+      return {
+        width: 400,
+        height: 60
+      };
+    }
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Lane')) {
+    return {
+      width: 400,
+      height: 100
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:DataObjectReference')) {
+    return {
+      width: 36,
+      height: 50
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:DataStoreReference')) {
+    return {
+      width: 50,
+      height: 50
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:TextAnnotation')) {
+    return {
+      width: 100,
+      height: 30
+    };
+  }
+
+  if ((0, _ModelUtil.is)(semantic, 'bpmn:Group')) {
+    return {
+      width: 300,
+      height: 300
+    };
+  }
+
+  return {
+    width: 100,
+    height: 80
+  };
+};
+/**
+ * Create participant.
+ *
+ * @param {boolean|Object} [attrs] attrs
+ *
+ * @returns {djs.model.Shape}
+ */
+
+
+ElementFactory.prototype.createParticipantShape = function (attrs) {
+  if (!(0, _minDash.isObject)(attrs)) {
+    attrs = {
+      isExpanded: attrs
+    };
+  }
+
+  attrs = (0, _minDash.assign)({
+    type: 'bpmn:Participant'
+  }, attrs || {}); // participants are expanded by default
+
+  if (attrs.isExpanded !== false) {
+    attrs.processRef = this._bpmnFactory.create('bpmn:Process');
+  }
+
+  return this.createShape(attrs);
+}; // helpers //////////////////////
+
+/**
+ * Apply attributes from a map to the given element,
+ * remove attribute from the map on application.
+ *
+ * @param {Base} element
+ * @param {Object} attrs (in/out map of attributes)
+ * @param {Array<string>} attributeNames name of attributes to apply
+ */
+
+
+function applyAttributes(element, attrs, attributeNames) {
+  (0, _minDash.forEach)(attributeNames, function (property) {
+    if (attrs[property] !== undefined) {
+      applyAttribute(element, attrs, property);
+    }
+  });
+}
+/**
+ * Apply named property to element and drain it from the attrs
+ * collection.
+ *
+ * @param {Base} element
+ * @param {Object} attrs (in/out map of attributes)
+ * @param {string} attributeName to apply
+ */
+
+
+function applyAttribute(element, attrs, attributeName) {
+  element[attributeName] = attrs[attributeName];
+  delete attrs[attributeName];
+}
+
+},{"../../util/DiUtil":89,"../../util/LabelUtil":90,"../../util/ModelUtil":91,"diagram-js/lib/core/ElementFactory":100,"inherits":218,"min-dash":219}],22:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Modeling;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _Modeling = _interopRequireDefault(require("diagram-js/lib/features/modeling/Modeling"));
+
+var _UpdateModdlePropertiesHandler = _interopRequireDefault(require("./cmd/UpdateModdlePropertiesHandler"));
+
+var _UpdatePropertiesHandler = _interopRequireDefault(require("./cmd/UpdatePropertiesHandler"));
+
+var _UpdateCanvasRootHandler = _interopRequireDefault(require("./cmd/UpdateCanvasRootHandler"));
+
+var _AddLaneHandler = _interopRequireDefault(require("./cmd/AddLaneHandler"));
+
+var _SplitLaneHandler = _interopRequireDefault(require("./cmd/SplitLaneHandler"));
+
+var _ResizeLaneHandler = _interopRequireDefault(require("./cmd/ResizeLaneHandler"));
+
+var _UpdateFlowNodeRefsHandler = _interopRequireDefault(require("./cmd/UpdateFlowNodeRefsHandler"));
+
+var _IdClaimHandler = _interopRequireDefault(require("./cmd/IdClaimHandler"));
+
+var _SetColorHandler = _interopRequireDefault(require("./cmd/SetColorHandler"));
+
+var _UpdateLabelHandler = _interopRequireDefault(require("../label-editing/cmd/UpdateLabelHandler"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN 2.0 modeling features activator
+ *
+ * @param {EventBus} eventBus
+ * @param {ElementFactory} elementFactory
+ * @param {CommandStack} commandStack
+ * @param {BpmnRules} bpmnRules
+ */
+function Modeling(eventBus, elementFactory, commandStack, bpmnRules) {
+  _Modeling.default.call(this, eventBus, elementFactory, commandStack);
+
+  this._bpmnRules = bpmnRules;
+}
+
+(0, _inherits.default)(Modeling, _Modeling.default);
+Modeling.$inject = ['eventBus', 'elementFactory', 'commandStack', 'bpmnRules'];
+
+Modeling.prototype.getHandlers = function () {
+  var handlers = _Modeling.default.prototype.getHandlers.call(this);
+
+  handlers['element.updateModdleProperties'] = _UpdateModdlePropertiesHandler.default;
+  handlers['element.updateProperties'] = _UpdatePropertiesHandler.default;
+  handlers['canvas.updateRoot'] = _UpdateCanvasRootHandler.default;
+  handlers['lane.add'] = _AddLaneHandler.default;
+  handlers['lane.resize'] = _ResizeLaneHandler.default;
+  handlers['lane.split'] = _SplitLaneHandler.default;
+  handlers['lane.updateRefs'] = _UpdateFlowNodeRefsHandler.default;
+  handlers['id.updateClaim'] = _IdClaimHandler.default;
+  handlers['element.setColor'] = _SetColorHandler.default;
+  handlers['element.updateLabel'] = _UpdateLabelHandler.default;
+  return handlers;
+};
+
+Modeling.prototype.updateLabel = function (element, newLabel, newBounds, hints) {
+  this._commandStack.execute('element.updateLabel', {
+    element: element,
+    newLabel: newLabel,
+    newBounds: newBounds,
+    hints: hints || {}
+  });
+};
+
+Modeling.prototype.connect = function (source, target, attrs, hints) {
+  var bpmnRules = this._bpmnRules;
+
+  if (!attrs) {
+    attrs = bpmnRules.canConnect(source, target);
+  }
+
+  if (!attrs) {
+    return;
+  }
+
+  return this.createConnection(source, target, attrs, source.parent, hints);
+};
+
+Modeling.prototype.updateModdleProperties = function (element, moddleElement, properties) {
+  this._commandStack.execute('element.updateModdleProperties', {
+    element: element,
+    moddleElement: moddleElement,
+    properties: properties
+  });
+};
+
+Modeling.prototype.updateProperties = function (element, properties) {
+  this._commandStack.execute('element.updateProperties', {
+    element: element,
+    properties: properties
+  });
+};
+
+Modeling.prototype.resizeLane = function (laneShape, newBounds, balanced) {
+  this._commandStack.execute('lane.resize', {
+    shape: laneShape,
+    newBounds: newBounds,
+    balanced: balanced
+  });
+};
+
+Modeling.prototype.addLane = function (targetLaneShape, location) {
+  var context = {
+    shape: targetLaneShape,
+    location: location
+  };
+
+  this._commandStack.execute('lane.add', context);
+
+  return context.newLane;
+};
+
+Modeling.prototype.splitLane = function (targetLane, count) {
+  this._commandStack.execute('lane.split', {
+    shape: targetLane,
+    count: count
+  });
+};
+/**
+ * Transform the current diagram into a collaboration.
+ *
+ * @return {djs.model.Root} the new root element
+ */
+
+
+Modeling.prototype.makeCollaboration = function () {
+  var collaborationElement = this._create('root', {
+    type: 'bpmn:Collaboration'
+  });
+
+  var context = {
+    newRoot: collaborationElement
+  };
+
+  this._commandStack.execute('canvas.updateRoot', context);
+
+  return collaborationElement;
+};
+
+Modeling.prototype.updateLaneRefs = function (flowNodeShapes, laneShapes) {
+  this._commandStack.execute('lane.updateRefs', {
+    flowNodeShapes: flowNodeShapes,
+    laneShapes: laneShapes
+  });
+};
+/**
+ * Transform the current diagram into a process.
+ *
+ * @return {djs.model.Root} the new root element
+ */
+
+
+Modeling.prototype.makeProcess = function () {
+  var processElement = this._create('root', {
+    type: 'bpmn:Process'
+  });
+
+  var context = {
+    newRoot: processElement
+  };
+
+  this._commandStack.execute('canvas.updateRoot', context);
+};
+
+Modeling.prototype.claimId = function (id, moddleElement) {
+  this._commandStack.execute('id.updateClaim', {
+    id: id,
+    element: moddleElement,
+    claiming: true
+  });
+};
+
+Modeling.prototype.unclaimId = function (id, moddleElement) {
+  this._commandStack.execute('id.updateClaim', {
+    id: id,
+    element: moddleElement
+  });
+};
+
+Modeling.prototype.setColor = function (elements, colors) {
+  if (!elements.length) {
+    elements = [elements];
+  }
+
+  this._commandStack.execute('element.setColor', {
+    elements: elements,
+    colors: colors
+  });
+};
+
+},{"../label-editing/cmd/UpdateLabelHandler":17,"./cmd/AddLaneHandler":63,"./cmd/IdClaimHandler":64,"./cmd/ResizeLaneHandler":65,"./cmd/SetColorHandler":66,"./cmd/SplitLaneHandler":67,"./cmd/UpdateCanvasRootHandler":68,"./cmd/UpdateFlowNodeRefsHandler":69,"./cmd/UpdateModdlePropertiesHandler":70,"./cmd/UpdatePropertiesHandler":71,"diagram-js/lib/features/modeling/Modeling":132,"inherits":218}],23:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AdaptiveLabelPositioningBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _Math = require("diagram-js/lib/util/Math");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ALIGNMENTS = ['top', 'bottom', 'left', 'right'];
+var ELEMENT_LABEL_DISTANCE = 10;
+/**
+ * A component that makes sure that external labels are added
+ * together with respective elements and properly updated (DI wise)
+ * during move.
+ *
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ */
+
+function AdaptiveLabelPositioningBehavior(eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this.postExecuted(['connection.create', 'connection.layout', 'connection.updateWaypoints'], function (event) {
+    var context = event.context,
+        connection = context.connection,
+        source = connection.source,
+        target = connection.target,
+        hints = context.hints || {};
+
+    if (hints.createElementsBehavior !== false) {
+      checkLabelAdjustment(source);
+      checkLabelAdjustment(target);
+    }
+  });
+  this.postExecuted(['label.create'], function (event) {
+    var context = event.context,
+        shape = context.shape,
+        hints = context.hints || {};
+
+    if (hints.createElementsBehavior !== false) {
+      checkLabelAdjustment(shape.labelTarget);
+    }
+  });
+  this.postExecuted(['elements.create'], function (event) {
+    var context = event.context,
+        elements = context.elements,
+        hints = context.hints || {};
+
+    if (hints.createElementsBehavior !== false) {
+      elements.forEach(function (element) {
+        checkLabelAdjustment(element);
+      });
+    }
+  });
+
+  function checkLabelAdjustment(element) {
+    // skip non-existing labels
+    if (!(0, _LabelUtil.hasExternalLabel)(element)) {
+      return;
+    }
+
+    var optimalPosition = getOptimalPosition(element); // no optimal position found
+
+    if (!optimalPosition) {
+      return;
+    }
+
+    adjustLabelPosition(element, optimalPosition);
+  }
+
+  function adjustLabelPosition(element, orientation) {
+    var elementMid = (0, _LayoutUtil.getMid)(element),
+        label = element.label,
+        labelMid = (0, _LayoutUtil.getMid)(label); // ignore labels that are being created
+
+    if (!label.parent) {
+      return;
+    }
+
+    var elementTrbl = (0, _LayoutUtil.asTRBL)(element);
+    var newLabelMid;
+
+    switch (orientation) {
+      case 'top':
+        newLabelMid = {
+          x: elementMid.x,
+          y: elementTrbl.top - ELEMENT_LABEL_DISTANCE - label.height / 2
+        };
+        break;
+
+      case 'left':
+        newLabelMid = {
+          x: elementTrbl.left - ELEMENT_LABEL_DISTANCE - label.width / 2,
+          y: elementMid.y
+        };
+        break;
+
+      case 'bottom':
+        newLabelMid = {
+          x: elementMid.x,
+          y: elementTrbl.bottom + ELEMENT_LABEL_DISTANCE + label.height / 2
+        };
+        break;
+
+      case 'right':
+        newLabelMid = {
+          x: elementTrbl.right + ELEMENT_LABEL_DISTANCE + label.width / 2,
+          y: elementMid.y
+        };
+        break;
+    }
+
+    var delta = (0, _Math.substract)(newLabelMid, labelMid);
+    modeling.moveShape(label, delta);
+  }
+}
+
+(0, _inherits.default)(AdaptiveLabelPositioningBehavior, _CommandInterceptor.default);
+AdaptiveLabelPositioningBehavior.$inject = ['eventBus', 'modeling']; // helpers //////////////////////
+
+/**
+ * Return alignments which are taken by a boundary's host element
+ *
+ * @param {Shape} element
+ *
+ * @return {Array<string>}
+ */
+
+function getTakenHostAlignments(element) {
+  var hostElement = element.host,
+      elementMid = (0, _LayoutUtil.getMid)(element),
+      hostOrientation = (0, _LayoutUtil.getOrientation)(elementMid, hostElement);
+  var freeAlignments; // check whether there is a multi-orientation, e.g. 'top-left'
+
+  if (hostOrientation.indexOf('-') >= 0) {
+    freeAlignments = hostOrientation.split('-');
+  } else {
+    freeAlignments = [hostOrientation];
+  }
+
+  var takenAlignments = ALIGNMENTS.filter(function (alignment) {
+    return freeAlignments.indexOf(alignment) === -1;
+  });
+  return takenAlignments;
+}
+/**
+ * Return alignments which are taken by related connections
+ *
+ * @param {Shape} element
+ *
+ * @return {Array<string>}
+ */
+
+
+function getTakenConnectionAlignments(element) {
+  var elementMid = (0, _LayoutUtil.getMid)(element);
+  var takenAlignments = [].concat(element.incoming.map(function (c) {
+    return c.waypoints[c.waypoints.length - 2];
+  }), element.outgoing.map(function (c) {
+    return c.waypoints[1];
+  })).map(function (point) {
+    return getApproximateOrientation(elementMid, point);
+  });
+  return takenAlignments;
+}
+/**
+ * Return the optimal label position around an element
+ * or _undefined_, if none was found.
+ *
+ * @param  {Shape} element
+ *
+ * @return {string} positioning identifier
+ */
+
+
+function getOptimalPosition(element) {
+  var labelMid = (0, _LayoutUtil.getMid)(element.label);
+  var elementMid = (0, _LayoutUtil.getMid)(element);
+  var labelOrientation = getApproximateOrientation(elementMid, labelMid);
+
+  if (!isAligned(labelOrientation)) {
+    return;
+  }
+
+  var takenAlignments = getTakenConnectionAlignments(element);
+
+  if (element.host) {
+    var takenHostAlignments = getTakenHostAlignments(element);
+    takenAlignments = takenAlignments.concat(takenHostAlignments);
+  }
+
+  var freeAlignments = ALIGNMENTS.filter(function (alignment) {
+    return takenAlignments.indexOf(alignment) === -1;
+  }); // NOTHING TO DO; label already aligned a.O.K.
+
+  if (freeAlignments.indexOf(labelOrientation) !== -1) {
+    return;
+  }
+
+  return freeAlignments[0];
+}
+
+function getApproximateOrientation(p0, p1) {
+  return (0, _LayoutUtil.getOrientation)(p1, p0, 5);
+}
+
+function isAligned(orientation) {
+  return ALIGNMENTS.indexOf(orientation) !== -1;
+}
+
+},{"../../../util/LabelUtil":90,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/Math":208,"inherits":218}],24:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AppendBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function AppendBehavior(eventBus, elementFactory, bpmnRules) {
+  _CommandInterceptor.default.call(this, eventBus); // assign correct shape position unless already set
+
+
+  this.preExecute('shape.append', function (context) {
+    var source = context.source,
+        shape = context.shape;
+
+    if (!context.position) {
+      if ((0, _ModelUtil.is)(shape, 'bpmn:TextAnnotation')) {
+        context.position = {
+          x: source.x + source.width / 2 + 75,
+          y: source.y - 50 - shape.height / 2
+        };
+      } else {
+        context.position = {
+          x: source.x + source.width + 80 + shape.width / 2,
+          y: source.y + source.height / 2
+        };
+      }
+    }
+  }, true);
+}
+
+(0, _inherits.default)(AppendBehavior, _CommandInterceptor.default);
+AppendBehavior.$inject = ['eventBus', 'elementFactory', 'bpmnRules'];
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],25:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AssociationBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _minDash = require("min-dash");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function AssociationBehavior(injector, modeling) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this.postExecute('shape.move', function (context) {
+    var newParent = context.newParent,
+        shape = context.shape;
+    var associations = (0, _minDash.filter)(shape.incoming.concat(shape.outgoing), function (connection) {
+      return (0, _ModelUtil.is)(connection, 'bpmn:Association');
+    });
+    (0, _minDash.forEach)(associations, function (association) {
+      modeling.moveConnection(association, {
+        x: 0,
+        y: 0
+      }, newParent);
+    });
+  }, true);
+}
+
+(0, _inherits.default)(AssociationBehavior, _CommandInterceptor.default);
+AssociationBehavior.$inject = ['injector', 'modeling'];
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218,"min-dash":219}],26:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AttachEventBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500;
+/**
+ * Replace intermediate event with boundary event when creating or moving results in attached event.
+ */
+
+function AttachEventBehavior(bpmnReplace, injector) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this._bpmnReplace = bpmnReplace;
+  var self = this;
+  this.postExecuted('elements.create', LOW_PRIORITY, function (context) {
+    var elements = context.elements;
+    elements = elements.filter(function (shape) {
+      var host = shape.host;
+      return shouldReplace(shape, host);
+    });
+
+    if (elements.length !== 1) {
+      return;
+    }
+
+    elements.map(function (element) {
+      return elements.indexOf(element);
+    }).forEach(function (index) {
+      var host = elements[index];
+      context.elements[index] = self.replaceShape(elements[index], host);
+    });
+  }, true);
+  this.preExecute('elements.move', LOW_PRIORITY, function (context) {
+    var shapes = context.shapes,
+        host = context.newHost;
+
+    if (shapes.length !== 1) {
+      return;
+    }
+
+    var shape = shapes[0];
+
+    if (shouldReplace(shape, host)) {
+      context.shapes = [self.replaceShape(shape, host)];
+    }
+  }, true);
+}
+
+AttachEventBehavior.$inject = ['bpmnReplace', 'injector'];
+(0, _inherits.default)(AttachEventBehavior, _CommandInterceptor.default);
+
+AttachEventBehavior.prototype.replaceShape = function (shape, host) {
+  var eventDefinition = getEventDefinition(shape);
+  var boundaryEvent = {
+    type: 'bpmn:BoundaryEvent',
+    host: host
+  };
+
+  if (eventDefinition) {
+    boundaryEvent.eventDefinitionType = eventDefinition.$type;
+  }
+
+  return this._bpmnReplace.replaceElement(shape, boundaryEvent, {
+    layoutConnection: false
+  });
+}; // helpers //////////
+
+
+function getEventDefinition(element) {
+  var businessObject = (0, _ModelUtil.getBusinessObject)(element),
+      eventDefinitions = businessObject.eventDefinitions;
+  return eventDefinitions && eventDefinitions[0];
+}
+
+function shouldReplace(shape, host) {
+  return !(0, _LabelUtil.isLabel)(shape) && (0, _ModelingUtil.isAny)(shape, ['bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent']) && !!host;
+}
+
+},{"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"../util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],27:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BoundaryEventBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _minDash = require("min-dash");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN specific boundary event behavior
+ */
+function BoundaryEventBehavior(eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  function getBoundaryEvents(element) {
+    return (0, _minDash.filter)(element.attachers, function (attacher) {
+      return (0, _ModelUtil.is)(attacher, 'bpmn:BoundaryEvent');
+    });
+  } // remove after connecting to event-based gateway
+
+
+  this.postExecute('connection.create', function (event) {
+    var source = event.context.source,
+        target = event.context.target,
+        boundaryEvents = getBoundaryEvents(target);
+
+    if ((0, _ModelUtil.is)(source, 'bpmn:EventBasedGateway') && (0, _ModelUtil.is)(target, 'bpmn:ReceiveTask') && boundaryEvents.length > 0) {
+      modeling.removeElements(boundaryEvents);
+    }
+  }); // remove after replacing connected gateway with event-based gateway
+
+  this.postExecute('connection.reconnect', function (event) {
+    var oldSource = event.context.oldSource,
+        newSource = event.context.newSource;
+
+    if ((0, _ModelUtil.is)(oldSource, 'bpmn:Gateway') && (0, _ModelUtil.is)(newSource, 'bpmn:EventBasedGateway')) {
+      (0, _minDash.forEach)(newSource.outgoing, function (connection) {
+        var target = connection.target,
+            attachedboundaryEvents = getBoundaryEvents(target);
+
+        if ((0, _ModelUtil.is)(target, 'bpmn:ReceiveTask') && attachedboundaryEvents.length > 0) {
+          modeling.removeElements(attachedboundaryEvents);
+        }
+      });
+    }
+  });
+}
+
+BoundaryEventBehavior.$inject = ['eventBus', 'modeling'];
+(0, _inherits.default)(BoundaryEventBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218,"min-dash":219}],28:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function CreateBehavior(injector) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this.preExecute('shape.create', 1500, function (event) {
+    var context = event.context,
+        parent = context.parent,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(parent, 'bpmn:Lane') && !(0, _ModelUtil.is)(shape, 'bpmn:Lane')) {
+      context.parent = (0, _ModelingUtil.getParent)(parent, 'bpmn:Participant');
+    }
+  });
+}
+
+CreateBehavior.$inject = ['injector'];
+(0, _inherits.default)(CreateBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"../util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],29:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateDataObjectBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN specific create data object behavior
+ */
+function CreateDataObjectBehavior(eventBus, bpmnFactory, moddle) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this.preExecute('shape.create', function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:DataObjectReference') && shape.type !== 'label') {
+      // create a DataObject every time a DataObjectReference is created
+      var dataObject = bpmnFactory.create('bpmn:DataObject'); // set the reference to the DataObject
+
+      shape.businessObject.dataObjectRef = dataObject;
+    }
+  });
+}
+
+CreateDataObjectBehavior.$inject = ['eventBus', 'bpmnFactory', 'moddle'];
+(0, _inherits.default)(CreateDataObjectBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],30:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateParticipantBehavior;
+exports.PARTICIPANT_BORDER_WIDTH = void 0;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+var _Elements = require("diagram-js/lib/util/Elements");
+
+var _minDash = require("min-dash");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var HORIZONTAL_PARTICIPANT_PADDING = 20,
+    VERTICAL_PARTICIPANT_PADDING = 20;
+var PARTICIPANT_BORDER_WIDTH = 30;
+exports.PARTICIPANT_BORDER_WIDTH = PARTICIPANT_BORDER_WIDTH;
+var HIGH_PRIORITY = 2000;
+/**
+ * BPMN-specific behavior for creating participants.
+ */
+
+function CreateParticipantBehavior(canvas, eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus); // fit participant
+
+
+  eventBus.on(['create.start', 'shape.move.start'], HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        shape = context.shape,
+        rootElement = canvas.getRootElement();
+
+    if (!(0, _ModelUtil.is)(shape, 'bpmn:Participant') || !(0, _ModelUtil.is)(rootElement, 'bpmn:Process') || !rootElement.children.length) {
+      return;
+    } // ignore connections, groups and labels
+
+
+    var children = rootElement.children.filter(function (element) {
+      return !(0, _ModelUtil.is)(element, 'bpmn:Group') && !(0, _LabelUtil.isLabel)(element) && !isConnection(element);
+    }); // ensure for available children to calculate bounds
+
+    if (!children.length) {
+      return;
+    }
+
+    var childrenBBox = (0, _Elements.getBBox)(children);
+    var participantBounds = getParticipantBounds(shape, childrenBBox); // assign width and height
+
+    (0, _minDash.assign)(shape, participantBounds); // assign create constraints
+
+    context.createConstraints = getParticipantCreateConstraints(shape, childrenBBox);
+  }); // force hovering process when creating first participant
+
+  eventBus.on('create.start', HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        shape = context.shape,
+        rootElement = canvas.getRootElement(),
+        rootElementGfx = canvas.getGraphics(rootElement);
+
+    function ensureHoveringProcess(event) {
+      event.element = rootElement;
+      event.gfx = rootElementGfx;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Participant') && (0, _ModelUtil.is)(rootElement, 'bpmn:Process')) {
+      eventBus.on('element.hover', HIGH_PRIORITY, ensureHoveringProcess);
+      eventBus.once('create.cleanup', function () {
+        eventBus.off('element.hover', ensureHoveringProcess);
+      });
+    }
+  });
+
+  function ensureCollaboration(context) {
+    var parent = context.parent,
+        collaboration;
+    var rootElement = canvas.getRootElement();
+
+    if ((0, _ModelUtil.is)(rootElement, 'bpmn:Collaboration')) {
+      collaboration = rootElement;
+    } else {
+      // update root element by making collaboration
+      collaboration = modeling.makeCollaboration(); // re-use process when creating first participant
+
+      context.process = parent;
+    }
+
+    context.parent = collaboration;
+  } // turn process into collaboration before adding participant
+
+
+  this.preExecute('shape.create', function (context) {
+    var parent = context.parent,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Participant') && (0, _ModelUtil.is)(parent, 'bpmn:Process')) {
+      ensureCollaboration(context);
+    }
+  }, true);
+  this.execute('shape.create', function (context) {
+    var process = context.process,
+        shape = context.shape;
+
+    if (process) {
+      context.oldProcessRef = shape.businessObject.processRef; // re-use process when creating first participant
+
+      shape.businessObject.processRef = process.businessObject;
+    }
+  }, true);
+  this.revert('shape.create', function (context) {
+    var process = context.process,
+        shape = context.shape;
+
+    if (process) {
+      // re-use process when creating first participant
+      shape.businessObject.processRef = context.oldProcessRef;
+    }
+  }, true);
+  this.postExecute('shape.create', function (context) {
+    var process = context.process,
+        shape = context.shape;
+
+    if (process) {
+      // move children from process to participant
+      var processChildren = process.children.slice();
+      modeling.moveElements(processChildren, {
+        x: 0,
+        y: 0
+      }, shape);
+    }
+  }, true); // turn process into collaboration when creating participants
+
+  this.preExecute('elements.create', HIGH_PRIORITY, function (context) {
+    var elements = context.elements,
+        parent = context.parent,
+        participant;
+    var hasParticipants = findParticipant(elements);
+
+    if (hasParticipants && (0, _ModelUtil.is)(parent, 'bpmn:Process')) {
+      ensureCollaboration(context);
+      participant = findParticipant(elements);
+      context.oldProcessRef = participant.businessObject.processRef; // re-use process when creating first participant
+
+      participant.businessObject.processRef = parent.businessObject;
+    }
+  }, true);
+  this.revert('elements.create', function (context) {
+    var elements = context.elements,
+        process = context.process,
+        participant;
+
+    if (process) {
+      participant = findParticipant(elements); // re-use process when creating first participant
+
+      participant.businessObject.processRef = context.oldProcessRef;
+    }
+  }, true);
+  this.postExecute('elements.create', function (context) {
+    var elements = context.elements,
+        process = context.process,
+        participant;
+
+    if (process) {
+      participant = findParticipant(elements); // move children from process to first participant
+
+      var processChildren = process.children.slice();
+      modeling.moveElements(processChildren, {
+        x: 0,
+        y: 0
+      }, participant);
+    }
+  }, true);
+}
+
+CreateParticipantBehavior.$inject = ['canvas', 'eventBus', 'modeling'];
+(0, _inherits.default)(CreateParticipantBehavior, _CommandInterceptor.default); // helpers //////////
+
+function getParticipantBounds(shape, childrenBBox) {
+  childrenBBox = {
+    width: childrenBBox.width + HORIZONTAL_PARTICIPANT_PADDING * 2 + PARTICIPANT_BORDER_WIDTH,
+    height: childrenBBox.height + VERTICAL_PARTICIPANT_PADDING * 2
+  };
+  var width = Math.max(shape.width, childrenBBox.width),
+      height = Math.max(shape.height, childrenBBox.height);
+  return {
+    x: -width / 2,
+    y: -height / 2,
+    width: width,
+    height: height
+  };
+}
+
+function getParticipantCreateConstraints(shape, childrenBBox) {
+  childrenBBox = (0, _LayoutUtil.asTRBL)(childrenBBox);
+  return {
+    bottom: childrenBBox.top + shape.height / 2 - VERTICAL_PARTICIPANT_PADDING,
+    left: childrenBBox.right - shape.width / 2 + HORIZONTAL_PARTICIPANT_PADDING,
+    top: childrenBBox.bottom - shape.height / 2 + VERTICAL_PARTICIPANT_PADDING,
+    right: childrenBBox.left + shape.width / 2 - HORIZONTAL_PARTICIPANT_PADDING - PARTICIPANT_BORDER_WIDTH
+  };
+}
+
+function isConnection(element) {
+  return !!element.waypoints;
+}
+
+function findParticipant(elements) {
+  return (0, _minDash.find)(elements, function (element) {
+    return (0, _ModelUtil.is)(element, 'bpmn:Participant');
+  });
+}
+
+},{"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/Elements":202,"inherits":218,"min-dash":219}],31:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DataInputAssociationBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _minDash = require("min-dash");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var TARGET_REF_PLACEHOLDER_NAME = '__targetRef_placeholder';
+/**
+ * This behavior makes sure we always set a fake
+ * DataInputAssociation#targetRef as demanded by the BPMN 2.0
+ * XSD schema.
+ *
+ * The reference is set to a bpmn:Property{ name: '__targetRef_placeholder' }
+ * which is created on the fly and cleaned up afterwards if not needed
+ * anymore.
+ *
+ * @param {EventBus} eventBus
+ * @param {BpmnFactory} bpmnFactory
+ */
+
+function DataInputAssociationBehavior(eventBus, bpmnFactory) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this.executed(['connection.create', 'connection.delete', 'connection.move', 'connection.reconnect'], ifDataInputAssociation(fixTargetRef));
+  this.reverted(['connection.create', 'connection.delete', 'connection.move', 'connection.reconnect'], ifDataInputAssociation(fixTargetRef));
+
+  function usesTargetRef(element, targetRef, removedConnection) {
+    var inputAssociations = element.get('dataInputAssociations');
+    return (0, _minDash.find)(inputAssociations, function (association) {
+      return association !== removedConnection && association.targetRef === targetRef;
+    });
+  }
+
+  function getTargetRef(element, create) {
+    var properties = element.get('properties');
+    var targetRefProp = (0, _minDash.find)(properties, function (p) {
+      return p.name === TARGET_REF_PLACEHOLDER_NAME;
+    });
+
+    if (!targetRefProp && create) {
+      targetRefProp = bpmnFactory.create('bpmn:Property', {
+        name: TARGET_REF_PLACEHOLDER_NAME
+      });
+      (0, _Collections.add)(properties, targetRefProp);
+    }
+
+    return targetRefProp;
+  }
+
+  function cleanupTargetRef(element, connection) {
+    var targetRefProp = getTargetRef(element);
+
+    if (!targetRefProp) {
+      return;
+    }
+
+    if (!usesTargetRef(element, targetRefProp, connection)) {
+      (0, _Collections.remove)(element.get('properties'), targetRefProp);
+    }
+  }
+  /**
+   * Make sure targetRef is set to a valid property or
+   * `null` if the connection is detached.
+   *
+   * @param {Event} event
+   */
+
+
+  function fixTargetRef(event) {
+    var context = event.context,
+        connection = context.connection,
+        connectionBo = connection.businessObject,
+        target = connection.target,
+        targetBo = target && target.businessObject,
+        newTarget = context.newTarget,
+        newTargetBo = newTarget && newTarget.businessObject,
+        oldTarget = context.oldTarget || context.target,
+        oldTargetBo = oldTarget && oldTarget.businessObject;
+    var dataAssociation = connection.businessObject,
+        targetRefProp;
+
+    if (oldTargetBo && oldTargetBo !== targetBo) {
+      cleanupTargetRef(oldTargetBo, connectionBo);
+    }
+
+    if (newTargetBo && newTargetBo !== targetBo) {
+      cleanupTargetRef(newTargetBo, connectionBo);
+    }
+
+    if (targetBo) {
+      targetRefProp = getTargetRef(targetBo, true);
+      dataAssociation.targetRef = targetRefProp;
+    } else {
+      dataAssociation.targetRef = null;
+    }
+  }
+}
+
+DataInputAssociationBehavior.$inject = ['eventBus', 'bpmnFactory'];
+(0, _inherits.default)(DataInputAssociationBehavior, _CommandInterceptor.default);
+/**
+ * Only call the given function when the event
+ * touches a bpmn:DataInputAssociation.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ */
+
+function ifDataInputAssociation(fn) {
+  return function (event) {
+    var context = event.context,
+        connection = context.connection;
+
+    if ((0, _ModelUtil.is)(connection, 'bpmn:DataInputAssociation')) {
+      return fn(event);
+    }
+  };
+}
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/util/Collections":200,"inherits":218,"min-dash":219}],32:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DataStoreBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+var _UpdateSemanticParentHandler = _interopRequireDefault(require("../cmd/UpdateSemanticParentHandler"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN specific data store behavior
+ */
+function DataStoreBehavior(canvas, commandStack, elementRegistry, eventBus) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  commandStack.registerHandler('dataStore.updateContainment', _UpdateSemanticParentHandler.default);
+
+  function getFirstParticipant() {
+    return elementRegistry.filter(function (element) {
+      return (0, _ModelUtil.is)(element, 'bpmn:Participant');
+    })[0];
+  }
+
+  function getDataStores(element) {
+    return element.children.filter(function (child) {
+      return (0, _ModelUtil.is)(child, 'bpmn:DataStoreReference') && !child.labelTarget;
+    });
+  }
+
+  function updateDataStoreParent(dataStore, newDataStoreParent) {
+    var dataStoreBo = dataStore.businessObject || dataStore;
+    newDataStoreParent = newDataStoreParent || getFirstParticipant();
+
+    if (newDataStoreParent) {
+      var newDataStoreParentBo = newDataStoreParent.businessObject || newDataStoreParent;
+      commandStack.execute('dataStore.updateContainment', {
+        dataStoreBo: dataStoreBo,
+        newSemanticParent: newDataStoreParentBo.processRef || newDataStoreParentBo,
+        newDiParent: newDataStoreParentBo.di
+      });
+    }
+  } // disable auto-resize for data stores
+
+
+  this.preExecute('shape.create', function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:DataStoreReference') && shape.type !== 'label') {
+      if (!context.hints) {
+        context.hints = {};
+      } // prevent auto resizing
+
+
+      context.hints.autoResize = false;
+    }
+  }); // disable auto-resize for data stores
+
+  this.preExecute('elements.move', function (event) {
+    var context = event.context,
+        shapes = context.shapes;
+    var dataStoreReferences = shapes.filter(function (shape) {
+      return (0, _ModelUtil.is)(shape, 'bpmn:DataStoreReference');
+    });
+
+    if (dataStoreReferences.length) {
+      if (!context.hints) {
+        context.hints = {};
+      } // prevent auto resizing for data store references
+
+
+      context.hints.autoResize = shapes.filter(function (shape) {
+        return !(0, _ModelUtil.is)(shape, 'bpmn:DataStoreReference');
+      });
+    }
+  }); // update parent on data store created
+
+  this.postExecute('shape.create', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        parent = shape.parent;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:DataStoreReference') && shape.type !== 'label' && (0, _ModelUtil.is)(parent, 'bpmn:Collaboration')) {
+      updateDataStoreParent(shape);
+    }
+  }); // update parent on data store moved
+
+  this.postExecute('shape.move', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        oldParent = context.oldParent,
+        parent = shape.parent;
+
+    if ((0, _ModelUtil.is)(oldParent, 'bpmn:Collaboration')) {
+      // do nothing if not necessary
+      return;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:DataStoreReference') && shape.type !== 'label' && (0, _ModelUtil.is)(parent, 'bpmn:Collaboration')) {
+      var participant = (0, _ModelUtil.is)(oldParent, 'bpmn:Participant') ? oldParent : getAncestor(oldParent, 'bpmn:Participant');
+      updateDataStoreParent(shape, participant);
+    }
+  }); // update data store parents on participant or subprocess deleted
+
+  this.postExecute('shape.delete', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        rootElement = canvas.getRootElement();
+
+    if ((0, _ModelingUtil.isAny)(shape, ['bpmn:Participant', 'bpmn:SubProcess']) && (0, _ModelUtil.is)(rootElement, 'bpmn:Collaboration')) {
+      getDataStores(rootElement).filter(function (dataStore) {
+        return isDescendant(dataStore, shape);
+      }).forEach(function (dataStore) {
+        updateDataStoreParent(dataStore);
+      });
+    }
+  }); // update data store parents on collaboration -> process
+
+  this.postExecute('canvas.updateRoot', function (event) {
+    var context = event.context,
+        oldRoot = context.oldRoot,
+        newRoot = context.newRoot;
+    var dataStores = getDataStores(oldRoot);
+    dataStores.forEach(function (dataStore) {
+      if ((0, _ModelUtil.is)(newRoot, 'bpmn:Process')) {
+        updateDataStoreParent(dataStore, newRoot);
+      }
+    });
+  });
+}
+
+DataStoreBehavior.$inject = ['canvas', 'commandStack', 'elementRegistry', 'eventBus'];
+(0, _inherits.default)(DataStoreBehavior, _CommandInterceptor.default); // helpers //////////
+
+function isDescendant(descendant, ancestor) {
+  var descendantBo = descendant.businessObject || descendant,
+      ancestorBo = ancestor.businessObject || ancestor;
+
+  while (descendantBo.$parent) {
+    if (descendantBo.$parent === ancestorBo.processRef || ancestorBo) {
+      return true;
+    }
+
+    descendantBo = descendantBo.$parent;
+  }
+
+  return false;
+}
+
+function getAncestor(element, type) {
+  while (element.parent) {
+    if ((0, _ModelUtil.is)(element.parent, type)) {
+      return element.parent;
+    }
+
+    element = element.parent;
+  }
+}
+
+},{"../../../util/ModelUtil":91,"../cmd/UpdateSemanticParentHandler":72,"../util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],33:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DeleteLaneBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LaneUtil = require("../util/LaneUtil");
+
+var _Elements = require("diagram-js/lib/util/Elements");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500;
+/**
+ * BPMN specific delete lane behavior
+ */
+
+function DeleteLaneBehavior(eventBus, modeling, spaceTool) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  function compensateLaneDelete(shape, oldParent) {
+    var siblings = (0, _LaneUtil.getChildLanes)(oldParent);
+    var topAffected = [];
+    var bottomAffected = [];
+    (0, _Elements.eachElement)(siblings, function (element) {
+      if (element.y > shape.y) {
+        bottomAffected.push(element);
+      } else {
+        topAffected.push(element);
+      }
+
+      return element.children;
+    });
+
+    if (!siblings.length) {
+      return;
+    }
+
+    var offset;
+
+    if (bottomAffected.length && topAffected.length) {
+      offset = shape.height / 2;
+    } else {
+      offset = shape.height;
+    }
+
+    var topAdjustments, bottomAdjustments;
+
+    if (topAffected.length) {
+      topAdjustments = spaceTool.calculateAdjustments(topAffected, 'y', offset, shape.y - 10);
+      spaceTool.makeSpace(topAdjustments.movingShapes, topAdjustments.resizingShapes, {
+        x: 0,
+        y: offset
+      }, 's');
+    }
+
+    if (bottomAffected.length) {
+      bottomAdjustments = spaceTool.calculateAdjustments(bottomAffected, 'y', -offset, shape.y + shape.height + 10);
+      spaceTool.makeSpace(bottomAdjustments.movingShapes, bottomAdjustments.resizingShapes, {
+        x: 0,
+        y: -offset
+      }, 'n');
+    }
+  }
+  /**
+   * Adjust sizes of other lanes after lane deletion
+   */
+
+
+  this.postExecuted('shape.delete', LOW_PRIORITY, function (event) {
+    var context = event.context,
+        hints = context.hints,
+        shape = context.shape,
+        oldParent = context.oldParent; // only compensate lane deletes
+
+    if (!(0, _ModelUtil.is)(shape, 'bpmn:Lane')) {
+      return;
+    } // compensate root deletes only
+
+
+    if (hints && hints.nested) {
+      return;
+    }
+
+    compensateLaneDelete(shape, oldParent);
+  });
+}
+
+DeleteLaneBehavior.$inject = ['eventBus', 'modeling', 'spaceTool'];
+(0, _inherits.default)(DeleteLaneBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"../util/LaneUtil":74,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/util/Elements":202,"inherits":218}],34:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DetachEventBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500;
+/**
+ * Replace boundary event with intermediate event when creating or moving results in detached event.
+ */
+
+function DetachEventBehavior(bpmnReplace, injector) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this._bpmnReplace = bpmnReplace;
+  var self = this;
+  this.postExecuted('elements.create', LOW_PRIORITY, function (context) {
+    var elements = context.elements;
+    elements.filter(function (shape) {
+      var host = shape.host;
+      return shouldReplace(shape, host);
+    }).map(function (shape) {
+      return elements.indexOf(shape);
+    }).forEach(function (index) {
+      context.elements[index] = self.replaceShape(elements[index]);
+    });
+  }, true);
+  this.preExecute('elements.move', LOW_PRIORITY, function (context) {
+    var shapes = context.shapes,
+        newHost = context.newHost;
+    shapes.forEach(function (shape, index) {
+      var host = shape.host;
+
+      if (shouldReplace(shape, includes(shapes, host) ? host : newHost)) {
+        shapes[index] = self.replaceShape(shape);
+      }
+    });
+  }, true);
+}
+
+DetachEventBehavior.$inject = ['bpmnReplace', 'injector'];
+(0, _inherits.default)(DetachEventBehavior, _CommandInterceptor.default);
+
+DetachEventBehavior.prototype.replaceShape = function (shape) {
+  var eventDefinition = getEventDefinition(shape),
+      intermediateEvent;
+
+  if (eventDefinition) {
+    intermediateEvent = {
+      type: 'bpmn:IntermediateCatchEvent',
+      eventDefinitionType: eventDefinition.$type
+    };
+  } else {
+    intermediateEvent = {
+      type: 'bpmn:IntermediateThrowEvent'
+    };
+  }
+
+  return this._bpmnReplace.replaceElement(shape, intermediateEvent, {
+    layoutConnection: false
+  });
+}; // helpers //////////
+
+
+function getEventDefinition(element) {
+  var businessObject = (0, _ModelUtil.getBusinessObject)(element),
+      eventDefinitions = businessObject.eventDefinitions;
+  return eventDefinitions && eventDefinitions[0];
+}
+
+function shouldReplace(shape, host) {
+  return !(0, _LabelUtil.isLabel)(shape) && (0, _ModelUtil.is)(shape, 'bpmn:BoundaryEvent') && !host;
+}
+
+function includes(array, item) {
+  return array.indexOf(item) !== -1;
+}
+
+},{"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],35:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DropOnFlowBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _minDash = require("min-dash");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _LineIntersection = require("diagram-js/lib/util/LineIntersection");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function DropOnFlowBehavior(eventBus, bpmnRules, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+  /**
+   * Reconnect start / end of a connection after
+   * dropping an element on a flow.
+   */
+
+
+  function insertShape(shape, targetFlow, positionOrBounds) {
+    var waypoints = targetFlow.waypoints,
+        waypointsBefore,
+        waypointsAfter,
+        dockingPoint,
+        source,
+        target,
+        incomingConnection,
+        outgoingConnection,
+        oldOutgoing = shape.outgoing.slice(),
+        oldIncoming = shape.incoming.slice();
+    var mid;
+
+    if ((0, _minDash.isNumber)(positionOrBounds.width)) {
+      mid = (0, _LayoutUtil.getMid)(positionOrBounds);
+    } else {
+      mid = positionOrBounds;
+    }
+
+    var intersection = (0, _LineIntersection.getApproxIntersection)(waypoints, mid);
+
+    if (intersection) {
+      waypointsBefore = waypoints.slice(0, intersection.index);
+      waypointsAfter = waypoints.slice(intersection.index + (intersection.bendpoint ? 1 : 0)); // due to inaccuracy intersection might have been found
+
+      if (!waypointsBefore.length || !waypointsAfter.length) {
+        return;
+      }
+
+      dockingPoint = intersection.bendpoint ? waypoints[intersection.index] : mid; // if last waypointBefore is inside shape's bounds, ignore docking point
+
+      if (!isPointInsideBBox(shape, waypointsBefore[waypointsBefore.length - 1])) {
+        waypointsBefore.push(copy(dockingPoint));
+      } // if first waypointAfter is inside shape's bounds, ignore docking point
+
+
+      if (!isPointInsideBBox(shape, waypointsAfter[0])) {
+        waypointsAfter.unshift(copy(dockingPoint));
+      }
+    }
+
+    source = targetFlow.source;
+    target = targetFlow.target;
+
+    if (bpmnRules.canConnect(source, shape, targetFlow)) {
+      // reconnect source -> inserted shape
+      modeling.reconnectEnd(targetFlow, shape, waypointsBefore || mid);
+      incomingConnection = targetFlow;
+    }
+
+    if (bpmnRules.canConnect(shape, target, targetFlow)) {
+      if (!incomingConnection) {
+        // reconnect inserted shape -> end
+        modeling.reconnectStart(targetFlow, shape, waypointsAfter || mid);
+        outgoingConnection = targetFlow;
+      } else {
+        outgoingConnection = modeling.connect(shape, target, {
+          type: targetFlow.type,
+          waypoints: waypointsAfter
+        });
+      }
+    }
+
+    var duplicateConnections = [].concat(incomingConnection && (0, _minDash.filter)(oldIncoming, function (connection) {
+      return connection.source === incomingConnection.source;
+    }) || [], outgoingConnection && (0, _minDash.filter)(oldOutgoing, function (connection) {
+      return connection.target === outgoingConnection.target;
+    }) || []);
+
+    if (duplicateConnections.length) {
+      modeling.removeElements(duplicateConnections);
+    }
+  }
+
+  this.preExecute('elements.move', function (context) {
+    var newParent = context.newParent,
+        shapes = context.shapes,
+        delta = context.delta,
+        shape = shapes[0];
+
+    if (!shape || !newParent) {
+      return;
+    } // if the new parent is a connection,
+    // change it to the new parent's parent
+
+
+    if (newParent && newParent.waypoints) {
+      context.newParent = newParent = newParent.parent;
+    }
+
+    var shapeMid = (0, _LayoutUtil.getMid)(shape);
+    var newShapeMid = {
+      x: shapeMid.x + delta.x,
+      y: shapeMid.y + delta.y
+    }; // find a connection which intersects with the
+    // element's mid point
+
+    var connection = (0, _minDash.find)(newParent.children, function (element) {
+      var canInsert = bpmnRules.canInsert(shapes, element);
+      return canInsert && (0, _LineIntersection.getApproxIntersection)(element.waypoints, newShapeMid);
+    });
+
+    if (connection) {
+      context.targetFlow = connection;
+      context.position = newShapeMid;
+    }
+  }, true);
+  this.postExecuted('elements.move', function (context) {
+    var shapes = context.shapes,
+        targetFlow = context.targetFlow,
+        position = context.position;
+
+    if (targetFlow) {
+      insertShape(shapes[0], targetFlow, position);
+    }
+  }, true);
+  this.preExecute('shape.create', function (context) {
+    var parent = context.parent,
+        shape = context.shape;
+
+    if (bpmnRules.canInsert(shape, parent)) {
+      context.targetFlow = parent;
+      context.parent = parent.parent;
+    }
+  }, true);
+  this.postExecuted('shape.create', function (context) {
+    var shape = context.shape,
+        targetFlow = context.targetFlow,
+        positionOrBounds = context.position;
+
+    if (targetFlow) {
+      insertShape(shape, targetFlow, positionOrBounds);
+    }
+  }, true);
+}
+
+(0, _inherits.default)(DropOnFlowBehavior, _CommandInterceptor.default);
+DropOnFlowBehavior.$inject = ['eventBus', 'bpmnRules', 'modeling']; // helpers /////////////////////
+
+function isPointInsideBBox(bbox, point) {
+  var x = point.x,
+      y = point.y;
+  return x >= bbox.x && x <= bbox.x + bbox.width && y >= bbox.y && y <= bbox.y + bbox.height;
+}
+
+function copy(obj) {
+  return (0, _minDash.assign)({}, obj);
+}
+
+},{"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/LineIntersection":207,"inherits":218,"min-dash":219}],36:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = EventBasedGatewayBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function EventBasedGatewayBehavior(eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+  /**
+   * Remove existing sequence flows of event-based target before connecting
+   * from event-based gateway.
+   */
+
+
+  this.preExecuted('connection.create', function (event) {
+    var context = event.context,
+        source = context.source,
+        target = context.target,
+        existingIncomingConnections = target.incoming.slice();
+
+    if (context.hints && context.hints.createElementsBehavior === false) {
+      return;
+    }
+
+    if ((0, _ModelUtil.is)(source, 'bpmn:EventBasedGateway') && target.incoming.length) {
+      existingIncomingConnections.filter(isSequenceFlow).forEach(function (sequenceFlow) {
+        modeling.removeConnection(sequenceFlow);
+      });
+    }
+  });
+  /**
+   *  After replacing shape with event-based gateway, remove incoming sequence
+   *  flows of event-based targets which do not belong to event-based gateway
+   *  source.
+   */
+
+  this.preExecuted('shape.replace', function (event) {
+    var newShape = event.context.newShape,
+        newShapeTargets,
+        newShapeTargetsIncomingSequenceFlows;
+
+    if (!(0, _ModelUtil.is)(newShape, 'bpmn:EventBasedGateway')) {
+      return;
+    }
+
+    newShapeTargets = newShape.outgoing.filter(isSequenceFlow).map(function (sequenceFlow) {
+      return sequenceFlow.target;
+    });
+    newShapeTargetsIncomingSequenceFlows = newShapeTargets.reduce(function (sequenceFlows, target) {
+      var incomingSequenceFlows = target.incoming.filter(isSequenceFlow);
+      return sequenceFlows.concat(incomingSequenceFlows);
+    }, []);
+    newShapeTargetsIncomingSequenceFlows.forEach(function (sequenceFlow) {
+      if (sequenceFlow.source !== newShape) {
+        modeling.removeConnection(sequenceFlow);
+      }
+    });
+  });
+}
+
+EventBasedGatewayBehavior.$inject = ['eventBus', 'modeling'];
+(0, _inherits.default)(EventBasedGatewayBehavior, _CommandInterceptor.default); // helpers //////////////////////
+
+function isSequenceFlow(connection) {
+  return (0, _ModelUtil.is)(connection, 'bpmn:SequenceFlow');
+}
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],37:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = FixHoverBehavior;
+
+var _LaneUtil = require("../util/LaneUtil");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+var HIGH_PRIORITY = 1500;
+var HIGHEST_PRIORITY = 2000;
+/**
+ * Correct hover targets in certain situations to improve diagram interaction.
+ *
+ * @param {ElementRegistry} elementRegistry
+ * @param {EventBus} eventBus
+ * @param {Canvas} canvas
+ */
+
+function FixHoverBehavior(elementRegistry, eventBus, canvas) {
+  eventBus.on(['create.hover', 'create.move', 'create.end', 'shape.move.hover', 'shape.move.move', 'shape.move.end'], HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        shape = context.shape || event.shape,
+        hover = event.hover; // ensure elements are not dropped onto a bpmn:Lane but onto
+    // the underlying bpmn:Participant
+
+    if ((0, _ModelUtil.is)(hover, 'bpmn:Lane') && !(0, _ModelingUtil.isAny)(shape, ['bpmn:Lane', 'bpmn:Participant'])) {
+      event.hover = (0, _LaneUtil.getLanesRoot)(hover);
+      event.hoverGfx = elementRegistry.getGraphics(event.hover);
+    }
+
+    var rootElement = canvas.getRootElement(); // ensure bpmn:Group and label elements are dropped
+    // always onto the root
+
+    if (hover !== rootElement && (shape.labelTarget || (0, _ModelUtil.is)(shape, 'bpmn:Group'))) {
+      event.hover = rootElement;
+      event.hoverGfx = elementRegistry.getGraphics(event.hover);
+    }
+  });
+  eventBus.on(['connect.hover', 'connect.out', 'connect.end', 'connect.cleanup', 'global-connect.hover', 'global-connect.out', 'global-connect.end', 'global-connect.cleanup'], HIGH_PRIORITY, function (event) {
+    var hover = event.hover; // ensure connections start/end on bpmn:Participant,
+    // not the underlying bpmn:Lane
+
+    if ((0, _ModelUtil.is)(hover, 'bpmn:Lane')) {
+      event.hover = (0, _LaneUtil.getLanesRoot)(hover) || hover;
+      event.hoverGfx = elementRegistry.getGraphics(event.hover);
+    }
+  });
+  eventBus.on(['bendpoint.move.hover'], HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        hover = event.hover,
+        type = context.type; // ensure reconnect start/end on bpmn:Participant,
+    // not the underlying bpmn:Lane
+
+    if ((0, _ModelUtil.is)(hover, 'bpmn:Lane') && /reconnect/.test(type)) {
+      event.hover = (0, _LaneUtil.getLanesRoot)(hover) || hover;
+      event.hoverGfx = elementRegistry.getGraphics(event.hover);
+    }
+  });
+  eventBus.on(['connect.start'], HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        start = context.start; // ensure connect start on bpmn:Participant,
+    // not the underlying bpmn:Lane
+
+    if ((0, _ModelUtil.is)(start, 'bpmn:Lane')) {
+      context.start = (0, _LaneUtil.getLanesRoot)(start) || start;
+    }
+  }); // allow movement of participants from lanes
+
+  eventBus.on('shape.move.start', HIGHEST_PRIORITY, function (event) {
+    var shape = event.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Lane')) {
+      event.shape = (0, _LaneUtil.getLanesRoot)(shape) || shape;
+    }
+  });
+}
+
+FixHoverBehavior.$inject = ['elementRegistry', 'eventBus', 'canvas'];
+
+},{"../../../util/ModelUtil":91,"../util/LaneUtil":74,"../util/ModelingUtil":75}],38:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = GroupBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _CategoryUtil = require("./util/CategoryUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var HIGH_PRIORITY = 2000;
+/**
+ * BPMN specific Group behavior
+ */
+
+function GroupBehavior(bpmnFactory, canvas, elementRegistry, eventBus, injector, moddleCopy) {
+  injector.invoke(_CommandInterceptor.default, this);
+  /**
+   * Gets process definitions
+   *
+   * @return {ModdleElement} definitions
+   */
+
+  function getDefinitions() {
+    var rootElement = canvas.getRootElement(),
+        businessObject = (0, _ModelUtil.getBusinessObject)(rootElement);
+    return businessObject.$parent;
+  }
+  /**
+   * Removes a referenced category value for a given group shape
+   *
+   * @param {djs.model.Shape} shape
+   */
+
+
+  function removeReferencedCategoryValue(shape) {
+    var businessObject = (0, _ModelUtil.getBusinessObject)(shape),
+        categoryValue = businessObject.categoryValueRef;
+
+    if (!categoryValue) {
+      return;
+    }
+
+    var category = categoryValue.$parent;
+
+    if (!categoryValue) {
+      return;
+    }
+
+    (0, _Collections.remove)(category.categoryValue, categoryValue); // cleanup category if it is empty
+
+    if (category && !category.categoryValue.length) {
+      removeCategory(category);
+    }
+  }
+  /**
+   * Removes a given category from the definitions
+   *
+   * @param {ModdleElement} category
+   */
+
+
+  function removeCategory(category) {
+    var definitions = getDefinitions();
+    (0, _Collections.remove)(definitions.get('rootElements'), category);
+  }
+  /**
+   * Returns all group element in the current registry
+   *
+   * @return {Array<djs.model.shape>} a list of group shapes
+   */
+
+
+  function getGroupElements() {
+    return elementRegistry.filter(function (e) {
+      return (0, _ModelUtil.is)(e, 'bpmn:Group');
+    });
+  }
+  /**
+   * Returns true if given categoryValue is referenced in one of the given elements
+   *
+   * @param {Array<djs.model.shape>} elements
+   * @param {ModdleElement} categoryValue
+   * @return {boolean}
+   */
+
+
+  function isReferenced(elements, categoryValue) {
+    return elements.some(function (e) {
+      var businessObject = (0, _ModelUtil.getBusinessObject)(e);
+      return businessObject.categoryValueRef && businessObject.categoryValueRef === categoryValue;
+    });
+  }
+  /**
+   * remove referenced category + value when group was deleted
+   */
+
+
+  this.executed('shape.delete', function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Group')) {
+      var businessObject = (0, _ModelUtil.getBusinessObject)(shape),
+          categoryValueRef = businessObject.categoryValueRef,
+          groupElements = getGroupElements();
+
+      if (!isReferenced(groupElements, categoryValueRef)) {
+        removeReferencedCategoryValue(shape);
+      }
+    }
+  });
+  /**
+   * re-attach removed category
+   */
+
+  this.reverted('shape.delete', function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Group')) {
+      var businessObject = (0, _ModelUtil.getBusinessObject)(shape),
+          categoryValueRef = businessObject.categoryValueRef,
+          definitions = getDefinitions(),
+          category = categoryValueRef ? categoryValueRef.$parent : null;
+      (0, _Collections.add)(category.get('categoryValue'), categoryValueRef);
+      (0, _Collections.add)(definitions.get('rootElements'), category);
+    }
+  });
+  /**
+   * create new category + value when group was created
+   */
+
+  this.execute('shape.create', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        businessObject = (0, _ModelUtil.getBusinessObject)(shape);
+
+    if ((0, _ModelUtil.is)(businessObject, 'bpmn:Group') && !businessObject.categoryValueRef) {
+      var definitions = getDefinitions(),
+          categoryValue = (0, _CategoryUtil.createCategoryValue)(definitions, bpmnFactory); // link the reference to the Group
+
+      businessObject.categoryValueRef = categoryValue;
+    }
+  });
+  this.revert('shape.create', function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Group')) {
+      removeReferencedCategoryValue(shape);
+      delete (0, _ModelUtil.getBusinessObject)(shape).categoryValueRef;
+    }
+  }); // copy bpmn:CategoryValue when copying element
+
+  eventBus.on('moddleCopy.canCopyProperty', HIGH_PRIORITY, function (context) {
+    var property = context.property,
+        categoryValue;
+
+    if ((0, _ModelUtil.is)(property, 'bpmn:CategoryValue')) {
+      categoryValue = (0, _CategoryUtil.createCategoryValue)(getDefinitions(), bpmnFactory); // return copy of category
+
+      return moddleCopy.copyElement(property, categoryValue);
+    }
+  });
+}
+
+GroupBehavior.$inject = ['bpmnFactory', 'canvas', 'elementRegistry', 'eventBus', 'injector', 'moddleCopy'];
+(0, _inherits.default)(GroupBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"./util/CategoryUtil":57,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/util/Collections":200,"inherits":218}],39:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ImportDockingFix;
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _LineIntersect = _interopRequireDefault(require("./util/LineIntersect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Fix broken dockings after DI imports.
+ *
+ * @param {EventBus} eventBus
+ */
+function ImportDockingFix(eventBus) {
+  function adjustDocking(startPoint, nextPoint, elementMid) {
+    var elementTop = {
+      x: elementMid.x,
+      y: elementMid.y - 50
+    };
+    var elementLeft = {
+      x: elementMid.x - 50,
+      y: elementMid.y
+    };
+    var verticalIntersect = (0, _LineIntersect.default)(startPoint, nextPoint, elementMid, elementTop),
+        horizontalIntersect = (0, _LineIntersect.default)(startPoint, nextPoint, elementMid, elementLeft); // original is horizontal or vertical center cross intersection
+
+    var centerIntersect;
+
+    if (verticalIntersect && horizontalIntersect) {
+      if (getDistance(verticalIntersect, elementMid) > getDistance(horizontalIntersect, elementMid)) {
+        centerIntersect = horizontalIntersect;
+      } else {
+        centerIntersect = verticalIntersect;
+      }
+    } else {
+      centerIntersect = verticalIntersect || horizontalIntersect;
+    }
+
+    startPoint.original = centerIntersect;
+  }
+
+  function fixDockings(connection) {
+    var waypoints = connection.waypoints;
+    adjustDocking(waypoints[0], waypoints[1], (0, _LayoutUtil.getMid)(connection.source));
+    adjustDocking(waypoints[waypoints.length - 1], waypoints[waypoints.length - 2], (0, _LayoutUtil.getMid)(connection.target));
+  }
+
+  eventBus.on('bpmnElement.added', function (e) {
+    var element = e.element;
+
+    if (element.waypoints) {
+      fixDockings(element);
+    }
+  });
+}
+
+ImportDockingFix.$inject = ['eventBus']; // helpers //////////////////////
+
+function getDistance(p1, p2) {
+  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
+
+},{"./util/LineIntersect":61,"diagram-js/lib/layout/LayoutUtil":188}],40:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = IsHorizontalFix;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A component that makes sure that each created or updated
+ * Pool and Lane is assigned an isHorizontal property set to true.
+ *
+ * @param {EventBus} eventBus
+ */
+function IsHorizontalFix(eventBus) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  var elementTypesToUpdate = ['bpmn:Participant', 'bpmn:Lane'];
+  this.executed(['shape.move', 'shape.create', 'shape.resize'], function (event) {
+    var bo = (0, _ModelUtil.getBusinessObject)(event.context.shape);
+
+    if ((0, _ModelingUtil.isAny)(bo, elementTypesToUpdate) && !bo.di.get('isHorizontal')) {
+      // set attribute directly to avoid modeling#updateProperty side effects
+      bo.di.set('isHorizontal', true);
+    }
+  });
+}
+
+IsHorizontalFix.$inject = ['eventBus'];
+(0, _inherits.default)(IsHorizontalFix, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"../util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],41:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = LabelBehavior;
+exports.getReferencePointDelta = getReferencePointDelta;
+exports.getReferencePoint = getReferencePoint;
+exports.asEdges = asEdges;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+var _LabelUtil2 = require("../../label-editing/LabelUtil");
+
+var _LabelLayoutUtil = require("./util/LabelLayoutUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _AttachUtil = require("diagram-js/lib/util/AttachUtil");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _PositionUtil = require("diagram-js/lib/util/PositionUtil");
+
+var _GeometricUtil = require("./util/GeometricUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DEFAULT_LABEL_DIMENSIONS = {
+  width: 90,
+  height: 20
+};
+var NAME_PROPERTY = 'name';
+var TEXT_PROPERTY = 'text';
+/**
+ * A component that makes sure that external labels are added
+ * together with respective elements and properly updated (DI wise)
+ * during move.
+ *
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ * @param {BpmnFactory} bpmnFactory
+ * @param {TextRenderer} textRenderer
+ */
+
+function LabelBehavior(eventBus, modeling, bpmnFactory, textRenderer) {
+  _CommandInterceptor.default.call(this, eventBus); // update label if name property was updated
+
+
+  this.postExecute('element.updateProperties', function (e) {
+    var context = e.context,
+        element = context.element,
+        properties = context.properties;
+
+    if (NAME_PROPERTY in properties) {
+      modeling.updateLabel(element, properties[NAME_PROPERTY]);
+    }
+
+    if (TEXT_PROPERTY in properties && (0, _ModelUtil.is)(element, 'bpmn:TextAnnotation')) {
+      var newBounds = textRenderer.getTextAnnotationBounds({
+        x: element.x,
+        y: element.y,
+        width: element.width,
+        height: element.height
+      }, properties[TEXT_PROPERTY] || '');
+      modeling.updateLabel(element, properties.text, newBounds);
+    }
+  }); // create label shape after shape/connection was created
+
+  this.postExecute(['shape.create', 'connection.create'], function (e) {
+    var context = e.context,
+        hints = context.hints || {};
+
+    if (hints.createElementsBehavior === false) {
+      return;
+    }
+
+    var element = context.shape || context.connection,
+        businessObject = element.businessObject;
+
+    if ((0, _LabelUtil.isLabel)(element) || !(0, _LabelUtil.isLabelExternal)(element)) {
+      return;
+    } // only create label if attribute available
+
+
+    if (!(0, _LabelUtil2.getLabel)(element)) {
+      return;
+    }
+
+    var labelCenter = (0, _LabelUtil.getExternalLabelMid)(element); // we don't care about x and y
+
+    var labelDimensions = textRenderer.getExternalLabelBounds(DEFAULT_LABEL_DIMENSIONS, (0, _LabelUtil2.getLabel)(element));
+    modeling.createLabel(element, labelCenter, {
+      id: businessObject.id + '_label',
+      businessObject: businessObject,
+      width: labelDimensions.width,
+      height: labelDimensions.height
+    });
+  }); // update label after label shape was deleted
+
+  this.postExecute('shape.delete', function (event) {
+    var context = event.context,
+        labelTarget = context.labelTarget,
+        hints = context.hints || {}; // check if label
+
+    if (labelTarget && hints.unsetLabel !== false) {
+      modeling.updateLabel(labelTarget, null, null, {
+        removeShape: false
+      });
+    }
+  }); // update di information on label creation
+
+  this.postExecute(['label.create'], function (event) {
+    var context = event.context,
+        element = context.shape,
+        businessObject,
+        di; // we want to trigger on real labels only
+
+    if (!element.labelTarget) {
+      return;
+    } // we want to trigger on BPMN elements only
+
+
+    if (!(0, _ModelUtil.is)(element.labelTarget || element, 'bpmn:BaseElement')) {
+      return;
+    }
+
+    businessObject = element.businessObject, di = businessObject.di;
+
+    if (!di.label) {
+      di.label = bpmnFactory.create('bpmndi:BPMNLabel', {
+        bounds: bpmnFactory.create('dc:Bounds')
+      });
+    }
+
+    (0, _minDash.assign)(di.label.bounds, {
+      x: element.x,
+      y: element.y,
+      width: element.width,
+      height: element.height
+    });
+  });
+
+  function getVisibleLabelAdjustment(event) {
+    var context = event.context,
+        connection = context.connection,
+        label = connection.label,
+        hints = (0, _minDash.assign)({}, context.hints),
+        newWaypoints = context.newWaypoints || connection.waypoints,
+        oldWaypoints = context.oldWaypoints;
+
+    if (typeof hints.startChanged === 'undefined') {
+      hints.startChanged = !!hints.connectionStart;
+    }
+
+    if (typeof hints.endChanged === 'undefined') {
+      hints.endChanged = !!hints.connectionEnd;
+    }
+
+    return (0, _LabelLayoutUtil.getLabelAdjustment)(label, newWaypoints, oldWaypoints, hints);
+  }
+
+  this.postExecute(['connection.layout', 'connection.updateWaypoints'], function (event) {
+    var context = event.context,
+        hints = context.hints || {};
+
+    if (hints.labelBehavior === false) {
+      return;
+    }
+
+    var connection = context.connection,
+        label = connection.label,
+        labelAdjustment; // handle missing label as well as the case
+    // that the label parent does not exist (yet),
+    // because it is being pasted / created via multi element create
+    //
+    // Cf. https://github.com/bpmn-io/bpmn-js/pull/1227
+
+    if (!label || !label.parent) {
+      return;
+    }
+
+    labelAdjustment = getVisibleLabelAdjustment(event);
+    modeling.moveShape(label, labelAdjustment);
+  }); // keep label position on shape replace
+
+  this.postExecute(['shape.replace'], function (event) {
+    var context = event.context,
+        newShape = context.newShape,
+        oldShape = context.oldShape;
+    var businessObject = (0, _ModelUtil.getBusinessObject)(newShape);
+
+    if (businessObject && (0, _LabelUtil.isLabelExternal)(businessObject) && oldShape.label && newShape.label) {
+      newShape.label.x = oldShape.label.x;
+      newShape.label.y = oldShape.label.y;
+    }
+  }); // move external label after resizing
+
+  this.postExecute('shape.resize', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        newBounds = context.newBounds,
+        oldBounds = context.oldBounds;
+
+    if ((0, _LabelUtil.hasExternalLabel)(shape)) {
+      var label = shape.label,
+          labelMid = (0, _LayoutUtil.getMid)(label),
+          edges = asEdges(oldBounds); // get nearest border point to label as reference point
+
+      var referencePoint = getReferencePoint(labelMid, edges);
+      var delta = getReferencePointDelta(referencePoint, oldBounds, newBounds);
+      modeling.moveShape(label, delta);
+    }
+  });
+}
+
+(0, _inherits.default)(LabelBehavior, _CommandInterceptor.default);
+LabelBehavior.$inject = ['eventBus', 'modeling', 'bpmnFactory', 'textRenderer']; // helpers //////////////////////
+
+/**
+ * Calculates a reference point delta relative to a new position
+ * of a certain element's bounds
+ *
+ * @param {Point} point
+ * @param {Bounds} oldBounds
+ * @param {Bounds} newBounds
+ *
+ * @return {Delta} delta
+ */
+
+function getReferencePointDelta(referencePoint, oldBounds, newBounds) {
+  var newReferencePoint = (0, _AttachUtil.getNewAttachPoint)(referencePoint, oldBounds, newBounds);
+  return (0, _LayoutUtil.roundPoint)((0, _PositionUtil.delta)(newReferencePoint, referencePoint));
+}
+/**
+ * Generates the nearest point (reference point) for a given point
+ * onto given set of lines
+ *
+ * @param {Array<Point, Point>} lines
+ * @param {Point} point
+ *
+ * @param {Point}
+ */
+
+
+function getReferencePoint(point, lines) {
+  if (!lines.length) {
+    return;
+  }
+
+  var nearestLine = getNearestLine(point, lines);
+  return (0, _GeometricUtil.perpendicularFoot)(point, nearestLine);
+}
+/**
+ * Convert the given bounds to a lines array containing all edges
+ *
+ * @param {Bounds|Point} bounds
+ *
+ * @return Array<Point>
+ */
+
+
+function asEdges(bounds) {
+  return [[// top
+  {
+    x: bounds.x,
+    y: bounds.y
+  }, {
+    x: bounds.x + (bounds.width || 0),
+    y: bounds.y
+  }], [// right
+  {
+    x: bounds.x + (bounds.width || 0),
+    y: bounds.y
+  }, {
+    x: bounds.x + (bounds.width || 0),
+    y: bounds.y + (bounds.height || 0)
+  }], [// bottom
+  {
+    x: bounds.x,
+    y: bounds.y + (bounds.height || 0)
+  }, {
+    x: bounds.x + (bounds.width || 0),
+    y: bounds.y + (bounds.height || 0)
+  }], [// left
+  {
+    x: bounds.x,
+    y: bounds.y
+  }, {
+    x: bounds.x,
+    y: bounds.y + (bounds.height || 0)
+  }]];
+}
+/**
+ * Returns the nearest line for a given point by distance
+ * @param {Point} point
+ * @param Array<Point> lines
+ *
+ * @return Array<Point>
+ */
+
+
+function getNearestLine(point, lines) {
+  var distances = lines.map(function (l) {
+    return {
+      line: l,
+      distance: (0, _GeometricUtil.getDistancePointLine)(point, l)
+    };
+  });
+  var sorted = (0, _minDash.sortBy)(distances, 'distance');
+  return sorted[0].line;
+}
+
+},{"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"../../label-editing/LabelUtil":16,"./util/GeometricUtil":58,"./util/LabelLayoutUtil":59,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/AttachUtil":198,"diagram-js/lib/util/PositionUtil":211,"inherits":218,"min-dash":219}],42:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ModelingFeedback;
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var COLLAB_ERR_MSG = 'flow elements must be children of pools/participants';
+
+function ModelingFeedback(eventBus, tooltips, translate) {
+  function showError(position, message, timeout) {
+    tooltips.add({
+      position: {
+        x: position.x + 5,
+        y: position.y + 5
+      },
+      type: 'error',
+      timeout: timeout || 2000,
+      html: '<div>' + message + '</div>'
+    });
+  }
+
+  eventBus.on(['shape.move.rejected', 'create.rejected'], function (event) {
+    var context = event.context,
+        shape = context.shape,
+        target = context.target;
+
+    if ((0, _ModelUtil.is)(target, 'bpmn:Collaboration') && (0, _ModelUtil.is)(shape, 'bpmn:FlowNode')) {
+      showError(event, translate(COLLAB_ERR_MSG));
+    }
+  });
+}
+
+ModelingFeedback.$inject = ['eventBus', 'tooltips', 'translate'];
+
+},{"../../../util/ModelUtil":91}],43:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = RemoveElementBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _LineIntersect = _interopRequireDefault(require("./util/LineIntersect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function RemoveElementBehavior(eventBus, bpmnRules, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+  /**
+   * Combine sequence flows when deleting an element
+   * if there is one incoming and one outgoing
+   * sequence flow
+   */
+
+
+  this.preExecute('shape.delete', function (e) {
+    var shape = e.context.shape; // only handle [a] -> [shape] -> [b] patterns
+
+    if (shape.incoming.length !== 1 || shape.outgoing.length !== 1) {
+      return;
+    }
+
+    var inConnection = shape.incoming[0],
+        outConnection = shape.outgoing[0]; // only handle sequence flows
+
+    if (!(0, _ModelUtil.is)(inConnection, 'bpmn:SequenceFlow') || !(0, _ModelUtil.is)(outConnection, 'bpmn:SequenceFlow')) {
+      return;
+    }
+
+    if (bpmnRules.canConnect(inConnection.source, outConnection.target, inConnection)) {
+      // compute new, combined waypoints
+      var newWaypoints = getNewWaypoints(inConnection.waypoints, outConnection.waypoints);
+      modeling.reconnectEnd(inConnection, outConnection.target, newWaypoints);
+    }
+  });
+}
+
+(0, _inherits.default)(RemoveElementBehavior, _CommandInterceptor.default);
+RemoveElementBehavior.$inject = ['eventBus', 'bpmnRules', 'modeling']; // helpers //////////////////////
+
+function getDocking(point) {
+  return point.original || point;
+}
+
+function getNewWaypoints(inWaypoints, outWaypoints) {
+  var intersection = (0, _LineIntersect.default)(getDocking(inWaypoints[inWaypoints.length - 2]), getDocking(inWaypoints[inWaypoints.length - 1]), getDocking(outWaypoints[1]), getDocking(outWaypoints[0]));
+
+  if (intersection) {
+    return [].concat(inWaypoints.slice(0, inWaypoints.length - 1), [intersection], outWaypoints.slice(1));
+  } else {
+    return [getDocking(inWaypoints[0]), getDocking(outWaypoints[outWaypoints.length - 1])];
+  }
+}
+
+},{"../../../util/ModelUtil":91,"./util/LineIntersect":61,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],44:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = RemoveParticipantBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN specific remove behavior
+ */
+function RemoveParticipantBehavior(eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+  /**
+   * morph collaboration diagram into process diagram
+   * after the last participant has been removed
+   */
+
+
+  this.preExecute('shape.delete', function (context) {
+    var shape = context.shape,
+        parent = shape.parent; // activate the behavior if the shape to be removed
+    // is a participant
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+      context.collaborationRoot = parent;
+    }
+  }, true);
+  this.postExecute('shape.delete', function (context) {
+    var collaborationRoot = context.collaborationRoot;
+
+    if (collaborationRoot && !collaborationRoot.businessObject.participants.length) {
+      // replace empty collaboration with process diagram
+      modeling.makeProcess();
+    }
+  }, true);
+}
+
+RemoveParticipantBehavior.$inject = ['eventBus', 'modeling'];
+(0, _inherits.default)(RemoveParticipantBehavior, _CommandInterceptor.default);
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],45:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ReplaceConnectionBehavior;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function ReplaceConnectionBehavior(eventBus, modeling, bpmnRules, injector) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  var dragging = injector.get('dragging', false);
+
+  function fixConnection(connection) {
+    var source = connection.source,
+        target = connection.target,
+        parent = connection.parent; // do not do anything if connection
+    // is already deleted (may happen due to other
+    // behaviors plugged-in before)
+
+    if (!parent) {
+      return;
+    }
+
+    var replacementType, remove;
+    /**
+     * Check if incoming or outgoing connections
+     * can stay or could be substituted with an
+     * appropriate replacement.
+     *
+     * This holds true for SequenceFlow <> MessageFlow.
+     */
+
+    if ((0, _ModelUtil.is)(connection, 'bpmn:SequenceFlow')) {
+      if (!bpmnRules.canConnectSequenceFlow(source, target)) {
+        remove = true;
+      }
+
+      if (bpmnRules.canConnectMessageFlow(source, target)) {
+        replacementType = 'bpmn:MessageFlow';
+      }
+    } // transform message flows into sequence flows, if possible
+
+
+    if ((0, _ModelUtil.is)(connection, 'bpmn:MessageFlow')) {
+      if (!bpmnRules.canConnectMessageFlow(source, target)) {
+        remove = true;
+      }
+
+      if (bpmnRules.canConnectSequenceFlow(source, target)) {
+        replacementType = 'bpmn:SequenceFlow';
+      }
+    }
+
+    if ((0, _ModelUtil.is)(connection, 'bpmn:Association') && !bpmnRules.canConnectAssociation(source, target)) {
+      remove = true;
+    } // remove invalid connection,
+    // unless it has been removed already
+
+
+    if (remove) {
+      modeling.removeConnection(connection);
+    } // replace SequenceFlow <> MessageFlow
+
+
+    if (replacementType) {
+      modeling.connect(source, target, {
+        type: replacementType,
+        waypoints: connection.waypoints.slice()
+      });
+    }
+  }
+
+  function replaceReconnectedConnection(event) {
+    var context = event.context,
+        connection = context.connection,
+        source = context.newSource || connection.source,
+        target = context.newTarget || connection.target,
+        allowed,
+        replacement;
+    allowed = bpmnRules.canConnect(source, target);
+
+    if (!allowed || allowed.type === connection.type) {
+      return;
+    }
+
+    replacement = modeling.connect(source, target, {
+      type: allowed.type,
+      waypoints: connection.waypoints.slice()
+    }); // remove old connection
+
+    modeling.removeConnection(connection); // replace connection in context to reconnect end/start
+
+    context.connection = replacement;
+
+    if (dragging) {
+      cleanDraggingSelection(connection, replacement);
+    }
+  } // monkey-patch selection saved in dragging in order to re-select it when operation is finished
+
+
+  function cleanDraggingSelection(oldConnection, newConnection) {
+    var context = dragging.context(),
+        previousSelection = context && context.payload.previousSelection,
+        index; // do nothing if not dragging or no selection was present
+
+    if (!previousSelection || !previousSelection.length) {
+      return;
+    }
+
+    index = previousSelection.indexOf(oldConnection);
+
+    if (index === -1) {
+      return;
+    }
+
+    previousSelection.splice(index, 1, newConnection);
+  } // lifecycle hooks
+
+
+  this.postExecuted('elements.move', function (context) {
+    var closure = context.closure,
+        allConnections = closure.allConnections;
+    (0, _minDash.forEach)(allConnections, fixConnection);
+  }, true);
+  this.preExecute('connection.reconnect', replaceReconnectedConnection);
+  this.postExecuted('element.updateProperties', function (event) {
+    var context = event.context,
+        properties = context.properties,
+        element = context.element,
+        businessObject = element.businessObject,
+        connection; // remove condition on change to default
+
+    if (properties.default) {
+      connection = (0, _minDash.find)(element.outgoing, (0, _minDash.matchPattern)({
+        id: element.businessObject.default.id
+      }));
+
+      if (connection) {
+        modeling.updateProperties(connection, {
+          conditionExpression: undefined
+        });
+      }
+    } // remove default from source on change to conditional
+
+
+    if (properties.conditionExpression && businessObject.sourceRef.default === businessObject) {
+      modeling.updateProperties(element.source, {
+        default: undefined
+      });
+    }
+  });
+}
+
+(0, _inherits.default)(ReplaceConnectionBehavior, _CommandInterceptor.default);
+ReplaceConnectionBehavior.$inject = ['eventBus', 'modeling', 'bpmnRules', 'injector'];
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218,"min-dash":219}],46:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ReplaceElementBehaviour;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _minDash = require("min-dash");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _DiUtil = require("../../../util/DiUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN-specific replace behavior.
+ */
+function ReplaceElementBehaviour(bpmnReplace, bpmnRules, elementRegistry, injector, modeling, selection) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this._bpmnReplace = bpmnReplace;
+  this._elementRegistry = elementRegistry;
+  this._selection = selection; // replace elements on move
+
+  this.postExecuted(['elements.move'], 500, function (event) {
+    var context = event.context,
+        target = context.newParent,
+        newHost = context.newHost,
+        elements = [];
+    (0, _minDash.forEach)(context.closure.topLevel, function (topLevelElements) {
+      if ((0, _DiUtil.isEventSubProcess)(topLevelElements)) {
+        elements = elements.concat(topLevelElements.children);
+      } else {
+        elements = elements.concat(topLevelElements);
+      }
+    }); // set target to host if attaching
+
+    if (elements.length === 1 && newHost) {
+      target = newHost;
+    }
+
+    var canReplace = bpmnRules.canReplace(elements, target);
+
+    if (canReplace) {
+      this.replaceElements(elements, canReplace.replacements, newHost);
+    }
+  }, this); // update attachments on host replace
+
+  this.postExecute(['shape.replace'], 1500, function (e) {
+    var context = e.context,
+        oldShape = context.oldShape,
+        newShape = context.newShape,
+        attachers = oldShape.attachers,
+        canReplace;
+
+    if (attachers && attachers.length) {
+      canReplace = bpmnRules.canReplace(attachers, newShape);
+      this.replaceElements(attachers, canReplace.replacements);
+    }
+  }, this); // keep ID on shape replace
+
+  this.postExecuted(['shape.replace'], 1500, function (e) {
+    var context = e.context,
+        oldShape = context.oldShape,
+        newShape = context.newShape;
+    modeling.unclaimId(oldShape.businessObject.id, oldShape.businessObject);
+    modeling.updateProperties(newShape, {
+      id: oldShape.id
+    });
+  });
+}
+
+(0, _inherits.default)(ReplaceElementBehaviour, _CommandInterceptor.default);
+
+ReplaceElementBehaviour.prototype.replaceElements = function (elements, newElements) {
+  var elementRegistry = this._elementRegistry,
+      bpmnReplace = this._bpmnReplace,
+      selection = this._selection;
+  (0, _minDash.forEach)(newElements, function (replacement) {
+    var newElement = {
+      type: replacement.newElementType
+    };
+    var oldElement = elementRegistry.get(replacement.oldElementId);
+    var idx = elements.indexOf(oldElement);
+    elements[idx] = bpmnReplace.replaceElement(oldElement, newElement, {
+      select: false
+    });
+  });
+
+  if (newElements) {
+    selection.select(elements);
+  }
+};
+
+ReplaceElementBehaviour.$inject = ['bpmnReplace', 'bpmnRules', 'elementRegistry', 'injector', 'modeling', 'selection'];
+
+},{"../../../util/DiUtil":89,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218,"min-dash":219}],47:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ResizeBehavior;
+exports.TEXT_ANNOTATION_MIN_DIMENSIONS = exports.SUB_PROCESS_MIN_DIMENSIONS = exports.PARTICIPANT_MIN_DIMENSIONS = exports.LANE_MIN_DIMENSIONS = void 0;
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _DiUtil = require("../../../util/DiUtil");
+
+var _ResizeUtil = require("./util/ResizeUtil");
+
+var HIGH_PRIORITY = 1500;
+var LANE_MIN_DIMENSIONS = {
+  width: 300,
+  height: 60
+};
+exports.LANE_MIN_DIMENSIONS = LANE_MIN_DIMENSIONS;
+var PARTICIPANT_MIN_DIMENSIONS = {
+  width: 300,
+  height: 150
+};
+exports.PARTICIPANT_MIN_DIMENSIONS = PARTICIPANT_MIN_DIMENSIONS;
+var SUB_PROCESS_MIN_DIMENSIONS = {
+  width: 140,
+  height: 120
+};
+exports.SUB_PROCESS_MIN_DIMENSIONS = SUB_PROCESS_MIN_DIMENSIONS;
+var TEXT_ANNOTATION_MIN_DIMENSIONS = {
+  width: 50,
+  height: 30
+};
+/**
+ * Set minimum bounds/resize constraints on resize.
+ *
+ * @param {EventBus} eventBus
+ */
+
+exports.TEXT_ANNOTATION_MIN_DIMENSIONS = TEXT_ANNOTATION_MIN_DIMENSIONS;
+
+function ResizeBehavior(eventBus) {
+  eventBus.on('resize.start', HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        shape = context.shape,
+        direction = context.direction,
+        balanced = context.balanced;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Lane') || (0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+      context.resizeConstraints = (0, _ResizeUtil.getParticipantResizeConstraints)(shape, direction, balanced);
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+      context.minDimensions = PARTICIPANT_MIN_DIMENSIONS;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:SubProcess') && (0, _DiUtil.isExpanded)(shape)) {
+      context.minDimensions = SUB_PROCESS_MIN_DIMENSIONS;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:TextAnnotation')) {
+      context.minDimensions = TEXT_ANNOTATION_MIN_DIMENSIONS;
+    }
+  });
+}
+
+ResizeBehavior.$inject = ['eventBus'];
+
+},{"../../../util/DiUtil":89,"../../../util/ModelUtil":91,"./util/ResizeUtil":62}],48:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ResizeLaneBehavior;
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _Mouse = require("diagram-js/lib/util/Mouse");
+
+var SLIGHTLY_HIGHER_PRIORITY = 1001;
+/**
+ * Invoke {@link Modeling#resizeLane} instead of
+ * {@link Modeling#resizeShape} when resizing a Lane
+ * or Participant shape.
+ */
+
+function ResizeLaneBehavior(eventBus, modeling) {
+  eventBus.on('resize.start', SLIGHTLY_HIGHER_PRIORITY + 500, function (event) {
+    var context = event.context,
+        shape = context.shape;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Lane') || (0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+      // should we resize the opposite lane(s) in
+      // order to compensate for the resize operation?
+      context.balanced = !(0, _Mouse.hasPrimaryModifier)(event);
+    }
+  });
+  /**
+   * Intercept resize end and call resize lane function instead.
+   */
+
+  eventBus.on('resize.end', SLIGHTLY_HIGHER_PRIORITY, function (event) {
+    var context = event.context,
+        shape = context.shape,
+        canExecute = context.canExecute,
+        newBounds = context.newBounds;
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Lane') || (0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+      if (canExecute) {
+        // ensure we have actual pixel values for new bounds
+        // (important when zoom level was > 1 during move)
+        newBounds = (0, _LayoutUtil.roundBounds)(newBounds); // perform the actual resize
+
+        modeling.resizeLane(shape, newBounds, context.balanced);
+      } // stop propagation
+
+
+      return false;
+    }
+  });
+}
+
+ResizeLaneBehavior.$inject = ['eventBus', 'modeling'];
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/Mouse":209}],49:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = RootElementReferenceBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _minDash = require("min-dash");
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("../util/ModelingUtil");
+
+var _DiUtil = require("../../../util/DiUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500;
+/**
+ * Add referenced root elements (error, escalation, message, signal) if they don't exist.
+ * Copy referenced root elements on copy & paste.
+ */
+
+function RootElementReferenceBehavior(bpmnjs, eventBus, injector, moddleCopy, bpmnFactory) {
+  injector.invoke(_CommandInterceptor.default, this);
+
+  function canHaveRootElementReference(element) {
+    return (0, _ModelingUtil.isAny)(element, ['bpmn:ReceiveTask', 'bpmn:SendTask']) || hasAnyEventDefinition(element, ['bpmn:ErrorEventDefinition', 'bpmn:EscalationEventDefinition', 'bpmn:MessageEventDefinition', 'bpmn:SignalEventDefinition']);
+  }
+
+  function hasRootElement(rootElement) {
+    var definitions = bpmnjs.getDefinitions(),
+        rootElements = definitions.get('rootElements');
+    return !!(0, _minDash.find)(rootElements, (0, _minDash.matchPattern)({
+      id: rootElement.id
+    }));
+  }
+
+  function getRootElementReferencePropertyName(eventDefinition) {
+    if ((0, _ModelUtil.is)(eventDefinition, 'bpmn:ErrorEventDefinition')) {
+      return 'errorRef';
+    } else if ((0, _ModelUtil.is)(eventDefinition, 'bpmn:EscalationEventDefinition')) {
+      return 'escalationRef';
+    } else if ((0, _ModelUtil.is)(eventDefinition, 'bpmn:MessageEventDefinition')) {
+      return 'messageRef';
+    } else if ((0, _ModelUtil.is)(eventDefinition, 'bpmn:SignalEventDefinition')) {
+      return 'signalRef';
+    }
+  }
+
+  function getRootElement(businessObject) {
+    if ((0, _ModelingUtil.isAny)(businessObject, ['bpmn:ReceiveTask', 'bpmn:SendTask'])) {
+      return businessObject.get('messageRef');
+    }
+
+    var eventDefinitions = businessObject.get('eventDefinitions'),
+        eventDefinition = eventDefinitions[0];
+    return eventDefinition.get(getRootElementReferencePropertyName(eventDefinition));
+  }
+
+  function setRootElement(businessObject, rootElement) {
+    if ((0, _ModelingUtil.isAny)(businessObject, ['bpmn:ReceiveTask', 'bpmn:SendTask'])) {
+      return businessObject.set('messageRef', rootElement);
+    }
+
+    var eventDefinitions = businessObject.get('eventDefinitions'),
+        eventDefinition = eventDefinitions[0];
+    return eventDefinition.set(getRootElementReferencePropertyName(eventDefinition), rootElement);
+  } // create shape
+
+
+  this.executed('shape.create', function (context) {
+    var shape = context.shape;
+
+    if (!canHaveRootElementReference(shape)) {
+      return;
+    }
+
+    var businessObject = (0, _ModelUtil.getBusinessObject)(shape),
+        rootElement = getRootElement(businessObject),
+        rootElements;
+
+    if (rootElement && !hasRootElement(rootElement)) {
+      rootElements = bpmnjs.getDefinitions().get('rootElements'); // add root element
+
+      (0, _Collections.add)(rootElements, rootElement);
+      context.addedRootElement = rootElement;
+    }
+  }, true);
+  this.reverted('shape.create', function (context) {
+    var addedRootElement = context.addedRootElement;
+
+    if (!addedRootElement) {
+      return;
+    }
+
+    var rootElements = bpmnjs.getDefinitions().get('rootElements'); // remove root element
+
+    (0, _Collections.remove)(rootElements, addedRootElement);
+  }, true);
+  eventBus.on('copyPaste.copyElement', function (context) {
+    var descriptor = context.descriptor,
+        element = context.element;
+
+    if (!canHaveRootElementReference(element)) {
+      return;
+    }
+
+    var businessObject = (0, _ModelUtil.getBusinessObject)(element),
+        rootElement = getRootElement(businessObject);
+
+    if (rootElement) {
+      descriptor.referencedRootElement = rootElement;
+    }
+  });
+  eventBus.on('copyPaste.pasteElement', LOW_PRIORITY, function (context) {
+    var descriptor = context.descriptor,
+        businessObject = descriptor.businessObject;
+
+    if (!canHaveRootElementReference(businessObject)) {
+      return;
+    }
+
+    var referencedRootElement = descriptor.referencedRootElement;
+
+    if (!referencedRootElement) {
+      return;
+    }
+
+    if (!hasRootElement(referencedRootElement)) {
+      referencedRootElement = moddleCopy.copyElement(referencedRootElement, bpmnFactory.create(referencedRootElement.$type));
+    }
+
+    setRootElement(businessObject, referencedRootElement);
+  });
+}
+
+RootElementReferenceBehavior.$inject = ['bpmnjs', 'eventBus', 'injector', 'moddleCopy', 'bpmnFactory'];
+(0, _inherits.default)(RootElementReferenceBehavior, _CommandInterceptor.default); // helpers //////////
+
+function hasAnyEventDefinition(element, types) {
+  if (!(0, _minDash.isArray)(types)) {
+    types = [types];
+  }
+
+  return (0, _minDash.some)(types, function (type) {
+    return (0, _DiUtil.hasEventDefinition)(element, type);
+  });
+}
+
+},{"../../../util/DiUtil":89,"../../../util/ModelUtil":91,"../util/ModelingUtil":75,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/util/Collections":200,"inherits":218,"min-dash":219}],50:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SpaceToolBehavior;
+
+var _minDash = require("min-dash");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _DiUtil = require("../../../util/DiUtil");
+
+var _ResizeBehavior = require("./ResizeBehavior");
+
+var _LaneUtil = require("../util/LaneUtil");
+
+var max = Math.max;
+
+function SpaceToolBehavior(eventBus) {
+  eventBus.on('spaceTool.getMinDimensions', function (context) {
+    var shapes = context.shapes,
+        axis = context.axis,
+        start = context.start,
+        minDimensions = {};
+    (0, _minDash.forEach)(shapes, function (shape) {
+      var id = shape.id;
+
+      if ((0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+        if (isHorizontal(axis)) {
+          minDimensions[id] = _ResizeBehavior.PARTICIPANT_MIN_DIMENSIONS;
+        } else {
+          minDimensions[id] = {
+            width: _ResizeBehavior.PARTICIPANT_MIN_DIMENSIONS.width,
+            height: getParticipantMinHeight(shape, start)
+          };
+        }
+      }
+
+      if ((0, _ModelUtil.is)(shape, 'bpmn:SubProcess') && (0, _DiUtil.isExpanded)(shape)) {
+        minDimensions[id] = _ResizeBehavior.SUB_PROCESS_MIN_DIMENSIONS;
+      }
+
+      if ((0, _ModelUtil.is)(shape, 'bpmn:TextAnnotation')) {
+        minDimensions[id] = _ResizeBehavior.TEXT_ANNOTATION_MIN_DIMENSIONS;
+      }
+    });
+    return minDimensions;
+  });
+}
+
+SpaceToolBehavior.$inject = ['eventBus']; // helpers //////////
+
+function isHorizontal(axis) {
+  return axis === 'x';
+}
+/**
+ * Get minimum height for participant taking lanes into account.
+ *
+ * @param {<djs.model.Shape>} participant
+ * @param {number} start
+ *
+ * @returns {Object}
+ */
+
+
+function getParticipantMinHeight(participant, start) {
+  var lanesMinHeight;
+
+  if (!hasChildLanes(participant)) {
+    return _ResizeBehavior.PARTICIPANT_MIN_DIMENSIONS.height;
+  }
+
+  lanesMinHeight = getLanesMinHeight(participant, start);
+  return max(_ResizeBehavior.PARTICIPANT_MIN_DIMENSIONS.height, lanesMinHeight);
+}
+
+function hasChildLanes(element) {
+  return !!(0, _LaneUtil.getChildLanes)(element).length;
+}
+
+function getLanesMinHeight(participant, resizeStart) {
+  var lanes = (0, _LaneUtil.getChildLanes)(participant),
+      resizedLane; // find the nested lane which is currently resized
+
+  resizedLane = findResizedLane(lanes, resizeStart); // resized lane cannot shrink below the minimum height
+  // but remaining lanes' dimensions are kept intact
+
+  return participant.height - resizedLane.height + _ResizeBehavior.LANE_MIN_DIMENSIONS.height;
+}
+/**
+ * Find nested lane which is currently resized.
+ *
+ * @param {Array<djs.model.Shape>} lanes
+ * @param {number} resizeStart
+ */
+
+
+function findResizedLane(lanes, resizeStart) {
+  var i, lane, childLanes;
+
+  for (i = 0; i < lanes.length; i++) {
+    lane = lanes[i]; // resizing current lane or a lane nested
+
+    if (resizeStart >= lane.y && resizeStart <= lane.y + lane.height) {
+      childLanes = (0, _LaneUtil.getChildLanes)(lane); // a nested lane is resized
+
+      if (childLanes.length) {
+        return findResizedLane(childLanes, resizeStart);
+      } // current lane is the resized one
+
+
+      return lane;
+    }
+  }
+}
+
+},{"../../../util/DiUtil":89,"../../../util/ModelUtil":91,"../util/LaneUtil":74,"./ResizeBehavior":47,"min-dash":219}],51:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SubProcessStartEventBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _DiUtil = require("../../../util/DiUtil.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Add start event replacing element with expanded sub process.
+ *
+ * @param {Injector} injector
+ * @param {Modeling} modeling
+ */
+function SubProcessStartEventBehavior(injector, modeling) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this.postExecuted('shape.replace', function (event) {
+    var oldShape = event.context.oldShape,
+        newShape = event.context.newShape;
+
+    if (!(0, _ModelUtil.is)(newShape, 'bpmn:SubProcess') || !(0, _ModelUtil.is)(oldShape, 'bpmn:Task') || !(0, _DiUtil.isExpanded)(newShape)) {
+      return;
+    }
+
+    var position = getStartEventPosition(newShape);
+    modeling.createShape({
+      type: 'bpmn:StartEvent'
+    }, position, newShape);
+  });
+}
+
+SubProcessStartEventBehavior.$inject = ['injector', 'modeling'];
+(0, _inherits.default)(SubProcessStartEventBehavior, _CommandInterceptor.default); // helpers //////////
+
+function getStartEventPosition(shape) {
+  return {
+    x: shape.x + shape.width / 6,
+    y: shape.y + shape.height / 2
+  };
+}
+
+},{"../../../util/DiUtil.js":89,"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],52:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ToggleElementCollapseBehaviour;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ResizeUtil = require("diagram-js/lib/features/resize/ResizeUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500;
+
+function ToggleElementCollapseBehaviour(eventBus, elementFactory, modeling, resize) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  function hideEmptyLabels(children) {
+    if (children.length) {
+      children.forEach(function (child) {
+        if (child.type === 'label' && !child.businessObject.name) {
+          child.hidden = true;
+        }
+      });
+    }
+  }
+
+  function expandedBounds(shape, defaultSize) {
+    var children = shape.children,
+        newBounds = defaultSize,
+        visibleElements,
+        visibleBBox;
+    visibleElements = filterVisible(children).concat([shape]);
+    visibleBBox = (0, _ResizeUtil.computeChildrenBBox)(visibleElements);
+
+    if (visibleBBox) {
+      // center to visibleBBox with max(defaultSize, childrenBounds)
+      newBounds.width = Math.max(visibleBBox.width, newBounds.width);
+      newBounds.height = Math.max(visibleBBox.height, newBounds.height);
+      newBounds.x = visibleBBox.x + (visibleBBox.width - newBounds.width) / 2;
+      newBounds.y = visibleBBox.y + (visibleBBox.height - newBounds.height) / 2;
+    } else {
+      // center to collapsed shape with defaultSize
+      newBounds.x = shape.x + (shape.width - newBounds.width) / 2;
+      newBounds.y = shape.y + (shape.height - newBounds.height) / 2;
+    }
+
+    return newBounds;
+  }
+
+  function collapsedBounds(shape, defaultSize) {
+    return {
+      x: shape.x + (shape.width - defaultSize.width) / 2,
+      y: shape.y + (shape.height - defaultSize.height) / 2,
+      width: defaultSize.width,
+      height: defaultSize.height
+    };
+  }
+
+  this.executed(['shape.toggleCollapse'], LOW_PRIORITY, function (e) {
+    var context = e.context,
+        shape = context.shape;
+
+    if (!(0, _ModelUtil.is)(shape, 'bpmn:SubProcess')) {
+      return;
+    }
+
+    if (!shape.collapsed) {
+      // all children got made visible through djs, hide empty labels
+      hideEmptyLabels(shape.children); // remove collapsed marker
+
+      (0, _ModelUtil.getBusinessObject)(shape).di.isExpanded = true;
+    } else {
+      // place collapsed marker
+      (0, _ModelUtil.getBusinessObject)(shape).di.isExpanded = false;
+    }
+  });
+  this.reverted(['shape.toggleCollapse'], LOW_PRIORITY, function (e) {
+    var context = e.context;
+    var shape = context.shape; // revert removing/placing collapsed marker
+
+    if (!shape.collapsed) {
+      (0, _ModelUtil.getBusinessObject)(shape).di.isExpanded = true;
+    } else {
+      (0, _ModelUtil.getBusinessObject)(shape).di.isExpanded = false;
+    }
+  });
+  this.postExecuted(['shape.toggleCollapse'], LOW_PRIORITY, function (e) {
+    var shape = e.context.shape,
+        defaultSize = elementFactory._getDefaultSize(shape),
+        newBounds;
+
+    if (shape.collapsed) {
+      // resize to default size of collapsed shapes
+      newBounds = collapsedBounds(shape, defaultSize);
+    } else {
+      // resize to bounds of max(visible children, defaultSize)
+      newBounds = expandedBounds(shape, defaultSize);
+    }
+
+    modeling.resizeShape(shape, newBounds, null, {
+      autoResize: shape.collapsed ? false : 'nwse'
+    });
+  });
+}
+
+(0, _inherits.default)(ToggleElementCollapseBehaviour, _CommandInterceptor.default);
+ToggleElementCollapseBehaviour.$inject = ['eventBus', 'elementFactory', 'modeling']; // helpers //////////////////////
+
+function filterVisible(elements) {
+  return elements.filter(function (e) {
+    return !e.hidden;
+  });
+}
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"diagram-js/lib/features/resize/ResizeUtil":168,"inherits":218}],53:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UnclaimIdBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _DiUtil = require("../../../util/DiUtil");
+
+var _LabelUtil = require("../../../util/LabelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Unclaims model IDs on element deletion.
+ *
+ * @param {Canvas} canvas
+ * @param {Injector} injector
+ * @param {Moddle} moddle
+ * @param {Modeling} modeling
+ */
+function UnclaimIdBehavior(canvas, injector, moddle, modeling) {
+  injector.invoke(_CommandInterceptor.default, this);
+  this.preExecute('shape.delete', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        shapeBo = shape.businessObject;
+
+    if ((0, _LabelUtil.isLabel)(shape)) {
+      return;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Participant') && (0, _DiUtil.isExpanded)(shape)) {
+      moddle.ids.unclaim(shapeBo.processRef.id);
+    }
+
+    modeling.unclaimId(shapeBo.id, shapeBo);
+  });
+  this.preExecute('connection.delete', function (event) {
+    var context = event.context,
+        connection = context.connection,
+        connectionBo = connection.businessObject;
+    modeling.unclaimId(connectionBo.id, connectionBo);
+  });
+  this.preExecute('canvas.updateRoot', function () {
+    var rootElement = canvas.getRootElement(),
+        rootElementBo = rootElement.businessObject;
+    moddle.ids.unclaim(rootElementBo.id);
+  });
+}
+
+(0, _inherits.default)(UnclaimIdBehavior, _CommandInterceptor.default);
+UnclaimIdBehavior.$inject = ['canvas', 'injector', 'moddle', 'modeling'];
+
+},{"../../../util/DiUtil":89,"../../../util/LabelUtil":90,"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],54:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DeleteSequenceFlowBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A behavior that unsets the Default property of
+ * sequence flow source on element delete, if the
+ * removed element is the Gateway or Task's default flow.
+ *
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ */
+function DeleteSequenceFlowBehavior(eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this.preExecute('connection.delete', function (event) {
+    var context = event.context,
+        connection = context.connection,
+        source = connection.source;
+
+    if (isDefaultFlow(connection, source)) {
+      modeling.updateProperties(source, {
+        'default': null
+      });
+    }
+  });
+}
+
+(0, _inherits.default)(DeleteSequenceFlowBehavior, _CommandInterceptor.default);
+DeleteSequenceFlowBehavior.$inject = ['eventBus', 'modeling']; // helpers //////////////////////
+
+function isDefaultFlow(connection, source) {
+  if (!(0, _ModelUtil.is)(connection, 'bpmn:SequenceFlow')) {
+    return false;
+  }
+
+  var sourceBo = (0, _ModelUtil.getBusinessObject)(source),
+      sequenceFlow = (0, _ModelUtil.getBusinessObject)(connection);
+  return sourceBo.get('default') === sequenceFlow;
+}
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],55:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateFlowNodeRefsBehavior;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("diagram-js/lib/command/CommandInterceptor"));
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 500,
+    HIGH_PRIORITY = 5000;
+/**
+ * BPMN specific delete lane behavior
+ */
+
+function UpdateFlowNodeRefsBehavior(eventBus, modeling, translate) {
+  _CommandInterceptor.default.call(this, eventBus);
+  /**
+   * Ok, this is it:
+   *
+   * We have to update the Lane#flowNodeRefs _and_
+   * FlowNode#lanes with every FlowNode move/resize and
+   * Lane move/resize.
+   *
+   * We want to group that stuff to recompute containments
+   * as efficient as possible.
+   *
+   * Yea!
+   */
+  // the update context
+
+
+  var context;
+
+  function initContext() {
+    context = context || new UpdateContext();
+    context.enter();
+    return context;
+  }
+
+  function getContext() {
+    if (!context) {
+      throw new Error(translate('out of bounds release'));
+    }
+
+    return context;
+  }
+
+  function releaseContext() {
+    if (!context) {
+      throw new Error(translate('out of bounds release'));
+    }
+
+    var triggerUpdate = context.leave();
+
+    if (triggerUpdate) {
+      modeling.updateLaneRefs(context.flowNodes, context.lanes);
+      context = null;
+    }
+
+    return triggerUpdate;
+  }
+
+  var laneRefUpdateEvents = ['spaceTool', 'lane.add', 'lane.resize', 'lane.split', 'elements.create', 'elements.delete', 'elements.move', 'shape.create', 'shape.delete', 'shape.move', 'shape.resize']; // listen to a lot of stuff to group lane updates
+
+  this.preExecute(laneRefUpdateEvents, HIGH_PRIORITY, function (event) {
+    initContext();
+  });
+  this.postExecuted(laneRefUpdateEvents, LOW_PRIORITY, function (event) {
+    releaseContext();
+  }); // Mark flow nodes + lanes that need an update
+
+  this.preExecute(['shape.create', 'shape.move', 'shape.delete', 'shape.resize'], function (event) {
+    var context = event.context,
+        shape = context.shape;
+    var updateContext = getContext(); // no need to update labels
+
+    if (shape.labelTarget) {
+      return;
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:Lane')) {
+      updateContext.addLane(shape);
+    }
+
+    if ((0, _ModelUtil.is)(shape, 'bpmn:FlowNode')) {
+      updateContext.addFlowNode(shape);
+    }
+  });
+}
+
+UpdateFlowNodeRefsBehavior.$inject = ['eventBus', 'modeling', 'translate'];
+(0, _inherits.default)(UpdateFlowNodeRefsBehavior, _CommandInterceptor.default);
+
+function UpdateContext() {
+  this.flowNodes = [];
+  this.lanes = [];
+  this.counter = 0;
+
+  this.addLane = function (lane) {
+    this.lanes.push(lane);
+  };
+
+  this.addFlowNode = function (flowNode) {
+    this.flowNodes.push(flowNode);
+  };
+
+  this.enter = function () {
+    this.counter++;
+  };
+
+  this.leave = function () {
+    this.counter--;
+    return !this.counter;
+  };
+}
+
+},{"../../../util/ModelUtil":91,"diagram-js/lib/command/CommandInterceptor":96,"inherits":218}],56:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _AdaptiveLabelPositioningBehavior = _interopRequireDefault(require("./AdaptiveLabelPositioningBehavior"));
+
+var _AppendBehavior = _interopRequireDefault(require("./AppendBehavior"));
+
+var _AssociationBehavior = _interopRequireDefault(require("./AssociationBehavior"));
+
+var _AttachEventBehavior = _interopRequireDefault(require("./AttachEventBehavior"));
+
+var _BoundaryEventBehavior = _interopRequireDefault(require("./BoundaryEventBehavior"));
+
+var _RootElementReferenceBehavior = _interopRequireDefault(require("./RootElementReferenceBehavior"));
+
+var _CreateBehavior = _interopRequireDefault(require("./CreateBehavior"));
+
+var _FixHoverBehavior = _interopRequireDefault(require("./FixHoverBehavior"));
+
+var _CreateDataObjectBehavior = _interopRequireDefault(require("./CreateDataObjectBehavior"));
+
+var _CreateParticipantBehavior = _interopRequireDefault(require("./CreateParticipantBehavior"));
+
+var _DataInputAssociationBehavior = _interopRequireDefault(require("./DataInputAssociationBehavior"));
+
+var _DataStoreBehavior = _interopRequireDefault(require("./DataStoreBehavior"));
+
+var _DeleteLaneBehavior = _interopRequireDefault(require("./DeleteLaneBehavior"));
+
+var _DetachEventBehavior = _interopRequireDefault(require("./DetachEventBehavior"));
+
+var _DropOnFlowBehavior = _interopRequireDefault(require("./DropOnFlowBehavior"));
+
+var _EventBasedGatewayBehavior = _interopRequireDefault(require("./EventBasedGatewayBehavior"));
+
+var _GroupBehavior = _interopRequireDefault(require("./GroupBehavior"));
+
+var _ImportDockingFix = _interopRequireDefault(require("./ImportDockingFix"));
+
+var _IsHorizontalFix = _interopRequireDefault(require("./IsHorizontalFix"));
+
+var _LabelBehavior = _interopRequireDefault(require("./LabelBehavior"));
+
+var _ModelingFeedback = _interopRequireDefault(require("./ModelingFeedback"));
+
+var _ReplaceConnectionBehavior = _interopRequireDefault(require("./ReplaceConnectionBehavior"));
+
+var _RemoveParticipantBehavior = _interopRequireDefault(require("./RemoveParticipantBehavior"));
+
+var _ReplaceElementBehaviour = _interopRequireDefault(require("./ReplaceElementBehaviour"));
+
+var _ResizeBehavior = _interopRequireDefault(require("./ResizeBehavior"));
+
+var _ResizeLaneBehavior = _interopRequireDefault(require("./ResizeLaneBehavior"));
+
+var _RemoveElementBehavior = _interopRequireDefault(require("./RemoveElementBehavior"));
+
+var _SpaceToolBehavior = _interopRequireDefault(require("./SpaceToolBehavior"));
+
+var _SubProcessStartEventBehavior = _interopRequireDefault(require("./SubProcessStartEventBehavior"));
+
+var _ToggleElementCollapseBehaviour = _interopRequireDefault(require("./ToggleElementCollapseBehaviour"));
+
+var _UnclaimIdBehavior = _interopRequireDefault(require("./UnclaimIdBehavior"));
+
+var _UpdateFlowNodeRefsBehavior = _interopRequireDefault(require("./UpdateFlowNodeRefsBehavior"));
+
+var _UnsetDefaultFlowBehavior = _interopRequireDefault(require("./UnsetDefaultFlowBehavior"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['adaptiveLabelPositioningBehavior', 'appendBehavior', 'associationBehavior', 'attachEventBehavior', 'boundaryEventBehavior', 'rootElementReferenceBehavior', 'createBehavior', 'fixHoverBehavior', 'createDataObjectBehavior', 'createParticipantBehavior', 'dataStoreBehavior', 'dataInputAssociationBehavior', 'deleteLaneBehavior', 'detachEventBehavior', 'dropOnFlowBehavior', 'eventBasedGatewayBehavior', 'groupBehavior', 'importDockingFix', 'isHorizontalFix', 'labelBehavior', 'modelingFeedback', 'removeElementBehavior', 'removeParticipantBehavior', 'replaceConnectionBehavior', 'replaceElementBehaviour', 'resizeBehavior', 'resizeLaneBehavior', 'toggleElementCollapseBehaviour', 'spaceToolBehavior', 'subProcessStartEventBehavior', 'unclaimIdBehavior', 'unsetDefaultFlowBehavior', 'updateFlowNodeRefsBehavior'],
+  adaptiveLabelPositioningBehavior: ['type', _AdaptiveLabelPositioningBehavior.default],
+  appendBehavior: ['type', _AppendBehavior.default],
+  associationBehavior: ['type', _AssociationBehavior.default],
+  attachEventBehavior: ['type', _AttachEventBehavior.default],
+  boundaryEventBehavior: ['type', _BoundaryEventBehavior.default],
+  rootElementReferenceBehavior: ['type', _RootElementReferenceBehavior.default],
+  createBehavior: ['type', _CreateBehavior.default],
+  fixHoverBehavior: ['type', _FixHoverBehavior.default],
+  createDataObjectBehavior: ['type', _CreateDataObjectBehavior.default],
+  createParticipantBehavior: ['type', _CreateParticipantBehavior.default],
+  dataInputAssociationBehavior: ['type', _DataInputAssociationBehavior.default],
+  dataStoreBehavior: ['type', _DataStoreBehavior.default],
+  deleteLaneBehavior: ['type', _DeleteLaneBehavior.default],
+  detachEventBehavior: ['type', _DetachEventBehavior.default],
+  dropOnFlowBehavior: ['type', _DropOnFlowBehavior.default],
+  eventBasedGatewayBehavior: ['type', _EventBasedGatewayBehavior.default],
+  groupBehavior: ['type', _GroupBehavior.default],
+  importDockingFix: ['type', _ImportDockingFix.default],
+  isHorizontalFix: ['type', _IsHorizontalFix.default],
+  labelBehavior: ['type', _LabelBehavior.default],
+  modelingFeedback: ['type', _ModelingFeedback.default],
+  replaceConnectionBehavior: ['type', _ReplaceConnectionBehavior.default],
+  removeParticipantBehavior: ['type', _RemoveParticipantBehavior.default],
+  replaceElementBehaviour: ['type', _ReplaceElementBehaviour.default],
+  resizeBehavior: ['type', _ResizeBehavior.default],
+  resizeLaneBehavior: ['type', _ResizeLaneBehavior.default],
+  removeElementBehavior: ['type', _RemoveElementBehavior.default],
+  toggleElementCollapseBehaviour: ['type', _ToggleElementCollapseBehaviour.default],
+  spaceToolBehavior: ['type', _SpaceToolBehavior.default],
+  subProcessStartEventBehavior: ['type', _SubProcessStartEventBehavior.default],
+  unclaimIdBehavior: ['type', _UnclaimIdBehavior.default],
+  updateFlowNodeRefsBehavior: ['type', _UpdateFlowNodeRefsBehavior.default],
+  unsetDefaultFlowBehavior: ['type', _UnsetDefaultFlowBehavior.default]
+};
+exports.default = _default;
+
+},{"./AdaptiveLabelPositioningBehavior":23,"./AppendBehavior":24,"./AssociationBehavior":25,"./AttachEventBehavior":26,"./BoundaryEventBehavior":27,"./CreateBehavior":28,"./CreateDataObjectBehavior":29,"./CreateParticipantBehavior":30,"./DataInputAssociationBehavior":31,"./DataStoreBehavior":32,"./DeleteLaneBehavior":33,"./DetachEventBehavior":34,"./DropOnFlowBehavior":35,"./EventBasedGatewayBehavior":36,"./FixHoverBehavior":37,"./GroupBehavior":38,"./ImportDockingFix":39,"./IsHorizontalFix":40,"./LabelBehavior":41,"./ModelingFeedback":42,"./RemoveElementBehavior":43,"./RemoveParticipantBehavior":44,"./ReplaceConnectionBehavior":45,"./ReplaceElementBehaviour":46,"./ResizeBehavior":47,"./ResizeLaneBehavior":48,"./RootElementReferenceBehavior":49,"./SpaceToolBehavior":50,"./SubProcessStartEventBehavior":51,"./ToggleElementCollapseBehaviour":52,"./UnclaimIdBehavior":53,"./UnsetDefaultFlowBehavior":54,"./UpdateFlowNodeRefsBehavior":55}],57:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createCategoryValue = createCategoryValue;
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _ModelUtil = require("../../../../util/ModelUtil");
+
+/**
+ * Creates a new bpmn:CategoryValue inside a new bpmn:Category
+ *
+ * @param {ModdleElement} definitions
+ * @param {BpmnFactory} bpmnFactory
+ *
+ * @return {ModdleElement} categoryValue.
+ */
+function createCategoryValue(definitions, bpmnFactory) {
+  var categoryValue = bpmnFactory.create('bpmn:CategoryValue'),
+      category = bpmnFactory.create('bpmn:Category', {
+    categoryValue: [categoryValue]
+  }); // add to correct place
+
+  (0, _Collections.add)(definitions.get('rootElements'), category);
+  (0, _ModelUtil.getBusinessObject)(category).$parent = definitions;
+  (0, _ModelUtil.getBusinessObject)(categoryValue).$parent = category;
+  return categoryValue;
+}
+
+},{"../../../../util/ModelUtil":91,"diagram-js/lib/util/Collections":200}],58:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.vectorLength = vectorLength;
+exports.getAngle = getAngle;
+exports.rotateVector = rotateVector;
+exports.perpendicularFoot = perpendicularFoot;
+exports.getDistancePointLine = getDistancePointLine;
+exports.getDistancePointPoint = getDistancePointPoint;
+
+/**
+ * Returns the length of a vector
+ *
+ * @param {Vector}
+ * @return {Float}
+ */
+function vectorLength(v) {
+  return Math.sqrt(Math.pow(v.x, 2) + Math.pow(v.y, 2));
+}
+/**
+ * Calculates the angle between a line a the yAxis
+ *
+ * @param {Array}
+ * @return {Float}
+ */
+
+
+function getAngle(line) {
+  // return value is between 0, 180 and -180, -0
+  // @janstuemmel: maybe replace return a/b with b/a
+  return Math.atan((line[1].y - line[0].y) / (line[1].x - line[0].x));
+}
+/**
+ * Rotates a vector by a given angle
+ *
+ * @param {Vector}
+ * @param {Float} Angle in radians
+ * @return {Vector}
+ */
+
+
+function rotateVector(vector, angle) {
+  return !angle ? vector : {
+    x: Math.cos(angle) * vector.x - Math.sin(angle) * vector.y,
+    y: Math.sin(angle) * vector.x + Math.cos(angle) * vector.y
+  };
+}
+/**
+ * Solves a 2D equation system
+ * a + r*b = c, where a,b,c are 2D vectors
+ *
+ * @param {Vector}
+ * @param {Vector}
+ * @param {Vector}
+ * @return {Float}
+ */
+
+
+function solveLambaSystem(a, b, c) {
+  // the 2d system
+  var system = [{
+    n: a[0] - c[0],
+    lambda: b[0]
+  }, {
+    n: a[1] - c[1],
+    lambda: b[1]
+  }]; // solve
+
+  var n = system[0].n * b[0] + system[1].n * b[1],
+      l = system[0].lambda * b[0] + system[1].lambda * b[1];
+  return -n / l;
+}
+/**
+ * Position of perpendicular foot
+ *
+ * @param {Point}
+ * @param [ {Point}, {Point} ] line defined through two points
+ * @return {Point} the perpendicular foot position
+ */
+
+
+function perpendicularFoot(point, line) {
+  var a = line[0],
+      b = line[1]; // relative position of b from a
+
+  var bd = {
+    x: b.x - a.x,
+    y: b.y - a.y
+  }; // solve equation system to the parametrized vectors param real value
+
+  var r = solveLambaSystem([a.x, a.y], [bd.x, bd.y], [point.x, point.y]);
+  return {
+    x: a.x + r * bd.x,
+    y: a.y + r * bd.y
+  };
+}
+/**
+ * Calculates the distance between a point and a line
+ *
+ * @param {Point}
+ * @param [ {Point}, {Point} ] line defined through two points
+ * @return {Float} distance
+ */
+
+
+function getDistancePointLine(point, line) {
+  var pfPoint = perpendicularFoot(point, line); // distance vector
+
+  var connectionVector = {
+    x: pfPoint.x - point.x,
+    y: pfPoint.y - point.y
+  };
+  return vectorLength(connectionVector);
+}
+/**
+ * Calculates the distance between two points
+ *
+ * @param {Point}
+ * @param {Point}
+ * @return {Float} distance
+ */
+
+
+function getDistancePointPoint(point1, point2) {
+  return vectorLength({
+    x: point1.x - point2.x,
+    y: point1.y - point2.y
+  });
+}
+
+},{}],59:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.findNewLabelLineStartIndex = findNewLabelLineStartIndex;
+exports.getLabelAdjustment = getLabelAdjustment;
+
+var _GeometricUtil = require("./GeometricUtil");
+
+var _LineAttachmentUtil = require("./LineAttachmentUtil");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+function findNewLabelLineStartIndex(oldWaypoints, newWaypoints, attachment, hints) {
+  var index = attachment.segmentIndex;
+  var offset = newWaypoints.length - oldWaypoints.length; // segmentMove happened
+
+  if (hints.segmentMove) {
+    var oldSegmentStartIndex = hints.segmentMove.segmentStartIndex,
+        newSegmentStartIndex = hints.segmentMove.newSegmentStartIndex; // if label was on moved segment return new segment index
+
+    if (index === oldSegmentStartIndex) {
+      return newSegmentStartIndex;
+    } // label is after new segment index
+
+
+    if (index >= newSegmentStartIndex) {
+      return index + offset < newSegmentStartIndex ? newSegmentStartIndex : index + offset;
+    } // if label is before new segment index
+
+
+    return index;
+  } // bendpointMove happened
+
+
+  if (hints.bendpointMove) {
+    var insert = hints.bendpointMove.insert,
+        bendpointIndex = hints.bendpointMove.bendpointIndex,
+        newIndex; // waypoints length didnt change
+
+    if (offset === 0) {
+      return index;
+    } // label behind new/removed bendpoint
+
+
+    if (index >= bendpointIndex) {
+      newIndex = insert ? index + 1 : index - 1;
+    } // label before new/removed bendpoint
+
+
+    if (index < bendpointIndex) {
+      newIndex = index; // decide label should take right or left segment
+
+      if (insert && attachment.type !== 'bendpoint' && bendpointIndex - 1 === index) {
+        var rel = relativePositionMidWaypoint(newWaypoints, bendpointIndex);
+
+        if (rel < attachment.relativeLocation) {
+          newIndex++;
+        }
+      }
+    }
+
+    return newIndex;
+  } // start/end changed
+
+
+  if (offset === 0) {
+    return index;
+  }
+
+  if (hints.connectionStart) {
+    return index === 0 ? 0 : null;
+  }
+
+  if (hints.connectionEnd) {
+    return index === oldWaypoints.length - 2 ? newWaypoints.length - 2 : null;
+  } // if nothing fits, return null
+
+
+  return null;
+}
+/**
+ * Calculate the required adjustment (move delta) for the given label
+ * after the connection waypoints got updated.
+ *
+ * @param {djs.model.Label} label
+ * @param {Array<Point>} newWaypoints
+ * @param {Array<Point>} oldWaypoints
+ * @param {Object} hints
+ *
+ * @return {Point} delta
+ */
+
+
+function getLabelAdjustment(label, newWaypoints, oldWaypoints, hints) {
+  var x = 0,
+      y = 0;
+  var labelPosition = getLabelMid(label); // get closest attachment
+
+  var attachment = (0, _LineAttachmentUtil.getAttachment)(labelPosition, oldWaypoints),
+      oldLabelLineIndex = attachment.segmentIndex,
+      newLabelLineIndex = findNewLabelLineStartIndex(oldWaypoints, newWaypoints, attachment, hints);
+
+  if (newLabelLineIndex === null) {
+    return {
+      x: x,
+      y: y
+    };
+  } // should never happen
+  // TODO(@janstuemmel): throw an error here when connectionSegmentMove is refactored
+
+
+  if (newLabelLineIndex < 0 || newLabelLineIndex > newWaypoints.length - 2) {
+    return {
+      x: x,
+      y: y
+    };
+  }
+
+  var oldLabelLine = getLine(oldWaypoints, oldLabelLineIndex),
+      newLabelLine = getLine(newWaypoints, newLabelLineIndex),
+      oldFoot = attachment.position;
+  var relativeFootPosition = getRelativeFootPosition(oldLabelLine, oldFoot),
+      angleDelta = getAngleDelta(oldLabelLine, newLabelLine); // special rule if label on bendpoint
+
+  if (attachment.type === 'bendpoint') {
+    var offset = newWaypoints.length - oldWaypoints.length,
+        oldBendpointIndex = attachment.bendpointIndex,
+        oldBendpoint = oldWaypoints[oldBendpointIndex]; // bendpoint position hasn't changed, return same position
+
+    if (newWaypoints.indexOf(oldBendpoint) !== -1) {
+      return {
+        x: x,
+        y: y
+      };
+    } // new bendpoint and old bendpoint have same index, then just return the offset
+
+
+    if (offset === 0) {
+      var newBendpoint = newWaypoints[oldBendpointIndex];
+      return {
+        x: newBendpoint.x - attachment.position.x,
+        y: newBendpoint.y - attachment.position.y
+      };
+    } // if bendpoints get removed
+
+
+    if (offset < 0 && oldBendpointIndex !== 0 && oldBendpointIndex < oldWaypoints.length - 1) {
+      relativeFootPosition = relativePositionMidWaypoint(oldWaypoints, oldBendpointIndex);
+    }
+  }
+
+  var newFoot = {
+    x: (newLabelLine[1].x - newLabelLine[0].x) * relativeFootPosition + newLabelLine[0].x,
+    y: (newLabelLine[1].y - newLabelLine[0].y) * relativeFootPosition + newLabelLine[0].y
+  }; // the rotated vector to label
+
+  var newLabelVector = (0, _GeometricUtil.rotateVector)({
+    x: labelPosition.x - oldFoot.x,
+    y: labelPosition.y - oldFoot.y
+  }, angleDelta); // the new relative position
+
+  x = newFoot.x + newLabelVector.x - labelPosition.x;
+  y = newFoot.y + newLabelVector.y - labelPosition.y;
+  return (0, _LayoutUtil.roundPoint)({
+    x: x,
+    y: y
+  });
+} // HELPERS //////////////////////
+
+
+function relativePositionMidWaypoint(waypoints, idx) {
+  var distanceSegment1 = (0, _GeometricUtil.getDistancePointPoint)(waypoints[idx - 1], waypoints[idx]),
+      distanceSegment2 = (0, _GeometricUtil.getDistancePointPoint)(waypoints[idx], waypoints[idx + 1]);
+  var relativePosition = distanceSegment1 / (distanceSegment1 + distanceSegment2);
+  return relativePosition;
+}
+
+function getLabelMid(label) {
+  return {
+    x: label.x + label.width / 2,
+    y: label.y + label.height / 2
+  };
+}
+
+function getAngleDelta(l1, l2) {
+  var a1 = (0, _GeometricUtil.getAngle)(l1),
+      a2 = (0, _GeometricUtil.getAngle)(l2);
+  return a2 - a1;
+}
+
+function getLine(waypoints, idx) {
+  return [waypoints[idx], waypoints[idx + 1]];
+}
+
+function getRelativeFootPosition(line, foot) {
+  var length = (0, _GeometricUtil.getDistancePointPoint)(line[0], line[1]),
+      lengthToFoot = (0, _GeometricUtil.getDistancePointPoint)(line[0], foot);
+  return length === 0 ? 0 : lengthToFoot / length;
+}
+
+},{"./GeometricUtil":58,"./LineAttachmentUtil":60,"diagram-js/lib/layout/LayoutUtil":188}],60:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getAttachment = getAttachment;
+var sqrt = Math.sqrt,
+    min = Math.min,
+    max = Math.max,
+    abs = Math.abs;
+/**
+ * Calculate the square (power to two) of a number.
+ *
+ * @param {number} n
+ *
+ * @return {number}
+ */
+
+function sq(n) {
+  return Math.pow(n, 2);
+}
+/**
+ * Get distance between two points.
+ *
+ * @param {Point} p1
+ * @param {Point} p2
+ *
+ * @return {number}
+ */
+
+
+function getDistance(p1, p2) {
+  return sqrt(sq(p1.x - p2.x) + sq(p1.y - p2.y));
+}
+/**
+ * Return the attachment of the given point on the specified line.
+ *
+ * The attachment is either a bendpoint (attached to the given point)
+ * or segment (attached to a location on a line segment) attachment:
+ *
+ * ```javascript
+ * var pointAttachment = {
+ *   type: 'bendpoint',
+ *   bendpointIndex: 3,
+ *   position: { x: 10, y: 10 } // the attach point on the line
+ * };
+ *
+ * var segmentAttachment = {
+ *   type: 'segment',
+ *   segmentIndex: 2,
+ *   relativeLocation: 0.31, // attach point location between 0 (at start) and 1 (at end)
+ *   position: { x: 10, y: 10 } // the attach point on the line
+ * };
+ * ```
+ *
+ * @param {Point} point
+ * @param {Array<Point>} line
+ *
+ * @return {Object} attachment
+ */
+
+
+function getAttachment(point, line) {
+  var idx = 0,
+      segmentStart,
+      segmentEnd,
+      segmentStartDistance,
+      segmentEndDistance,
+      attachmentPosition,
+      minDistance,
+      intersections,
+      attachment,
+      attachmentDistance,
+      closestAttachmentDistance,
+      closestAttachment;
+
+  for (idx = 0; idx < line.length - 1; idx++) {
+    segmentStart = line[idx];
+    segmentEnd = line[idx + 1];
+
+    if (pointsEqual(segmentStart, segmentEnd)) {
+      intersections = [segmentStart];
+    } else {
+      segmentStartDistance = getDistance(point, segmentStart);
+      segmentEndDistance = getDistance(point, segmentEnd);
+      minDistance = min(segmentStartDistance, segmentEndDistance);
+      intersections = getCircleSegmentIntersections(segmentStart, segmentEnd, point, minDistance);
+    }
+
+    if (intersections.length < 1) {
+      throw new Error('expected between [1, 2] circle -> line intersections');
+    } // one intersection -> bendpoint attachment
+
+
+    if (intersections.length === 1) {
+      attachment = {
+        type: 'bendpoint',
+        position: intersections[0],
+        segmentIndex: idx,
+        bendpointIndex: pointsEqual(segmentStart, intersections[0]) ? idx : idx + 1
+      };
+    } // two intersections -> segment attachment
+
+
+    if (intersections.length === 2) {
+      attachmentPosition = mid(intersections[0], intersections[1]);
+      attachment = {
+        type: 'segment',
+        position: attachmentPosition,
+        segmentIndex: idx,
+        relativeLocation: getDistance(segmentStart, attachmentPosition) / getDistance(segmentStart, segmentEnd)
+      };
+    }
+
+    attachmentDistance = getDistance(attachment.position, point);
+
+    if (!closestAttachment || closestAttachmentDistance > attachmentDistance) {
+      closestAttachment = attachment;
+      closestAttachmentDistance = attachmentDistance;
+    }
+  }
+
+  return closestAttachment;
+}
+/**
+ * Gets the intersection between a circle and a line segment.
+ *
+ * @param {Point} s1 segment start
+ * @param {Point} s2 segment end
+ * @param {Point} cc circle center
+ * @param {number} cr circle radius
+ *
+ * @return {Array<Point>} intersections
+ */
+
+
+function getCircleSegmentIntersections(s1, s2, cc, cr) {
+  var baX = s2.x - s1.x;
+  var baY = s2.y - s1.y;
+  var caX = cc.x - s1.x;
+  var caY = cc.y - s1.y;
+  var a = baX * baX + baY * baY;
+  var bBy2 = baX * caX + baY * caY;
+  var c = caX * caX + caY * caY - cr * cr;
+  var pBy2 = bBy2 / a;
+  var q = c / a;
+  var disc = pBy2 * pBy2 - q; // check against negative value to work around
+  // negative, very close to zero results (-4e-15)
+  // being produced in some environments
+
+  if (disc < 0 && disc > -0.000001) {
+    disc = 0;
+  }
+
+  if (disc < 0) {
+    return [];
+  } // if disc == 0 ... dealt with later
+
+
+  var tmpSqrt = sqrt(disc);
+  var abScalingFactor1 = -pBy2 + tmpSqrt;
+  var abScalingFactor2 = -pBy2 - tmpSqrt;
+  var i1 = {
+    x: s1.x - baX * abScalingFactor1,
+    y: s1.y - baY * abScalingFactor1
+  };
+
+  if (disc === 0) {
+    // abScalingFactor1 == abScalingFactor2
+    return [i1];
+  }
+
+  var i2 = {
+    x: s1.x - baX * abScalingFactor2,
+    y: s1.y - baY * abScalingFactor2
+  }; // return only points on line segment
+
+  return [i1, i2].filter(function (p) {
+    return isPointInSegment(p, s1, s2);
+  });
+}
+
+function isPointInSegment(p, segmentStart, segmentEnd) {
+  return fenced(p.x, segmentStart.x, segmentEnd.x) && fenced(p.y, segmentStart.y, segmentEnd.y);
+}
+
+function fenced(n, rangeStart, rangeEnd) {
+  // use matching threshold to work around
+  // precision errors in intersection computation
+  return n >= min(rangeStart, rangeEnd) - EQUAL_THRESHOLD && n <= max(rangeStart, rangeEnd) + EQUAL_THRESHOLD;
+}
+/**
+ * Calculate mid of two points.
+ *
+ * @param {Point} p1
+ * @param {Point} p2
+ *
+ * @return {Point}
+ */
+
+
+function mid(p1, p2) {
+  return {
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2
+  };
+}
+
+var EQUAL_THRESHOLD = 0.1;
+
+function pointsEqual(p1, p2) {
+  return abs(p1.x - p2.x) <= EQUAL_THRESHOLD && abs(p1.y - p2.y) <= EQUAL_THRESHOLD;
+}
+
+},{}],61:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = lineIntersect;
+
+/**
+ * Returns the intersection between two line segments a and b.
+ *
+ * @param {Point} l1s
+ * @param {Point} l1e
+ * @param {Point} l2s
+ * @param {Point} l2e
+ *
+ * @return {Point}
+ */
+function lineIntersect(l1s, l1e, l2s, l2e) {
+  // if the lines intersect, the result contains the x and y of the
+  // intersection (treating the lines as infinite) and booleans for
+  // whether line segment 1 or line segment 2 contain the point
+  var denominator, a, b, c, numerator;
+  denominator = (l2e.y - l2s.y) * (l1e.x - l1s.x) - (l2e.x - l2s.x) * (l1e.y - l1s.y);
+
+  if (denominator == 0) {
+    return null;
+  }
+
+  a = l1s.y - l2s.y;
+  b = l1s.x - l2s.x;
+  numerator = (l2e.x - l2s.x) * a - (l2e.y - l2s.y) * b;
+  c = numerator / denominator; // if we cast these lines infinitely in
+  // both directions, they intersect here
+
+  return {
+    x: Math.round(l1s.x + c * (l1e.x - l1s.x)),
+    y: Math.round(l1s.y + c * (l1e.y - l1s.y))
+  };
+}
+
+},{}],62:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getParticipantResizeConstraints = getParticipantResizeConstraints;
+
+var _ModelUtil = require("../../../../util/ModelUtil");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _LaneUtil = require("../../../modeling/util/LaneUtil");
+
+var _ResizeBehavior = require("../ResizeBehavior");
+
+var abs = Math.abs,
+    min = Math.min,
+    max = Math.max;
+
+function addToTrbl(trbl, attr, value, choice) {
+  var current = trbl[attr]; // make sure to set the value if it does not exist
+  // or apply the correct value by comparing against
+  // choice(value, currentValue)
+
+  trbl[attr] = current === undefined ? value : choice(value, current);
+}
+
+function addMin(trbl, attr, value) {
+  return addToTrbl(trbl, attr, value, min);
+}
+
+function addMax(trbl, attr, value) {
+  return addToTrbl(trbl, attr, value, max);
+}
+
+var LANE_RIGHT_PADDING = 20,
+    LANE_LEFT_PADDING = 50,
+    LANE_TOP_PADDING = 20,
+    LANE_BOTTOM_PADDING = 20;
+
+function getParticipantResizeConstraints(laneShape, resizeDirection, balanced) {
+  var lanesRoot = (0, _LaneUtil.getLanesRoot)(laneShape);
+  var isFirst = true,
+      isLast = true; // max top/bottom size for lanes
+
+  var allLanes = (0, _LaneUtil.collectLanes)(lanesRoot, [lanesRoot]);
+  var laneTrbl = (0, _LayoutUtil.asTRBL)(laneShape);
+  var maxTrbl = {},
+      minTrbl = {};
+
+  if (/e/.test(resizeDirection)) {
+    minTrbl.right = laneTrbl.left + _ResizeBehavior.LANE_MIN_DIMENSIONS.width;
+  } else if (/w/.test(resizeDirection)) {
+    minTrbl.left = laneTrbl.right - _ResizeBehavior.LANE_MIN_DIMENSIONS.width;
+  }
+
+  allLanes.forEach(function (other) {
+    var otherTrbl = (0, _LayoutUtil.asTRBL)(other);
+
+    if (/n/.test(resizeDirection)) {
+      if (otherTrbl.top < laneTrbl.top - 10) {
+        isFirst = false;
+      } // max top size (based on next element)
+
+
+      if (balanced && abs(laneTrbl.top - otherTrbl.bottom) < 10) {
+        addMax(maxTrbl, 'top', otherTrbl.top + _ResizeBehavior.LANE_MIN_DIMENSIONS.height);
+      } // min top size (based on self or nested element)
+
+
+      if (abs(laneTrbl.top - otherTrbl.top) < 5) {
+        addMin(minTrbl, 'top', otherTrbl.bottom - _ResizeBehavior.LANE_MIN_DIMENSIONS.height);
+      }
+    }
+
+    if (/s/.test(resizeDirection)) {
+      if (otherTrbl.bottom > laneTrbl.bottom + 10) {
+        isLast = false;
+      } // max bottom size (based on previous element)
+
+
+      if (balanced && abs(laneTrbl.bottom - otherTrbl.top) < 10) {
+        addMin(maxTrbl, 'bottom', otherTrbl.bottom - _ResizeBehavior.LANE_MIN_DIMENSIONS.height);
+      } // min bottom size (based on self or nested element)
+
+
+      if (abs(laneTrbl.bottom - otherTrbl.bottom) < 5) {
+        addMax(minTrbl, 'bottom', otherTrbl.top + _ResizeBehavior.LANE_MIN_DIMENSIONS.height);
+      }
+    }
+  }); // max top/bottom/left/right size based on flow nodes
+
+  var flowElements = lanesRoot.children.filter(function (s) {
+    return !s.hidden && !s.waypoints && ((0, _ModelUtil.is)(s, 'bpmn:FlowElement') || (0, _ModelUtil.is)(s, 'bpmn:Artifact'));
+  });
+  flowElements.forEach(function (flowElement) {
+    var flowElementTrbl = (0, _LayoutUtil.asTRBL)(flowElement);
+
+    if (isFirst && /n/.test(resizeDirection)) {
+      addMin(minTrbl, 'top', flowElementTrbl.top - LANE_TOP_PADDING);
+    }
+
+    if (/e/.test(resizeDirection)) {
+      addMax(minTrbl, 'right', flowElementTrbl.right + LANE_RIGHT_PADDING);
+    }
+
+    if (isLast && /s/.test(resizeDirection)) {
+      addMax(minTrbl, 'bottom', flowElementTrbl.bottom + LANE_BOTTOM_PADDING);
+    }
+
+    if (/w/.test(resizeDirection)) {
+      addMin(minTrbl, 'left', flowElementTrbl.left - LANE_LEFT_PADDING);
+    }
+  });
+  return {
+    min: minTrbl,
+    max: maxTrbl
+  };
+}
+
+},{"../../../../util/ModelUtil":91,"../../../modeling/util/LaneUtil":74,"../ResizeBehavior":47,"diagram-js/lib/layout/LayoutUtil":188}],63:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AddLaneHandler;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("diagram-js/lib/util/Elements");
+
+var _LaneUtil = require("../util/LaneUtil");
+
+/**
+ * A handler that allows us to add a new lane
+ * above or below an existing one.
+ *
+ * @param {Modeling} modeling
+ * @param {SpaceTool} spaceTool
+ */
+function AddLaneHandler(modeling, spaceTool) {
+  this._modeling = modeling;
+  this._spaceTool = spaceTool;
+}
+
+AddLaneHandler.$inject = ['modeling', 'spaceTool'];
+
+AddLaneHandler.prototype.preExecute = function (context) {
+  var spaceTool = this._spaceTool,
+      modeling = this._modeling;
+  var shape = context.shape,
+      location = context.location;
+  var lanesRoot = (0, _LaneUtil.getLanesRoot)(shape);
+  var isRoot = lanesRoot === shape,
+      laneParent = isRoot ? shape : shape.parent;
+  var existingChildLanes = (0, _LaneUtil.getChildLanes)(laneParent); // (0) add a lane if we currently got none and are adding to root
+
+  if (!existingChildLanes.length) {
+    modeling.createShape({
+      type: 'bpmn:Lane'
+    }, {
+      x: shape.x + _LaneUtil.LANE_INDENTATION,
+      y: shape.y,
+      width: shape.width - _LaneUtil.LANE_INDENTATION,
+      height: shape.height
+    }, laneParent);
+  } // (1) collect affected elements to create necessary space
+
+
+  var allAffected = [];
+  (0, _Elements.eachElement)(lanesRoot, function (element) {
+    allAffected.push(element); // handle element labels in the diagram root
+
+    if (element.label) {
+      allAffected.push(element.label);
+    }
+
+    if (element === shape) {
+      return [];
+    }
+
+    return (0, _minDash.filter)(element.children, function (c) {
+      return c !== shape;
+    });
+  });
+  var offset = location === 'top' ? -120 : 120,
+      lanePosition = location === 'top' ? shape.y : shape.y + shape.height,
+      spacePos = lanePosition + (location === 'top' ? 10 : -10),
+      direction = location === 'top' ? 'n' : 's';
+  var adjustments = spaceTool.calculateAdjustments(allAffected, 'y', offset, spacePos);
+  spaceTool.makeSpace(adjustments.movingShapes, adjustments.resizingShapes, {
+    x: 0,
+    y: offset
+  }, direction, spacePos); // (2) create new lane at open space
+
+  context.newLane = modeling.createShape({
+    type: 'bpmn:Lane'
+  }, {
+    x: shape.x + (isRoot ? _LaneUtil.LANE_INDENTATION : 0),
+    y: lanePosition - (location === 'top' ? 120 : 0),
+    width: shape.width - (isRoot ? _LaneUtil.LANE_INDENTATION : 0),
+    height: 120
+  }, laneParent);
+};
+
+},{"../util/LaneUtil":74,"diagram-js/lib/util/Elements":202,"min-dash":219}],64:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = IdClaimHandler;
+
+function IdClaimHandler(moddle) {
+  this._moddle = moddle;
+}
+
+IdClaimHandler.$inject = ['moddle'];
+
+IdClaimHandler.prototype.execute = function (context) {
+  var ids = this._moddle.ids,
+      id = context.id,
+      element = context.element,
+      claiming = context.claiming;
+
+  if (claiming) {
+    ids.claim(id, element);
+  } else {
+    ids.unclaim(id);
+  }
+};
+/**
+ * Command revert implementation.
+ */
+
+
+IdClaimHandler.prototype.revert = function (context) {
+  var ids = this._moddle.ids,
+      id = context.id,
+      element = context.element,
+      claiming = context.claiming;
+
+  if (claiming) {
+    ids.unclaim(id);
+  } else {
+    ids.claim(id, element);
+  }
+};
+
+},{}],65:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ResizeLaneHandler;
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _LaneUtil = require("../util/LaneUtil");
+
+var _Elements = require("diagram-js/lib/util/Elements");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _ResizeUtil = require("diagram-js/lib/features/resize/ResizeUtil");
+
+/**
+ * A handler that resizes a lane.
+ *
+ * @param {Modeling} modeling
+ */
+function ResizeLaneHandler(modeling, spaceTool) {
+  this._modeling = modeling;
+  this._spaceTool = spaceTool;
+}
+
+ResizeLaneHandler.$inject = ['modeling', 'spaceTool'];
+
+ResizeLaneHandler.prototype.preExecute = function (context) {
+  var shape = context.shape,
+      newBounds = context.newBounds,
+      balanced = context.balanced;
+
+  if (balanced !== false) {
+    this.resizeBalanced(shape, newBounds);
+  } else {
+    this.resizeSpace(shape, newBounds);
+  }
+};
+/**
+ * Resize balanced, adjusting next / previous lane sizes.
+ *
+ * @param {djs.model.Shape} shape
+ * @param {Bounds} newBounds
+ */
+
+
+ResizeLaneHandler.prototype.resizeBalanced = function (shape, newBounds) {
+  var modeling = this._modeling;
+  var resizeNeeded = (0, _LaneUtil.computeLanesResize)(shape, newBounds); // resize the lane
+
+  modeling.resizeShape(shape, newBounds); // resize other lanes as needed
+
+  resizeNeeded.forEach(function (r) {
+    modeling.resizeShape(r.shape, r.newBounds);
+  });
+};
+/**
+ * Resize, making actual space and moving below / above elements.
+ *
+ * @param {djs.model.Shape} shape
+ * @param {Bounds} newBounds
+ */
+
+
+ResizeLaneHandler.prototype.resizeSpace = function (shape, newBounds) {
+  var spaceTool = this._spaceTool;
+  var shapeTrbl = (0, _LayoutUtil.asTRBL)(shape),
+      newTrbl = (0, _LayoutUtil.asTRBL)(newBounds);
+  var trblDiff = (0, _ResizeUtil.substractTRBL)(newTrbl, shapeTrbl);
+  var lanesRoot = (0, _LaneUtil.getLanesRoot)(shape);
+  var allAffected = [],
+      allLanes = [];
+  (0, _Elements.eachElement)(lanesRoot, function (element) {
+    allAffected.push(element);
+
+    if ((0, _ModelUtil.is)(element, 'bpmn:Lane') || (0, _ModelUtil.is)(element, 'bpmn:Participant')) {
+      allLanes.push(element);
+    }
+
+    return element.children;
+  });
+  var change, spacePos, direction, offset, adjustments;
+
+  if (trblDiff.bottom || trblDiff.top) {
+    change = trblDiff.bottom || trblDiff.top;
+    spacePos = shape.y + (trblDiff.bottom ? shape.height : 0) + (trblDiff.bottom ? -10 : 10);
+    direction = trblDiff.bottom ? 's' : 'n';
+    offset = trblDiff.top > 0 || trblDiff.bottom < 0 ? -change : change;
+    adjustments = spaceTool.calculateAdjustments(allAffected, 'y', offset, spacePos);
+    spaceTool.makeSpace(adjustments.movingShapes, adjustments.resizingShapes, {
+      x: 0,
+      y: change
+    }, direction);
+  }
+
+  if (trblDiff.left || trblDiff.right) {
+    change = trblDiff.right || trblDiff.left;
+    spacePos = shape.x + (trblDiff.right ? shape.width : 0) + (trblDiff.right ? -10 : 100);
+    direction = trblDiff.right ? 'e' : 'w';
+    offset = trblDiff.left > 0 || trblDiff.right < 0 ? -change : change;
+    adjustments = spaceTool.calculateAdjustments(allLanes, 'x', offset, spacePos);
+    spaceTool.makeSpace(adjustments.movingShapes, adjustments.resizingShapes, {
+      x: change,
+      y: 0
+    }, direction);
+  }
+};
+
+},{"../../../util/ModelUtil":91,"../util/LaneUtil":74,"diagram-js/lib/features/resize/ResizeUtil":168,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/Elements":202}],66:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SetColorHandler;
+
+var _minDash = require("min-dash");
+
+var DEFAULT_COLORS = {
+  fill: undefined,
+  stroke: undefined
+};
+
+function SetColorHandler(commandStack) {
+  this._commandStack = commandStack;
+}
+
+SetColorHandler.$inject = ['commandStack'];
+
+SetColorHandler.prototype.postExecute = function (context) {
+  var elements = context.elements,
+      colors = context.colors || DEFAULT_COLORS;
+  var self = this;
+  var di = {};
+
+  if ('fill' in colors) {
+    (0, _minDash.assign)(di, {
+      fill: colors.fill
+    });
+  }
+
+  if ('stroke' in colors) {
+    (0, _minDash.assign)(di, {
+      stroke: colors.stroke
+    });
+  }
+
+  (0, _minDash.forEach)(elements, function (element) {
+    self._commandStack.execute('element.updateProperties', {
+      element: element,
+      properties: {
+        di: di
+      }
+    });
+  });
+};
+
+},{"min-dash":219}],67:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SplitLaneHandler;
+
+var _LaneUtil = require("../util/LaneUtil");
+
+/**
+ * A handler that splits a lane into a number of sub-lanes,
+ * creating new sub lanes, if necessary.
+ *
+ * @param {Modeling} modeling
+ */
+function SplitLaneHandler(modeling, translate) {
+  this._modeling = modeling;
+  this._translate = translate;
+}
+
+SplitLaneHandler.$inject = ['modeling', 'translate'];
+
+SplitLaneHandler.prototype.preExecute = function (context) {
+  var modeling = this._modeling,
+      translate = this._translate;
+  var shape = context.shape,
+      newLanesCount = context.count;
+  var childLanes = (0, _LaneUtil.getChildLanes)(shape),
+      existingLanesCount = childLanes.length;
+
+  if (existingLanesCount > newLanesCount) {
+    throw new Error(translate('more than {count} child lanes', {
+      count: newLanesCount
+    }));
+  }
+
+  var newLanesHeight = Math.round(shape.height / newLanesCount); // Iterate from top to bottom in child lane order,
+  // resizing existing lanes and creating new ones
+  // so that they split the parent proportionally.
+  //
+  // Due to rounding related errors, the bottom lane
+  // needs to take up all the remaining space.
+
+  var laneY, laneHeight, laneBounds, newLaneAttrs, idx;
+
+  for (idx = 0; idx < newLanesCount; idx++) {
+    laneY = shape.y + idx * newLanesHeight; // if bottom lane
+
+    if (idx === newLanesCount - 1) {
+      laneHeight = shape.height - newLanesHeight * idx;
+    } else {
+      laneHeight = newLanesHeight;
+    }
+
+    laneBounds = {
+      x: shape.x + _LaneUtil.LANE_INDENTATION,
+      y: laneY,
+      width: shape.width - _LaneUtil.LANE_INDENTATION,
+      height: laneHeight
+    };
+
+    if (idx < existingLanesCount) {
+      // resize existing lane
+      modeling.resizeShape(childLanes[idx], laneBounds);
+    } else {
+      // create a new lane at position
+      newLaneAttrs = {
+        type: 'bpmn:Lane'
+      };
+      modeling.createShape(newLaneAttrs, laneBounds, shape);
+    }
+  }
+};
+
+},{"../util/LaneUtil":74}],68:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateCanvasRootHandler;
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+function UpdateCanvasRootHandler(canvas, modeling) {
+  this._canvas = canvas;
+  this._modeling = modeling;
+}
+
+UpdateCanvasRootHandler.$inject = ['canvas', 'modeling'];
+
+UpdateCanvasRootHandler.prototype.execute = function (context) {
+  var canvas = this._canvas;
+  var newRoot = context.newRoot,
+      newRootBusinessObject = newRoot.businessObject,
+      oldRoot = canvas.getRootElement(),
+      oldRootBusinessObject = oldRoot.businessObject,
+      bpmnDefinitions = oldRootBusinessObject.$parent,
+      diPlane = oldRootBusinessObject.di; // (1) replace process old <> new root
+
+  canvas.setRootElement(newRoot, true); // (2) update root elements
+
+  (0, _Collections.add)(bpmnDefinitions.rootElements, newRootBusinessObject);
+  newRootBusinessObject.$parent = bpmnDefinitions;
+  (0, _Collections.remove)(bpmnDefinitions.rootElements, oldRootBusinessObject);
+  oldRootBusinessObject.$parent = null; // (3) wire di
+
+  oldRootBusinessObject.di = null;
+  diPlane.bpmnElement = newRootBusinessObject;
+  newRootBusinessObject.di = diPlane;
+  context.oldRoot = oldRoot; // TODO(nikku): return changed elements?
+  // return [ newRoot, oldRoot ];
+};
+
+UpdateCanvasRootHandler.prototype.revert = function (context) {
+  var canvas = this._canvas;
+  var newRoot = context.newRoot,
+      newRootBusinessObject = newRoot.businessObject,
+      oldRoot = context.oldRoot,
+      oldRootBusinessObject = oldRoot.businessObject,
+      bpmnDefinitions = newRootBusinessObject.$parent,
+      diPlane = newRootBusinessObject.di; // (1) replace process old <> new root
+
+  canvas.setRootElement(oldRoot, true); // (2) update root elements
+
+  (0, _Collections.remove)(bpmnDefinitions.rootElements, newRootBusinessObject);
+  newRootBusinessObject.$parent = null;
+  (0, _Collections.add)(bpmnDefinitions.rootElements, oldRootBusinessObject);
+  oldRootBusinessObject.$parent = bpmnDefinitions; // (3) wire di
+
+  newRootBusinessObject.di = null;
+  diPlane.bpmnElement = oldRootBusinessObject;
+  oldRootBusinessObject.di = diPlane; // TODO(nikku): return changed elements?
+  // return [ newRoot, oldRoot ];
+};
+
+},{"diagram-js/lib/util/Collections":200}],69:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateFlowNodeRefsHandler;
+
+var _LaneUtil = require("../util/LaneUtil");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _Collections = require("diagram-js/lib/util/Collections");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var FLOW_NODE_REFS_ATTR = 'flowNodeRef',
+    LANES_ATTR = 'lanes';
+/**
+ * A handler that updates lane refs on changed elements
+ */
+
+function UpdateFlowNodeRefsHandler(elementRegistry) {
+  this._elementRegistry = elementRegistry;
+}
+
+UpdateFlowNodeRefsHandler.$inject = ['elementRegistry'];
+
+UpdateFlowNodeRefsHandler.prototype.computeUpdates = function (flowNodeShapes, laneShapes) {
+  var handledNodes = [];
+  var updates = [];
+  var participantCache = {};
+  var allFlowNodeShapes = [];
+
+  function isInLaneShape(element, laneShape) {
+    var laneTrbl = (0, _LayoutUtil.asTRBL)(laneShape);
+    var elementMid = {
+      x: element.x + element.width / 2,
+      y: element.y + element.height / 2
+    };
+    return elementMid.x > laneTrbl.left && elementMid.x < laneTrbl.right && elementMid.y > laneTrbl.top && elementMid.y < laneTrbl.bottom;
+  }
+
+  function addFlowNodeShape(flowNodeShape) {
+    if (handledNodes.indexOf(flowNodeShape) === -1) {
+      allFlowNodeShapes.push(flowNodeShape);
+      handledNodes.push(flowNodeShape);
+    }
+  }
+
+  function getAllLaneShapes(flowNodeShape) {
+    var root = (0, _LaneUtil.getLanesRoot)(flowNodeShape);
+
+    if (!participantCache[root.id]) {
+      participantCache[root.id] = (0, _LaneUtil.collectLanes)(root);
+    }
+
+    return participantCache[root.id];
+  }
+
+  function getNewLanes(flowNodeShape) {
+    if (!flowNodeShape.parent) {
+      return [];
+    }
+
+    var allLaneShapes = getAllLaneShapes(flowNodeShape);
+    return allLaneShapes.filter(function (l) {
+      return isInLaneShape(flowNodeShape, l);
+    }).map(function (shape) {
+      return shape.businessObject;
+    });
+  }
+
+  laneShapes.forEach(function (laneShape) {
+    var root = (0, _LaneUtil.getLanesRoot)(laneShape);
+
+    if (!root || handledNodes.indexOf(root) !== -1) {
+      return;
+    }
+
+    var children = root.children.filter(function (c) {
+      return (0, _ModelUtil.is)(c, 'bpmn:FlowNode');
+    });
+    children.forEach(addFlowNodeShape);
+    handledNodes.push(root);
+  });
+  flowNodeShapes.forEach(addFlowNodeShape);
+  allFlowNodeShapes.forEach(function (flowNodeShape) {
+    var flowNode = flowNodeShape.businessObject;
+    var lanes = flowNode.get(LANES_ATTR),
+        remove = lanes.slice(),
+        add = getNewLanes(flowNodeShape);
+    updates.push({
+      flowNode: flowNode,
+      remove: remove,
+      add: add
+    });
+  });
+  laneShapes.forEach(function (laneShape) {
+    var lane = laneShape.businessObject; // lane got removed XX-)
+
+    if (!laneShape.parent) {
+      lane.get(FLOW_NODE_REFS_ATTR).forEach(function (flowNode) {
+        updates.push({
+          flowNode: flowNode,
+          remove: [lane],
+          add: []
+        });
+      });
+    }
+  });
+  return updates;
+};
+
+UpdateFlowNodeRefsHandler.prototype.execute = function (context) {
+  var updates = context.updates;
+
+  if (!updates) {
+    updates = context.updates = this.computeUpdates(context.flowNodeShapes, context.laneShapes);
+  }
+
+  updates.forEach(function (update) {
+    var flowNode = update.flowNode,
+        lanes = flowNode.get(LANES_ATTR); // unwire old
+
+    update.remove.forEach(function (oldLane) {
+      (0, _Collections.remove)(lanes, oldLane);
+      (0, _Collections.remove)(oldLane.get(FLOW_NODE_REFS_ATTR), flowNode);
+    }); // wire new
+
+    update.add.forEach(function (newLane) {
+      (0, _Collections.add)(lanes, newLane);
+      (0, _Collections.add)(newLane.get(FLOW_NODE_REFS_ATTR), flowNode);
+    });
+  }); // TODO(nikku): return changed elements
+  // return [ ... ];
+};
+
+UpdateFlowNodeRefsHandler.prototype.revert = function (context) {
+  var updates = context.updates;
+  updates.forEach(function (update) {
+    var flowNode = update.flowNode,
+        lanes = flowNode.get(LANES_ATTR); // unwire new
+
+    update.add.forEach(function (newLane) {
+      (0, _Collections.remove)(lanes, newLane);
+      (0, _Collections.remove)(newLane.get(FLOW_NODE_REFS_ATTR), flowNode);
+    }); // wire old
+
+    update.remove.forEach(function (oldLane) {
+      (0, _Collections.add)(lanes, oldLane);
+      (0, _Collections.add)(oldLane.get(FLOW_NODE_REFS_ATTR), flowNode);
+    });
+  }); // TODO(nikku): return changed elements
+  // return [ ... ];
+};
+
+},{"../../../util/ModelUtil":91,"../util/LaneUtil":74,"diagram-js/lib/layout/LayoutUtil":188,"diagram-js/lib/util/Collections":200}],70:[function(require,module,exports){
+'use strict';
+
+var reduce = require('min-dash').reduce,
+    keys = require('min-dash').keys,
+    forEach = require('min-dash').forEach,
+    is = require('../../../util/ModelUtil').is,
+    getBusinessObject = require('../../../util/ModelUtil').getBusinessObject;
+
+
+function UpdateModdlePropertiesHandler(elementRegistry) {
+  this._elementRegistry = elementRegistry;
+}
+
+UpdateModdlePropertiesHandler.$inject = ['elementRegistry'];
+
+module.exports = UpdateModdlePropertiesHandler;
+
+
+UpdateModdlePropertiesHandler.prototype.execute = function(context) {
+
+  var element = context.element,
+      moddleElement = context.moddleElement,
+      properties = context.properties;
+
+  if (!moddleElement) {
+    throw new Error('<moddleElement> required');
+  }
+
+  var changed = context.changed || this.getVisualReferences(moddleElement).concat(element);
+  var oldProperties = context.oldProperties || getModdleProperties(moddleElement, keys(properties));
+
+  setModdleProperties(moddleElement, properties);
+
+  context.oldProperties = oldProperties;
+  context.changed = changed;
+
+  return changed;
+};
+
+UpdateModdlePropertiesHandler.prototype.revert = function(context) {
+  var oldProperties = context.oldProperties,
+      moddleElement = context.moddleElement,
+      changed = context.changed;
+
+  setModdleProperties(moddleElement, oldProperties);
+
+  return changed;
+};
+
+/**
+ * Return visual references of given moddle element within the diagram.
+ *
+ * @param {ModdleElement} moddleElement
+ *
+ * @return {Array<djs.model.Element>}
+ */
+UpdateModdlePropertiesHandler.prototype.getVisualReferences = function(moddleElement) {
+
+  var elementRegistry = this._elementRegistry;
+
+  if (is(moddleElement, 'bpmn:DataObject')) {
+    return getAllDataObjectReferences(moddleElement, elementRegistry);
+  }
+
+  return [];
+};
+
+
+// helpers /////////////////
+
+function getModdleProperties(moddleElement, propertyNames) {
+  return reduce(propertyNames, function(result, key) {
+    result[key] = moddleElement.get(key);
+    return result;
+  }, {});
+}
+
+function setModdleProperties(moddleElement, properties) {
+  forEach(properties, function(value, key) {
+    moddleElement.set(key, value);
+  });
+}
+
+function getAllDataObjectReferences(dataObject, elementRegistry) {
+  return elementRegistry.filter(function(element) {
+    return (
+      is(element, 'bpmn:DataObjectReference') &&
+          getBusinessObject(element).dataObjectRef === dataObject
+    );
+  });
+}
+},{"../../../util/ModelUtil":91,"min-dash":219}],71:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdatePropertiesHandler;
+
+var _minDash = require("min-dash");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var DEFAULT_FLOW = 'default',
+    ID = 'id',
+    DI = 'di';
+var NULL_DIMENSIONS = {
+  width: 0,
+  height: 0
+};
+/**
+ * A handler that implements a BPMN 2.0 property update.
+ *
+ * This should be used to set simple properties on elements with
+ * an underlying BPMN business object.
+ *
+ * Use respective diagram-js provided handlers if you would
+ * like to perform automated modeling.
+ */
+
+function UpdatePropertiesHandler(elementRegistry, moddle, translate, modeling, textRenderer) {
+  this._elementRegistry = elementRegistry;
+  this._moddle = moddle;
+  this._translate = translate;
+  this._modeling = modeling;
+  this._textRenderer = textRenderer;
+}
+
+UpdatePropertiesHandler.$inject = ['elementRegistry', 'moddle', 'translate', 'modeling', 'textRenderer']; // api //////////////////////
+
+/**
+ * Updates a BPMN element with a list of new properties
+ *
+ * @param {Object} context
+ * @param {djs.model.Base} context.element the element to update
+ * @param {Object} context.properties a list of properties to set on the element's
+ *                                    businessObject (the BPMN model element)
+ *
+ * @return {Array<djs.model.Base>} the updated element
+ */
+
+UpdatePropertiesHandler.prototype.execute = function (context) {
+  var element = context.element,
+      changed = [element],
+      translate = this._translate;
+
+  if (!element) {
+    throw new Error(translate('element required'));
+  }
+
+  var elementRegistry = this._elementRegistry,
+      ids = this._moddle.ids;
+  var businessObject = element.businessObject,
+      properties = unwrapBusinessObjects(context.properties),
+      oldProperties = context.oldProperties || getProperties(businessObject, properties);
+
+  if (isIdChange(properties, businessObject)) {
+    ids.unclaim(businessObject[ID]);
+    elementRegistry.updateId(element, properties[ID]);
+    ids.claim(properties[ID], businessObject);
+  } // correctly indicate visual changes on default flow updates
+
+
+  if (DEFAULT_FLOW in properties) {
+    if (properties[DEFAULT_FLOW]) {
+      changed.push(elementRegistry.get(properties[DEFAULT_FLOW].id));
+    }
+
+    if (businessObject[DEFAULT_FLOW]) {
+      changed.push(elementRegistry.get(businessObject[DEFAULT_FLOW].id));
+    }
+  } // update properties
+
+
+  setProperties(businessObject, properties); // store old values
+
+  context.oldProperties = oldProperties;
+  context.changed = changed; // indicate changed on objects affected by the update
+
+  return changed;
+};
+
+UpdatePropertiesHandler.prototype.postExecute = function (context) {
+  var element = context.element,
+      label = element.label;
+  var text = label && (0, _ModelUtil.getBusinessObject)(label).name;
+
+  if (!text) {
+    return;
+  } // get layouted text bounds and resize external
+  // external label accordingly
+
+
+  var newLabelBounds = this._textRenderer.getExternalLabelBounds(label, text);
+
+  this._modeling.resizeShape(label, newLabelBounds, NULL_DIMENSIONS);
+};
+/**
+ * Reverts the update on a BPMN elements properties.
+ *
+ * @param  {Object} context
+ *
+ * @return {djs.model.Base} the updated element
+ */
+
+
+UpdatePropertiesHandler.prototype.revert = function (context) {
+  var element = context.element,
+      properties = context.properties,
+      oldProperties = context.oldProperties,
+      businessObject = element.businessObject,
+      elementRegistry = this._elementRegistry,
+      ids = this._moddle.ids; // update properties
+
+  setProperties(businessObject, oldProperties);
+
+  if (isIdChange(properties, businessObject)) {
+    ids.unclaim(properties[ID]);
+    elementRegistry.updateId(element, oldProperties[ID]);
+    ids.claim(oldProperties[ID], businessObject);
+  }
+
+  return context.changed;
+};
+
+function isIdChange(properties, businessObject) {
+  return ID in properties && properties[ID] !== businessObject[ID];
+}
+
+function getProperties(businessObject, properties) {
+  var propertyNames = (0, _minDash.keys)(properties);
+  return (0, _minDash.reduce)(propertyNames, function (result, key) {
+    // handle DI separately
+    if (key !== DI) {
+      result[key] = businessObject.get(key);
+    } else {
+      result[key] = getDiProperties(businessObject.di, (0, _minDash.keys)(properties.di));
+    }
+
+    return result;
+  }, {});
+}
+
+function getDiProperties(di, propertyNames) {
+  return (0, _minDash.reduce)(propertyNames, function (result, key) {
+    result[key] = di.get(key);
+    return result;
+  }, {});
+}
+
+function setProperties(businessObject, properties) {
+  (0, _minDash.forEach)(properties, function (value, key) {
+    if (key !== DI) {
+      businessObject.set(key, value);
+    } else {
+      // only update, if businessObject.di exists
+      if (businessObject.di) {
+        setDiProperties(businessObject.di, value);
+      }
+    }
+  });
+}
+
+function setDiProperties(di, properties) {
+  (0, _minDash.forEach)(properties, function (value, key) {
+    di.set(key, value);
+  });
+}
+
+var referencePropertyNames = ['default'];
+/**
+ * Make sure we unwrap the actual business object
+ * behind diagram element that may have been
+ * passed as arguments.
+ *
+ * @param  {Object} properties
+ *
+ * @return {Object} unwrappedProps
+ */
+
+function unwrapBusinessObjects(properties) {
+  var unwrappedProps = (0, _minDash.assign)({}, properties);
+  referencePropertyNames.forEach(function (name) {
+    if (name in properties) {
+      unwrappedProps[name] = (0, _ModelUtil.getBusinessObject)(unwrappedProps[name]);
+    }
+  });
+  return unwrappedProps;
+}
+
+},{"../../../util/ModelUtil":91,"min-dash":219}],72:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateSemanticParentHandler;
+
+function UpdateSemanticParentHandler(bpmnUpdater) {
+  this._bpmnUpdater = bpmnUpdater;
+}
+
+UpdateSemanticParentHandler.$inject = ['bpmnUpdater'];
+
+UpdateSemanticParentHandler.prototype.execute = function (context) {
+  var dataStoreBo = context.dataStoreBo,
+      newSemanticParent = context.newSemanticParent,
+      newDiParent = context.newDiParent;
+  context.oldSemanticParent = dataStoreBo.$parent;
+  context.oldDiParent = dataStoreBo.di.$parent; // update semantic parent
+
+  this._bpmnUpdater.updateSemanticParent(dataStoreBo, newSemanticParent); // update DI parent
+
+
+  this._bpmnUpdater.updateDiParent(dataStoreBo.di, newDiParent);
+};
+
+UpdateSemanticParentHandler.prototype.revert = function (context) {
+  var dataStoreBo = context.dataStoreBo,
+      oldSemanticParent = context.oldSemanticParent,
+      oldDiParent = context.oldDiParent; // update semantic parent
+
+  this._bpmnUpdater.updateSemanticParent(dataStoreBo, oldSemanticParent); // update DI parent
+
+
+  this._bpmnUpdater.updateDiParent(dataStoreBo.di, oldDiParent);
+};
+
+},{}],73:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _behavior = _interopRequireDefault(require("./behavior"));
+
+var _rules = _interopRequireDefault(require("../rules"));
+
+var _diOrdering = _interopRequireDefault(require("../di-ordering"));
+
+var _ordering = _interopRequireDefault(require("../ordering"));
+
+var _replace = _interopRequireDefault(require("../replace"));
+
+var _command = _interopRequireDefault(require("diagram-js/lib/command"));
+
+var _tooltips = _interopRequireDefault(require("diagram-js/lib/features/tooltips"));
+
+var _labelSupport = _interopRequireDefault(require("diagram-js/lib/features/label-support"));
+
+var _attachSupport = _interopRequireDefault(require("diagram-js/lib/features/attach-support"));
+
+var _selection = _interopRequireDefault(require("diagram-js/lib/features/selection"));
+
+var _changeSupport = _interopRequireDefault(require("diagram-js/lib/features/change-support"));
+
+var _spaceTool = _interopRequireDefault(require("diagram-js/lib/features/space-tool"));
+
+var _BpmnFactory = _interopRequireDefault(require("./BpmnFactory"));
+
+var _BpmnUpdater = _interopRequireDefault(require("./BpmnUpdater"));
+
+var _ElementFactory = _interopRequireDefault(require("./ElementFactory"));
+
+var _Modeling = _interopRequireDefault(require("./Modeling"));
+
+var _BpmnLayouter = _interopRequireDefault(require("./BpmnLayouter"));
+
+var _CroppingConnectionDocking = _interopRequireDefault(require("diagram-js/lib/layout/CroppingConnectionDocking"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['modeling', 'bpmnUpdater'],
+  __depends__: [_behavior.default, _rules.default, _diOrdering.default, _ordering.default, _replace.default, _command.default, _tooltips.default, _labelSupport.default, _attachSupport.default, _selection.default, _changeSupport.default, _spaceTool.default],
+  bpmnFactory: ['type', _BpmnFactory.default],
+  bpmnUpdater: ['type', _BpmnUpdater.default],
+  elementFactory: ['type', _ElementFactory.default],
+  modeling: ['type', _Modeling.default],
+  layouter: ['type', _BpmnLayouter.default],
+  connectionDocking: ['type', _CroppingConnectionDocking.default]
+};
+exports.default = _default;
+
+},{"../di-ordering":15,"../ordering":77,"../replace":79,"../rules":81,"./BpmnFactory":18,"./BpmnLayouter":19,"./BpmnUpdater":20,"./ElementFactory":21,"./Modeling":22,"./behavior":56,"diagram-js/lib/command":98,"diagram-js/lib/features/attach-support":110,"diagram-js/lib/features/change-support":112,"diagram-js/lib/features/label-support":131,"diagram-js/lib/features/selection":175,"diagram-js/lib/features/space-tool":179,"diagram-js/lib/features/tooltips":183,"diagram-js/lib/layout/CroppingConnectionDocking":187}],74:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.collectLanes = collectLanes;
+exports.getChildLanes = getChildLanes;
+exports.getLanesRoot = getLanesRoot;
+exports.computeLanesResize = computeLanesResize;
+exports.LANE_INDENTATION = void 0;
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+var _ModelingUtil = require("./ModelingUtil");
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+var _ResizeUtil = require("diagram-js/lib/features/resize/ResizeUtil");
+
+var abs = Math.abs;
+
+function getTRBLResize(oldBounds, newBounds) {
+  return (0, _ResizeUtil.substractTRBL)((0, _LayoutUtil.asTRBL)(newBounds), (0, _LayoutUtil.asTRBL)(oldBounds));
+}
+
+var LANE_PARENTS = ['bpmn:Participant', 'bpmn:Process', 'bpmn:SubProcess'];
+var LANE_INDENTATION = 30;
+/**
+ * Collect all lane shapes in the given paren
+ *
+ * @param  {djs.model.Shape} shape
+ * @param  {Array<djs.model.Base>} [collectedShapes]
+ *
+ * @return {Array<djs.model.Base>}
+ */
+
+exports.LANE_INDENTATION = LANE_INDENTATION;
+
+function collectLanes(shape, collectedShapes) {
+  collectedShapes = collectedShapes || [];
+  shape.children.filter(function (s) {
+    if ((0, _ModelUtil.is)(s, 'bpmn:Lane')) {
+      collectLanes(s, collectedShapes);
+      collectedShapes.push(s);
+    }
+  });
+  return collectedShapes;
+}
+/**
+ * Return the lane children of the given element.
+ *
+ * @param {djs.model.Shape} shape
+ *
+ * @return {Array<djs.model.Shape>}
+ */
+
+
+function getChildLanes(shape) {
+  return shape.children.filter(function (c) {
+    return (0, _ModelUtil.is)(c, 'bpmn:Lane');
+  });
+}
+/**
+ * Return the root element containing the given lane shape
+ *
+ * @param {djs.model.Shape} shape
+ *
+ * @return {djs.model.Shape}
+ */
+
+
+function getLanesRoot(shape) {
+  return (0, _ModelingUtil.getParent)(shape, LANE_PARENTS) || shape;
+}
+/**
+ * Compute the required resize operations for lanes
+ * adjacent to the given shape, assuming it will be
+ * resized to the given new bounds.
+ *
+ * @param {djs.model.Shape} shape
+ * @param {Bounds} newBounds
+ *
+ * @return {Array<Object>}
+ */
+
+
+function computeLanesResize(shape, newBounds) {
+  var rootElement = getLanesRoot(shape);
+  var initialShapes = (0, _ModelUtil.is)(rootElement, 'bpmn:Process') ? [] : [rootElement];
+  var allLanes = collectLanes(rootElement, initialShapes),
+      shapeTrbl = (0, _LayoutUtil.asTRBL)(shape),
+      shapeNewTrbl = (0, _LayoutUtil.asTRBL)(newBounds),
+      trblResize = getTRBLResize(shape, newBounds),
+      resizeNeeded = [];
+  allLanes.forEach(function (other) {
+    if (other === shape) {
+      return;
+    }
+
+    var topResize = 0,
+        rightResize = trblResize.right,
+        bottomResize = 0,
+        leftResize = trblResize.left;
+    var otherTrbl = (0, _LayoutUtil.asTRBL)(other);
+
+    if (trblResize.top) {
+      if (abs(otherTrbl.bottom - shapeTrbl.top) < 10) {
+        bottomResize = shapeNewTrbl.top - otherTrbl.bottom;
+      }
+
+      if (abs(otherTrbl.top - shapeTrbl.top) < 5) {
+        topResize = shapeNewTrbl.top - otherTrbl.top;
+      }
+    }
+
+    if (trblResize.bottom) {
+      if (abs(otherTrbl.top - shapeTrbl.bottom) < 10) {
+        topResize = shapeNewTrbl.bottom - otherTrbl.top;
+      }
+
+      if (abs(otherTrbl.bottom - shapeTrbl.bottom) < 5) {
+        bottomResize = shapeNewTrbl.bottom - otherTrbl.bottom;
+      }
+    }
+
+    if (topResize || rightResize || bottomResize || leftResize) {
+      resizeNeeded.push({
+        shape: other,
+        newBounds: (0, _ResizeUtil.resizeTRBL)(other, {
+          top: topResize,
+          right: rightResize,
+          bottom: bottomResize,
+          left: leftResize
+        })
+      });
+    }
+  });
+  return resizeNeeded;
+}
+
+},{"../../../util/ModelUtil":91,"./ModelingUtil":75,"diagram-js/lib/features/resize/ResizeUtil":168,"diagram-js/lib/layout/LayoutUtil":188}],75:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isAny = isAny;
+exports.getParent = getParent;
+
+var _minDash = require("min-dash");
+
+var _ModelUtil = require("../../../util/ModelUtil");
+
+/**
+ * Return true if element has any of the given types.
+ *
+ * @param {djs.model.Base} element
+ * @param {Array<string>} types
+ *
+ * @return {boolean}
+ */
+function isAny(element, types) {
+  return (0, _minDash.some)(types, function (t) {
+    return (0, _ModelUtil.is)(element, t);
+  });
+}
+/**
+ * Return the parent of the element with any of the given types.
+ *
+ * @param {djs.model.Base} element
+ * @param {string|Array<string>} anyType
+ *
+ * @return {djs.model.Base}
+ */
+
+
+function getParent(element, anyType) {
+  if (typeof anyType === 'string') {
+    anyType = [anyType];
+  }
+
+  while (element = element.parent) {
+    if (isAny(element, anyType)) {
+      return element;
+    }
+  }
+
+  return null;
+}
+
+},{"../../../util/ModelUtil":91,"min-dash":219}],76:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnOrderingProvider;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _OrderingProvider = _interopRequireDefault(require("diagram-js/lib/features/ordering/OrderingProvider"));
+
+var _ModelingUtil = require("../modeling/util/ModelingUtil");
+
+var _minDash = require("min-dash");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * a simple ordering provider that makes sure:
+ *
+ * (0) labels and groups are rendered always on top
+ * (1) elements are ordered by a {level} property
+ */
+function BpmnOrderingProvider(eventBus, canvas, translate) {
+  _OrderingProvider.default.call(this, eventBus);
+
+  var orders = [{
+    type: 'bpmn:SubProcess',
+    order: {
+      level: 6
+    }
+  }, {
+    type: 'bpmn:SequenceFlow',
+    order: {
+      level: 3,
+      containers: ['bpmn:Participant', 'bpmn:FlowElementsContainer']
+    }
+  }, // handle DataAssociation(s) like message flows and render them always on top
+  {
+    type: 'bpmn:DataAssociation',
+    order: {
+      level: 9,
+      containers: ['bpmn:Collaboration', 'bpmn:Process']
+    }
+  }, {
+    type: 'bpmn:MessageFlow',
+    order: {
+      level: 9,
+      containers: ['bpmn:Collaboration']
+    }
+  }, {
+    type: 'bpmn:Association',
+    order: {
+      level: 6,
+      containers: ['bpmn:Participant', 'bpmn:FlowElementsContainer', 'bpmn:Collaboration']
+    }
+  }, {
+    type: 'bpmn:BoundaryEvent',
+    order: {
+      level: 8
+    }
+  }, {
+    type: 'bpmn:Group',
+    order: {
+      level: 10,
+      containers: ['bpmn:Collaboration', 'bpmn:Process']
+    }
+  }, {
+    type: 'bpmn:FlowElement',
+    order: {
+      level: 5
+    }
+  }, {
+    type: 'bpmn:Participant',
+    order: {
+      level: -2
+    }
+  }, {
+    type: 'bpmn:Lane',
+    order: {
+      level: -1
+    }
+  }];
+
+  function computeOrder(element) {
+    if (element.labelTarget) {
+      return {
+        level: 10
+      };
+    }
+
+    var entry = (0, _minDash.find)(orders, function (o) {
+      return (0, _ModelingUtil.isAny)(element, [o.type]);
+    });
+    return entry && entry.order || {
+      level: 1
+    };
+  }
+
+  function getOrder(element) {
+    var order = element.order;
+
+    if (!order) {
+      element.order = order = computeOrder(element);
+    }
+
+    return order;
+  }
+
+  function findActualParent(element, newParent, containers) {
+    var actualParent = newParent;
+
+    while (actualParent) {
+      if ((0, _ModelingUtil.isAny)(actualParent, containers)) {
+        break;
+      }
+
+      actualParent = actualParent.parent;
+    }
+
+    if (!actualParent) {
+      throw new Error(translate('no parent for {element} in {parent}', {
+        element: element.id,
+        parent: newParent.id
+      }));
+    }
+
+    return actualParent;
+  }
+
+  this.getOrdering = function (element, newParent) {
+    // render labels always on top
+    if (element.labelTarget) {
+      return {
+        parent: canvas.getRootElement(),
+        index: -1
+      };
+    }
+
+    var elementOrder = getOrder(element);
+
+    if (elementOrder.containers) {
+      newParent = findActualParent(element, newParent, elementOrder.containers);
+    }
+
+    var currentIndex = newParent.children.indexOf(element);
+    var insertIndex = (0, _minDash.findIndex)(newParent.children, function (child) {
+      // do not compare with labels, they are created
+      // in the wrong order (right after elements) during import and
+      // mess up the positioning.
+      if (!element.labelTarget && child.labelTarget) {
+        return false;
+      }
+
+      return elementOrder.level < getOrder(child).level;
+    }); // if the element is already in the child list at
+    // a smaller index, we need to adjust the insert index.
+    // this takes into account that the element is being removed
+    // before being re-inserted
+
+    if (insertIndex !== -1) {
+      if (currentIndex !== -1 && currentIndex < insertIndex) {
+        insertIndex -= 1;
+      }
+    }
+
+    return {
+      index: insertIndex,
+      parent: newParent
+    };
+  };
+}
+
+BpmnOrderingProvider.$inject = ['eventBus', 'canvas', 'translate'];
+(0, _inherits.default)(BpmnOrderingProvider, _OrderingProvider.default);
+
+},{"../modeling/util/ModelingUtil":75,"diagram-js/lib/features/ordering/OrderingProvider":159,"inherits":218,"min-dash":219}],77:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _translate = _interopRequireDefault(require("diagram-js/lib/i18n/translate"));
+
+var _BpmnOrderingProvider = _interopRequireDefault(require("./BpmnOrderingProvider"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_translate.default],
+  __init__: ['bpmnOrderingProvider'],
+  bpmnOrderingProvider: ['type', _BpmnOrderingProvider.default]
+};
+exports.default = _default;
+
+},{"./BpmnOrderingProvider":76,"diagram-js/lib/i18n/translate":184}],78:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnReplace;
+
+var _minDash = require("min-dash");
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _ModelingUtil = require("../modeling/util/ModelingUtil");
+
+var _DiUtil = require("../../util/DiUtil");
+
+var _ModdleCopy = require("../copy-paste/ModdleCopy");
+
+function copyProperties(source, target, properties) {
+  if (!(0, _minDash.isArray)(properties)) {
+    properties = [properties];
+  }
+
+  (0, _minDash.forEach)(properties, function (property) {
+    if (!(0, _minDash.isUndefined)(source[property])) {
+      target[property] = source[property];
+    }
+  });
+}
+
+var CUSTOM_PROPERTIES = ['cancelActivity', 'instantiate', 'eventGatewayType', 'triggeredByEvent', 'isInterrupting'];
+
+function toggeling(element, target) {
+  var oldCollapsed = element && (0, _minDash.has)(element, 'collapsed') ? element.collapsed : !(0, _DiUtil.isExpanded)(element);
+  var targetCollapsed;
+
+  if (target && ((0, _minDash.has)(target, 'collapsed') || (0, _minDash.has)(target, 'isExpanded'))) {
+    // property is explicitly set so use it
+    targetCollapsed = (0, _minDash.has)(target, 'collapsed') ? target.collapsed : !target.isExpanded;
+  } else {
+    // keep old state
+    targetCollapsed = oldCollapsed;
+  }
+
+  if (oldCollapsed !== targetCollapsed) {
+    element.collapsed = oldCollapsed;
+    return true;
+  }
+
+  return false;
+}
+/**
+ * This module takes care of replacing BPMN elements
+ */
+
+
+function BpmnReplace(bpmnFactory, elementFactory, moddleCopy, modeling, replace, rules, selection) {
+  /**
+   * Prepares a new business object for the replacement element
+   * and triggers the replace operation.
+   *
+   * @param  {djs.model.Base} element
+   * @param  {Object} target
+   * @param  {Object} [hints]
+   *
+   * @return {djs.model.Base} the newly created element
+   */
+  function replaceElement(element, target, hints) {
+    hints = hints || {};
+    var type = target.type,
+        oldBusinessObject = element.businessObject;
+
+    if (isSubProcess(oldBusinessObject)) {
+      if (type === 'bpmn:SubProcess') {
+        if (toggeling(element, target)) {
+          // expanding or collapsing process
+          modeling.toggleCollapse(element);
+          return element;
+        }
+      }
+    }
+
+    var newBusinessObject = bpmnFactory.create(type);
+    var newElement = {
+      type: type,
+      businessObject: newBusinessObject
+    };
+    var elementProps = (0, _ModdleCopy.getPropertyNames)(oldBusinessObject.$descriptor),
+        newElementProps = (0, _ModdleCopy.getPropertyNames)(newBusinessObject.$descriptor, true),
+        copyProps = intersection(elementProps, newElementProps); // initialize special properties defined in target definition
+
+    (0, _minDash.assign)(newBusinessObject, (0, _minDash.pick)(target, CUSTOM_PROPERTIES));
+    var properties = (0, _minDash.filter)(copyProps, function (propertyName) {
+      // copying event definitions, unless we replace
+      if (propertyName === 'eventDefinitions') {
+        return hasEventDefinition(element, target.eventDefinitionType);
+      } // retain loop characteristics if the target element
+      // is not an event sub process
+
+
+      if (propertyName === 'loopCharacteristics') {
+        return !(0, _DiUtil.isEventSubProcess)(newBusinessObject);
+      } // so the applied properties from 'target' don't get lost
+
+
+      if ((0, _minDash.has)(newBusinessObject, propertyName)) {
+        return false;
+      }
+
+      if (propertyName === 'processRef' && target.isExpanded === false) {
+        return false;
+      }
+
+      if (propertyName === 'triggeredByEvent') {
+        return false;
+      }
+
+      return true;
+    });
+    newBusinessObject = moddleCopy.copyElement(oldBusinessObject, newBusinessObject, properties); // initialize custom BPMN extensions
+
+    if (target.eventDefinitionType) {
+      // only initialize with new eventDefinition
+      // if we did not set an event definition yet,
+      // i.e. because we copied it
+      if (!hasEventDefinition(newBusinessObject, target.eventDefinitionType)) {
+        newElement.eventDefinitionType = target.eventDefinitionType;
+        newElement.eventDefinitionAttrs = target.eventDefinitionAttrs;
+      }
+    }
+
+    if ((0, _ModelUtil.is)(oldBusinessObject, 'bpmn:Activity')) {
+      if (isSubProcess(oldBusinessObject)) {
+        // no toggeling, so keep old state
+        newElement.isExpanded = (0, _DiUtil.isExpanded)(oldBusinessObject);
+      } // else if property is explicitly set, use it
+      else if (target && (0, _minDash.has)(target, 'isExpanded')) {
+          newElement.isExpanded = target.isExpanded;
+        } // TODO: need also to respect min/max Size
+      // copy size, from an expanded subprocess to an expanded alternative subprocess
+      // except bpmn:Task, because Task is always expanded
+
+
+      if ((0, _DiUtil.isExpanded)(oldBusinessObject) && !(0, _ModelUtil.is)(oldBusinessObject, 'bpmn:Task') && newElement.isExpanded) {
+        newElement.width = element.width;
+        newElement.height = element.height;
+      }
+    } // remove children if not expanding sub process
+
+
+    if (isSubProcess(oldBusinessObject) && !isSubProcess(newBusinessObject)) {
+      hints.moveChildren = false;
+    } // transform collapsed/expanded pools
+
+
+    if ((0, _ModelUtil.is)(oldBusinessObject, 'bpmn:Participant')) {
+      // create expanded pool
+      if (target.isExpanded === true) {
+        newBusinessObject.processRef = bpmnFactory.create('bpmn:Process');
+      } else {
+        // remove children when transforming to collapsed pool
+        hints.moveChildren = false;
+      } // apply same width and default height
+
+
+      newElement.width = element.width;
+      newElement.height = elementFactory._getDefaultSize(newBusinessObject).height;
+    }
+
+    if (!rules.allowed('shape.resize', {
+      shape: newBusinessObject
+    })) {
+      newElement.height = elementFactory._getDefaultSize(newBusinessObject).height;
+      newElement.width = elementFactory._getDefaultSize(newBusinessObject).width;
+    }
+
+    newBusinessObject.name = oldBusinessObject.name; // retain default flow's reference between inclusive <-> exclusive gateways and activities
+
+    if ((0, _ModelingUtil.isAny)(oldBusinessObject, ['bpmn:ExclusiveGateway', 'bpmn:InclusiveGateway', 'bpmn:Activity']) && (0, _ModelingUtil.isAny)(newBusinessObject, ['bpmn:ExclusiveGateway', 'bpmn:InclusiveGateway', 'bpmn:Activity'])) {
+      newBusinessObject.default = oldBusinessObject.default;
+    }
+
+    if (target.host && !(0, _ModelUtil.is)(oldBusinessObject, 'bpmn:BoundaryEvent') && (0, _ModelUtil.is)(newBusinessObject, 'bpmn:BoundaryEvent')) {
+      newElement.host = target.host;
+    } // The DataStoreReference element is 14px wider than the DataObjectReference element
+    // This ensures that they stay centered on the x axis when replaced
+
+
+    if (newElement.type === 'bpmn:DataStoreReference' || newElement.type === 'bpmn:DataObjectReference') {
+      newElement.x = element.x + (element.width - newElement.width) / 2;
+    }
+
+    newElement.di = {}; // fill and stroke will be set to DI
+
+    copyProperties(oldBusinessObject.di, newElement.di, ['fill', 'stroke']);
+    newElement = replace.replaceElement(element, newElement, hints);
+
+    if (hints.select !== false) {
+      selection.select(newElement);
+    }
+
+    return newElement;
+  }
+
+  this.replaceElement = replaceElement;
+}
+
+BpmnReplace.$inject = ['bpmnFactory', 'elementFactory', 'moddleCopy', 'modeling', 'replace', 'rules', 'selection'];
+
+function isSubProcess(bo) {
+  return (0, _ModelUtil.is)(bo, 'bpmn:SubProcess');
+}
+
+function hasEventDefinition(element, type) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  return type && bo.get('eventDefinitions').some(function (definition) {
+    return (0, _ModelUtil.is)(definition, type);
+  });
+}
+/**
+ * Compute intersection between two arrays.
+ */
+
+
+function intersection(a1, a2) {
+  return a1.filter(function (el) {
+    return a2.indexOf(el) !== -1;
+  });
+}
+
+},{"../../util/DiUtil":89,"../../util/ModelUtil":91,"../copy-paste/ModdleCopy":12,"../modeling/util/ModelingUtil":75,"min-dash":219}],79:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _copyPaste = _interopRequireDefault(require("../copy-paste"));
+
+var _replace = _interopRequireDefault(require("diagram-js/lib/features/replace"));
+
+var _selection = _interopRequireDefault(require("diagram-js/lib/features/selection"));
+
+var _BpmnReplace = _interopRequireDefault(require("./BpmnReplace"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_copyPaste.default, _replace.default, _selection.default],
+  bpmnReplace: ['type', _BpmnReplace.default]
+};
+exports.default = _default;
+
+},{"../copy-paste":13,"./BpmnReplace":78,"diagram-js/lib/features/replace":167,"diagram-js/lib/features/selection":175}],80:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BpmnRules;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _ModelUtil = require("../../util/ModelUtil");
+
+var _ModelingUtil = require("../modeling/util/ModelingUtil");
+
+var _LabelUtil = require("../../util/LabelUtil");
+
+var _DiUtil = require("../../util/DiUtil");
+
+var _RuleProvider = _interopRequireDefault(require("diagram-js/lib/features/rules/RuleProvider"));
+
+var _BpmnSnappingUtil = require("../snapping/BpmnSnappingUtil");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * BPMN specific modeling rule
+ */
+function BpmnRules(eventBus) {
+  _RuleProvider.default.call(this, eventBus);
+}
+
+(0, _inherits.default)(BpmnRules, _RuleProvider.default);
+BpmnRules.$inject = ['eventBus'];
+
+BpmnRules.prototype.init = function () {
+  this.addRule('connection.start', function (context) {
+    var source = context.source;
+    return canStartConnection(source);
+  });
+  this.addRule('connection.create', function (context) {
+    var source = context.source,
+        target = context.target,
+        hints = context.hints || {},
+        targetParent = hints.targetParent,
+        targetAttach = hints.targetAttach; // don't allow incoming connections on
+    // newly created boundary events
+    // to boundary events
+
+    if (targetAttach) {
+      return false;
+    } // temporarily set target parent for scoping
+    // checks to work
+
+
+    if (targetParent) {
+      target.parent = targetParent;
+    }
+
+    try {
+      return canConnect(source, target);
+    } finally {
+      // unset temporary target parent
+      if (targetParent) {
+        target.parent = null;
+      }
+    }
+  });
+  this.addRule('connection.reconnect', function (context) {
+    var connection = context.connection,
+        source = context.source,
+        target = context.target;
+    return canConnect(source, target, connection);
+  });
+  this.addRule('connection.updateWaypoints', function (context) {
+    return {
+      type: context.connection.type
+    };
+  });
+  this.addRule('shape.resize', function (context) {
+    var shape = context.shape,
+        newBounds = context.newBounds;
+    return canResize(shape, newBounds);
+  });
+  this.addRule('elements.create', function (context) {
+    var elements = context.elements,
+        position = context.position,
+        target = context.target;
+    return (0, _minDash.every)(elements, function (element) {
+      if (isConnection(element)) {
+        return canConnect(element.source, element.target, element);
+      }
+
+      if (element.host) {
+        return canAttach(element, element.host, null, position);
+      }
+
+      return canCreate(element, target, null, position);
+    });
+  });
+  this.addRule('elements.move', function (context) {
+    var target = context.target,
+        shapes = context.shapes,
+        position = context.position;
+    return canAttach(shapes, target, null, position) || canReplace(shapes, target, position) || canMove(shapes, target, position) || canInsert(shapes, target, position);
+  });
+  this.addRule('shape.create', function (context) {
+    return canCreate(context.shape, context.target, context.source, context.position);
+  });
+  this.addRule('shape.attach', function (context) {
+    return canAttach(context.shape, context.target, null, context.position);
+  });
+  this.addRule('element.copy', function (context) {
+    var element = context.element,
+        elements = context.elements;
+    return canCopy(elements, element);
+  });
+};
+
+BpmnRules.prototype.canConnectMessageFlow = canConnectMessageFlow;
+BpmnRules.prototype.canConnectSequenceFlow = canConnectSequenceFlow;
+BpmnRules.prototype.canConnectDataAssociation = canConnectDataAssociation;
+BpmnRules.prototype.canConnectAssociation = canConnectAssociation;
+BpmnRules.prototype.canMove = canMove;
+BpmnRules.prototype.canAttach = canAttach;
+BpmnRules.prototype.canReplace = canReplace;
+BpmnRules.prototype.canDrop = canDrop;
+BpmnRules.prototype.canInsert = canInsert;
+BpmnRules.prototype.canCreate = canCreate;
+BpmnRules.prototype.canConnect = canConnect;
+BpmnRules.prototype.canResize = canResize;
+BpmnRules.prototype.canCopy = canCopy;
+/**
+ * Utility functions for rule checking
+ */
+
+/**
+ * Checks if given element can be used for starting connection.
+ *
+ * @param  {Element} source
+ * @return {boolean}
+ */
+
+function canStartConnection(element) {
+  if (nonExistingOrLabel(element)) {
+    return null;
+  }
+
+  return (0, _ModelingUtil.isAny)(element, ['bpmn:FlowNode', 'bpmn:InteractionNode', 'bpmn:DataObjectReference', 'bpmn:DataStoreReference', 'bpmn:Group']);
+}
+
+function nonExistingOrLabel(element) {
+  return !element || (0, _LabelUtil.isLabel)(element);
+}
+
+function isSame(a, b) {
+  return a === b;
+}
+
+function getOrganizationalParent(element) {
+  do {
+    if ((0, _ModelUtil.is)(element, 'bpmn:Process')) {
+      return (0, _ModelUtil.getBusinessObject)(element);
+    }
+
+    if ((0, _ModelUtil.is)(element, 'bpmn:Participant')) {
+      return (0, _ModelUtil.getBusinessObject)(element).processRef || (0, _ModelUtil.getBusinessObject)(element);
+    }
+  } while (element = element.parent);
+}
+
+function isTextAnnotation(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:TextAnnotation');
+}
+
+function isGroup(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:Group') && !element.labelTarget;
+}
+
+function isCompensationBoundary(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && hasEventDefinition(element, 'bpmn:CompensateEventDefinition');
+}
+
+function isForCompensation(e) {
+  return (0, _ModelUtil.getBusinessObject)(e).isForCompensation;
+}
+
+function isSameOrganization(a, b) {
+  var parentA = getOrganizationalParent(a),
+      parentB = getOrganizationalParent(b);
+  return parentA === parentB;
+}
+
+function isMessageFlowSource(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:InteractionNode') && !(0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && (!(0, _ModelUtil.is)(element, 'bpmn:Event') || (0, _ModelUtil.is)(element, 'bpmn:ThrowEvent') && hasEventDefinitionOrNone(element, 'bpmn:MessageEventDefinition'));
+}
+
+function isMessageFlowTarget(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:InteractionNode') && !isForCompensation(element) && (!(0, _ModelUtil.is)(element, 'bpmn:Event') || (0, _ModelUtil.is)(element, 'bpmn:CatchEvent') && hasEventDefinitionOrNone(element, 'bpmn:MessageEventDefinition')) && !((0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && !hasEventDefinition(element, 'bpmn:MessageEventDefinition'));
+}
+
+function getScopeParent(element) {
+  var parent = element;
+
+  while (parent = parent.parent) {
+    if ((0, _ModelUtil.is)(parent, 'bpmn:FlowElementsContainer')) {
+      return (0, _ModelUtil.getBusinessObject)(parent);
+    }
+
+    if ((0, _ModelUtil.is)(parent, 'bpmn:Participant')) {
+      return (0, _ModelUtil.getBusinessObject)(parent).processRef;
+    }
+  }
+
+  return null;
+}
+
+function isSameScope(a, b) {
+  var scopeParentA = getScopeParent(a),
+      scopeParentB = getScopeParent(b);
+  return scopeParentA === scopeParentB;
+}
+
+function hasEventDefinition(element, eventDefinition) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  return !!(0, _minDash.find)(bo.eventDefinitions || [], function (definition) {
+    return (0, _ModelUtil.is)(definition, eventDefinition);
+  });
+}
+
+function hasEventDefinitionOrNone(element, eventDefinition) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  return (bo.eventDefinitions || []).every(function (definition) {
+    return (0, _ModelUtil.is)(definition, eventDefinition);
+  });
+}
+
+function isSequenceFlowSource(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:FlowNode') && !(0, _ModelUtil.is)(element, 'bpmn:EndEvent') && !(0, _DiUtil.isEventSubProcess)(element) && !((0, _ModelUtil.is)(element, 'bpmn:IntermediateThrowEvent') && hasEventDefinition(element, 'bpmn:LinkEventDefinition')) && !isCompensationBoundary(element) && !isForCompensation(element);
+}
+
+function isSequenceFlowTarget(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:FlowNode') && !(0, _ModelUtil.is)(element, 'bpmn:StartEvent') && !(0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && !(0, _DiUtil.isEventSubProcess)(element) && !((0, _ModelUtil.is)(element, 'bpmn:IntermediateCatchEvent') && hasEventDefinition(element, 'bpmn:LinkEventDefinition')) && !isForCompensation(element);
+}
+
+function isEventBasedTarget(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:ReceiveTask') || (0, _ModelUtil.is)(element, 'bpmn:IntermediateCatchEvent') && (hasEventDefinition(element, 'bpmn:MessageEventDefinition') || hasEventDefinition(element, 'bpmn:TimerEventDefinition') || hasEventDefinition(element, 'bpmn:ConditionalEventDefinition') || hasEventDefinition(element, 'bpmn:SignalEventDefinition'));
+}
+
+function isConnection(element) {
+  return element.waypoints;
+}
+
+function getParents(element) {
+  var parents = [];
+
+  while (element) {
+    element = element.parent;
+
+    if (element) {
+      parents.push(element);
+    }
+  }
+
+  return parents;
+}
+
+function isParent(possibleParent, element) {
+  var allParents = getParents(element);
+  return allParents.indexOf(possibleParent) !== -1;
+}
+
+function canConnect(source, target, connection) {
+  if (nonExistingOrLabel(source) || nonExistingOrLabel(target)) {
+    return null;
+  }
+
+  if (!(0, _ModelUtil.is)(connection, 'bpmn:DataAssociation')) {
+    if (canConnectMessageFlow(source, target)) {
+      return {
+        type: 'bpmn:MessageFlow'
+      };
+    }
+
+    if (canConnectSequenceFlow(source, target)) {
+      return {
+        type: 'bpmn:SequenceFlow'
+      };
+    }
+  }
+
+  var connectDataAssociation = canConnectDataAssociation(source, target);
+
+  if (connectDataAssociation) {
+    return connectDataAssociation;
+  }
+
+  if (isCompensationBoundary(source) && isForCompensation(target)) {
+    return {
+      type: 'bpmn:Association',
+      associationDirection: 'One'
+    };
+  }
+
+  if (canConnectAssociation(source, target)) {
+    return {
+      type: 'bpmn:Association'
+    };
+  }
+
+  return false;
+}
+/**
+ * Can an element be dropped into the target element
+ *
+ * @return {boolean}
+ */
+
+
+function canDrop(element, target, position) {
+  // can move labels and groups everywhere
+  if ((0, _LabelUtil.isLabel)(element) || isGroup(element)) {
+    return true;
+  } // disallow to create elements on collapsed pools
+
+
+  if ((0, _ModelUtil.is)(target, 'bpmn:Participant') && !(0, _DiUtil.isExpanded)(target)) {
+    return false;
+  } // allow to create new participants on
+  // existing collaboration and process diagrams
+
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:Participant')) {
+    return (0, _ModelUtil.is)(target, 'bpmn:Process') || (0, _ModelUtil.is)(target, 'bpmn:Collaboration');
+  } // allow moving DataInput / DataOutput within its original container only
+
+
+  if ((0, _ModelingUtil.isAny)(element, ['bpmn:DataInput', 'bpmn:DataOutput'])) {
+    if (element.parent) {
+      return target === element.parent;
+    }
+  } // allow creating lanes on participants and other lanes only
+
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:Lane')) {
+    return (0, _ModelUtil.is)(target, 'bpmn:Participant') || (0, _ModelUtil.is)(target, 'bpmn:Lane');
+  } // disallow dropping boundary events which cannot replace with intermediate event
+
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && !isDroppableBoundaryEvent(element)) {
+    return false;
+  } // drop flow elements onto flow element containers
+  // and participants
+
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:FlowElement') && !(0, _ModelUtil.is)(element, 'bpmn:DataStoreReference')) {
+    if ((0, _ModelUtil.is)(target, 'bpmn:FlowElementsContainer')) {
+      return (0, _DiUtil.isExpanded)(target);
+    }
+
+    return (0, _ModelingUtil.isAny)(target, ['bpmn:Participant', 'bpmn:Lane']);
+  } // account for the fact that data associations are always
+  // rendered and moved to top (Process or Collaboration level)
+  //
+  // artifacts may be placed wherever, too
+
+
+  if ((0, _ModelingUtil.isAny)(element, ['bpmn:Artifact', 'bpmn:DataAssociation', 'bpmn:DataStoreReference'])) {
+    return (0, _ModelingUtil.isAny)(target, ['bpmn:Collaboration', 'bpmn:Lane', 'bpmn:Participant', 'bpmn:Process', 'bpmn:SubProcess']);
+  }
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:MessageFlow')) {
+    return (0, _ModelUtil.is)(target, 'bpmn:Collaboration') || element.source.parent == target || element.target.parent == target;
+  }
+
+  return false;
+}
+
+function isDroppableBoundaryEvent(event) {
+  return (0, _ModelUtil.getBusinessObject)(event).cancelActivity && (hasNoEventDefinition(event) || hasCommonBoundaryIntermediateEventDefinition(event));
+}
+
+function isBoundaryEvent(element) {
+  return !(0, _LabelUtil.isLabel)(element) && (0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent');
+}
+
+function isLane(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:Lane');
+}
+/**
+ * We treat IntermediateThrowEvents as boundary events during create,
+ * this must be reflected in the rules.
+ */
+
+
+function isBoundaryCandidate(element) {
+  if (isBoundaryEvent(element)) {
+    return true;
+  }
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:IntermediateThrowEvent') && hasNoEventDefinition(element)) {
+    return true;
+  }
+
+  return (0, _ModelUtil.is)(element, 'bpmn:IntermediateCatchEvent') && hasCommonBoundaryIntermediateEventDefinition(element);
+}
+
+function hasNoEventDefinition(element) {
+  var bo = (0, _ModelUtil.getBusinessObject)(element);
+  return bo && !(bo.eventDefinitions && bo.eventDefinitions.length);
+}
+
+function hasCommonBoundaryIntermediateEventDefinition(element) {
+  return hasOneOfEventDefinitions(element, ['bpmn:MessageEventDefinition', 'bpmn:TimerEventDefinition', 'bpmn:SignalEventDefinition', 'bpmn:ConditionalEventDefinition']);
+}
+
+function hasOneOfEventDefinitions(element, eventDefinitions) {
+  return eventDefinitions.some(function (definition) {
+    return hasEventDefinition(element, definition);
+  });
+}
+
+function isReceiveTaskAfterEventBasedGateway(element) {
+  return (0, _ModelUtil.is)(element, 'bpmn:ReceiveTask') && (0, _minDash.find)(element.incoming, function (incoming) {
+    return (0, _ModelUtil.is)(incoming.source, 'bpmn:EventBasedGateway');
+  });
+}
+
+function canAttach(elements, target, source, position) {
+  if (!Array.isArray(elements)) {
+    elements = [elements];
+  } // only (re-)attach one element at a time
+
+
+  if (elements.length !== 1) {
+    return false;
+  }
+
+  var element = elements[0]; // do not attach labels
+
+  if ((0, _LabelUtil.isLabel)(element)) {
+    return false;
+  } // only handle boundary events
+
+
+  if (!isBoundaryCandidate(element)) {
+    return false;
+  } // disallow drop on event sub processes
+
+
+  if ((0, _DiUtil.isEventSubProcess)(target)) {
+    return false;
+  } // only allow drop on non compensation activities
+
+
+  if (!(0, _ModelUtil.is)(target, 'bpmn:Activity') || isForCompensation(target)) {
+    return false;
+  } // only attach to subprocess border
+
+
+  if (position && !(0, _BpmnSnappingUtil.getBoundaryAttachment)(position, target)) {
+    return false;
+  } // do not attach on receive tasks after event based gateways
+
+
+  if (isReceiveTaskAfterEventBasedGateway(target)) {
+    return false;
+  }
+
+  return 'attach';
+}
+/**
+ * Defines how to replace elements for a given target.
+ *
+ * Returns an array containing all elements which will be replaced.
+ *
+ * @example
+ *
+ *  [{ id: 'IntermediateEvent_2',
+ *     type: 'bpmn:StartEvent'
+ *   },
+ *   { id: 'IntermediateEvent_5',
+ *     type: 'bpmn:EndEvent'
+ *   }]
+ *
+ * @param  {Array} elements
+ * @param  {Object} target
+ *
+ * @return {Object} an object containing all elements which have to be replaced
+ */
+
+
+function canReplace(elements, target, position) {
+  if (!target) {
+    return false;
+  }
+
+  var canExecute = {
+    replacements: []
+  };
+  (0, _minDash.forEach)(elements, function (element) {
+    if (!(0, _DiUtil.isEventSubProcess)(target)) {
+      if ((0, _ModelUtil.is)(element, 'bpmn:StartEvent') && element.type !== 'label' && canDrop(element, target)) {
+        // replace a non-interrupting start event by a blank interrupting start event
+        // when the target is not an event sub process
+        if (!(0, _DiUtil.isInterrupting)(element)) {
+          canExecute.replacements.push({
+            oldElementId: element.id,
+            newElementType: 'bpmn:StartEvent'
+          });
+        } // replace an error/escalation/compensate start event by a blank interrupting start event
+        // when the target is not an event sub process
+
+
+        if ((0, _DiUtil.hasErrorEventDefinition)(element) || (0, _DiUtil.hasEscalationEventDefinition)(element) || (0, _DiUtil.hasCompensateEventDefinition)(element)) {
+          canExecute.replacements.push({
+            oldElementId: element.id,
+            newElementType: 'bpmn:StartEvent'
+          });
+        } // replace a typed start event by a blank interrupting start event
+        // when the target is a sub process but not an event sub process
+
+
+        if (hasOneOfEventDefinitions(element, ['bpmn:MessageEventDefinition', 'bpmn:TimerEventDefinition', 'bpmn:SignalEventDefinition', 'bpmn:ConditionalEventDefinition']) && (0, _ModelUtil.is)(target, 'bpmn:SubProcess')) {
+          canExecute.replacements.push({
+            oldElementId: element.id,
+            newElementType: 'bpmn:StartEvent'
+          });
+        }
+      }
+    }
+
+    if (!(0, _ModelUtil.is)(target, 'bpmn:Transaction')) {
+      if (hasEventDefinition(element, 'bpmn:CancelEventDefinition') && element.type !== 'label') {
+        if ((0, _ModelUtil.is)(element, 'bpmn:EndEvent') && canDrop(element, target)) {
+          canExecute.replacements.push({
+            oldElementId: element.id,
+            newElementType: 'bpmn:EndEvent'
+          });
+        }
+
+        if ((0, _ModelUtil.is)(element, 'bpmn:BoundaryEvent') && canAttach(element, target, null, position)) {
+          canExecute.replacements.push({
+            oldElementId: element.id,
+            newElementType: 'bpmn:BoundaryEvent'
+          });
+        }
+      }
+    }
+  });
+  return canExecute.replacements.length ? canExecute : false;
+}
+
+function canMove(elements, target) {
+  // do not move selection containing lanes
+  if ((0, _minDash.some)(elements, isLane)) {
+    return false;
+  } // allow default move check to start move operation
+
+
+  if (!target) {
+    return true;
+  }
+
+  return elements.every(function (element) {
+    return canDrop(element, target);
+  });
+}
+
+function canCreate(shape, target, source, position) {
+  if (!target) {
+    return false;
+  }
+
+  if ((0, _LabelUtil.isLabel)(shape) || isGroup(shape)) {
+    return true;
+  }
+
+  if (isSame(source, target)) {
+    return false;
+  } // ensure we do not drop the element
+  // into source
+
+
+  if (source && isParent(source, target)) {
+    return false;
+  }
+
+  return canDrop(shape, target, position) || canInsert(shape, target, position);
+}
+
+function canResize(shape, newBounds) {
+  if ((0, _ModelUtil.is)(shape, 'bpmn:SubProcess')) {
+    return (0, _DiUtil.isExpanded)(shape) && (!newBounds || newBounds.width >= 100 && newBounds.height >= 80);
+  }
+
+  if ((0, _ModelUtil.is)(shape, 'bpmn:Lane')) {
+    return !newBounds || newBounds.width >= 130 && newBounds.height >= 60;
+  }
+
+  if ((0, _ModelUtil.is)(shape, 'bpmn:Participant')) {
+    return !newBounds || newBounds.width >= 250 && newBounds.height >= 50;
+  }
+
+  if (isTextAnnotation(shape)) {
+    return true;
+  }
+
+  if (isGroup(shape)) {
+    return true;
+  }
+
+  return false;
+}
+/**
+ * Check, whether one side of the relationship
+ * is a text annotation.
+ */
+
+
+function isOneTextAnnotation(source, target) {
+  var sourceTextAnnotation = isTextAnnotation(source),
+      targetTextAnnotation = isTextAnnotation(target);
+  return (sourceTextAnnotation || targetTextAnnotation) && sourceTextAnnotation !== targetTextAnnotation;
+}
+
+function canConnectAssociation(source, target) {
+  // do not connect connections
+  if (isConnection(source) || isConnection(target)) {
+    return false;
+  } // compensation boundary events are exception
+
+
+  if (isCompensationBoundary(source) && isForCompensation(target)) {
+    return true;
+  } // don't connect parent <-> child
+
+
+  if (isParent(target, source) || isParent(source, target)) {
+    return false;
+  } // allow connection of associations between <!TextAnnotation> and <TextAnnotation>
+
+
+  if (isOneTextAnnotation(source, target)) {
+    return true;
+  } // can connect associations where we can connect
+  // data associations, too (!)
+
+
+  return !!canConnectDataAssociation(source, target);
+}
+
+function canConnectMessageFlow(source, target) {
+  // during connect user might move mouse out of canvas
+  // https://github.com/bpmn-io/bpmn-js/issues/1033
+  if (getRootElement(source) && !getRootElement(target)) {
+    return false;
+  }
+
+  return isMessageFlowSource(source) && isMessageFlowTarget(target) && !isSameOrganization(source, target);
+}
+
+function canConnectSequenceFlow(source, target) {
+  if (isEventBasedTarget(target) && target.incoming.length > 0 && areOutgoingEventBasedGatewayConnections(target.incoming) && !(0, _ModelUtil.is)(source, 'bpmn:EventBasedGateway')) {
+    return false;
+  }
+
+  return isSequenceFlowSource(source) && isSequenceFlowTarget(target) && isSameScope(source, target) && !((0, _ModelUtil.is)(source, 'bpmn:EventBasedGateway') && !isEventBasedTarget(target));
+}
+
+function canConnectDataAssociation(source, target) {
+  if ((0, _ModelingUtil.isAny)(source, ['bpmn:DataObjectReference', 'bpmn:DataStoreReference']) && (0, _ModelingUtil.isAny)(target, ['bpmn:Activity', 'bpmn:ThrowEvent'])) {
+    return {
+      type: 'bpmn:DataInputAssociation'
+    };
+  }
+
+  if ((0, _ModelingUtil.isAny)(target, ['bpmn:DataObjectReference', 'bpmn:DataStoreReference']) && (0, _ModelingUtil.isAny)(source, ['bpmn:Activity', 'bpmn:CatchEvent'])) {
+    return {
+      type: 'bpmn:DataOutputAssociation'
+    };
+  }
+
+  return false;
+}
+
+function canInsert(shape, flow, position) {
+  if (!flow) {
+    return false;
+  }
+
+  if (Array.isArray(shape)) {
+    if (shape.length !== 1) {
+      return false;
+    }
+
+    shape = shape[0];
+  }
+
+  if (flow.source === shape || flow.target === shape) {
+    return false;
+  } // return true if we can drop on the
+  // underlying flow parent
+  //
+  // at this point we are not really able to talk
+  // about connection rules (yet)
+
+
+  return (0, _ModelingUtil.isAny)(flow, ['bpmn:SequenceFlow', 'bpmn:MessageFlow']) && !(0, _LabelUtil.isLabel)(flow) && (0, _ModelUtil.is)(shape, 'bpmn:FlowNode') && !(0, _ModelUtil.is)(shape, 'bpmn:BoundaryEvent') && canDrop(shape, flow.parent, position);
+}
+
+function includes(elements, element) {
+  return elements && element && elements.indexOf(element) !== -1;
+}
+
+function canCopy(elements, element) {
+  if ((0, _LabelUtil.isLabel)(element)) {
+    return true;
+  }
+
+  if ((0, _ModelUtil.is)(element, 'bpmn:Lane') && !includes(elements, element.parent)) {
+    return false;
+  }
+
+  return true;
+}
+
+function isOutgoingEventBasedGatewayConnection(connection) {
+  if (connection && connection.source) {
+    return (0, _ModelUtil.is)(connection.source, 'bpmn:EventBasedGateway');
+  }
+}
+
+function areOutgoingEventBasedGatewayConnections(connections) {
+  connections = connections || [];
+  return connections.some(isOutgoingEventBasedGatewayConnection);
+}
+
+function getRootElement(element) {
+  return (0, _ModelingUtil.getParent)(element, 'bpmn:Process') || (0, _ModelingUtil.getParent)(element, 'bpmn:Collaboration');
+}
+
+},{"../../util/DiUtil":89,"../../util/LabelUtil":90,"../../util/ModelUtil":91,"../modeling/util/ModelingUtil":75,"../snapping/BpmnSnappingUtil":82,"diagram-js/lib/features/rules/RuleProvider":169,"inherits":218,"min-dash":219}],81:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rules = _interopRequireDefault(require("diagram-js/lib/features/rules"));
+
+var _BpmnRules = _interopRequireDefault(require("./BpmnRules"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_rules.default],
+  __init__: ['bpmnRules'],
+  bpmnRules: ['type', _BpmnRules.default]
+};
+exports.default = _default;
+
+},{"./BpmnRules":80,"diagram-js/lib/features/rules":171}],82:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getBoundaryAttachment = getBoundaryAttachment;
+
+var _LayoutUtil = require("diagram-js/lib/layout/LayoutUtil");
+
+function getBoundaryAttachment(position, targetBounds) {
+  var orientation = (0, _LayoutUtil.getOrientation)(position, targetBounds, -15);
+
+  if (orientation !== 'intersect') {
+    return orientation;
+  } else {
+    return null;
+  }
+}
+
+},{"diagram-js/lib/layout/LayoutUtil":188}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3615,7 +12348,7 @@ function isFrameElement(semantic) {
   return (0, _ModelUtil.is)(semantic, 'bpmn:Group');
 }
 
-},{"../features/label-editing/LabelUtil":11,"../util/DiUtil":18,"../util/LabelUtil":19,"../util/ModelUtil":20,"./Util":15,"diagram-js/lib/layout/LayoutUtil":51,"min-dash":78}],13:[function(require,module,exports){
+},{"../features/label-editing/LabelUtil":16,"../util/DiUtil":89,"../util/LabelUtil":90,"../util/ModelUtil":91,"./Util":86,"diagram-js/lib/layout/LayoutUtil":188,"min-dash":219}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4040,7 +12773,7 @@ function BpmnTreeWalker(handler, translate) {
   };
 }
 
-},{"./Util":15,"min-dash":78,"object-refs":82}],14:[function(require,module,exports){
+},{"./Util":86,"min-dash":219,"object-refs":223}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4136,7 +12869,7 @@ function importBpmnDiagram(diagram, definitions, bpmnDiagram) {
   });
 }
 
-},{"./BpmnTreeWalker":13}],15:[function(require,module,exports){
+},{"./BpmnTreeWalker":84}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4152,7 +12885,7 @@ function elementToString(e) {
   return '<' + e.$type + (e.id ? ' id="' + e.id : '') + '" />';
 }
 
-},{}],16:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4172,7 +12905,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./BpmnImporter":12,"diagram-js/lib/i18n/translate":49}],17:[function(require,module,exports){
+},{"./BpmnImporter":83,"diagram-js/lib/i18n/translate":184}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4220,7 +12953,7 @@ function wrapForCompatibility(api) {
   };
 }
 
-},{"min-dash":78}],18:[function(require,module,exports){
+},{"min-dash":219}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4289,7 +13022,7 @@ function hasCompensateEventDefinition(element) {
   return hasEventDefinition(element, 'bpmn:CompensateEventDefinition');
 }
 
-},{"./ModelUtil":20,"min-dash":78}],19:[function(require,module,exports){
+},{"./ModelUtil":91,"min-dash":219}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4442,7 +13175,7 @@ function isLabel(element) {
   return element && !!element.labelTarget;
 }
 
-},{"./ModelUtil":20,"min-dash":78}],20:[function(require,module,exports){
+},{"./ModelUtil":91,"min-dash":219}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4476,7 +13209,7 @@ function getBusinessObject(element) {
   return element && element.businessObject || element;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4521,7 +13254,7 @@ function open() {
   document.body.appendChild(lightbox);
 }
 
-},{"min-dom":79}],22:[function(require,module,exports){
+},{"min-dom":220}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7166,7 +15899,7 @@ function simple(additionalPackages, options) {
 var _default = simple;
 exports.default = _default;
 
-},{"min-dash":78,"moddle":81,"moddle-xml":80}],23:[function(require,module,exports){
+},{"min-dash":219,"moddle":222,"moddle-xml":221}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7183,7 +15916,7 @@ var _Diagram = _interopRequireDefault(require("./lib/Diagram"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./lib/Diagram":24}],24:[function(require,module,exports){
+},{"./lib/Diagram":95}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7381,7 +16114,648 @@ Diagram.prototype.clear = function () {
   this.get('eventBus').fire('diagram.clear');
 };
 
-},{"./core":30,"didi":75}],25:[function(require,module,exports){
+},{"./core":104,"didi":216}],96:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CommandInterceptor;
+
+var _minDash = require("min-dash");
+
+var DEFAULT_PRIORITY = 1000;
+/**
+ * A utility that can be used to plug-in into the command execution for
+ * extension and/or validation.
+ *
+ * @param {EventBus} eventBus
+ *
+ * @example
+ *
+ * import inherits from 'inherits';
+ *
+ * import CommandInterceptor from 'diagram-js/lib/command/CommandInterceptor';
+ *
+ * function CommandLogger(eventBus) {
+ *   CommandInterceptor.call(this, eventBus);
+ *
+ *   this.preExecute(function(event) {
+ *     console.log('command pre-execute', event);
+ *   });
+ * }
+ *
+ * inherits(CommandLogger, CommandInterceptor);
+ *
+ */
+
+function CommandInterceptor(eventBus) {
+  this._eventBus = eventBus;
+}
+
+CommandInterceptor.$inject = ['eventBus'];
+
+function unwrapEvent(fn, that) {
+  return function (event) {
+    return fn.call(that || null, event.context, event.command, event);
+  };
+}
+/**
+ * Register an interceptor for a command execution
+ *
+ * @param {string|Array<string>} [events] list of commands to register on
+ * @param {string} [hook] command hook, i.e. preExecute, executed to listen on
+ * @param {number} [priority] the priority on which to hook into the execution
+ * @param {Function} handlerFn interceptor to be invoked with (event)
+ * @param {boolean} unwrap if true, unwrap the event and pass (context, command, event) to the
+ *                          listener instead
+ * @param {Object} [that] Pass context (`this`) to the handler function
+ */
+
+
+CommandInterceptor.prototype.on = function (events, hook, priority, handlerFn, unwrap, that) {
+  if ((0, _minDash.isFunction)(hook) || (0, _minDash.isNumber)(hook)) {
+    that = unwrap;
+    unwrap = handlerFn;
+    handlerFn = priority;
+    priority = hook;
+    hook = null;
+  }
+
+  if ((0, _minDash.isFunction)(priority)) {
+    that = unwrap;
+    unwrap = handlerFn;
+    handlerFn = priority;
+    priority = DEFAULT_PRIORITY;
+  }
+
+  if ((0, _minDash.isObject)(unwrap)) {
+    that = unwrap;
+    unwrap = false;
+  }
+
+  if (!(0, _minDash.isFunction)(handlerFn)) {
+    throw new Error('handlerFn must be a function');
+  }
+
+  if (!(0, _minDash.isArray)(events)) {
+    events = [events];
+  }
+
+  var eventBus = this._eventBus;
+  (0, _minDash.forEach)(events, function (event) {
+    // concat commandStack(.event)?(.hook)?
+    var fullEvent = ['commandStack', event, hook].filter(function (e) {
+      return e;
+    }).join('.');
+    eventBus.on(fullEvent, priority, unwrap ? unwrapEvent(handlerFn, that) : handlerFn, that);
+  });
+};
+
+var hooks = ['canExecute', 'preExecute', 'preExecuted', 'execute', 'executed', 'postExecute', 'postExecuted', 'revert', 'reverted'];
+/*
+ * Install hook shortcuts
+ *
+ * This will generate the CommandInterceptor#(preExecute|...|reverted) methods
+ * which will in term forward to CommandInterceptor#on.
+ */
+
+(0, _minDash.forEach)(hooks, function (hook) {
+  /**
+   * {canExecute|preExecute|preExecuted|execute|executed|postExecute|postExecuted|revert|reverted}
+   *
+   * A named hook for plugging into the command execution
+   *
+   * @param {string|Array<string>} [events] list of commands to register on
+   * @param {number} [priority] the priority on which to hook into the execution
+   * @param {Function} handlerFn interceptor to be invoked with (event)
+   * @param {boolean} [unwrap=false] if true, unwrap the event and pass (context, command, event) to the
+   *                          listener instead
+   * @param {Object} [that] Pass context (`this`) to the handler function
+   */
+  CommandInterceptor.prototype[hook] = function (events, priority, handlerFn, unwrap, that) {
+    if ((0, _minDash.isFunction)(events) || (0, _minDash.isNumber)(events)) {
+      that = unwrap;
+      unwrap = handlerFn;
+      handlerFn = priority;
+      priority = events;
+      events = null;
+    }
+
+    this.on(events, hook, priority, handlerFn, unwrap, that);
+  };
+});
+
+},{"min-dash":219}],97:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CommandStack;
+
+var _minDash = require("min-dash");
+
+/**
+ * A service that offers un- and redoable execution of commands.
+ *
+ * The command stack is responsible for executing modeling actions
+ * in a un- and redoable manner. To do this it delegates the actual
+ * command execution to {@link CommandHandler}s.
+ *
+ * Command handlers provide {@link CommandHandler#execute(ctx)} and
+ * {@link CommandHandler#revert(ctx)} methods to un- and redo a command
+ * identified by a command context.
+ *
+ *
+ * ## Life-Cycle events
+ *
+ * In the process the command stack fires a number of life-cycle events
+ * that other components to participate in the command execution.
+ *
+ *    * preExecute
+ *    * preExecuted
+ *    * execute
+ *    * executed
+ *    * postExecute
+ *    * postExecuted
+ *    * revert
+ *    * reverted
+ *
+ * A special event is used for validating, whether a command can be
+ * performed prior to its execution.
+ *
+ *    * canExecute
+ *
+ * Each of the events is fired as `commandStack.{eventName}` and
+ * `commandStack.{commandName}.{eventName}`, respectively. This gives
+ * components fine grained control on where to hook into.
+ *
+ * The event object fired transports `command`, the name of the
+ * command and `context`, the command context.
+ *
+ *
+ * ## Creating Command Handlers
+ *
+ * Command handlers should provide the {@link CommandHandler#execute(ctx)}
+ * and {@link CommandHandler#revert(ctx)} methods to implement
+ * redoing and undoing of a command.
+ *
+ * A command handler _must_ ensure undo is performed properly in order
+ * not to break the undo chain. It must also return the shapes that
+ * got changed during the `execute` and `revert` operations.
+ *
+ * Command handlers may execute other modeling operations (and thus
+ * commands) in their `preExecute` and `postExecute` phases. The command
+ * stack will properly group all commands together into a logical unit
+ * that may be re- and undone atomically.
+ *
+ * Command handlers must not execute other commands from within their
+ * core implementation (`execute`, `revert`).
+ *
+ *
+ * ## Change Tracking
+ *
+ * During the execution of the CommandStack it will keep track of all
+ * elements that have been touched during the command's execution.
+ *
+ * At the end of the CommandStack execution it will notify interested
+ * components via an 'elements.changed' event with all the dirty
+ * elements.
+ *
+ * The event can be picked up by components that are interested in the fact
+ * that elements have been changed. One use case for this is updating
+ * their graphical representation after moving / resizing or deletion.
+ *
+ * @see CommandHandler
+ *
+ * @param {EventBus} eventBus
+ * @param {Injector} injector
+ */
+function CommandStack(eventBus, injector) {
+  /**
+   * A map of all registered command handlers.
+   *
+   * @type {Object}
+   */
+  this._handlerMap = {};
+  /**
+   * A stack containing all re/undoable actions on the diagram
+   *
+   * @type {Array<Object>}
+   */
+
+  this._stack = [];
+  /**
+   * The current index on the stack
+   *
+   * @type {number}
+   */
+
+  this._stackIdx = -1;
+  /**
+   * Current active commandStack execution
+   *
+   * @type {Object}
+   */
+
+  this._currentExecution = {
+    actions: [],
+    dirty: []
+  };
+  this._injector = injector;
+  this._eventBus = eventBus;
+  this._uid = 1;
+  eventBus.on(['diagram.destroy', 'diagram.clear'], function () {
+    this.clear(false);
+  }, this);
+}
+
+CommandStack.$inject = ['eventBus', 'injector'];
+/**
+ * Execute a command
+ *
+ * @param {string} command the command to execute
+ * @param {Object} context the environment to execute the command in
+ */
+
+CommandStack.prototype.execute = function (command, context) {
+  if (!command) {
+    throw new Error('command required');
+  }
+
+  var action = {
+    command: command,
+    context: context
+  };
+
+  this._pushAction(action);
+
+  this._internalExecute(action);
+
+  this._popAction(action);
+};
+/**
+ * Ask whether a given command can be executed.
+ *
+ * Implementors may hook into the mechanism on two ways:
+ *
+ *   * in event listeners:
+ *
+ *     Users may prevent the execution via an event listener.
+ *     It must prevent the default action for `commandStack.(<command>.)canExecute` events.
+ *
+ *   * in command handlers:
+ *
+ *     If the method {@link CommandHandler#canExecute} is implemented in a handler
+ *     it will be called to figure out whether the execution is allowed.
+ *
+ * @param  {string} command the command to execute
+ * @param  {Object} context the environment to execute the command in
+ *
+ * @return {boolean} true if the command can be executed
+ */
+
+
+CommandStack.prototype.canExecute = function (command, context) {
+  var action = {
+    command: command,
+    context: context
+  };
+
+  var handler = this._getHandler(command);
+
+  var result = this._fire(command, 'canExecute', action); // handler#canExecute will only be called if no listener
+  // decided on a result already
+
+
+  if (result === undefined) {
+    if (!handler) {
+      return false;
+    }
+
+    if (handler.canExecute) {
+      result = handler.canExecute(context);
+    }
+  }
+
+  return result;
+};
+/**
+ * Clear the command stack, erasing all undo / redo history
+ */
+
+
+CommandStack.prototype.clear = function (emit) {
+  this._stack.length = 0;
+  this._stackIdx = -1;
+
+  if (emit !== false) {
+    this._fire('changed');
+  }
+};
+/**
+ * Undo last command(s)
+ */
+
+
+CommandStack.prototype.undo = function () {
+  var action = this._getUndoAction(),
+      next;
+
+  if (action) {
+    this._pushAction(action);
+
+    while (action) {
+      this._internalUndo(action);
+
+      next = this._getUndoAction();
+
+      if (!next || next.id !== action.id) {
+        break;
+      }
+
+      action = next;
+    }
+
+    this._popAction();
+  }
+};
+/**
+ * Redo last command(s)
+ */
+
+
+CommandStack.prototype.redo = function () {
+  var action = this._getRedoAction(),
+      next;
+
+  if (action) {
+    this._pushAction(action);
+
+    while (action) {
+      this._internalExecute(action, true);
+
+      next = this._getRedoAction();
+
+      if (!next || next.id !== action.id) {
+        break;
+      }
+
+      action = next;
+    }
+
+    this._popAction();
+  }
+};
+/**
+ * Register a handler instance with the command stack
+ *
+ * @param {string} command
+ * @param {CommandHandler} handler
+ */
+
+
+CommandStack.prototype.register = function (command, handler) {
+  this._setHandler(command, handler);
+};
+/**
+ * Register a handler type with the command stack
+ * by instantiating it and injecting its dependencies.
+ *
+ * @param {string} command
+ * @param {Function} a constructor for a {@link CommandHandler}
+ */
+
+
+CommandStack.prototype.registerHandler = function (command, handlerCls) {
+  if (!command || !handlerCls) {
+    throw new Error('command and handlerCls must be defined');
+  }
+
+  var handler = this._injector.instantiate(handlerCls);
+
+  this.register(command, handler);
+};
+
+CommandStack.prototype.canUndo = function () {
+  return !!this._getUndoAction();
+};
+
+CommandStack.prototype.canRedo = function () {
+  return !!this._getRedoAction();
+}; // stack access  //////////////////////
+
+
+CommandStack.prototype._getRedoAction = function () {
+  return this._stack[this._stackIdx + 1];
+};
+
+CommandStack.prototype._getUndoAction = function () {
+  return this._stack[this._stackIdx];
+}; // internal functionality //////////////////////
+
+
+CommandStack.prototype._internalUndo = function (action) {
+  var self = this;
+  var command = action.command,
+      context = action.context;
+
+  var handler = this._getHandler(command); // guard against illegal nested command stack invocations
+
+
+  this._atomicDo(function () {
+    self._fire(command, 'revert', action);
+
+    if (handler.revert) {
+      self._markDirty(handler.revert(context));
+    }
+
+    self._revertedAction(action);
+
+    self._fire(command, 'reverted', action);
+  });
+};
+
+CommandStack.prototype._fire = function (command, qualifier, event) {
+  if (arguments.length < 3) {
+    event = qualifier;
+    qualifier = null;
+  }
+
+  var names = qualifier ? [command + '.' + qualifier, qualifier] : [command],
+      i,
+      name,
+      result;
+  event = this._eventBus.createEvent(event);
+
+  for (i = 0; name = names[i]; i++) {
+    result = this._eventBus.fire('commandStack.' + name, event);
+
+    if (event.cancelBubble) {
+      break;
+    }
+  }
+
+  return result;
+};
+
+CommandStack.prototype._createId = function () {
+  return this._uid++;
+};
+
+CommandStack.prototype._atomicDo = function (fn) {
+  var execution = this._currentExecution;
+  execution.atomic = true;
+
+  try {
+    fn();
+  } finally {
+    execution.atomic = false;
+  }
+};
+
+CommandStack.prototype._internalExecute = function (action, redo) {
+  var self = this;
+  var command = action.command,
+      context = action.context;
+
+  var handler = this._getHandler(command);
+
+  if (!handler) {
+    throw new Error('no command handler registered for <' + command + '>');
+  }
+
+  this._pushAction(action);
+
+  if (!redo) {
+    this._fire(command, 'preExecute', action);
+
+    if (handler.preExecute) {
+      handler.preExecute(context);
+    }
+
+    this._fire(command, 'preExecuted', action);
+  } // guard against illegal nested command stack invocations
+
+
+  this._atomicDo(function () {
+    self._fire(command, 'execute', action);
+
+    if (handler.execute) {
+      // actual execute + mark return results as dirty
+      self._markDirty(handler.execute(context));
+    } // log to stack
+
+
+    self._executedAction(action, redo);
+
+    self._fire(command, 'executed', action);
+  });
+
+  if (!redo) {
+    this._fire(command, 'postExecute', action);
+
+    if (handler.postExecute) {
+      handler.postExecute(context);
+    }
+
+    this._fire(command, 'postExecuted', action);
+  }
+
+  this._popAction(action);
+};
+
+CommandStack.prototype._pushAction = function (action) {
+  var execution = this._currentExecution,
+      actions = execution.actions;
+  var baseAction = actions[0];
+
+  if (execution.atomic) {
+    throw new Error('illegal invocation in <execute> or <revert> phase (action: ' + action.command + ')');
+  }
+
+  if (!action.id) {
+    action.id = baseAction && baseAction.id || this._createId();
+  }
+
+  actions.push(action);
+};
+
+CommandStack.prototype._popAction = function () {
+  var execution = this._currentExecution,
+      actions = execution.actions,
+      dirty = execution.dirty;
+  actions.pop();
+
+  if (!actions.length) {
+    this._eventBus.fire('elements.changed', {
+      elements: (0, _minDash.uniqueBy)('id', dirty.reverse())
+    });
+
+    dirty.length = 0;
+
+    this._fire('changed');
+  }
+};
+
+CommandStack.prototype._markDirty = function (elements) {
+  var execution = this._currentExecution;
+
+  if (!elements) {
+    return;
+  }
+
+  elements = (0, _minDash.isArray)(elements) ? elements : [elements];
+  execution.dirty = execution.dirty.concat(elements);
+};
+
+CommandStack.prototype._executedAction = function (action, redo) {
+  var stackIdx = ++this._stackIdx;
+
+  if (!redo) {
+    this._stack.splice(stackIdx, this._stack.length, action);
+  }
+};
+
+CommandStack.prototype._revertedAction = function (action) {
+  this._stackIdx--;
+};
+
+CommandStack.prototype._getHandler = function (command) {
+  return this._handlerMap[command];
+};
+
+CommandStack.prototype._setHandler = function (command, handler) {
+  if (!command || !handler) {
+    throw new Error('command and handler required');
+  }
+
+  if (this._handlerMap[command]) {
+    throw new Error('overriding handler for command <' + command + '>');
+  }
+
+  this._handlerMap[command] = handler;
+};
+
+},{"min-dash":219}],98:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _CommandStack = _interopRequireDefault(require("./CommandStack"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  commandStack: ['type', _CommandStack.default]
+};
+exports.default = _default;
+
+},{"./CommandStack":97}],99:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8356,7 +17730,7 @@ Canvas.prototype.resized = function () {
   this._eventBus.fire('canvas.resized');
 };
 
-},{"../util/Collections":61,"../util/Elements":63,"min-dash":78,"tiny-svg":87}],26:[function(require,module,exports){
+},{"../util/Collections":200,"../util/Elements":202,"min-dash":219,"tiny-svg":228}],100:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8410,7 +17784,7 @@ ElementFactory.prototype.create = function (type, attrs) {
   return (0, _model.create)(type, attrs);
 };
 
-},{"../model":52,"min-dash":78}],27:[function(require,module,exports){
+},{"../model":190,"min-dash":219}],101:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8647,7 +18021,7 @@ ElementRegistry.prototype._validateId = function (id) {
   }
 };
 
-},{"tiny-svg":87}],28:[function(require,module,exports){
+},{"tiny-svg":228}],102:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9128,7 +18502,7 @@ function invokeFunction(fn, args) {
   return fn.apply(null, args);
 }
 
-},{"min-dash":78}],29:[function(require,module,exports){
+},{"min-dash":219}],103:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9352,7 +18726,7 @@ function prependTo(newNode, parentNode, siblingNode) {
   parentNode.insertBefore(newNode, node);
 }
 
-},{"../util/Elements":63,"../util/GraphicsUtil":66,"../util/SvgTransformUtil":73,"min-dash":78,"min-dom":79,"tiny-svg":87}],30:[function(require,module,exports){
+},{"../util/Elements":202,"../util/GraphicsUtil":205,"../util/SvgTransformUtil":214,"min-dash":219,"min-dom":220,"tiny-svg":228}],104:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9385,7 +18759,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../draw":34,"./Canvas":25,"./ElementFactory":26,"./ElementRegistry":27,"./EventBus":28,"./GraphicsFactory":29}],31:[function(require,module,exports){
+},{"../draw":108,"./Canvas":99,"./ElementFactory":100,"./ElementRegistry":101,"./EventBus":102,"./GraphicsFactory":103}],105:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9480,7 +18854,7 @@ BaseRenderer.prototype.getShapePath = function () {};
 
 BaseRenderer.prototype.getConnectionPath = function () {};
 
-},{}],32:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9588,7 +18962,7 @@ DefaultRenderer.prototype.getConnectionPath = function getConnectionPath(connect
 
 DefaultRenderer.$inject = ['eventBus', 'styles'];
 
-},{"../util/Elements":63,"../util/RenderUtil":72,"./BaseRenderer":31,"inherits":77,"tiny-svg":87}],33:[function(require,module,exports){
+},{"../util/Elements":202,"../util/RenderUtil":213,"./BaseRenderer":105,"inherits":218,"tiny-svg":228}],107:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9662,7 +19036,7 @@ function Styles() {
   };
 }
 
-},{"min-dash":78}],34:[function(require,module,exports){
+},{"min-dash":219}],108:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9683,7 +19057,2095 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./DefaultRenderer":32,"./Styles":33}],35:[function(require,module,exports){
+},{"./DefaultRenderer":106,"./Styles":107}],109:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AttachSupport;
+
+var _minDash = require("min-dash");
+
+var _Removal = require("../../util/Removal");
+
+var _AttachUtil = require("../../util/AttachUtil");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("../../command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 251,
+    HIGH_PRIORITY = 1401;
+var MARKER_ATTACH = 'attach-ok';
+/**
+ * Adds the notion of attached elements to the modeler.
+ *
+ * Optionally depends on `diagram-js/lib/features/move` to render
+ * the attached elements during move preview.
+ *
+ * Optionally depends on `diagram-js/lib/features/label-support`
+ * to render attached labels during move preview.
+ *
+ * @param {didi.Injector} injector
+ * @param {EventBus} eventBus
+ * @param {Canvas} canvas
+ * @param {Rules} rules
+ * @param {Modeling} modeling
+ */
+
+function AttachSupport(injector, eventBus, canvas, rules, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  var movePreview = injector.get('movePreview', false); // remove all the attached elements from the shapes to be validated
+  // add all the attached shapes to the overall list of moved shapes
+
+  eventBus.on('shape.move.start', HIGH_PRIORITY, function (e) {
+    var context = e.context,
+        shapes = context.shapes,
+        validatedShapes = context.validatedShapes;
+    context.shapes = addAttached(shapes);
+    context.validatedShapes = removeAttached(validatedShapes);
+  }); // add attachers to the visual's group
+
+  movePreview && eventBus.on('shape.move.start', LOW_PRIORITY, function (e) {
+    var context = e.context,
+        shapes = context.shapes,
+        attachers = getAttachers(shapes);
+    (0, _minDash.forEach)(attachers, function (attacher) {
+      movePreview.makeDraggable(context, attacher, true);
+      (0, _minDash.forEach)(attacher.labels, function (label) {
+        movePreview.makeDraggable(context, label, true);
+      });
+    });
+  }); // add attach-ok marker to current host
+
+  movePreview && eventBus.on('shape.move.start', function (event) {
+    var context = event.context,
+        shapes = context.shapes;
+
+    if (shapes.length !== 1) {
+      return;
+    }
+
+    var shape = shapes[0];
+    var host = shape.host;
+
+    if (host) {
+      canvas.addMarker(host, MARKER_ATTACH);
+      eventBus.once(['shape.move.out', 'shape.move.cleanup'], function () {
+        canvas.removeMarker(host, MARKER_ATTACH);
+      });
+    }
+  }); // add all attachers to move closure
+
+  this.preExecuted('elements.move', HIGH_PRIORITY, function (e) {
+    var context = e.context,
+        closure = context.closure,
+        shapes = context.shapes,
+        attachers = getAttachers(shapes);
+    (0, _minDash.forEach)(attachers, function (attacher) {
+      closure.add(attacher, closure.topLevel[attacher.host.id]);
+    });
+  }); // perform the attaching after shapes are done moving
+
+  this.postExecuted('elements.move', function (e) {
+    var context = e.context,
+        shapes = context.shapes,
+        newHost = context.newHost,
+        attachers; // only single elements can be attached
+    // multiply elements can be detached
+
+    if (newHost && shapes.length !== 1) {
+      return;
+    }
+
+    if (newHost) {
+      attachers = shapes;
+    } else {
+      // find attachers moved without host
+      attachers = (0, _minDash.filter)(shapes, function (shape) {
+        var host = shape.host;
+        return isAttacher(shape) && !includes(shapes, host);
+      });
+    }
+
+    (0, _minDash.forEach)(attachers, function (attacher) {
+      modeling.updateAttachment(attacher, newHost);
+    });
+  }); // ensure invalid attachment connections are removed
+
+  this.postExecuted('elements.move', function (e) {
+    var shapes = e.context.shapes;
+    (0, _minDash.forEach)(shapes, function (shape) {
+      (0, _minDash.forEach)(shape.attachers, function (attacher) {
+        // remove invalid outgoing connections
+        (0, _minDash.forEach)(attacher.outgoing.slice(), function (connection) {
+          var allowed = rules.allowed('connection.reconnect', {
+            connection: connection,
+            source: connection.source,
+            target: connection.target
+          });
+
+          if (!allowed) {
+            modeling.removeConnection(connection);
+          }
+        }); // remove invalid incoming connections
+
+        (0, _minDash.forEach)(attacher.incoming.slice(), function (connection) {
+          var allowed = rules.allowed('connection.reconnect', {
+            connection: connection,
+            source: connection.source,
+            target: connection.target
+          });
+
+          if (!allowed) {
+            modeling.removeConnection(connection);
+          }
+        });
+      });
+    });
+  });
+  this.postExecute('shape.create', function (e) {
+    var context = e.context,
+        shape = context.shape,
+        host = context.host;
+
+    if (host) {
+      modeling.updateAttachment(shape, host);
+    }
+  }); // update attachments if the host is replaced
+
+  this.postExecute('shape.replace', function (e) {
+    var context = e.context,
+        oldShape = context.oldShape,
+        newShape = context.newShape; // move the attachers to the new host
+
+    (0, _Removal.saveClear)(oldShape.attachers, function (attacher) {
+      var allowed = rules.allowed('elements.move', {
+        target: newShape,
+        shapes: [attacher]
+      });
+
+      if (allowed === 'attach') {
+        modeling.updateAttachment(attacher, newShape);
+      } else {
+        modeling.removeShape(attacher);
+      }
+    }); // move attachers if new host has different size
+
+    if (newShape.attachers.length) {
+      (0, _minDash.forEach)(newShape.attachers, function (attacher) {
+        var delta = (0, _AttachUtil.getNewAttachShapeDelta)(attacher, oldShape, newShape);
+        modeling.moveShape(attacher, delta, attacher.parent);
+      });
+    }
+  }); // move shape on host resize
+
+  this.postExecute('shape.resize', function (event) {
+    var context = event.context,
+        shape = context.shape,
+        oldBounds = context.oldBounds,
+        newBounds = context.newBounds,
+        attachers = shape.attachers,
+        hints = context.hints || {};
+
+    if (hints.attachSupport === false) {
+      return;
+    }
+
+    (0, _minDash.forEach)(attachers, function (attacher) {
+      var delta = (0, _AttachUtil.getNewAttachShapeDelta)(attacher, oldBounds, newBounds);
+      modeling.moveShape(attacher, delta, attacher.parent);
+      (0, _minDash.forEach)(attacher.labels, function (label) {
+        modeling.moveShape(label, delta, label.parent);
+      });
+    });
+  }); // remove attachments
+
+  this.preExecute('shape.delete', function (event) {
+    var shape = event.context.shape;
+    (0, _Removal.saveClear)(shape.attachers, function (attacher) {
+      modeling.removeShape(attacher);
+    });
+
+    if (shape.host) {
+      modeling.updateAttachment(shape, null);
+    }
+  });
+}
+
+(0, _inherits.default)(AttachSupport, _CommandInterceptor.default);
+AttachSupport.$inject = ['injector', 'eventBus', 'canvas', 'rules', 'modeling'];
+/**
+ * Return attachers of the given shapes
+ *
+ * @param {Array<djs.model.Base>} shapes
+ * @return {Array<djs.model.Base>}
+ */
+
+function getAttachers(shapes) {
+  return (0, _minDash.flatten)((0, _minDash.map)(shapes, function (s) {
+    return s.attachers || [];
+  }));
+}
+/**
+ * Return a combined list of elements and
+ * attachers.
+ *
+ * @param {Array<djs.model.Base>} elements
+ * @return {Array<djs.model.Base>} filtered
+ */
+
+
+function addAttached(elements) {
+  var attachers = getAttachers(elements);
+  return (0, _minDash.unionBy)('id', elements, attachers);
+}
+/**
+ * Return a filtered list of elements that do not
+ * contain attached elements with hosts being part
+ * of the selection.
+ *
+ * @param  {Array<djs.model.Base>} elements
+ *
+ * @return {Array<djs.model.Base>} filtered
+ */
+
+
+function removeAttached(elements) {
+  var ids = (0, _minDash.groupBy)(elements, 'id');
+  return (0, _minDash.filter)(elements, function (element) {
+    while (element) {
+      // host in selection
+      if (element.host && ids[element.host.id]) {
+        return false;
+      }
+
+      element = element.parent;
+    }
+
+    return true;
+  });
+}
+
+function isAttacher(shape) {
+  return !!shape.host;
+}
+
+function includes(array, item) {
+  return array.indexOf(item) !== -1;
+}
+
+},{"../../command/CommandInterceptor":96,"../../util/AttachUtil":198,"../../util/Removal":212,"inherits":218,"min-dash":219}],110:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rules = _interopRequireDefault(require("../rules"));
+
+var _AttachSupport = _interopRequireDefault(require("./AttachSupport"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_rules.default],
+  __init__: ['attachSupport'],
+  attachSupport: ['type', _AttachSupport.default]
+};
+exports.default = _default;
+
+},{"../rules":171,"./AttachSupport":109}],111:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ChangeSupport;
+
+var _Elements = require("../../util/Elements");
+
+/**
+ * Adds change support to the diagram, including
+ *
+ * <ul>
+ *   <li>redrawing shapes and connections on change</li>
+ * </ul>
+ *
+ * @param {EventBus} eventBus
+ * @param {Canvas} canvas
+ * @param {ElementRegistry} elementRegistry
+ * @param {GraphicsFactory} graphicsFactory
+ */
+function ChangeSupport(eventBus, canvas, elementRegistry, graphicsFactory) {
+  // redraw shapes / connections on change
+  eventBus.on('element.changed', function (event) {
+    var element = event.element; // element might have been deleted and replaced by new element with same ID
+    // thus check for parent of element except for root element
+
+    if (element.parent || element === canvas.getRootElement()) {
+      event.gfx = elementRegistry.getGraphics(element);
+    } // shape + gfx may have been deleted
+
+
+    if (!event.gfx) {
+      return;
+    }
+
+    eventBus.fire((0, _Elements.getType)(element) + '.changed', event);
+  });
+  eventBus.on('elements.changed', function (event) {
+    var elements = event.elements;
+    elements.forEach(function (e) {
+      eventBus.fire('element.changed', {
+        element: e
+      });
+    });
+    graphicsFactory.updateContainments(elements);
+  });
+  eventBus.on('shape.changed', function (event) {
+    graphicsFactory.update('shape', event.element, event.gfx);
+  });
+  eventBus.on('connection.changed', function (event) {
+    graphicsFactory.update('connection', event.element, event.gfx);
+  });
+}
+
+ChangeSupport.$inject = ['eventBus', 'canvas', 'elementRegistry', 'graphicsFactory'];
+
+},{"../../util/Elements":202}],112:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _ChangeSupport = _interopRequireDefault(require("./ChangeSupport"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['changeSupport'],
+  changeSupport: ['type', _ChangeSupport.default]
+};
+exports.default = _default;
+
+},{"./ChangeSupport":111}],113:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Clipboard;
+
+/**
+ * A clip board stub
+ */
+function Clipboard() {}
+
+Clipboard.prototype.get = function () {
+  return this._data;
+};
+
+Clipboard.prototype.set = function (data) {
+  this._data = data;
+};
+
+Clipboard.prototype.clear = function () {
+  var data = this._data;
+  delete this._data;
+  return data;
+};
+
+Clipboard.prototype.isEmpty = function () {
+  return !this._data;
+};
+
+},{}],114:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Clipboard = _interopRequireDefault(require("./Clipboard"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  clipboard: ['type', _Clipboard.default]
+};
+exports.default = _default;
+
+},{"./Clipboard":113}],115:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CopyPaste;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("../../util/Elements");
+
+/**
+ * @typedef {Function} <copyPaste.canCopyElements> listener
+ *
+ * @param {Object} context
+ * @param {Array<djs.model.Base>} context.elements
+ *
+ * @returns {Array<djs.model.Base>|boolean} - Return elements to be copied or false to disallow
+ * copying.
+ */
+
+/**
+ * @typedef {Function} <copyPaste.copyElement> listener
+ *
+ * @param {Object} context
+ * @param {Object} context.descriptor
+ * @param {djs.model.Base} context.element
+ * @param {Array<djs.model.Base>} context.elements
+ */
+
+/**
+ * @typedef {Function} <copyPaste.elementsCopied> listener
+ *
+ * @param {Object} context
+ * @param {Object} context.elements
+ * @param {Object} context.tree
+ */
+
+/**
+ * @typedef {Function} <copyPaste.pasteElement> listener
+ *
+ * @param {Object} context
+ * @param {Object} context.cache - Already created elements.
+ * @param {Object} context.descriptor
+ */
+
+/**
+ * @typedef {Function} <copyPaste.pasteElements> listener
+ *
+ * @param {Object} context
+ * @param {Object} context.hints - Add hints before pasting.
+ */
+
+/**
+ * Copy and paste elements.
+ *
+ * @param {Canvas} canvas
+ * @param {Create} create
+ * @param {Clipboard} clipboard
+ * @param {ElementFactory} elementFactory
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ * @param {Mouse} mouse
+ * @param {Rules} rules
+ */
+function CopyPaste(canvas, create, clipboard, elementFactory, eventBus, modeling, mouse, rules) {
+  this._canvas = canvas;
+  this._create = create;
+  this._clipboard = clipboard;
+  this._elementFactory = elementFactory;
+  this._eventBus = eventBus;
+  this._modeling = modeling;
+  this._mouse = mouse;
+  this._rules = rules;
+  eventBus.on('copyPaste.copyElement', function (context) {
+    var descriptor = context.descriptor,
+        element = context.element,
+        elements = context.elements; // default priority (priority = 1)
+
+    descriptor.priority = 1;
+    descriptor.id = element.id;
+    var parentCopied = (0, _minDash.find)(elements, function (e) {
+      return e === element.parent;
+    }); // do NOT reference parent if parent wasn't copied
+
+    if (parentCopied) {
+      descriptor.parent = element.parent.id;
+    } // attachers (priority = 2)
+
+
+    if (isAttacher(element)) {
+      descriptor.priority = 2;
+      descriptor.host = element.host.id;
+    } // connections (priority = 3)
+
+
+    if (isConnection(element)) {
+      descriptor.priority = 3;
+      descriptor.source = element.source.id;
+      descriptor.target = element.target.id;
+      descriptor.waypoints = copyWaypoints(element);
+    } // labels (priority = 4)
+
+
+    if (isLabel(element)) {
+      descriptor.priority = 4;
+      descriptor.labelTarget = element.labelTarget.id;
+    }
+
+    (0, _minDash.forEach)(['x', 'y', 'width', 'height'], function (property) {
+      if ((0, _minDash.isNumber)(element[property])) {
+        descriptor[property] = element[property];
+      }
+    });
+    descriptor.hidden = element.hidden;
+    descriptor.collapsed = element.collapsed;
+  });
+  eventBus.on('copyPaste.pasteElements', function (context) {
+    var hints = context.hints;
+    (0, _minDash.assign)(hints, {
+      createElementsBehavior: false
+    });
+  });
+}
+
+CopyPaste.$inject = ['canvas', 'create', 'clipboard', 'elementFactory', 'eventBus', 'modeling', 'mouse', 'rules'];
+/**
+ * Copy elements.
+ *
+ * @param {Array<djs.model.Base>} elements
+ *
+ * @returns {Object}
+ */
+
+CopyPaste.prototype.copy = function (elements) {
+  var allowed, tree;
+
+  if (!(0, _minDash.isArray)(elements)) {
+    elements = elements ? [elements] : [];
+  }
+
+  allowed = this._eventBus.fire('copyPaste.canCopyElements', {
+    elements: elements
+  });
+
+  if (allowed === false) {
+    tree = {};
+  } else {
+    tree = this.createTree((0, _minDash.isArray)(allowed) ? allowed : elements);
+  } // we set an empty tree, selection of elements
+  // to copy was empty.
+
+
+  this._clipboard.set(tree);
+
+  this._eventBus.fire('copyPaste.elementsCopied', {
+    elements: elements,
+    tree: tree
+  });
+
+  return tree;
+};
+/**
+ * Paste elements.
+ *
+ * @param {Object} [context]
+ * @param {djs.model.base} [context.element] - Parent.
+ * @param {Point} [context.point] - Position.
+ * @param {Object} [context.hints] - Hints.
+ */
+
+
+CopyPaste.prototype.paste = function (context) {
+  var tree = this._clipboard.get();
+
+  if (this._clipboard.isEmpty()) {
+    return;
+  }
+
+  var hints = context && context.hints || {};
+
+  this._eventBus.fire('copyPaste.pasteElements', {
+    hints: hints
+  });
+
+  var elements = this._createElements(tree); // paste directly
+
+
+  if (context && context.element && context.point) {
+    return this._paste(elements, context.element, context.point, hints);
+  }
+
+  this._create.start(this._mouse.getLastMoveEvent(), elements, {
+    hints: hints || {}
+  });
+};
+/**
+ * Paste elements directly.
+ *
+ * @param {Array<djs.model.Base>} elements
+ * @param {djs.model.base} target
+ * @param {Point} position
+ * @param {Object} [hints]
+ */
+
+
+CopyPaste.prototype._paste = function (elements, target, position, hints) {
+  // make sure each element has x and y
+  (0, _minDash.forEach)(elements, function (element) {
+    if (!(0, _minDash.isNumber)(element.x)) {
+      element.x = 0;
+    }
+
+    if (!(0, _minDash.isNumber)(element.y)) {
+      element.y = 0;
+    }
+  });
+  var bbox = (0, _Elements.getBBox)(elements); // center elements around cursor
+
+  (0, _minDash.forEach)(elements, function (element) {
+    if (isConnection(element)) {
+      element.waypoints = (0, _minDash.map)(element.waypoints, function (waypoint) {
+        return {
+          x: waypoint.x - bbox.x - bbox.width / 2,
+          y: waypoint.y - bbox.y - bbox.height / 2
+        };
+      });
+    }
+
+    (0, _minDash.assign)(element, {
+      x: element.x - bbox.x - bbox.width / 2,
+      y: element.y - bbox.y - bbox.height / 2
+    });
+  });
+  return this._modeling.createElements(elements, position, target, (0, _minDash.assign)({}, hints));
+};
+/**
+ * Create elements from tree.
+ */
+
+
+CopyPaste.prototype._createElements = function (tree) {
+  var self = this;
+  var eventBus = this._eventBus;
+  var cache = {};
+  var elements = [];
+  (0, _minDash.forEach)(tree, function (branch, depth) {
+    depth = parseInt(depth, 10); // sort by priority
+
+    branch = (0, _minDash.sortBy)(branch, 'priority');
+    (0, _minDash.forEach)(branch, function (descriptor) {
+      // remove priority
+      var attrs = (0, _minDash.assign)({}, (0, _minDash.omit)(descriptor, ['priority']));
+
+      if (cache[descriptor.parent]) {
+        attrs.parent = cache[descriptor.parent];
+      } else {
+        delete attrs.parent;
+      }
+
+      eventBus.fire('copyPaste.pasteElement', {
+        cache: cache,
+        descriptor: attrs
+      });
+      var element;
+
+      if (isConnection(attrs)) {
+        attrs.source = cache[descriptor.source];
+        attrs.target = cache[descriptor.target];
+        element = cache[descriptor.id] = self.createConnection(attrs);
+        elements.push(element);
+        return;
+      }
+
+      if (isLabel(attrs)) {
+        attrs.labelTarget = cache[attrs.labelTarget];
+        element = cache[descriptor.id] = self.createLabel(attrs);
+        elements.push(element);
+        return;
+      }
+
+      if (attrs.host) {
+        attrs.host = cache[attrs.host];
+      }
+
+      element = cache[descriptor.id] = self.createShape(attrs);
+      elements.push(element);
+    });
+  });
+  return elements;
+};
+
+CopyPaste.prototype.createConnection = function (attrs) {
+  var connection = this._elementFactory.createConnection((0, _minDash.omit)(attrs, ['id']));
+
+  return connection;
+};
+
+CopyPaste.prototype.createLabel = function (attrs) {
+  var label = this._elementFactory.createLabel((0, _minDash.omit)(attrs, ['id']));
+
+  return label;
+};
+
+CopyPaste.prototype.createShape = function (attrs) {
+  var shape = this._elementFactory.createShape((0, _minDash.omit)(attrs, ['id']));
+
+  return shape;
+};
+/**
+ * Check wether element has relations to other elements e.g. attachers, labels and connections.
+ *
+ * @param  {Object} element
+ * @param  {Array<djs.model.Base>} elements
+ *
+ * @returns {boolean}
+ */
+
+
+CopyPaste.prototype.hasRelations = function (element, elements) {
+  var labelTarget, source, target;
+
+  if (isConnection(element)) {
+    source = (0, _minDash.find)(elements, (0, _minDash.matchPattern)({
+      id: element.source.id
+    }));
+    target = (0, _minDash.find)(elements, (0, _minDash.matchPattern)({
+      id: element.target.id
+    }));
+
+    if (!source || !target) {
+      return false;
+    }
+  }
+
+  if (isLabel(element)) {
+    labelTarget = (0, _minDash.find)(elements, (0, _minDash.matchPattern)({
+      id: element.labelTarget.id
+    }));
+
+    if (!labelTarget) {
+      return false;
+    }
+  }
+
+  return true;
+};
+/**
+ * Create a tree-like structure from elements.
+ *
+ * @example
+ * tree: {
+  *  0: [
+  *    { id: 'Shape_1', priority: 1, ... },
+  *    { id: 'Shape_2', priority: 1, ... },
+  *    { id: 'Connection_1', source: 'Shape_1', target: 'Shape_2', priority: 3, ... },
+  *    ...
+  *  ],
+  *  1: [
+  *    { id: 'Shape_3', parent: 'Shape1', priority: 1, ... },
+  *    ...
+  *  ]
+  * };
+  *
+  * @param  {Array<djs.model.base>} elements
+  *
+  * @return {Object}
+  */
+
+
+CopyPaste.prototype.createTree = function (elements) {
+  var rules = this._rules,
+      self = this;
+  var tree = {},
+      elementsData = [];
+  var parents = (0, _Elements.getParents)(elements);
+
+  function canCopy(element, elements) {
+    return rules.allowed('element.copy', {
+      element: element,
+      elements: elements
+    });
+  }
+
+  function addElementData(element, depth) {
+    // (1) check wether element has already been added
+    var foundElementData = (0, _minDash.find)(elementsData, function (elementsData) {
+      return element === elementsData.element;
+    }); // (2) add element if not already added
+
+    if (!foundElementData) {
+      elementsData.push({
+        element: element,
+        depth: depth
+      });
+      return;
+    } // (3) update depth
+
+
+    if (foundElementData.depth < depth) {
+      elementsData = removeElementData(foundElementData, elementsData);
+      elementsData.push({
+        element: foundElementData.element,
+        depth: depth
+      });
+    }
+  }
+
+  function removeElementData(elementData, elementsData) {
+    var index = elementsData.indexOf(elementData);
+
+    if (index !== -1) {
+      elementsData.splice(index, 1);
+    }
+
+    return elementsData;
+  } // (1) add elements
+
+
+  (0, _Elements.eachElement)(parents, function (element, _index, depth) {
+    // do NOT add external labels directly
+    if (isLabel(element)) {
+      return;
+    } // always copy external labels
+
+
+    (0, _minDash.forEach)(element.labels, function (label) {
+      addElementData(label, depth);
+    });
+
+    function addRelatedElements(elements) {
+      elements && elements.length && (0, _minDash.forEach)(elements, function (element) {
+        // add external labels
+        (0, _minDash.forEach)(element.labels, function (label) {
+          addElementData(label, depth);
+        });
+        addElementData(element, depth);
+      });
+    }
+
+    (0, _minDash.forEach)([element.attachers, element.incoming, element.outgoing], addRelatedElements);
+    addElementData(element, depth);
+    return element.children;
+  });
+  elements = (0, _minDash.map)(elementsData, function (elementData) {
+    return elementData.element;
+  }); // (2) copy elements
+
+  elementsData = (0, _minDash.map)(elementsData, function (elementData) {
+    elementData.descriptor = {};
+
+    self._eventBus.fire('copyPaste.copyElement', {
+      descriptor: elementData.descriptor,
+      element: elementData.element,
+      elements: elements
+    });
+
+    return elementData;
+  }); // (3) sort elements by priority
+
+  elementsData = (0, _minDash.sortBy)(elementsData, function (elementData) {
+    return elementData.descriptor.priority;
+  });
+  elements = (0, _minDash.map)(elementsData, function (elementData) {
+    return elementData.element;
+  }); // (4) create tree
+
+  (0, _minDash.forEach)(elementsData, function (elementData) {
+    var depth = elementData.depth;
+
+    if (!self.hasRelations(elementData.element, elements)) {
+      removeElement(elementData.element, elements);
+      return;
+    }
+
+    if (!canCopy(elementData.element, elements)) {
+      removeElement(elementData.element, elements);
+      return;
+    }
+
+    if (!tree[depth]) {
+      tree[depth] = [];
+    }
+
+    tree[depth].push(elementData.descriptor);
+  });
+  return tree;
+}; // helpers //////////
+
+
+function isAttacher(element) {
+  return !!element.host;
+}
+
+function isConnection(element) {
+  return !!element.waypoints;
+}
+
+function isLabel(element) {
+  return !!element.labelTarget;
+}
+
+function copyWaypoints(element) {
+  return (0, _minDash.map)(element.waypoints, function (waypoint) {
+    waypoint = copyWaypoint(waypoint);
+
+    if (waypoint.original) {
+      waypoint.original = copyWaypoint(waypoint.original);
+    }
+
+    return waypoint;
+  });
+}
+
+function copyWaypoint(waypoint) {
+  return (0, _minDash.assign)({}, waypoint);
+}
+
+function removeElement(element, elements) {
+  var index = elements.indexOf(element);
+
+  if (index === -1) {
+    return elements;
+  }
+
+  return elements.splice(index, 1);
+}
+
+},{"../../util/Elements":202,"min-dash":219}],116:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _clipboard = _interopRequireDefault(require("../clipboard"));
+
+var _create = _interopRequireDefault(require("../create"));
+
+var _mouse = _interopRequireDefault(require("../mouse"));
+
+var _rules = _interopRequireDefault(require("../rules"));
+
+var _CopyPaste = _interopRequireDefault(require("./CopyPaste"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_clipboard.default, _create.default, _mouse.default, _rules.default],
+  __init__: ['copyPaste'],
+  copyPaste: ['type', _CopyPaste.default]
+};
+exports.default = _default;
+
+},{"../clipboard":114,"../create":119,"../mouse":158,"../rules":171,"./CopyPaste":115}],117:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Create;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("../../util/Elements");
+
+var MARKER_OK = 'drop-ok',
+    MARKER_NOT_OK = 'drop-not-ok',
+    MARKER_ATTACH = 'attach-ok',
+    MARKER_NEW_PARENT = 'new-parent';
+var PREFIX = 'create';
+var HIGH_PRIORITY = 2000;
+/**
+ * Create new elements through drag and drop.
+ *
+ * @param {Canvas} canvas
+ * @param {Dragging} dragging
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ * @param {Rules} rules
+ */
+
+function Create(canvas, dragging, eventBus, modeling, rules) {
+  // rules //////////
+
+  /**
+   * Check wether elements can be created.
+   *
+   * @param {Array<djs.model.Base>} elements
+   * @param {djs.model.Base} target
+   * @param {Point} position
+   * @param {djs.model.Base} [source]
+   *
+   * @returns {boolean|null|Object}
+   */
+  function canCreate(elements, target, position, source, hints) {
+    if (!target) {
+      return false;
+    } // ignore child elements and external labels
+
+
+    elements = (0, _minDash.filter)(elements, function (element) {
+      var labelTarget = element.labelTarget;
+      return !element.parent && !(isLabel(element) && elements.indexOf(labelTarget) !== -1);
+    });
+    var shape = (0, _minDash.find)(elements, function (element) {
+      return !isConnection(element);
+    });
+    var attach = false,
+        connect = false,
+        create = false; // (1) attaching single shapes
+
+    if (isSingleShape(elements)) {
+      attach = rules.allowed('shape.attach', {
+        position: position,
+        shape: shape,
+        target: target
+      });
+    }
+
+    if (!attach) {
+      // (2) creating elements
+      if (isSingleShape(elements)) {
+        create = rules.allowed('shape.create', {
+          position: position,
+          shape: shape,
+          source: source,
+          target: target
+        });
+      } else {
+        create = rules.allowed('elements.create', {
+          elements: elements,
+          position: position,
+          target: target
+        });
+      }
+    }
+
+    var connectionTarget = hints.connectionTarget; // (3) appending single shapes
+
+    if (create || attach) {
+      if (shape && source) {
+        connect = rules.allowed('connection.create', {
+          source: connectionTarget === source ? shape : source,
+          target: connectionTarget === source ? source : shape,
+          hints: {
+            targetParent: target,
+            targetAttach: attach
+          }
+        });
+      }
+
+      return {
+        attach: attach,
+        connect: connect
+      };
+    } // ignore wether or not elements can be created
+
+
+    if (create === null || attach === null) {
+      return null;
+    }
+
+    return false;
+  }
+
+  function setMarker(element, marker) {
+    [MARKER_ATTACH, MARKER_OK, MARKER_NOT_OK, MARKER_NEW_PARENT].forEach(function (m) {
+      if (m === marker) {
+        canvas.addMarker(element, m);
+      } else {
+        canvas.removeMarker(element, m);
+      }
+    });
+  } // event handling //////////
+
+
+  eventBus.on(['create.move', 'create.hover'], function (event) {
+    var context = event.context,
+        elements = context.elements,
+        hover = event.hover,
+        source = context.source,
+        hints = context.hints || {};
+
+    if (!hover) {
+      context.canExecute = false;
+      context.target = null;
+      return;
+    }
+
+    ensureConstraints(event);
+    var position = {
+      x: event.x,
+      y: event.y
+    };
+    var canExecute = context.canExecute = hover && canCreate(elements, hover, position, source, hints);
+
+    if (hover && canExecute !== null) {
+      context.target = hover;
+
+      if (canExecute && canExecute.attach) {
+        setMarker(hover, MARKER_ATTACH);
+      } else {
+        setMarker(hover, canExecute ? MARKER_NEW_PARENT : MARKER_NOT_OK);
+      }
+    }
+  });
+  eventBus.on(['create.end', 'create.out', 'create.cleanup'], function (event) {
+    var hover = event.hover;
+
+    if (hover) {
+      setMarker(hover, null);
+    }
+  });
+  eventBus.on('create.end', function (event) {
+    var context = event.context,
+        source = context.source,
+        shape = context.shape,
+        elements = context.elements,
+        target = context.target,
+        canExecute = context.canExecute,
+        attach = canExecute && canExecute.attach,
+        connect = canExecute && canExecute.connect,
+        hints = context.hints || {};
+
+    if (canExecute === false || !target) {
+      return false;
+    }
+
+    ensureConstraints(event);
+    var position = {
+      x: event.x,
+      y: event.y
+    };
+
+    if (connect) {
+      shape = modeling.appendShape(source, shape, position, target, {
+        attach: attach,
+        connection: connect === true ? {} : connect,
+        connectionTarget: hints.connectionTarget
+      });
+    } else {
+      elements = modeling.createElements(elements, position, target, (0, _minDash.assign)({}, hints, {
+        attach: attach
+      })); // update shape
+
+      shape = (0, _minDash.find)(elements, function (element) {
+        return !isConnection(element);
+      });
+    } // update elements and shape
+
+
+    (0, _minDash.assign)(context, {
+      elements: elements,
+      shape: shape
+    });
+    (0, _minDash.assign)(event, {
+      elements: elements,
+      shape: shape
+    });
+  });
+
+  function cancel() {
+    var context = dragging.context();
+
+    if (context && context.prefix === PREFIX) {
+      dragging.cancel();
+    }
+  } // cancel on <elements.changed> that is not result of <drag.end>
+
+
+  eventBus.on('create.init', function () {
+    eventBus.on('elements.changed', cancel);
+    eventBus.once(['create.cancel', 'create.end'], HIGH_PRIORITY, function () {
+      eventBus.off('elements.changed', cancel);
+    });
+  }); // API //////////
+
+  this.start = function (event, elements, context) {
+    if (!(0, _minDash.isArray)(elements)) {
+      elements = [elements];
+    }
+
+    var shape = (0, _minDash.find)(elements, function (element) {
+      return !isConnection(element);
+    });
+
+    if (!shape) {
+      // at least one shape is required
+      return;
+    }
+
+    context = (0, _minDash.assign)({
+      elements: elements,
+      hints: {},
+      shape: shape
+    }, context || {}); // make sure each element has x and y
+
+    (0, _minDash.forEach)(elements, function (element) {
+      if (!(0, _minDash.isNumber)(element.x)) {
+        element.x = 0;
+      }
+
+      if (!(0, _minDash.isNumber)(element.y)) {
+        element.y = 0;
+      }
+    });
+    var bbox = (0, _Elements.getBBox)(elements); // center elements around cursor
+
+    (0, _minDash.forEach)(elements, function (element) {
+      if (isConnection(element)) {
+        element.waypoints = (0, _minDash.map)(element.waypoints, function (waypoint) {
+          return {
+            x: waypoint.x - bbox.x - bbox.width / 2,
+            y: waypoint.y - bbox.y - bbox.height / 2
+          };
+        });
+      }
+
+      (0, _minDash.assign)(element, {
+        x: element.x - bbox.x - bbox.width / 2,
+        y: element.y - bbox.y - bbox.height / 2
+      });
+    });
+    dragging.init(event, PREFIX, {
+      cursor: 'grabbing',
+      autoActivate: true,
+      data: {
+        shape: shape,
+        elements: elements,
+        context: context
+      }
+    });
+  };
+}
+
+Create.$inject = ['canvas', 'dragging', 'eventBus', 'modeling', 'rules']; // helpers //////////
+
+function ensureConstraints(event) {
+  var context = event.context,
+      createConstraints = context.createConstraints;
+
+  if (!createConstraints) {
+    return;
+  }
+
+  if (createConstraints.left) {
+    event.x = Math.max(event.x, createConstraints.left);
+  }
+
+  if (createConstraints.right) {
+    event.x = Math.min(event.x, createConstraints.right);
+  }
+
+  if (createConstraints.top) {
+    event.y = Math.max(event.y, createConstraints.top);
+  }
+
+  if (createConstraints.bottom) {
+    event.y = Math.min(event.y, createConstraints.bottom);
+  }
+}
+
+function isConnection(element) {
+  return !!element.waypoints;
+}
+
+function isSingleShape(elements) {
+  return elements && elements.length === 1 && !isConnection(elements[0]);
+}
+
+function isLabel(element) {
+  return !!element.labelTarget;
+}
+
+},{"../../util/Elements":202,"min-dash":219}],118:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreatePreview;
+
+var _SvgTransformUtil = require("../../util/SvgTransformUtil");
+
+var _GraphicsUtil = require("../../util/GraphicsUtil");
+
+var _tinySvg = require("tiny-svg");
+
+var LOW_PRIORITY = 750;
+
+function CreatePreview(canvas, eventBus, graphicsFactory, previewSupport, styles) {
+  function createDragGroup(elements) {
+    var dragGroup = (0, _tinySvg.create)('g');
+    (0, _tinySvg.attr)(dragGroup, styles.cls('djs-drag-group', ['no-events']));
+    var childrenGfx = (0, _tinySvg.create)('g');
+    elements.forEach(function (element) {
+      // create graphics
+      var gfx;
+
+      if (element.hidden) {
+        return;
+      }
+
+      if (element.waypoints) {
+        gfx = graphicsFactory._createContainer('connection', childrenGfx);
+        graphicsFactory.drawConnection((0, _GraphicsUtil.getVisual)(gfx), element);
+      } else {
+        gfx = graphicsFactory._createContainer('shape', childrenGfx);
+        graphicsFactory.drawShape((0, _GraphicsUtil.getVisual)(gfx), element);
+        (0, _SvgTransformUtil.translate)(gfx, element.x, element.y);
+      } // add preview
+
+
+      previewSupport.addDragger(element, dragGroup, gfx);
+    });
+    return dragGroup;
+  }
+
+  eventBus.on('create.move', LOW_PRIORITY, function (event) {
+    var hover = event.hover,
+        context = event.context,
+        elements = context.elements,
+        dragGroup = context.dragGroup; // lazily create previews
+
+    if (!dragGroup) {
+      dragGroup = context.dragGroup = createDragGroup(elements);
+    }
+
+    var defaultLayer;
+
+    if (hover) {
+      if (!dragGroup.parentNode) {
+        defaultLayer = canvas.getDefaultLayer();
+        (0, _tinySvg.append)(defaultLayer, dragGroup);
+      }
+
+      (0, _SvgTransformUtil.translate)(dragGroup, event.x, event.y);
+    } else {
+      (0, _tinySvg.remove)(dragGroup);
+    }
+  });
+  eventBus.on('create.cleanup', function (event) {
+    var context = event.context,
+        dragGroup = context.dragGroup;
+
+    if (dragGroup) {
+      (0, _tinySvg.remove)(dragGroup);
+    }
+  });
+}
+
+CreatePreview.$inject = ['canvas', 'eventBus', 'graphicsFactory', 'previewSupport', 'styles'];
+
+},{"../../util/GraphicsUtil":205,"../../util/SvgTransformUtil":214,"tiny-svg":228}],119:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _dragging = _interopRequireDefault(require("../dragging"));
+
+var _previewSupport = _interopRequireDefault(require("../preview-support"));
+
+var _rules = _interopRequireDefault(require("../rules"));
+
+var _selection = _interopRequireDefault(require("../selection"));
+
+var _Create = _interopRequireDefault(require("./Create"));
+
+var _CreatePreview = _interopRequireDefault(require("./CreatePreview"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_dragging.default, _previewSupport.default, _rules.default, _selection.default],
+  __init__: ['create', 'createPreview'],
+  create: ['type', _Create.default],
+  createPreview: ['type', _CreatePreview.default]
+};
+exports.default = _default;
+
+},{"../dragging":121,"../preview-support":165,"../rules":171,"../selection":175,"./Create":117,"./CreatePreview":118}],120:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Dragging;
+
+var _minDash = require("min-dash");
+
+var _minDom = require("min-dom");
+
+var _Event = require("../../util/Event");
+
+var _Cursor = require("../../util/Cursor");
+
+var _ClickTrap = require("../../util/ClickTrap");
+
+var _PositionUtil = require("../../util/PositionUtil");
+
+var round = Math.round;
+var DRAG_ACTIVE_CLS = 'djs-drag-active';
+
+function preventDefault(event) {
+  event.preventDefault();
+}
+
+function isTouchEvent(event) {
+  // check for TouchEvent being available first
+  // (i.e. not available on desktop Firefox)
+  return typeof TouchEvent !== 'undefined' && event instanceof TouchEvent;
+}
+
+function getLength(point) {
+  return Math.sqrt(Math.pow(point.x, 2) + Math.pow(point.y, 2));
+}
+/**
+ * A helper that fires canvas localized drag events and realizes
+ * the general "drag-and-drop" look and feel.
+ *
+ * Calling {@link Dragging#activate} activates dragging on a canvas.
+ *
+ * It provides the following:
+ *
+ *   * emits life cycle events, namespaced with a prefix assigned
+ *     during dragging activation
+ *   * sets and restores the cursor
+ *   * sets and restores the selection if elements still exist
+ *   * ensures there can be only one drag operation active at a time
+ *
+ * Dragging may be canceled manually by calling {@link Dragging#cancel}
+ * or by pressing ESC.
+ *
+ *
+ * ## Life-cycle events
+ *
+ * Dragging can be in three different states, off, initialized
+ * and active.
+ *
+ * (1) off: no dragging operation is in progress
+ * (2) initialized: a new drag operation got initialized but not yet
+ *                  started (i.e. because of no initial move)
+ * (3) started: dragging is in progress
+ *
+ * Eventually dragging will be off again after a drag operation has
+ * been ended or canceled via user click or ESC key press.
+ *
+ * To indicate transitions between these states dragging emits generic
+ * life-cycle events with the `drag.` prefix _and_ events namespaced
+ * to a prefix choosen by a user during drag initialization.
+ *
+ * The following events are emitted (appropriately prefixed) via
+ * the {@link EventBus}.
+ *
+ * * `init`
+ * * `start`
+ * * `move`
+ * * `end`
+ * * `ended` (dragging already in off state)
+ * * `cancel` (only if previously started)
+ * * `canceled` (dragging already in off state, only if previously started)
+ * * `cleanup`
+ *
+ *
+ * @example
+ *
+ * function MyDragComponent(eventBus, dragging) {
+ *
+ *   eventBus.on('mydrag.start', function(event) {
+ *     console.log('yes, we start dragging');
+ *   });
+ *
+ *   eventBus.on('mydrag.move', function(event) {
+ *     console.log('canvas local coordinates', event.x, event.y, event.dx, event.dy);
+ *
+ *     // local drag data is passed with the event
+ *     event.context.foo; // "BAR"
+ *
+ *     // the original mouse event, too
+ *     event.originalEvent; // MouseEvent(...)
+ *   });
+ *
+ *   eventBus.on('element.click', function(event) {
+ *     dragging.init(event, 'mydrag', {
+ *       cursor: 'grabbing',
+ *       data: {
+ *         context: {
+ *           foo: "BAR"
+ *         }
+ *       }
+ *     });
+ *   });
+ * }
+ */
+
+
+function Dragging(eventBus, canvas, selection, elementRegistry) {
+  var defaultOptions = {
+    threshold: 5,
+    trapClick: true
+  }; // the currently active drag operation
+  // dragging is active as soon as this context exists.
+  //
+  // it is visually _active_ only when a context.active flag is set to true.
+
+  var context;
+  /* convert a global event into local coordinates */
+
+  function toLocalPoint(globalPosition) {
+    var viewbox = canvas.viewbox();
+
+    var clientRect = canvas._container.getBoundingClientRect();
+
+    return {
+      x: viewbox.x + (globalPosition.x - clientRect.left) / viewbox.scale,
+      y: viewbox.y + (globalPosition.y - clientRect.top) / viewbox.scale
+    };
+  } // helpers
+
+
+  function fire(type, dragContext) {
+    dragContext = dragContext || context;
+    var event = eventBus.createEvent((0, _minDash.assign)({}, dragContext.payload, dragContext.data, {
+      isTouch: dragContext.isTouch
+    })); // default integration
+
+    if (eventBus.fire('drag.' + type, event) === false) {
+      return false;
+    }
+
+    return eventBus.fire(dragContext.prefix + '.' + type, event);
+  }
+
+  function restoreSelection(previousSelection) {
+    var existingSelection = previousSelection.filter(function (element) {
+      return elementRegistry.get(element.id);
+    });
+    existingSelection.length && selection.select(existingSelection);
+  } // event listeners
+
+
+  function move(event, activate) {
+    var payload = context.payload,
+        displacement = context.displacement;
+    var globalStart = context.globalStart,
+        globalCurrent = (0, _Event.toPoint)(event),
+        globalDelta = (0, _PositionUtil.delta)(globalCurrent, globalStart);
+    var localStart = context.localStart,
+        localCurrent = toLocalPoint(globalCurrent),
+        localDelta = (0, _PositionUtil.delta)(localCurrent, localStart); // activate context explicitly or once threshold is reached
+
+    if (!context.active && (activate || getLength(globalDelta) > context.threshold)) {
+      // fire start event with original
+      // starting coordinates
+      (0, _minDash.assign)(payload, {
+        x: round(localStart.x + displacement.x),
+        y: round(localStart.y + displacement.y),
+        dx: 0,
+        dy: 0
+      }, {
+        originalEvent: event
+      });
+
+      if (false === fire('start')) {
+        return cancel();
+      }
+
+      context.active = true; // unset selection and remember old selection
+      // the previous (old) selection will always passed
+      // with the event via the event.previousSelection property
+
+      if (!context.keepSelection) {
+        payload.previousSelection = selection.get();
+        selection.select(null);
+      } // allow custom cursor
+
+
+      if (context.cursor) {
+        (0, _Cursor.set)(context.cursor);
+      } // indicate dragging via marker on root element
+
+
+      canvas.addMarker(canvas.getRootElement(), DRAG_ACTIVE_CLS);
+    }
+
+    (0, _Event.stopPropagation)(event);
+
+    if (context.active) {
+      // update payload with actual coordinates
+      (0, _minDash.assign)(payload, {
+        x: round(localCurrent.x + displacement.x),
+        y: round(localCurrent.y + displacement.y),
+        dx: round(localDelta.x),
+        dy: round(localDelta.y)
+      }, {
+        originalEvent: event
+      }); // emit move event
+
+      fire('move');
+    }
+  }
+
+  function end(event) {
+    var previousContext,
+        returnValue = true;
+
+    if (context.active) {
+      if (event) {
+        context.payload.originalEvent = event; // suppress original event (click, ...)
+        // because we just ended a drag operation
+
+        (0, _Event.stopPropagation)(event);
+      } // implementations may stop restoring the
+      // original state (selections, ...) by preventing the
+      // end events default action
+
+
+      returnValue = fire('end');
+    }
+
+    if (returnValue === false) {
+      fire('rejected');
+    }
+
+    previousContext = cleanup(returnValue !== true); // last event to be fired when all drag operations are done
+    // at this point in time no drag operation is in progress anymore
+
+    fire('ended', previousContext);
+  } // cancel active drag operation if the user presses
+  // the ESC key on the keyboard
+
+
+  function checkCancel(event) {
+    if (event.which === 27) {
+      preventDefault(event);
+      cancel();
+    }
+  } // prevent ghost click that might occur after a finished
+  // drag and drop session
+
+
+  function trapClickAndEnd(event) {
+    var untrap; // trap the click in case we are part of an active
+    // drag operation. This will effectively prevent
+    // the ghost click that cannot be canceled otherwise.
+
+    if (context.active) {
+      untrap = (0, _ClickTrap.install)(eventBus); // remove trap after minimal delay
+
+      setTimeout(untrap, 400); // prevent default action (click)
+
+      preventDefault(event);
+    }
+
+    end(event);
+  }
+
+  function trapTouch(event) {
+    move(event);
+  } // update the drag events hover (djs.model.Base) and hoverGfx (Snap<SVGElement>)
+  // properties during hover and out and fire {prefix}.hover and {prefix}.out properties
+  // respectively
+
+
+  function hover(event) {
+    var payload = context.payload;
+    payload.hoverGfx = event.gfx;
+    payload.hover = event.element;
+    fire('hover');
+  }
+
+  function out(event) {
+    fire('out');
+    var payload = context.payload;
+    payload.hoverGfx = null;
+    payload.hover = null;
+  } // life-cycle methods
+
+
+  function cancel(restore) {
+    var previousContext;
+
+    if (!context) {
+      return;
+    }
+
+    var wasActive = context.active;
+
+    if (wasActive) {
+      fire('cancel');
+    }
+
+    previousContext = cleanup(restore);
+
+    if (wasActive) {
+      // last event to be fired when all drag operations are done
+      // at this point in time no drag operation is in progress anymore
+      fire('canceled', previousContext);
+    }
+  }
+
+  function cleanup(restore) {
+    var previousContext, endDrag;
+    fire('cleanup'); // reset cursor
+
+    (0, _Cursor.unset)();
+
+    if (context.trapClick) {
+      endDrag = trapClickAndEnd;
+    } else {
+      endDrag = end;
+    } // reset dom listeners
+
+
+    _minDom.event.unbind(document, 'mousemove', move);
+
+    _minDom.event.unbind(document, 'dragstart', preventDefault);
+
+    _minDom.event.unbind(document, 'selectstart', preventDefault);
+
+    _minDom.event.unbind(document, 'mousedown', endDrag, true);
+
+    _minDom.event.unbind(document, 'mouseup', endDrag, true);
+
+    _minDom.event.unbind(document, 'keyup', checkCancel);
+
+    _minDom.event.unbind(document, 'touchstart', trapTouch, true);
+
+    _minDom.event.unbind(document, 'touchcancel', cancel, true);
+
+    _minDom.event.unbind(document, 'touchmove', move, true);
+
+    _minDom.event.unbind(document, 'touchend', end, true);
+
+    eventBus.off('element.hover', hover);
+    eventBus.off('element.out', out); // remove drag marker on root element
+
+    canvas.removeMarker(canvas.getRootElement(), DRAG_ACTIVE_CLS); // restore selection, unless it has changed
+
+    var previousSelection = context.payload.previousSelection;
+
+    if (restore !== false && previousSelection && !selection.get().length) {
+      restoreSelection(previousSelection);
+    }
+
+    previousContext = context;
+    context = null;
+    return previousContext;
+  }
+  /**
+   * Initialize a drag operation.
+   *
+   * If `localPosition` is given, drag events will be emitted
+   * relative to it.
+   *
+   * @param {MouseEvent|TouchEvent} [event]
+   * @param {Point} [localPosition] actual diagram local position this drag operation should start at
+   * @param {string} prefix
+   * @param {Object} [options]
+   */
+
+
+  function init(event, relativeTo, prefix, options) {
+    // only one drag operation may be active, at a time
+    if (context) {
+      cancel(false);
+    }
+
+    if (typeof relativeTo === 'string') {
+      options = prefix;
+      prefix = relativeTo;
+      relativeTo = null;
+    }
+
+    options = (0, _minDash.assign)({}, defaultOptions, options || {});
+    var data = options.data || {},
+        originalEvent,
+        globalStart,
+        localStart,
+        endDrag,
+        isTouch;
+
+    if (options.trapClick) {
+      endDrag = trapClickAndEnd;
+    } else {
+      endDrag = end;
+    }
+
+    if (event) {
+      originalEvent = (0, _Event.getOriginal)(event) || event;
+      globalStart = (0, _Event.toPoint)(event);
+      (0, _Event.stopPropagation)(event); // prevent default browser dragging behavior
+
+      if (originalEvent.type === 'dragstart') {
+        preventDefault(originalEvent);
+      }
+    } else {
+      originalEvent = null;
+      globalStart = {
+        x: 0,
+        y: 0
+      };
+    }
+
+    localStart = toLocalPoint(globalStart);
+
+    if (!relativeTo) {
+      relativeTo = localStart;
+    }
+
+    isTouch = isTouchEvent(originalEvent);
+    context = (0, _minDash.assign)({
+      prefix: prefix,
+      data: data,
+      payload: {},
+      globalStart: globalStart,
+      displacement: (0, _PositionUtil.delta)(relativeTo, localStart),
+      localStart: localStart,
+      isTouch: isTouch
+    }, options); // skip dom registration if trigger
+    // is set to manual (during testing)
+
+    if (!options.manual) {
+      // add dom listeners
+      if (isTouch) {
+        _minDom.event.bind(document, 'touchstart', trapTouch, true);
+
+        _minDom.event.bind(document, 'touchcancel', cancel, true);
+
+        _minDom.event.bind(document, 'touchmove', move, true);
+
+        _minDom.event.bind(document, 'touchend', end, true);
+      } else {
+        // assume we use the mouse to interact per default
+        _minDom.event.bind(document, 'mousemove', move); // prevent default browser drag and text selection behavior
+
+
+        _minDom.event.bind(document, 'dragstart', preventDefault);
+
+        _minDom.event.bind(document, 'selectstart', preventDefault);
+
+        _minDom.event.bind(document, 'mousedown', endDrag, true);
+
+        _minDom.event.bind(document, 'mouseup', endDrag, true);
+      }
+
+      _minDom.event.bind(document, 'keyup', checkCancel);
+
+      eventBus.on('element.hover', hover);
+      eventBus.on('element.out', out);
+    }
+
+    fire('init');
+
+    if (options.autoActivate) {
+      move(event, true);
+    }
+  } // cancel on diagram destruction
+
+
+  eventBus.on('diagram.destroy', cancel); // API
+
+  this.init = init;
+  this.move = move;
+  this.hover = hover;
+  this.out = out;
+  this.end = end;
+  this.cancel = cancel; // for introspection
+
+  this.context = function () {
+    return context;
+  };
+
+  this.setOptions = function (options) {
+    (0, _minDash.assign)(defaultOptions, options);
+  };
+}
+
+Dragging.$inject = ['eventBus', 'canvas', 'selection', 'elementRegistry'];
+
+},{"../../util/ClickTrap":199,"../../util/Cursor":201,"../../util/Event":203,"../../util/PositionUtil":211,"min-dash":219,"min-dom":220}],121:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _hoverFix = _interopRequireDefault(require("../hover-fix"));
+
+var _selection = _interopRequireDefault(require("../selection"));
+
+var _Dragging = _interopRequireDefault(require("./Dragging"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_hoverFix.default, _selection.default],
+  dragging: ['type', _Dragging.default]
+};
+exports.default = _default;
+
+},{"../hover-fix":123,"../selection":175,"./Dragging":120}],122:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = HoverFix;
+
+var _minDom = require("min-dom");
+
+var _Event = require("../../util/Event");
+
+var HIGH_PRIORITY = 1500;
+/**
+ * Browsers may swallow certain events (hover, out ...) if users are to
+ * fast with the mouse.
+ *
+ * @see http://stackoverflow.com/questions/7448468/why-cant-i-reliably-capture-a-mouseout-event
+ *
+ * The fix implemented in this component ensure that we
+ *
+ * 1) have a hover state after a successful drag.move event
+ * 2) have an out event when dragging leaves an element
+ *
+ * @param {ElementRegistry} elementRegistry
+ * @param {EventBus} eventBus
+ * @param {Injector} injector
+ */
+
+function HoverFix(elementRegistry, eventBus, injector) {
+  var self = this;
+  var dragging = injector.get('dragging', false);
+  /**
+   * Make sure we are god damn hovering!
+   *
+   * @param {Event} dragging event
+   */
+
+  function ensureHover(event) {
+    if (event.hover) {
+      return;
+    }
+
+    var originalEvent = event.originalEvent;
+
+    var gfx = self._findTargetGfx(originalEvent);
+
+    var element = gfx && elementRegistry.get(gfx);
+
+    if (gfx && element) {
+      // 1) cancel current mousemove
+      event.stopPropagation(); // 2) emit fake hover for new target
+
+      dragging.hover({
+        element: element,
+        gfx: gfx
+      }); // 3) re-trigger move event
+
+      dragging.move(originalEvent);
+    }
+  }
+
+  if (dragging) {
+    /**
+     * We wait for a specific sequence of events before
+     * emitting a fake drag.hover event.
+     *
+     * Event Sequence:
+     *
+     * drag.start
+     * drag.move >> ensure we are hovering
+     */
+    eventBus.on('drag.start', function (event) {
+      eventBus.once('drag.move', HIGH_PRIORITY, function (event) {
+        ensureHover(event);
+      });
+    });
+  }
+  /**
+   * We make sure that element.out is always fired, even if the
+   * browser swallows an element.out event.
+   *
+   * Event sequence:
+   *
+   * element.hover
+   * (element.out >> sometimes swallowed)
+   * element.hover >> ensure we fired element.out
+   */
+
+
+  (function () {
+    var hoverGfx;
+    var hover;
+    eventBus.on('element.hover', function (event) {
+      // (1) remember current hover element
+      hoverGfx = event.gfx;
+      hover = event.element;
+    });
+    eventBus.on('element.hover', HIGH_PRIORITY, function (event) {
+      // (3) am I on an element still?
+      if (hover) {
+        // (4) that is a problem, gotta "simulate the out"
+        eventBus.fire('element.out', {
+          element: hover,
+          gfx: hoverGfx
+        });
+      }
+    });
+    eventBus.on('element.out', function () {
+      // (2) unset hover state if we correctly outed us *GG*
+      hoverGfx = null;
+      hover = null;
+    });
+  })();
+
+  this._findTargetGfx = function (event) {
+    var position, target;
+
+    if (!(event instanceof MouseEvent)) {
+      return;
+    }
+
+    position = (0, _Event.toPoint)(event); // damn expensive operation, ouch!
+
+    target = document.elementFromPoint(position.x, position.y);
+    return getGfx(target);
+  };
+}
+
+HoverFix.$inject = ['elementRegistry', 'eventBus', 'injector']; // helpers /////////////////////
+
+function getGfx(target) {
+  return (0, _minDom.closest)(target, 'svg, .djs-element', true);
+}
+
+},{"../../util/Event":203,"min-dom":220}],123:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _HoverFix = _interopRequireDefault(require("./HoverFix"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['hoverFix'],
+  hoverFix: ['type', _HoverFix.default]
+};
+exports.default = _default;
+
+},{"./HoverFix":122}],124:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10125,7 +21587,7 @@ InteractionEvents.$inject = ['eventBus', 'elementRegistry', 'styles'];
  * @property {Event} originalEvent
  */
 
-},{"../../util/Mouse":69,"../../util/RenderUtil":72,"min-dash":78,"min-dom":79,"tiny-svg":87}],36:[function(require,module,exports){
+},{"../../util/Mouse":209,"../../util/RenderUtil":213,"min-dash":219,"min-dom":220,"tiny-svg":228}],125:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10143,7 +21605,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./InteractionEvents":35}],37:[function(require,module,exports){
+},{"./InteractionEvents":124}],126:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10308,7 +21770,7 @@ function isInput(target) {
   return target && ((0, _minDom.matches)(target, 'input, textarea') || target.contentEditable === 'true');
 }
 
-},{"./KeyboardUtil":39,"min-dash":78,"min-dom":79}],38:[function(require,module,exports){
+},{"./KeyboardUtil":128,"min-dash":219,"min-dom":220}],127:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10467,7 +21929,7 @@ KeyboardBindings.prototype.registerBindings = function (keyboard, editorActions)
   });
 };
 
-},{"./KeyboardUtil":39}],39:[function(require,module,exports){
+},{"./KeyboardUtil":128}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10522,7 +21984,7 @@ function isShift(event) {
   return event.shiftKey;
 }
 
-},{"min-dash":78}],40:[function(require,module,exports){
+},{"min-dash":219}],129:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10543,7 +22005,2738 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Keyboard":37,"./KeyboardBindings":38}],41:[function(require,module,exports){
+},{"./Keyboard":126,"./KeyboardBindings":127}],130:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = LabelSupport;
+
+var _minDash = require("min-dash");
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _Collections = require("../../util/Collections");
+
+var _Removal = require("../../util/Removal");
+
+var _CommandInterceptor = _interopRequireDefault(require("../../command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LOW_PRIORITY = 250,
+    HIGH_PRIORITY = 1400;
+
+/**
+ * A handler that makes sure labels are properly moved with
+ * their label targets.
+ *
+ * @param {didi.Injector} injector
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ */
+function LabelSupport(injector, eventBus, modeling) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  var movePreview = injector.get('movePreview', false); // remove labels from the collection that are being
+  // moved with other elements anyway
+
+  eventBus.on('shape.move.start', HIGH_PRIORITY, function (e) {
+    var context = e.context,
+        shapes = context.shapes,
+        validatedShapes = context.validatedShapes;
+    context.shapes = removeLabels(shapes);
+    context.validatedShapes = removeLabels(validatedShapes);
+  }); // add labels to visual's group
+
+  movePreview && eventBus.on('shape.move.start', LOW_PRIORITY, function (e) {
+    var context = e.context,
+        shapes = context.shapes;
+    var labels = [];
+    (0, _minDash.forEach)(shapes, function (element) {
+      (0, _minDash.forEach)(element.labels, function (label) {
+        if (!label.hidden && context.shapes.indexOf(label) === -1) {
+          labels.push(label);
+        }
+
+        if (element.labelTarget) {
+          labels.push(element);
+        }
+      });
+    });
+    (0, _minDash.forEach)(labels, function (label) {
+      movePreview.makeDraggable(context, label, true);
+    });
+  }); // add all labels to move closure
+
+  this.preExecuted('elements.move', HIGH_PRIORITY, function (e) {
+    var context = e.context,
+        closure = context.closure,
+        enclosedElements = closure.enclosedElements;
+    var enclosedLabels = []; // find labels that are not part of
+    // move closure yet and add them
+
+    (0, _minDash.forEach)(enclosedElements, function (element) {
+      (0, _minDash.forEach)(element.labels, function (label) {
+        if (!enclosedElements[label.id]) {
+          enclosedLabels.push(label);
+        }
+      });
+    });
+    closure.addAll(enclosedLabels);
+  });
+  this.preExecute(['connection.delete', 'shape.delete'], function (e) {
+    var context = e.context,
+        element = context.connection || context.shape;
+    (0, _Removal.saveClear)(element.labels, function (label) {
+      modeling.removeShape(label, {
+        nested: true
+      });
+    });
+  });
+  this.execute('shape.delete', function (e) {
+    var context = e.context,
+        shape = context.shape,
+        labelTarget = shape.labelTarget; // unset labelTarget
+
+    if (labelTarget) {
+      context.labelTargetIndex = (0, _Collections.indexOf)(labelTarget.labels, shape);
+      context.labelTarget = labelTarget;
+      shape.labelTarget = null;
+    }
+  });
+  this.revert('shape.delete', function (e) {
+    var context = e.context,
+        shape = context.shape,
+        labelTarget = context.labelTarget,
+        labelTargetIndex = context.labelTargetIndex; // restore labelTarget
+
+    if (labelTarget) {
+      (0, _Collections.add)(labelTarget.labels, shape, labelTargetIndex);
+      shape.labelTarget = labelTarget;
+    }
+  });
+}
+
+(0, _inherits.default)(LabelSupport, _CommandInterceptor.default);
+LabelSupport.$inject = ['injector', 'eventBus', 'modeling'];
+/**
+ * Return a filtered list of elements that do not
+ * contain attached elements with hosts being part
+ * of the selection.
+ *
+ * @param  {Array<djs.model.Base>} elements
+ *
+ * @return {Array<djs.model.Base>} filtered
+ */
+
+function removeLabels(elements) {
+  return (0, _minDash.filter)(elements, function (element) {
+    // filter out labels that are move together
+    // with their label targets
+    return elements.indexOf(element.labelTarget) === -1;
+  });
+}
+
+},{"../../command/CommandInterceptor":96,"../../util/Collections":200,"../../util/Removal":212,"inherits":218,"min-dash":219}],131:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _LabelSupport = _interopRequireDefault(require("./LabelSupport"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['labelSupport'],
+  labelSupport: ['type', _LabelSupport.default]
+};
+exports.default = _default;
+
+},{"./LabelSupport":130}],132:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Modeling;
+
+var _minDash = require("min-dash");
+
+var _model = require("../../model");
+
+var _AlignElementsHandler = _interopRequireDefault(require("./cmd/AlignElementsHandler"));
+
+var _AppendShapeHandler = _interopRequireDefault(require("./cmd/AppendShapeHandler"));
+
+var _CreateConnectionHandler = _interopRequireDefault(require("./cmd/CreateConnectionHandler"));
+
+var _CreateElementsHandler = _interopRequireDefault(require("./cmd/CreateElementsHandler"));
+
+var _CreateLabelHandler = _interopRequireDefault(require("./cmd/CreateLabelHandler"));
+
+var _CreateShapeHandler = _interopRequireDefault(require("./cmd/CreateShapeHandler"));
+
+var _DeleteConnectionHandler = _interopRequireDefault(require("./cmd/DeleteConnectionHandler"));
+
+var _DeleteElementsHandler = _interopRequireDefault(require("./cmd/DeleteElementsHandler"));
+
+var _DeleteShapeHandler = _interopRequireDefault(require("./cmd/DeleteShapeHandler"));
+
+var _DistributeElementsHandler = _interopRequireDefault(require("./cmd/DistributeElementsHandler"));
+
+var _LayoutConnectionHandler = _interopRequireDefault(require("./cmd/LayoutConnectionHandler"));
+
+var _MoveConnectionHandler = _interopRequireDefault(require("./cmd/MoveConnectionHandler"));
+
+var _MoveElementsHandler = _interopRequireDefault(require("./cmd/MoveElementsHandler"));
+
+var _MoveShapeHandler = _interopRequireDefault(require("./cmd/MoveShapeHandler"));
+
+var _ReconnectConnectionHandler = _interopRequireDefault(require("./cmd/ReconnectConnectionHandler"));
+
+var _ReplaceShapeHandler = _interopRequireDefault(require("./cmd/ReplaceShapeHandler"));
+
+var _ResizeShapeHandler = _interopRequireDefault(require("./cmd/ResizeShapeHandler"));
+
+var _SpaceToolHandler = _interopRequireDefault(require("./cmd/SpaceToolHandler"));
+
+var _ToggleShapeCollapseHandler = _interopRequireDefault(require("./cmd/ToggleShapeCollapseHandler"));
+
+var _UpdateAttachmentHandler = _interopRequireDefault(require("./cmd/UpdateAttachmentHandler"));
+
+var _UpdateWaypointsHandler = _interopRequireDefault(require("./cmd/UpdateWaypointsHandler"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * The basic modeling entry point.
+ *
+ * @param {EventBus} eventBus
+ * @param {ElementFactory} elementFactory
+ * @param {CommandStack} commandStack
+ */
+function Modeling(eventBus, elementFactory, commandStack) {
+  this._eventBus = eventBus;
+  this._elementFactory = elementFactory;
+  this._commandStack = commandStack;
+  var self = this;
+  eventBus.on('diagram.init', function () {
+    // register modeling handlers
+    self.registerHandlers(commandStack);
+  });
+}
+
+Modeling.$inject = ['eventBus', 'elementFactory', 'commandStack'];
+
+Modeling.prototype.getHandlers = function () {
+  return {
+    'shape.append': _AppendShapeHandler.default,
+    'shape.create': _CreateShapeHandler.default,
+    'shape.delete': _DeleteShapeHandler.default,
+    'shape.move': _MoveShapeHandler.default,
+    'shape.resize': _ResizeShapeHandler.default,
+    'shape.replace': _ReplaceShapeHandler.default,
+    'shape.toggleCollapse': _ToggleShapeCollapseHandler.default,
+    'spaceTool': _SpaceToolHandler.default,
+    'label.create': _CreateLabelHandler.default,
+    'connection.create': _CreateConnectionHandler.default,
+    'connection.delete': _DeleteConnectionHandler.default,
+    'connection.move': _MoveConnectionHandler.default,
+    'connection.layout': _LayoutConnectionHandler.default,
+    'connection.updateWaypoints': _UpdateWaypointsHandler.default,
+    'connection.reconnect': _ReconnectConnectionHandler.default,
+    'elements.create': _CreateElementsHandler.default,
+    'elements.move': _MoveElementsHandler.default,
+    'elements.delete': _DeleteElementsHandler.default,
+    'elements.distribute': _DistributeElementsHandler.default,
+    'elements.align': _AlignElementsHandler.default,
+    'element.updateAttachment': _UpdateAttachmentHandler.default
+  };
+};
+/**
+ * Register handlers with the command stack
+ *
+ * @param {CommandStack} commandStack
+ */
+
+
+Modeling.prototype.registerHandlers = function (commandStack) {
+  (0, _minDash.forEach)(this.getHandlers(), function (handler, id) {
+    commandStack.registerHandler(id, handler);
+  });
+}; // modeling helpers //////////////////////
+
+
+Modeling.prototype.moveShape = function (shape, delta, newParent, newParentIndex, hints) {
+  if (typeof newParentIndex === 'object') {
+    hints = newParentIndex;
+    newParentIndex = null;
+  }
+
+  var context = {
+    shape: shape,
+    delta: delta,
+    newParent: newParent,
+    newParentIndex: newParentIndex,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('shape.move', context);
+};
+/**
+ * Update the attachment of the given shape.
+ *
+ * @param {djs.mode.Base} shape
+ * @param {djs.model.Base} [newHost]
+ */
+
+
+Modeling.prototype.updateAttachment = function (shape, newHost) {
+  var context = {
+    shape: shape,
+    newHost: newHost
+  };
+
+  this._commandStack.execute('element.updateAttachment', context);
+};
+/**
+ * Move a number of shapes to a new target, either setting it as
+ * the new parent or attaching it.
+ *
+ * @param {Array<djs.mode.Base>} shapes
+ * @param {Point} delta
+ * @param {djs.model.Base} [target]
+ * @param {Object} [hints]
+ * @param {boolean} [hints.attach=false]
+ */
+
+
+Modeling.prototype.moveElements = function (shapes, delta, target, hints) {
+  hints = hints || {};
+  var attach = hints.attach;
+  var newParent = target,
+      newHost;
+
+  if (attach === true) {
+    newHost = target;
+    newParent = target.parent;
+  } else if (attach === false) {
+    newHost = null;
+  }
+
+  var context = {
+    shapes: shapes,
+    delta: delta,
+    newParent: newParent,
+    newHost: newHost,
+    hints: hints
+  };
+
+  this._commandStack.execute('elements.move', context);
+};
+
+Modeling.prototype.moveConnection = function (connection, delta, newParent, newParentIndex, hints) {
+  if (typeof newParentIndex === 'object') {
+    hints = newParentIndex;
+    newParentIndex = undefined;
+  }
+
+  var context = {
+    connection: connection,
+    delta: delta,
+    newParent: newParent,
+    newParentIndex: newParentIndex,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('connection.move', context);
+};
+
+Modeling.prototype.layoutConnection = function (connection, hints) {
+  var context = {
+    connection: connection,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('connection.layout', context);
+};
+/**
+ * Create connection.
+ *
+ * @param {djs.model.Base} source
+ * @param {djs.model.Base} target
+ * @param {number} [parentIndex]
+ * @param {Object|djs.model.Connection} connection
+ * @param {djs.model.Base} parent
+ * @param {Object} hints
+ *
+ * @return {djs.model.Connection} the created connection.
+ */
+
+
+Modeling.prototype.createConnection = function (source, target, parentIndex, connection, parent, hints) {
+  if (typeof parentIndex === 'object') {
+    hints = parent;
+    parent = connection;
+    connection = parentIndex;
+    parentIndex = undefined;
+  }
+
+  connection = this._create('connection', connection);
+  var context = {
+    source: source,
+    target: target,
+    parent: parent,
+    parentIndex: parentIndex,
+    connection: connection,
+    hints: hints
+  };
+
+  this._commandStack.execute('connection.create', context);
+
+  return context.connection;
+};
+/**
+ * Create a shape at the specified position.
+ *
+ * @param {djs.model.Shape|Object} shape
+ * @param {Point} position
+ * @param {djs.model.Shape|djs.model.Root} target
+ * @param {number} [parentIndex] position in parents children list
+ * @param {Object} [hints]
+ * @param {boolean} [hints.attach] whether to attach to target or become a child
+ *
+ * @return {djs.model.Shape} the created shape
+ */
+
+
+Modeling.prototype.createShape = function (shape, position, target, parentIndex, hints) {
+  if (typeof parentIndex !== 'number') {
+    hints = parentIndex;
+    parentIndex = undefined;
+  }
+
+  hints = hints || {};
+  var attach = hints.attach,
+      parent,
+      host;
+  shape = this._create('shape', shape);
+
+  if (attach) {
+    parent = target.parent;
+    host = target;
+  } else {
+    parent = target;
+  }
+
+  var context = {
+    position: position,
+    shape: shape,
+    parent: parent,
+    parentIndex: parentIndex,
+    host: host,
+    hints: hints
+  };
+
+  this._commandStack.execute('shape.create', context);
+
+  return context.shape;
+};
+
+Modeling.prototype.createElements = function (elements, position, parent, parentIndex, hints) {
+  if (!(0, _minDash.isArray)(elements)) {
+    elements = [elements];
+  }
+
+  if (typeof parentIndex !== 'number') {
+    hints = parentIndex;
+    parentIndex = undefined;
+  }
+
+  hints = hints || {};
+  var context = {
+    position: position,
+    elements: elements,
+    parent: parent,
+    parentIndex: parentIndex,
+    hints: hints
+  };
+
+  this._commandStack.execute('elements.create', context);
+
+  return context.elements;
+};
+
+Modeling.prototype.createLabel = function (labelTarget, position, label, parent) {
+  label = this._create('label', label);
+  var context = {
+    labelTarget: labelTarget,
+    position: position,
+    parent: parent || labelTarget.parent,
+    shape: label
+  };
+
+  this._commandStack.execute('label.create', context);
+
+  return context.shape;
+};
+/**
+ * Append shape to given source, drawing a connection
+ * between source and the newly created shape.
+ *
+ * @param {djs.model.Shape} source
+ * @param {djs.model.Shape|Object} shape
+ * @param {Point} position
+ * @param {djs.model.Shape} target
+ * @param {Object} [hints]
+ * @param {boolean} [hints.attach]
+ * @param {djs.model.Connection|Object} [hints.connection]
+ * @param {djs.model.Base} [hints.connectionParent]
+ *
+ * @return {djs.model.Shape} the newly created shape
+ */
+
+
+Modeling.prototype.appendShape = function (source, shape, position, target, hints) {
+  hints = hints || {};
+  shape = this._create('shape', shape);
+  var context = {
+    source: source,
+    position: position,
+    target: target,
+    shape: shape,
+    connection: hints.connection,
+    connectionParent: hints.connectionParent,
+    hints: hints
+  };
+
+  this._commandStack.execute('shape.append', context);
+
+  return context.shape;
+};
+
+Modeling.prototype.removeElements = function (elements) {
+  var context = {
+    elements: elements
+  };
+
+  this._commandStack.execute('elements.delete', context);
+};
+
+Modeling.prototype.distributeElements = function (groups, axis, dimension) {
+  var context = {
+    groups: groups,
+    axis: axis,
+    dimension: dimension
+  };
+
+  this._commandStack.execute('elements.distribute', context);
+};
+
+Modeling.prototype.removeShape = function (shape, hints) {
+  var context = {
+    shape: shape,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('shape.delete', context);
+};
+
+Modeling.prototype.removeConnection = function (connection, hints) {
+  var context = {
+    connection: connection,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('connection.delete', context);
+};
+
+Modeling.prototype.replaceShape = function (oldShape, newShape, hints) {
+  var context = {
+    oldShape: oldShape,
+    newData: newShape,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('shape.replace', context);
+
+  return context.newShape;
+};
+
+Modeling.prototype.alignElements = function (elements, alignment) {
+  var context = {
+    elements: elements,
+    alignment: alignment
+  };
+
+  this._commandStack.execute('elements.align', context);
+};
+
+Modeling.prototype.resizeShape = function (shape, newBounds, minBounds, hints) {
+  var context = {
+    shape: shape,
+    newBounds: newBounds,
+    minBounds: minBounds,
+    hints: hints
+  };
+
+  this._commandStack.execute('shape.resize', context);
+};
+
+Modeling.prototype.createSpace = function (movingShapes, resizingShapes, delta, direction, start) {
+  var context = {
+    delta: delta,
+    direction: direction,
+    movingShapes: movingShapes,
+    resizingShapes: resizingShapes,
+    start: start
+  };
+
+  this._commandStack.execute('spaceTool', context);
+};
+
+Modeling.prototype.updateWaypoints = function (connection, newWaypoints, hints) {
+  var context = {
+    connection: connection,
+    newWaypoints: newWaypoints,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('connection.updateWaypoints', context);
+};
+
+Modeling.prototype.reconnect = function (connection, source, target, dockingOrPoints, hints) {
+  var context = {
+    connection: connection,
+    newSource: source,
+    newTarget: target,
+    dockingOrPoints: dockingOrPoints,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('connection.reconnect', context);
+};
+
+Modeling.prototype.reconnectStart = function (connection, newSource, dockingOrPoints, hints) {
+  if (!hints) {
+    hints = {};
+  }
+
+  this.reconnect(connection, newSource, connection.target, dockingOrPoints, (0, _minDash.assign)(hints, {
+    docking: 'source'
+  }));
+};
+
+Modeling.prototype.reconnectEnd = function (connection, newTarget, dockingOrPoints, hints) {
+  if (!hints) {
+    hints = {};
+  }
+
+  this.reconnect(connection, connection.source, newTarget, dockingOrPoints, (0, _minDash.assign)(hints, {
+    docking: 'target'
+  }));
+};
+
+Modeling.prototype.connect = function (source, target, attrs, hints) {
+  return this.createConnection(source, target, attrs || {}, source.parent, hints);
+};
+
+Modeling.prototype._create = function (type, attrs) {
+  if (attrs instanceof _model.Base) {
+    return attrs;
+  } else {
+    return this._elementFactory.create(type, attrs);
+  }
+};
+
+Modeling.prototype.toggleCollapse = function (shape, hints) {
+  var context = {
+    shape: shape,
+    hints: hints || {}
+  };
+
+  this._commandStack.execute('shape.toggleCollapse', context);
+};
+
+},{"../../model":190,"./cmd/AlignElementsHandler":133,"./cmd/AppendShapeHandler":134,"./cmd/CreateConnectionHandler":135,"./cmd/CreateElementsHandler":136,"./cmd/CreateLabelHandler":137,"./cmd/CreateShapeHandler":138,"./cmd/DeleteConnectionHandler":139,"./cmd/DeleteElementsHandler":140,"./cmd/DeleteShapeHandler":141,"./cmd/DistributeElementsHandler":142,"./cmd/LayoutConnectionHandler":143,"./cmd/MoveConnectionHandler":144,"./cmd/MoveElementsHandler":145,"./cmd/MoveShapeHandler":146,"./cmd/ReconnectConnectionHandler":147,"./cmd/ReplaceShapeHandler":148,"./cmd/ResizeShapeHandler":149,"./cmd/SpaceToolHandler":150,"./cmd/ToggleShapeCollapseHandler":151,"./cmd/UpdateAttachmentHandler":152,"./cmd/UpdateWaypointsHandler":153,"min-dash":219}],133:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AlignElements;
+
+var _minDash = require("min-dash");
+
+/**
+ * A handler that align elements in a certain way.
+ *
+ */
+function AlignElements(modeling, canvas) {
+  this._modeling = modeling;
+  this._canvas = canvas;
+}
+
+AlignElements.$inject = ['modeling', 'canvas'];
+
+AlignElements.prototype.preExecute = function (context) {
+  var modeling = this._modeling;
+  var elements = context.elements,
+      alignment = context.alignment;
+  (0, _minDash.forEach)(elements, function (element) {
+    var delta = {
+      x: 0,
+      y: 0
+    };
+
+    if (alignment.left) {
+      delta.x = alignment.left - element.x;
+    } else if (alignment.right) {
+      delta.x = alignment.right - element.width - element.x;
+    } else if (alignment.center) {
+      delta.x = alignment.center - Math.round(element.width / 2) - element.x;
+    } else if (alignment.top) {
+      delta.y = alignment.top - element.y;
+    } else if (alignment.bottom) {
+      delta.y = alignment.bottom - element.height - element.y;
+    } else if (alignment.middle) {
+      delta.y = alignment.middle - Math.round(element.height / 2) - element.y;
+    }
+
+    modeling.moveElements([element], delta, element.parent);
+  });
+};
+
+AlignElements.prototype.postExecute = function (context) {};
+
+},{"min-dash":219}],134:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = AppendShapeHandler;
+
+var _minDash = require("min-dash");
+
+/**
+ * A handler that implements reversible appending of shapes
+ * to a source shape.
+ *
+ * @param {canvas} Canvas
+ * @param {elementFactory} ElementFactory
+ * @param {modeling} Modeling
+ */
+function AppendShapeHandler(modeling) {
+  this._modeling = modeling;
+}
+
+AppendShapeHandler.$inject = ['modeling']; // api //////////////////////
+
+/**
+ * Creates a new shape
+ *
+ * @param {Object} context
+ * @param {ElementDescriptor} context.shape the new shape
+ * @param {ElementDescriptor} context.source the source object
+ * @param {ElementDescriptor} context.parent the parent object
+ * @param {Point} context.position position of the new element
+ */
+
+AppendShapeHandler.prototype.preExecute = function (context) {
+  var source = context.source;
+
+  if (!source) {
+    throw new Error('source required');
+  }
+
+  var target = context.target || source.parent,
+      shape = context.shape,
+      hints = context.hints || {};
+  shape = context.shape = this._modeling.createShape(shape, context.position, target, {
+    attach: hints.attach
+  });
+  context.shape = shape;
+};
+
+AppendShapeHandler.prototype.postExecute = function (context) {
+  var hints = context.hints || {};
+
+  if (!existsConnection(context.source, context.shape)) {
+    // create connection
+    if (hints.connectionTarget === context.source) {
+      this._modeling.connect(context.shape, context.source, context.connection);
+    } else {
+      this._modeling.connect(context.source, context.shape, context.connection);
+    }
+  }
+};
+
+function existsConnection(source, target) {
+  return (0, _minDash.some)(source.outgoing, function (c) {
+    return c.target === target;
+  });
+}
+
+},{"min-dash":219}],135:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateConnectionHandler;
+
+function CreateConnectionHandler(canvas, layouter) {
+  this._canvas = canvas;
+  this._layouter = layouter;
+}
+
+CreateConnectionHandler.$inject = ['canvas', 'layouter']; // api //////////////////////
+
+/**
+ * Appends a shape to a target shape
+ *
+ * @param {Object} context
+ * @param {djs.element.Base} context.source the source object
+ * @param {djs.element.Base} context.target the parent object
+ * @param {Point} context.position position of the new element
+ */
+
+CreateConnectionHandler.prototype.execute = function (context) {
+  var connection = context.connection,
+      source = context.source,
+      target = context.target,
+      parent = context.parent,
+      parentIndex = context.parentIndex,
+      hints = context.hints;
+
+  if (!source || !target) {
+    throw new Error('source and target required');
+  }
+
+  if (!parent) {
+    throw new Error('parent required');
+  }
+
+  connection.source = source;
+  connection.target = target;
+
+  if (!connection.waypoints) {
+    connection.waypoints = this._layouter.layoutConnection(connection, hints);
+  } // add connection
+
+
+  this._canvas.addConnection(connection, parent, parentIndex);
+
+  return connection;
+};
+
+CreateConnectionHandler.prototype.revert = function (context) {
+  var connection = context.connection;
+
+  this._canvas.removeConnection(connection);
+
+  connection.source = null;
+  connection.target = null;
+  return connection;
+};
+
+},{}],136:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateElementsHandler;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("../../../util/Elements");
+
+var round = Math.round;
+
+function CreateElementsHandler(modeling) {
+  this._modeling = modeling;
+}
+
+CreateElementsHandler.$inject = ['modeling'];
+
+CreateElementsHandler.prototype.preExecute = function (context) {
+  var elements = context.elements,
+      parent = context.parent,
+      parentIndex = context.parentIndex,
+      position = context.position,
+      hints = context.hints;
+  var modeling = this._modeling; // make sure each element has x and y
+
+  (0, _minDash.forEach)(elements, function (element) {
+    if (!(0, _minDash.isNumber)(element.x)) {
+      element.x = 0;
+    }
+
+    if (!(0, _minDash.isNumber)(element.y)) {
+      element.y = 0;
+    }
+  });
+  var bbox = (0, _Elements.getBBox)(elements); // center elements around position
+
+  (0, _minDash.forEach)(elements, function (element) {
+    if (isConnection(element)) {
+      element.waypoints = (0, _minDash.map)(element.waypoints, function (waypoint) {
+        return {
+          x: round(waypoint.x - bbox.x - bbox.width / 2 + position.x),
+          y: round(waypoint.y - bbox.y - bbox.height / 2 + position.y)
+        };
+      });
+    }
+
+    (0, _minDash.assign)(element, {
+      x: round(element.x - bbox.x - bbox.width / 2 + position.x),
+      y: round(element.y - bbox.y - bbox.height / 2 + position.y)
+    });
+  });
+  var parents = (0, _Elements.getParents)(elements);
+  var cache = {};
+  (0, _minDash.forEach)(elements, function (element) {
+    if (isConnection(element)) {
+      cache[element.id] = (0, _minDash.isNumber)(parentIndex) ? modeling.createConnection(cache[element.source.id], cache[element.target.id], parentIndex, element, element.parent || parent, hints) : modeling.createConnection(cache[element.source.id], cache[element.target.id], element, element.parent || parent, hints);
+      return;
+    }
+
+    var createShapeHints = (0, _minDash.assign)({}, hints);
+
+    if (parents.indexOf(element) === -1) {
+      createShapeHints.autoResize = false;
+    }
+
+    cache[element.id] = (0, _minDash.isNumber)(parentIndex) ? modeling.createShape(element, (0, _minDash.pick)(element, ['x', 'y', 'width', 'height']), element.parent || parent, parentIndex, createShapeHints) : modeling.createShape(element, (0, _minDash.pick)(element, ['x', 'y', 'width', 'height']), element.parent || parent, createShapeHints);
+  });
+  context.elements = (0, _minDash.values)(cache);
+}; // helpers //////////
+
+
+function isConnection(element) {
+  return !!element.waypoints;
+}
+
+},{"../../../util/Elements":202,"min-dash":219}],137:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateLabelHandler;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CreateShapeHandler = _interopRequireDefault(require("./CreateShapeHandler"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A handler that attaches a label to a given target shape.
+ *
+ * @param {Canvas} canvas
+ */
+function CreateLabelHandler(canvas) {
+  _CreateShapeHandler.default.call(this, canvas);
+}
+
+(0, _inherits.default)(CreateLabelHandler, _CreateShapeHandler.default);
+CreateLabelHandler.$inject = ['canvas']; // api //////////////////////
+
+var originalExecute = _CreateShapeHandler.default.prototype.execute;
+/**
+ * Appends a label to a target shape.
+ *
+ * @method CreateLabelHandler#execute
+ *
+ * @param {Object} context
+ * @param {ElementDescriptor} context.target the element the label is attached to
+ * @param {ElementDescriptor} context.parent the parent object
+ * @param {Point} context.position position of the new element
+ */
+
+CreateLabelHandler.prototype.execute = function (context) {
+  var label = context.shape;
+  ensureValidDimensions(label);
+  label.labelTarget = context.labelTarget;
+  return originalExecute.call(this, context);
+};
+
+var originalRevert = _CreateShapeHandler.default.prototype.revert;
+/**
+ * Undo append by removing the shape
+ */
+
+CreateLabelHandler.prototype.revert = function (context) {
+  context.shape.labelTarget = null;
+  return originalRevert.call(this, context);
+}; // helpers //////////////////////
+
+
+function ensureValidDimensions(label) {
+  // make sure a label has valid { width, height } dimensions
+  ['width', 'height'].forEach(function (prop) {
+    if (typeof label[prop] === 'undefined') {
+      label[prop] = 0;
+    }
+  });
+}
+
+},{"./CreateShapeHandler":138,"inherits":218}],138:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CreateShapeHandler;
+
+var _minDash = require("min-dash");
+
+var round = Math.round;
+/**
+ * A handler that implements reversible addition of shapes.
+ *
+ * @param {canvas} Canvas
+ */
+
+function CreateShapeHandler(canvas) {
+  this._canvas = canvas;
+}
+
+CreateShapeHandler.$inject = ['canvas']; // api //////////////////////
+
+/**
+ * Appends a shape to a target shape
+ *
+ * @param {Object} context
+ * @param {djs.model.Base} context.parent the parent object
+ * @param {Point} context.position position of the new element
+ */
+
+CreateShapeHandler.prototype.execute = function (context) {
+  var shape = context.shape,
+      positionOrBounds = context.position,
+      parent = context.parent,
+      parentIndex = context.parentIndex;
+
+  if (!parent) {
+    throw new Error('parent required');
+  }
+
+  if (!positionOrBounds) {
+    throw new Error('position required');
+  } // (1) add at event center position _or_ at given bounds
+
+
+  if (positionOrBounds.width !== undefined) {
+    (0, _minDash.assign)(shape, positionOrBounds);
+  } else {
+    (0, _minDash.assign)(shape, {
+      x: positionOrBounds.x - round(shape.width / 2),
+      y: positionOrBounds.y - round(shape.height / 2)
+    });
+  } // (2) add to canvas
+
+
+  this._canvas.addShape(shape, parent, parentIndex);
+
+  return shape;
+};
+/**
+ * Undo append by removing the shape
+ */
+
+
+CreateShapeHandler.prototype.revert = function (context) {
+  var shape = context.shape; // (3) remove form canvas
+
+  this._canvas.removeShape(shape);
+
+  return shape;
+};
+
+},{"min-dash":219}],139:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DeleteConnectionHandler;
+
+var _Collections = require("../../../util/Collections");
+
+/**
+ * A handler that implements reversible deletion of Connections.
+ */
+function DeleteConnectionHandler(canvas, modeling) {
+  this._canvas = canvas;
+  this._modeling = modeling;
+}
+
+DeleteConnectionHandler.$inject = ['canvas', 'modeling'];
+
+DeleteConnectionHandler.prototype.execute = function (context) {
+  var connection = context.connection,
+      parent = connection.parent;
+  context.parent = parent; // remember containment
+
+  context.parentIndex = (0, _Collections.indexOf)(parent.children, connection);
+  context.source = connection.source;
+  context.target = connection.target;
+
+  this._canvas.removeConnection(connection);
+
+  connection.source = null;
+  connection.target = null;
+  return connection;
+};
+/**
+ * Command revert implementation.
+ */
+
+
+DeleteConnectionHandler.prototype.revert = function (context) {
+  var connection = context.connection,
+      parent = context.parent,
+      parentIndex = context.parentIndex;
+  connection.source = context.source;
+  connection.target = context.target; // restore containment
+
+  (0, _Collections.add)(parent.children, connection, parentIndex);
+
+  this._canvas.addConnection(connection, parent);
+
+  return connection;
+};
+
+},{"../../../util/Collections":200}],140:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DeleteElementsHandler;
+
+var _minDash = require("min-dash");
+
+function DeleteElementsHandler(modeling, elementRegistry) {
+  this._modeling = modeling;
+  this._elementRegistry = elementRegistry;
+}
+
+DeleteElementsHandler.$inject = ['modeling', 'elementRegistry'];
+
+DeleteElementsHandler.prototype.postExecute = function (context) {
+  var modeling = this._modeling,
+      elementRegistry = this._elementRegistry,
+      elements = context.elements;
+  (0, _minDash.forEach)(elements, function (element) {
+    // element may have been removed with previous
+    // remove operations already (e.g. in case of nesting)
+    if (!elementRegistry.get(element.id)) {
+      return;
+    }
+
+    if (element.waypoints) {
+      modeling.removeConnection(element);
+    } else {
+      modeling.removeShape(element);
+    }
+  });
+};
+
+},{"min-dash":219}],141:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DeleteShapeHandler;
+
+var _Collections = require("../../../util/Collections");
+
+var _Removal = require("../../../util/Removal");
+
+/**
+ * A handler that implements reversible deletion of shapes.
+ *
+ */
+function DeleteShapeHandler(canvas, modeling) {
+  this._canvas = canvas;
+  this._modeling = modeling;
+}
+
+DeleteShapeHandler.$inject = ['canvas', 'modeling'];
+/**
+ * - Remove connections
+ * - Remove all direct children
+ */
+
+DeleteShapeHandler.prototype.preExecute = function (context) {
+  var modeling = this._modeling;
+  var shape = context.shape; // remove connections
+
+  (0, _Removal.saveClear)(shape.incoming, function (connection) {
+    // To make sure that the connection isn't removed twice
+    // For example if a container is removed
+    modeling.removeConnection(connection, {
+      nested: true
+    });
+  });
+  (0, _Removal.saveClear)(shape.outgoing, function (connection) {
+    modeling.removeConnection(connection, {
+      nested: true
+    });
+  }); // remove child shapes and connections
+
+  (0, _Removal.saveClear)(shape.children, function (child) {
+    if (isConnection(child)) {
+      modeling.removeConnection(child, {
+        nested: true
+      });
+    } else {
+      modeling.removeShape(child, {
+        nested: true
+      });
+    }
+  });
+};
+/**
+ * Remove shape and remember the parent
+ */
+
+
+DeleteShapeHandler.prototype.execute = function (context) {
+  var canvas = this._canvas;
+  var shape = context.shape,
+      oldParent = shape.parent;
+  context.oldParent = oldParent; // remove containment
+
+  context.oldParentIndex = (0, _Collections.indexOf)(oldParent.children, shape); // remove shape
+
+  canvas.removeShape(shape);
+  return shape;
+};
+/**
+ * Command revert implementation
+ */
+
+
+DeleteShapeHandler.prototype.revert = function (context) {
+  var canvas = this._canvas;
+  var shape = context.shape,
+      oldParent = context.oldParent,
+      oldParentIndex = context.oldParentIndex; // restore containment
+
+  (0, _Collections.add)(oldParent.children, shape, oldParentIndex);
+  canvas.addShape(shape, oldParent);
+  return shape;
+};
+
+function isConnection(element) {
+  return element.waypoints;
+}
+
+},{"../../../util/Collections":200,"../../../util/Removal":212}],142:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DistributeElements;
+
+var _minDash = require("min-dash");
+
+/**
+ * A handler that distributes elements evenly.
+ */
+function DistributeElements(modeling) {
+  this._modeling = modeling;
+}
+
+DistributeElements.$inject = ['modeling'];
+var OFF_AXIS = {
+  x: 'y',
+  y: 'x'
+};
+
+DistributeElements.prototype.preExecute = function (context) {
+  var modeling = this._modeling;
+  var groups = context.groups,
+      axis = context.axis,
+      dimension = context.dimension;
+
+  function updateRange(group, element) {
+    group.range.min = Math.min(element[axis], group.range.min);
+    group.range.max = Math.max(element[axis] + element[dimension], group.range.max);
+  }
+
+  function center(element) {
+    return element[axis] + element[dimension] / 2;
+  }
+
+  function lastIdx(arr) {
+    return arr.length - 1;
+  }
+
+  function rangeDiff(range) {
+    return range.max - range.min;
+  }
+
+  function centerElement(refCenter, element) {
+    var delta = {
+      y: 0
+    };
+    delta[axis] = refCenter - center(element);
+
+    if (delta[axis]) {
+      delta[OFF_AXIS[axis]] = 0;
+      modeling.moveElements([element], delta, element.parent);
+    }
+  }
+
+  var firstGroup = groups[0],
+      lastGroupIdx = lastIdx(groups),
+      lastGroup = groups[lastGroupIdx];
+  var margin,
+      spaceInBetween,
+      groupsSize = 0; // the size of each range
+
+  (0, _minDash.forEach)(groups, function (group, idx) {
+    var sortedElements, refElem, refCenter;
+
+    if (group.elements.length < 2) {
+      if (idx && idx !== groups.length - 1) {
+        updateRange(group, group.elements[0]);
+        groupsSize += rangeDiff(group.range);
+      }
+
+      return;
+    }
+
+    sortedElements = (0, _minDash.sortBy)(group.elements, axis);
+    refElem = sortedElements[0];
+
+    if (idx === lastGroupIdx) {
+      refElem = sortedElements[lastIdx(sortedElements)];
+    }
+
+    refCenter = center(refElem); // wanna update the ranges after the shapes have been centered
+
+    group.range = null;
+    (0, _minDash.forEach)(sortedElements, function (element) {
+      centerElement(refCenter, element);
+
+      if (group.range === null) {
+        group.range = {
+          min: element[axis],
+          max: element[axis] + element[dimension]
+        };
+        return;
+      } // update group's range after centering the range elements
+
+
+      updateRange(group, element);
+    });
+
+    if (idx && idx !== groups.length - 1) {
+      groupsSize += rangeDiff(group.range);
+    }
+  });
+  spaceInBetween = Math.abs(lastGroup.range.min - firstGroup.range.max);
+  margin = Math.round((spaceInBetween - groupsSize) / (groups.length - 1));
+
+  if (margin < groups.length - 1) {
+    return;
+  }
+
+  (0, _minDash.forEach)(groups, function (group, groupIdx) {
+    var delta = {},
+        prevGroup;
+
+    if (group === firstGroup || group === lastGroup) {
+      return;
+    }
+
+    prevGroup = groups[groupIdx - 1];
+    group.range.max = 0;
+    (0, _minDash.forEach)(group.elements, function (element, idx) {
+      delta[OFF_AXIS[axis]] = 0;
+      delta[axis] = prevGroup.range.max - element[axis] + margin;
+
+      if (group.range.min !== element[axis]) {
+        delta[axis] += element[axis] - group.range.min;
+      }
+
+      if (delta[axis]) {
+        modeling.moveElements([element], delta, element.parent);
+      }
+
+      group.range.max = Math.max(element[axis] + element[dimension], idx ? group.range.max : 0);
+    });
+  });
+};
+
+DistributeElements.prototype.postExecute = function (context) {};
+
+},{"min-dash":219}],143:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = LayoutConnectionHandler;
+
+var _minDash = require("min-dash");
+
+/**
+ * A handler that implements reversible moving of shapes.
+ */
+function LayoutConnectionHandler(layouter, canvas) {
+  this._layouter = layouter;
+  this._canvas = canvas;
+}
+
+LayoutConnectionHandler.$inject = ['layouter', 'canvas'];
+
+LayoutConnectionHandler.prototype.execute = function (context) {
+  var connection = context.connection;
+  var oldWaypoints = connection.waypoints;
+  (0, _minDash.assign)(context, {
+    oldWaypoints: oldWaypoints
+  });
+  connection.waypoints = this._layouter.layoutConnection(connection, context.hints);
+  return connection;
+};
+
+LayoutConnectionHandler.prototype.revert = function (context) {
+  var connection = context.connection;
+  connection.waypoints = context.oldWaypoints;
+  return connection;
+};
+
+},{"min-dash":219}],144:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MoveConnectionHandler;
+
+var _minDash = require("min-dash");
+
+var _Collections = require("../../../util/Collections");
+
+/**
+ * A handler that implements reversible moving of connections.
+ *
+ * The handler differs from the layout connection handler in a sense
+ * that it preserves the connection layout.
+ */
+function MoveConnectionHandler() {}
+
+MoveConnectionHandler.prototype.execute = function (context) {
+  var connection = context.connection,
+      delta = context.delta;
+  var newParent = context.newParent || connection.parent,
+      newParentIndex = context.newParentIndex,
+      oldParent = connection.parent; // save old parent in context
+
+  context.oldParent = oldParent;
+  context.oldParentIndex = (0, _Collections.remove)(oldParent.children, connection); // add to new parent at position
+
+  (0, _Collections.add)(newParent.children, connection, newParentIndex); // update parent
+
+  connection.parent = newParent; // update waypoint positions
+
+  (0, _minDash.forEach)(connection.waypoints, function (p) {
+    p.x += delta.x;
+    p.y += delta.y;
+
+    if (p.original) {
+      p.original.x += delta.x;
+      p.original.y += delta.y;
+    }
+  });
+  return connection;
+};
+
+MoveConnectionHandler.prototype.revert = function (context) {
+  var connection = context.connection,
+      newParent = connection.parent,
+      oldParent = context.oldParent,
+      oldParentIndex = context.oldParentIndex,
+      delta = context.delta; // remove from newParent
+
+  (0, _Collections.remove)(newParent.children, connection); // restore previous location in old parent
+
+  (0, _Collections.add)(oldParent.children, connection, oldParentIndex); // restore parent
+
+  connection.parent = oldParent; // revert to old waypoint positions
+
+  (0, _minDash.forEach)(connection.waypoints, function (p) {
+    p.x -= delta.x;
+    p.y -= delta.y;
+
+    if (p.original) {
+      p.original.x -= delta.x;
+      p.original.y -= delta.y;
+    }
+  });
+  return connection;
+};
+
+},{"../../../util/Collections":200,"min-dash":219}],145:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MoveElementsHandler;
+
+var _MoveHelper = _interopRequireDefault(require("./helper/MoveHelper"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A handler that implements reversible moving of shapes.
+ */
+function MoveElementsHandler(modeling) {
+  this._helper = new _MoveHelper.default(modeling);
+}
+
+MoveElementsHandler.$inject = ['modeling'];
+
+MoveElementsHandler.prototype.preExecute = function (context) {
+  context.closure = this._helper.getClosure(context.shapes);
+};
+
+MoveElementsHandler.prototype.postExecute = function (context) {
+  var hints = context.hints,
+      primaryShape;
+
+  if (hints && hints.primaryShape) {
+    primaryShape = hints.primaryShape;
+    hints.oldParent = primaryShape.parent;
+  }
+
+  this._helper.moveClosure(context.closure, context.delta, context.newParent, context.newHost, primaryShape);
+};
+
+},{"./helper/MoveHelper":156}],146:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MoveShapeHandler;
+
+var _minDash = require("min-dash");
+
+var _MoveHelper = _interopRequireDefault(require("./helper/MoveHelper"));
+
+var _Collections = require("../../../util/Collections");
+
+var _AnchorsHelper = require("./helper/AnchorsHelper");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A handler that implements reversible moving of shapes.
+ */
+function MoveShapeHandler(modeling) {
+  this._modeling = modeling;
+  this._helper = new _MoveHelper.default(modeling);
+}
+
+MoveShapeHandler.$inject = ['modeling'];
+
+MoveShapeHandler.prototype.execute = function (context) {
+  var shape = context.shape,
+      delta = context.delta,
+      newParent = context.newParent || shape.parent,
+      newParentIndex = context.newParentIndex,
+      oldParent = shape.parent;
+  context.oldBounds = (0, _minDash.pick)(shape, ['x', 'y', 'width', 'height']); // save old parent in context
+
+  context.oldParent = oldParent;
+  context.oldParentIndex = (0, _Collections.remove)(oldParent.children, shape); // add to new parent at position
+
+  (0, _Collections.add)(newParent.children, shape, newParentIndex); // update shape parent + position
+
+  (0, _minDash.assign)(shape, {
+    parent: newParent,
+    x: shape.x + delta.x,
+    y: shape.y + delta.y
+  });
+  return shape;
+};
+
+MoveShapeHandler.prototype.postExecute = function (context) {
+  var shape = context.shape,
+      delta = context.delta,
+      hints = context.hints;
+  var modeling = this._modeling;
+
+  if (hints.layout !== false) {
+    (0, _minDash.forEach)(shape.incoming, function (c) {
+      modeling.layoutConnection(c, {
+        connectionEnd: (0, _AnchorsHelper.getMovedTargetAnchor)(c, shape, delta)
+      });
+    });
+    (0, _minDash.forEach)(shape.outgoing, function (c) {
+      modeling.layoutConnection(c, {
+        connectionStart: (0, _AnchorsHelper.getMovedSourceAnchor)(c, shape, delta)
+      });
+    });
+  }
+
+  if (hints.recurse !== false) {
+    this.moveChildren(context);
+  }
+};
+
+MoveShapeHandler.prototype.revert = function (context) {
+  var shape = context.shape,
+      oldParent = context.oldParent,
+      oldParentIndex = context.oldParentIndex,
+      delta = context.delta; // restore previous location in old parent
+
+  (0, _Collections.add)(oldParent.children, shape, oldParentIndex); // revert to old position and parent
+
+  (0, _minDash.assign)(shape, {
+    parent: oldParent,
+    x: shape.x - delta.x,
+    y: shape.y - delta.y
+  });
+  return shape;
+};
+
+MoveShapeHandler.prototype.moveChildren = function (context) {
+  var delta = context.delta,
+      shape = context.shape;
+
+  this._helper.moveRecursive(shape.children, delta, null);
+};
+
+MoveShapeHandler.prototype.getNewParent = function (context) {
+  return context.newParent || context.shape.parent;
+};
+
+},{"../../../util/Collections":200,"./helper/AnchorsHelper":154,"./helper/MoveHelper":156,"min-dash":219}],147:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ReconnectConnectionHandler;
+
+var _minDash = require("min-dash");
+
+/**
+ * Reconnect connection handler
+ */
+function ReconnectConnectionHandler(modeling) {
+  this._modeling = modeling;
+}
+
+ReconnectConnectionHandler.$inject = ['modeling'];
+
+ReconnectConnectionHandler.prototype.execute = function (context) {
+  var newSource = context.newSource,
+      newTarget = context.newTarget,
+      connection = context.connection,
+      dockingOrPoints = context.dockingOrPoints;
+
+  if (!newSource && !newTarget) {
+    throw new Error('newSource or newTarget required');
+  }
+
+  if ((0, _minDash.isArray)(dockingOrPoints)) {
+    context.oldWaypoints = connection.waypoints;
+    connection.waypoints = dockingOrPoints;
+  }
+
+  if (newSource) {
+    context.oldSource = connection.source;
+    connection.source = newSource;
+  }
+
+  if (newTarget) {
+    context.oldTarget = connection.target;
+    connection.target = newTarget;
+  }
+
+  return connection;
+};
+
+ReconnectConnectionHandler.prototype.postExecute = function (context) {
+  var connection = context.connection,
+      newSource = context.newSource,
+      newTarget = context.newTarget,
+      dockingOrPoints = context.dockingOrPoints,
+      hints = context.hints || {};
+  var layoutConnectionHints = {};
+
+  if (hints.connectionStart) {
+    layoutConnectionHints.connectionStart = hints.connectionStart;
+  }
+
+  if (hints.connectionEnd) {
+    layoutConnectionHints.connectionEnd = hints.connectionEnd;
+  }
+
+  if (hints.layoutConnection === false) {
+    return;
+  }
+
+  if (newSource && (!newTarget || hints.docking === 'source')) {
+    layoutConnectionHints.connectionStart = layoutConnectionHints.connectionStart || getDocking((0, _minDash.isArray)(dockingOrPoints) ? dockingOrPoints[0] : dockingOrPoints);
+  }
+
+  if (newTarget && (!newSource || hints.docking === 'target')) {
+    layoutConnectionHints.connectionEnd = layoutConnectionHints.connectionEnd || getDocking((0, _minDash.isArray)(dockingOrPoints) ? dockingOrPoints[dockingOrPoints.length - 1] : dockingOrPoints);
+  }
+
+  if (hints.newWaypoints) {
+    layoutConnectionHints.waypoints = hints.newWaypoints;
+  }
+
+  this._modeling.layoutConnection(connection, layoutConnectionHints);
+};
+
+ReconnectConnectionHandler.prototype.revert = function (context) {
+  var oldSource = context.oldSource,
+      oldTarget = context.oldTarget,
+      oldWaypoints = context.oldWaypoints,
+      connection = context.connection;
+
+  if (oldSource) {
+    connection.source = oldSource;
+  }
+
+  if (oldTarget) {
+    connection.target = oldTarget;
+  }
+
+  if (oldWaypoints) {
+    connection.waypoints = oldWaypoints;
+  }
+
+  return connection;
+}; // helpers //////////
+
+
+function getDocking(point) {
+  return point.original || point;
+}
+
+},{"min-dash":219}],148:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ReplaceShapeHandler;
+
+var _minDash = require("min-dash");
+
+var _AnchorsHelper = require("./helper/AnchorsHelper");
+
+/**
+ * Replace shape by adding new shape and removing old shape. Incoming and outgoing connections will
+ * be kept if possible.
+ *
+ * @class
+ * @constructor
+ *
+ * @param {Modeling} modeling
+ * @param {Rules} rules
+ */
+function ReplaceShapeHandler(modeling, rules) {
+  this._modeling = modeling;
+  this._rules = rules;
+}
+
+ReplaceShapeHandler.$inject = ['modeling', 'rules'];
+/**
+ * Add new shape.
+ *
+ * @param {Object} context
+ * @param {djs.model.Shape} context.oldShape
+ * @param {Object} context.newData
+ * @param {string} context.newData.type
+ * @param {number} context.newData.x
+ * @param {number} context.newData.y
+ * @param {Object} [hints]
+ */
+
+ReplaceShapeHandler.prototype.preExecute = function (context) {
+  var self = this,
+      modeling = this._modeling,
+      rules = this._rules;
+  var oldShape = context.oldShape,
+      newData = context.newData,
+      hints = context.hints || {},
+      newShape;
+
+  function canReconnect(source, target, connection) {
+    return rules.allowed('connection.reconnect', {
+      connection: connection,
+      source: source,
+      target: target
+    });
+  } // (1) add new shape at given position
+
+
+  var position = {
+    x: newData.x,
+    y: newData.y
+  };
+  var oldBounds = {
+    x: oldShape.x,
+    y: oldShape.y,
+    width: oldShape.width,
+    height: oldShape.height
+  };
+  newShape = context.newShape = context.newShape || self.createShape(newData, position, oldShape.parent, hints); // (2) update host
+
+  if (oldShape.host) {
+    modeling.updateAttachment(newShape, oldShape.host);
+  } // (3) adopt all children from old shape
+
+
+  var children;
+
+  if (hints.moveChildren !== false) {
+    children = oldShape.children.slice();
+    modeling.moveElements(children, {
+      x: 0,
+      y: 0
+    }, newShape, hints);
+  } // (4) reconnect connections to new shape if possible
+
+
+  var incoming = oldShape.incoming.slice(),
+      outgoing = oldShape.outgoing.slice();
+  (0, _minDash.forEach)(incoming, function (connection) {
+    var source = connection.source,
+        allowed = canReconnect(source, newShape, connection);
+
+    if (allowed) {
+      self.reconnectEnd(connection, newShape, (0, _AnchorsHelper.getResizedTargetAnchor)(connection, newShape, oldBounds), hints);
+    }
+  });
+  (0, _minDash.forEach)(outgoing, function (connection) {
+    var target = connection.target,
+        allowed = canReconnect(newShape, target, connection);
+
+    if (allowed) {
+      self.reconnectStart(connection, newShape, (0, _AnchorsHelper.getResizedSourceAnchor)(connection, newShape, oldBounds), hints);
+    }
+  });
+};
+/**
+ * Remove old shape.
+ */
+
+
+ReplaceShapeHandler.prototype.postExecute = function (context) {
+  var oldShape = context.oldShape;
+
+  this._modeling.removeShape(oldShape);
+};
+
+ReplaceShapeHandler.prototype.execute = function (context) {};
+
+ReplaceShapeHandler.prototype.revert = function (context) {};
+
+ReplaceShapeHandler.prototype.createShape = function (shape, position, target, hints) {
+  return this._modeling.createShape(shape, position, target, hints);
+};
+
+ReplaceShapeHandler.prototype.reconnectStart = function (connection, newSource, dockingPoint, hints) {
+  this._modeling.reconnectStart(connection, newSource, dockingPoint, hints);
+};
+
+ReplaceShapeHandler.prototype.reconnectEnd = function (connection, newTarget, dockingPoint, hints) {
+  this._modeling.reconnectEnd(connection, newTarget, dockingPoint, hints);
+};
+
+},{"./helper/AnchorsHelper":154,"min-dash":219}],149:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ResizeShapeHandler;
+
+var _minDash = require("min-dash");
+
+var _AnchorsHelper = require("./helper/AnchorsHelper");
+
+/**
+ * A handler that implements reversible resizing of shapes.
+ *
+ * @param {Modeling} modeling
+ */
+function ResizeShapeHandler(modeling) {
+  this._modeling = modeling;
+}
+
+ResizeShapeHandler.$inject = ['modeling'];
+/**
+ * {
+ *   shape: {....}
+ *   newBounds: {
+ *     width:  20,
+ *     height: 40,
+ *     x:       5,
+ *     y:      10
+ *   }
+ *
+ * }
+ */
+
+ResizeShapeHandler.prototype.execute = function (context) {
+  var shape = context.shape,
+      newBounds = context.newBounds,
+      minBounds = context.minBounds;
+
+  if (newBounds.x === undefined || newBounds.y === undefined || newBounds.width === undefined || newBounds.height === undefined) {
+    throw new Error('newBounds must have {x, y, width, height} properties');
+  }
+
+  if (minBounds && (newBounds.width < minBounds.width || newBounds.height < minBounds.height)) {
+    throw new Error('width and height cannot be less than minimum height and width');
+  } else if (!minBounds && newBounds.width < 10 || newBounds.height < 10) {
+    throw new Error('width and height cannot be less than 10px');
+  } // save old bbox in context
+
+
+  context.oldBounds = {
+    width: shape.width,
+    height: shape.height,
+    x: shape.x,
+    y: shape.y
+  }; // update shape
+
+  (0, _minDash.assign)(shape, {
+    width: newBounds.width,
+    height: newBounds.height,
+    x: newBounds.x,
+    y: newBounds.y
+  });
+  return shape;
+};
+
+ResizeShapeHandler.prototype.postExecute = function (context) {
+  var modeling = this._modeling;
+  var shape = context.shape,
+      oldBounds = context.oldBounds,
+      hints = context.hints || {};
+
+  if (hints.layout === false) {
+    return;
+  }
+
+  (0, _minDash.forEach)(shape.incoming, function (c) {
+    modeling.layoutConnection(c, {
+      connectionEnd: (0, _AnchorsHelper.getResizedTargetAnchor)(c, shape, oldBounds)
+    });
+  });
+  (0, _minDash.forEach)(shape.outgoing, function (c) {
+    modeling.layoutConnection(c, {
+      connectionStart: (0, _AnchorsHelper.getResizedSourceAnchor)(c, shape, oldBounds)
+    });
+  });
+};
+
+ResizeShapeHandler.prototype.revert = function (context) {
+  var shape = context.shape,
+      oldBounds = context.oldBounds; // restore previous bbox
+
+  (0, _minDash.assign)(shape, {
+    width: oldBounds.width,
+    height: oldBounds.height,
+    x: oldBounds.x,
+    y: oldBounds.y
+  });
+  return shape;
+};
+
+},{"./helper/AnchorsHelper":154,"min-dash":219}],150:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SpaceToolHandler;
+
+var _minDash = require("min-dash");
+
+var _SpaceUtil = require("../../space-tool/SpaceUtil");
+
+var _AnchorsHelper = require("./helper/AnchorsHelper");
+
+/**
+ * Add or remove space by moving and resizing shapes and updating connection waypoints.
+ */
+function SpaceToolHandler(modeling) {
+  this._modeling = modeling;
+}
+
+SpaceToolHandler.$inject = ['modeling'];
+
+SpaceToolHandler.prototype.preExecute = function (context) {
+  var delta = context.delta,
+      direction = context.direction,
+      movingShapes = context.movingShapes,
+      resizingShapes = context.resizingShapes,
+      start = context.start,
+      oldBounds = {}; // (1) move shapes
+
+  this.moveShapes(movingShapes, delta); // (2a) save old bounds of resized shapes
+
+  (0, _minDash.forEach)(resizingShapes, function (shape) {
+    oldBounds[shape.id] = getBounds(shape);
+  }); // (2b) resize shapes
+
+  this.resizeShapes(resizingShapes, delta, direction); // (3) update connection waypoints
+
+  this.updateConnectionWaypoints((0, _SpaceUtil.getWaypointsUpdatingConnections)(movingShapes, resizingShapes), delta, direction, start, movingShapes, resizingShapes, oldBounds);
+};
+
+SpaceToolHandler.prototype.execute = function () {};
+
+SpaceToolHandler.prototype.revert = function () {};
+
+SpaceToolHandler.prototype.moveShapes = function (shapes, delta) {
+  var self = this;
+  (0, _minDash.forEach)(shapes, function (element) {
+    self._modeling.moveShape(element, delta, null, {
+      autoResize: false,
+      layout: false,
+      recurse: false
+    });
+  });
+};
+
+SpaceToolHandler.prototype.resizeShapes = function (shapes, delta, direction) {
+  var self = this;
+  (0, _minDash.forEach)(shapes, function (shape) {
+    var newBounds = (0, _SpaceUtil.resizeBounds)(shape, direction, delta);
+
+    self._modeling.resizeShape(shape, newBounds, null, {
+      attachSupport: false,
+      autoResize: false,
+      layout: false
+    });
+  });
+};
+/**
+ * Update connections waypoints according to the rules:
+ *   1. Both source and target are moved/resized => move waypoints by the delta
+ *   2. Only one of source and target is moved/resized => re-layout connection with moved start/end
+ */
+
+
+SpaceToolHandler.prototype.updateConnectionWaypoints = function (connections, delta, direction, start, movingShapes, resizingShapes, oldBounds) {
+  var self = this,
+      affectedShapes = movingShapes.concat(resizingShapes);
+  (0, _minDash.forEach)(connections, function (connection) {
+    var source = connection.source,
+        target = connection.target,
+        waypoints = copyWaypoints(connection),
+        axis = getAxisFromDirection(direction),
+        layoutHints = {
+      labelBehavior: false
+    };
+
+    if (includes(affectedShapes, source) && includes(affectedShapes, target)) {
+      // move waypoints
+      waypoints = (0, _minDash.map)(waypoints, function (waypoint) {
+        if (shouldMoveWaypoint(waypoint, start, direction)) {
+          // move waypoint
+          waypoint[axis] = waypoint[axis] + delta[axis];
+        }
+
+        if (waypoint.original && shouldMoveWaypoint(waypoint.original, start, direction)) {
+          // move waypoint original
+          waypoint.original[axis] = waypoint.original[axis] + delta[axis];
+        }
+
+        return waypoint;
+      });
+
+      self._modeling.updateWaypoints(connection, waypoints, {
+        labelBehavior: false
+      });
+    } else if (includes(affectedShapes, source) || includes(affectedShapes, target)) {
+      // re-layout connection with moved start/end
+      if (includes(movingShapes, source)) {
+        layoutHints.connectionStart = (0, _AnchorsHelper.getMovedSourceAnchor)(connection, source, delta);
+      } else if (includes(movingShapes, target)) {
+        layoutHints.connectionEnd = (0, _AnchorsHelper.getMovedTargetAnchor)(connection, target, delta);
+      } else if (includes(resizingShapes, source)) {
+        layoutHints.connectionStart = (0, _AnchorsHelper.getResizedSourceAnchor)(connection, source, oldBounds[source.id]);
+      } else if (includes(resizingShapes, target)) {
+        layoutHints.connectionEnd = (0, _AnchorsHelper.getResizedTargetAnchor)(connection, target, oldBounds[target.id]);
+      }
+
+      self._modeling.layoutConnection(connection, layoutHints);
+    }
+  });
+}; // helpers //////////
+
+
+function copyWaypoint(waypoint) {
+  return (0, _minDash.assign)({}, waypoint);
+}
+
+function copyWaypoints(connection) {
+  return (0, _minDash.map)(connection.waypoints, function (waypoint) {
+    waypoint = copyWaypoint(waypoint);
+
+    if (waypoint.original) {
+      waypoint.original = copyWaypoint(waypoint.original);
+    }
+
+    return waypoint;
+  });
+}
+
+function getAxisFromDirection(direction) {
+  switch (direction) {
+    case 'n':
+      return 'y';
+
+    case 'w':
+      return 'x';
+
+    case 's':
+      return 'y';
+
+    case 'e':
+      return 'x';
+  }
+}
+
+function shouldMoveWaypoint(waypoint, start, direction) {
+  var relevantAxis = getAxisFromDirection(direction);
+
+  if (/e|s/.test(direction)) {
+    return waypoint[relevantAxis] > start;
+  } else if (/n|w/.test(direction)) {
+    return waypoint[relevantAxis] < start;
+  }
+}
+
+function includes(array, item) {
+  return array.indexOf(item) !== -1;
+}
+
+function getBounds(shape) {
+  return {
+    x: shape.x,
+    y: shape.y,
+    height: shape.height,
+    width: shape.width
+  };
+}
+
+},{"../../space-tool/SpaceUtil":178,"./helper/AnchorsHelper":154,"min-dash":219}],151:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ToggleShapeCollapseHandler;
+
+var _minDash = require("min-dash");
+
+/**
+ * A handler that toggles the collapsed state of an element
+ * and the visibility of all its children.
+ *
+ * @param {Modeling} modeling
+ */
+function ToggleShapeCollapseHandler(modeling) {
+  this._modeling = modeling;
+}
+
+ToggleShapeCollapseHandler.$inject = ['modeling'];
+
+ToggleShapeCollapseHandler.prototype.execute = function (context) {
+  var shape = context.shape,
+      children = shape.children; // recursively remember previous visibility of children
+
+  context.oldChildrenVisibility = getElementsVisibilityRecursive(children); // toggle state
+
+  shape.collapsed = !shape.collapsed; // recursively hide/show children
+
+  var result = setHiddenRecursive(children, shape.collapsed);
+  return [shape].concat(result);
+};
+
+ToggleShapeCollapseHandler.prototype.revert = function (context) {
+  var shape = context.shape,
+      oldChildrenVisibility = context.oldChildrenVisibility;
+  var children = shape.children; // recursively set old visability of children
+
+  var result = restoreVisibilityRecursive(children, oldChildrenVisibility); // retoggle state
+
+  shape.collapsed = !shape.collapsed;
+  return [shape].concat(result);
+}; // helpers //////////////////////
+
+/**
+ * Return a map { elementId -> hiddenState}.
+ *
+ * @param {Array<djs.model.Shape>} elements
+ *
+ * @return {Object}
+ */
+
+
+function getElementsVisibilityRecursive(elements) {
+  var result = {};
+  (0, _minDash.forEach)(elements, function (element) {
+    result[element.id] = element.hidden;
+
+    if (element.children) {
+      result = (0, _minDash.assign)({}, result, getElementsVisibilityRecursive(element.children));
+    }
+  });
+  return result;
+}
+
+function setHiddenRecursive(elements, newHidden) {
+  var result = [];
+  (0, _minDash.forEach)(elements, function (element) {
+    element.hidden = newHidden;
+    result = result.concat(element);
+
+    if (element.children) {
+      result = result.concat(setHiddenRecursive(element.children, element.collapsed || newHidden));
+    }
+  });
+  return result;
+}
+
+function restoreVisibilityRecursive(elements, lastState) {
+  var result = [];
+  (0, _minDash.forEach)(elements, function (element) {
+    element.hidden = lastState[element.id];
+    result = result.concat(element);
+
+    if (element.children) {
+      result = result.concat(restoreVisibilityRecursive(element.children, lastState));
+    }
+  });
+  return result;
+}
+
+},{"min-dash":219}],152:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateAttachmentHandler;
+
+var _Collections = require("../../../util/Collections");
+
+/**
+ * A handler that implements reversible attaching/detaching of shapes.
+ */
+function UpdateAttachmentHandler(modeling) {
+  this._modeling = modeling;
+}
+
+UpdateAttachmentHandler.$inject = ['modeling'];
+
+UpdateAttachmentHandler.prototype.execute = function (context) {
+  var shape = context.shape,
+      newHost = context.newHost,
+      oldHost = shape.host; // (0) detach from old host
+
+  context.oldHost = oldHost;
+  context.attacherIdx = removeAttacher(oldHost, shape); // (1) attach to new host
+
+  addAttacher(newHost, shape); // (2) update host
+
+  shape.host = newHost;
+  return shape;
+};
+
+UpdateAttachmentHandler.prototype.revert = function (context) {
+  var shape = context.shape,
+      newHost = context.newHost,
+      oldHost = context.oldHost,
+      attacherIdx = context.attacherIdx; // (2) update host
+
+  shape.host = oldHost; // (1) attach to new host
+
+  removeAttacher(newHost, shape); // (0) detach from old host
+
+  addAttacher(oldHost, shape, attacherIdx);
+  return shape;
+};
+
+function removeAttacher(host, attacher) {
+  // remove attacher from host
+  return (0, _Collections.remove)(host && host.attachers, attacher);
+}
+
+function addAttacher(host, attacher, idx) {
+  if (!host) {
+    return;
+  }
+
+  var attachers = host.attachers;
+
+  if (!attachers) {
+    host.attachers = attachers = [];
+  }
+
+  (0, _Collections.add)(attachers, attacher, idx);
+}
+
+},{"../../../util/Collections":200}],153:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = UpdateWaypointsHandler;
+
+function UpdateWaypointsHandler() {}
+
+UpdateWaypointsHandler.prototype.execute = function (context) {
+  var connection = context.connection,
+      newWaypoints = context.newWaypoints;
+  context.oldWaypoints = connection.waypoints;
+  connection.waypoints = newWaypoints;
+  return connection;
+};
+
+UpdateWaypointsHandler.prototype.revert = function (context) {
+  var connection = context.connection,
+      oldWaypoints = context.oldWaypoints;
+  connection.waypoints = oldWaypoints;
+  return connection;
+};
+
+},{}],154:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getResizedSourceAnchor = getResizedSourceAnchor;
+exports.getResizedTargetAnchor = getResizedTargetAnchor;
+exports.getMovedSourceAnchor = getMovedSourceAnchor;
+exports.getMovedTargetAnchor = getMovedTargetAnchor;
+
+var _AttachUtil = require("../../../../util/AttachUtil");
+
+var _LayoutUtil = require("../../../../layout/LayoutUtil");
+
+var _minDash = require("min-dash");
+
+function getResizedSourceAnchor(connection, shape, oldBounds) {
+  var waypoints = safeGetWaypoints(connection),
+      waypointsInsideNewBounds = getWaypointsInsideBounds(waypoints, shape),
+      oldAnchor = waypoints[0]; // new anchor is the last waypoint enclosed be resized source
+
+  if (waypointsInsideNewBounds.length) {
+    return waypointsInsideNewBounds[waypointsInsideNewBounds.length - 1];
+  }
+
+  return (0, _AttachUtil.getNewAttachPoint)(oldAnchor.original || oldAnchor, oldBounds, shape);
+}
+
+function getResizedTargetAnchor(connection, shape, oldBounds) {
+  var waypoints = safeGetWaypoints(connection),
+      waypointsInsideNewBounds = getWaypointsInsideBounds(waypoints, shape),
+      oldAnchor = waypoints[waypoints.length - 1]; // new anchor is the first waypoint enclosed be resized target
+
+  if (waypointsInsideNewBounds.length) {
+    return waypointsInsideNewBounds[0];
+  }
+
+  return (0, _AttachUtil.getNewAttachPoint)(oldAnchor.original || oldAnchor, oldBounds, shape);
+}
+
+function getMovedSourceAnchor(connection, source, moveDelta) {
+  var waypoints = safeGetWaypoints(connection),
+      oldBounds = subtract(source, moveDelta),
+      oldAnchor = waypoints[0];
+  return (0, _AttachUtil.getNewAttachPoint)(oldAnchor.original || oldAnchor, oldBounds, source);
+}
+
+function getMovedTargetAnchor(connection, target, moveDelta) {
+  var waypoints = safeGetWaypoints(connection),
+      oldBounds = subtract(target, moveDelta),
+      oldAnchor = waypoints[waypoints.length - 1];
+  return (0, _AttachUtil.getNewAttachPoint)(oldAnchor.original || oldAnchor, oldBounds, target);
+} // helpers //////////////////////
+
+
+function subtract(bounds, delta) {
+  return {
+    x: bounds.x - delta.x,
+    y: bounds.y - delta.y,
+    width: bounds.width,
+    height: bounds.height
+  };
+}
+/**
+ * Return waypoints of given connection; throw if non exists (should not happen!!).
+ *
+ * @param {Connection} connection
+ *
+ * @return {Array<Point>}
+ */
+
+
+function safeGetWaypoints(connection) {
+  var waypoints = connection.waypoints;
+
+  if (!waypoints.length) {
+    throw new Error('connection#' + connection.id + ': no waypoints');
+  }
+
+  return waypoints;
+}
+
+function getWaypointsInsideBounds(waypoints, bounds) {
+  var originalWaypoints = (0, _minDash.map)(waypoints, getOriginal);
+  return (0, _minDash.filter)(originalWaypoints, function (waypoint) {
+    return isInsideBounds(waypoint, bounds);
+  });
+}
+/**
+ * Checks if point is inside bounds, incl. edges.
+ *
+ * @param {Point} point
+ * @param {Bounds} bounds
+ */
+
+
+function isInsideBounds(point, bounds) {
+  return (0, _LayoutUtil.getOrientation)(bounds, point, 1) === 'intersect';
+}
+
+function getOriginal(point) {
+  return point.original || point;
+}
+
+},{"../../../../layout/LayoutUtil":188,"../../../../util/AttachUtil":198,"min-dash":219}],155:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MoveClosure;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("../../../../util/Elements");
+
+function MoveClosure() {
+  this.allShapes = {};
+  this.allConnections = {};
+  this.enclosedElements = {};
+  this.enclosedConnections = {};
+  this.topLevel = {};
+}
+
+MoveClosure.prototype.add = function (element, isTopLevel) {
+  return this.addAll([element], isTopLevel);
+};
+
+MoveClosure.prototype.addAll = function (elements, isTopLevel) {
+  var newClosure = (0, _Elements.getClosure)(elements, !!isTopLevel, this);
+  (0, _minDash.assign)(this, newClosure);
+  return this;
+};
+
+},{"../../../../util/Elements":202,"min-dash":219}],156:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = MoveHelper;
+
+var _minDash = require("min-dash");
+
+var _AnchorsHelper = require("./AnchorsHelper");
+
+var _MoveClosure = _interopRequireDefault(require("./MoveClosure"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A helper that is able to carry out serialized move
+ * operations on multiple elements.
+ *
+ * @param {Modeling} modeling
+ */
+function MoveHelper(modeling) {
+  this._modeling = modeling;
+}
+/**
+ * Move the specified elements and all children by the given delta.
+ *
+ * This moves all enclosed connections, too and layouts all affected
+ * external connections.
+ *
+ * @param  {Array<djs.model.Base>} elements
+ * @param  {Point} delta
+ * @param  {djs.model.Base} newParent applied to the first level of shapes
+ *
+ * @return {Array<djs.model.Base>} list of touched elements
+ */
+
+
+MoveHelper.prototype.moveRecursive = function (elements, delta, newParent) {
+  if (!elements) {
+    return [];
+  } else {
+    return this.moveClosure(this.getClosure(elements), delta, newParent);
+  }
+};
+/**
+ * Move the given closure of elmements.
+ *
+ * @param {Object} closure
+ * @param {Point} delta
+ * @param {djs.model.Base} [newParent]
+ * @param {djs.model.Base} [newHost]
+ */
+
+
+MoveHelper.prototype.moveClosure = function (closure, delta, newParent, newHost, primaryShape) {
+  var modeling = this._modeling;
+  var allShapes = closure.allShapes,
+      allConnections = closure.allConnections,
+      enclosedConnections = closure.enclosedConnections,
+      topLevel = closure.topLevel,
+      keepParent = false;
+
+  if (primaryShape && primaryShape.parent === newParent) {
+    keepParent = true;
+  } // move all shapes
+
+
+  (0, _minDash.forEach)(allShapes, function (shape) {
+    // move the element according to the given delta
+    modeling.moveShape(shape, delta, topLevel[shape.id] && !keepParent && newParent, {
+      recurse: false,
+      layout: false
+    });
+  }); // move all child connections / layout external connections
+
+  (0, _minDash.forEach)(allConnections, function (c) {
+    var sourceMoved = !!allShapes[c.source.id],
+        targetMoved = !!allShapes[c.target.id];
+
+    if (enclosedConnections[c.id] && sourceMoved && targetMoved) {
+      modeling.moveConnection(c, delta, topLevel[c.id] && !keepParent && newParent);
+    } else {
+      modeling.layoutConnection(c, {
+        connectionStart: sourceMoved && (0, _AnchorsHelper.getMovedSourceAnchor)(c, c.source, delta),
+        connectionEnd: targetMoved && (0, _AnchorsHelper.getMovedTargetAnchor)(c, c.target, delta)
+      });
+    }
+  });
+};
+/**
+ * Returns the closure for the selected elements
+ *
+ * @param  {Array<djs.model.Base>} elements
+ * @return {MoveClosure} closure
+ */
+
+
+MoveHelper.prototype.getClosure = function (elements) {
+  return new _MoveClosure.default().addAll(elements, true);
+};
+
+},{"./AnchorsHelper":154,"./MoveClosure":155,"min-dash":219}],157:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Mouse;
+exports.createMoveEvent = createMoveEvent;
+
+function Mouse(eventBus) {
+  var self = this;
+  this._lastMoveEvent = null;
+
+  function setLastMoveEvent(mousemoveEvent) {
+    self._lastMoveEvent = mousemoveEvent;
+  }
+
+  eventBus.on('canvas.init', function (context) {
+    var svg = self._svg = context.svg;
+    svg.addEventListener('mousemove', setLastMoveEvent);
+  });
+  eventBus.on('canvas.destroy', function () {
+    self._lastMouseEvent = null;
+
+    self._svg.removeEventListener('mousemove', setLastMoveEvent);
+  });
+}
+
+Mouse.$inject = ['eventBus'];
+
+Mouse.prototype.getLastMoveEvent = function () {
+  return this._lastMoveEvent || createMoveEvent(0, 0);
+}; // helpers //////////
+
+
+function createMoveEvent(x, y) {
+  var event = document.createEvent('MouseEvent');
+  var screenX = x,
+      screenY = y,
+      clientX = x,
+      clientY = y;
+
+  if (event.initMouseEvent) {
+    event.initMouseEvent('mousemove', true, true, window, 0, screenX, screenY, clientX, clientY, false, false, false, false, 0, null);
+  }
+
+  return event;
+}
+
+},{}],158:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Mouse = _interopRequireDefault(require("./Mouse"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['mouse'],
+  mouse: ['type', _Mouse.default]
+};
+exports.default = _default;
+
+},{"./Mouse":157}],159:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = OrderingProvider;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("../../command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * An abstract provider that allows modelers to implement a custom
+ * ordering of diagram elements on the canvas.
+ *
+ * It makes sure that the order is always preserved during element
+ * creation and move operations.
+ *
+ * In order to use this behavior, inherit from it and override
+ * the method {@link OrderingProvider#getOrdering}.
+ *
+ * @example
+ *
+ * ```javascript
+ * function CustomOrderingProvider(eventBus) {
+ *   OrderingProvider.call(this, eventBus);
+ *
+ *   this.getOrdering = function(element, newParent) {
+ *     // always insert elements at the front
+ *     // when moving
+ *     return {
+ *       index: 0,
+ *       parent: newParent
+ *     };
+ *   };
+ * }
+ * ```
+ *
+ * @param {EventBus} eventBus
+ */
+function OrderingProvider(eventBus) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  var self = this;
+  this.preExecute(['shape.create', 'connection.create'], function (event) {
+    var context = event.context,
+        element = context.shape || context.connection,
+        parent = context.parent;
+    var ordering = self.getOrdering(element, parent);
+
+    if (ordering) {
+      if (ordering.parent !== undefined) {
+        context.parent = ordering.parent;
+      }
+
+      context.parentIndex = ordering.index;
+    }
+  });
+  this.preExecute(['shape.move', 'connection.move'], function (event) {
+    var context = event.context,
+        element = context.shape || context.connection,
+        parent = context.newParent || element.parent;
+    var ordering = self.getOrdering(element, parent);
+
+    if (ordering) {
+      if (ordering.parent !== undefined) {
+        context.newParent = ordering.parent;
+      }
+
+      context.newParentIndex = ordering.index;
+    }
+  });
+}
+/**
+ * Return a custom ordering of the element, both in terms
+ * of parent element and index in the new parent.
+ *
+ * Implementors of this method must return an object with
+ * `parent` _and_ `index` in it.
+ *
+ * @param {djs.model.Base} element
+ * @param {djs.model.Shape} newParent
+ *
+ * @return {Object} ordering descriptor
+ */
+
+
+OrderingProvider.prototype.getOrdering = function (element, newParent) {
+  return null;
+};
+
+(0, _inherits.default)(OrderingProvider, _CommandInterceptor.default);
+
+},{"../../command/CommandInterceptor":96,"inherits":218}],160:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10651,7 +24844,7 @@ Outline.prototype.updateConnectionOutline = function (outline, connection) {
 
 Outline.$inject = ['eventBus', 'styles', 'elementRegistry'];
 
-},{"../../util/Elements":63,"min-dash":78,"min-dom":79,"tiny-svg":87}],42:[function(require,module,exports){
+},{"../../util/Elements":202,"min-dash":219,"min-dom":220,"tiny-svg":228}],161:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10669,7 +24862,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Outline":41}],43:[function(require,module,exports){
+},{"./Outline":160}],162:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11229,7 +25422,7 @@ function setTransform(el, transform) {
   });
 }
 
-},{"../../util/Elements":63,"../../util/IdGenerator":67,"min-dash":78,"min-dom":79}],44:[function(require,module,exports){
+},{"../../util/Elements":202,"../../util/IdGenerator":206,"min-dash":219,"min-dom":220}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11247,7 +25440,705 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./Overlays":43}],45:[function(require,module,exports){
+},{"./Overlays":162}],164:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = PreviewSupport;
+
+var _minDash = require("min-dash");
+
+var _tinySvg = require("tiny-svg");
+
+var _minDom = require("min-dom");
+
+var _GraphicsUtil = require("../../util/GraphicsUtil");
+
+var MARKER_TYPES = ['marker-start', 'marker-mid', 'marker-end'];
+var NODES_CAN_HAVE_MARKER = ['circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect'];
+/**
+ * Adds support for previews of moving/resizing elements.
+ */
+
+function PreviewSupport(elementRegistry, eventBus, canvas, styles) {
+  this._elementRegistry = elementRegistry;
+  this._canvas = canvas;
+  this._styles = styles;
+  this._clonedMarkers = {};
+  var self = this;
+  eventBus.on('drag.cleanup', function () {
+    (0, _minDash.forEach)(self._clonedMarkers, function (clonedMarker) {
+      (0, _tinySvg.remove)(clonedMarker);
+    });
+    self._clonedMarkers = {};
+  });
+}
+
+PreviewSupport.$inject = ['elementRegistry', 'eventBus', 'canvas', 'styles'];
+/**
+ * Returns graphics of an element.
+ *
+ * @param {djs.model.Base} element
+ *
+ * @return {SVGElement}
+ */
+
+PreviewSupport.prototype.getGfx = function (element) {
+  return this._elementRegistry.getGraphics(element);
+};
+/**
+ * Adds a move preview of a given shape to a given svg group.
+ *
+ * @param {djs.model.Base} element
+ * @param {SVGElement} group
+ * @param {SVGElement} [gfx]
+ *
+ * @return {SVGElement} dragger
+ */
+
+
+PreviewSupport.prototype.addDragger = function (element, group, gfx) {
+  gfx = gfx || this.getGfx(element);
+  var dragger = (0, _tinySvg.clone)(gfx);
+  var bbox = gfx.getBoundingClientRect();
+
+  this._cloneMarkers((0, _GraphicsUtil.getVisual)(dragger));
+
+  (0, _tinySvg.attr)(dragger, this._styles.cls('djs-dragger', [], {
+    x: bbox.top,
+    y: bbox.left
+  }));
+  (0, _tinySvg.append)(group, dragger);
+  return dragger;
+};
+/**
+ * Adds a resize preview of a given shape to a given svg group.
+ *
+ * @param {djs.model.Base} element
+ * @param {SVGElement} group
+ *
+ * @return {SVGElement} frame
+ */
+
+
+PreviewSupport.prototype.addFrame = function (shape, group) {
+  var frame = (0, _tinySvg.create)('rect', {
+    class: 'djs-resize-overlay',
+    width: shape.width,
+    height: shape.height,
+    x: shape.x,
+    y: shape.y
+  });
+  (0, _tinySvg.append)(group, frame);
+  return frame;
+};
+/**
+ * Clone all markers referenced by a node and its child nodes.
+ *
+ * @param {SVGElement} gfx
+ */
+
+
+PreviewSupport.prototype._cloneMarkers = function (gfx) {
+  var self = this;
+
+  if (gfx.childNodes) {
+    // TODO: use forEach once we drop PhantomJS
+    for (var i = 0; i < gfx.childNodes.length; i++) {
+      // recursively clone markers of child nodes
+      self._cloneMarkers(gfx.childNodes[i]);
+    }
+  }
+
+  if (!canHaveMarker(gfx)) {
+    return;
+  }
+
+  MARKER_TYPES.forEach(function (markerType) {
+    if ((0, _tinySvg.attr)(gfx, markerType)) {
+      var marker = getMarker(gfx, markerType, self._canvas.getContainer());
+
+      self._cloneMarker(gfx, marker, markerType);
+    }
+  });
+};
+/**
+ * Clone marker referenced by an element.
+ *
+ * @param {SVGElement} gfx
+ * @param {SVGElement} marker
+ * @param {string} markerType
+ */
+
+
+PreviewSupport.prototype._cloneMarker = function (gfx, marker, markerType) {
+  var markerId = marker.id;
+  var clonedMarker = this._clonedMarkers[markerId];
+
+  if (!clonedMarker) {
+    clonedMarker = (0, _tinySvg.clone)(marker);
+    var clonedMarkerId = markerId + '-clone';
+    clonedMarker.id = clonedMarkerId;
+    (0, _tinySvg.classes)(clonedMarker).add('djs-dragger').add('djs-dragger-marker');
+    this._clonedMarkers[markerId] = clonedMarker;
+    var defs = (0, _minDom.query)('defs', this._canvas._svg);
+
+    if (!defs) {
+      defs = (0, _tinySvg.create)('defs');
+      (0, _tinySvg.append)(this._canvas._svg, defs);
+    }
+
+    (0, _tinySvg.append)(defs, clonedMarker);
+  }
+
+  var reference = idToReference(this._clonedMarkers[markerId].id);
+  (0, _tinySvg.attr)(gfx, markerType, reference);
+}; // helpers //////////
+
+/**
+ * Get marker of given type referenced by node.
+ *
+ * @param {Node} node
+ * @param {string} markerType
+ * @param {Node} [parentNode]
+ *
+ * @param {Node}
+ */
+
+
+function getMarker(node, markerType, parentNode) {
+  var id = referenceToId((0, _tinySvg.attr)(node, markerType));
+  return (0, _minDom.query)('marker#' + id, parentNode || document);
+}
+/**
+ * Get ID of fragment within current document from its functional IRI reference.
+ * References may use single or double quotes.
+ *
+ * @param {string} reference
+ *
+ * @returns {string}
+ */
+
+
+function referenceToId(reference) {
+  return reference.match(/url\(['"]?#([^'"]*)['"]?\)/)[1];
+}
+/**
+ * Get functional IRI reference for given ID of fragment within current document.
+ *
+ * @param {string} id
+ *
+ * @returns {string}
+ */
+
+
+function idToReference(id) {
+  return 'url(#' + id + ')';
+}
+/**
+ * Check wether node type can have marker attributes.
+ *
+ * @param {Node} node
+ *
+ * @returns {boolean}
+ */
+
+
+function canHaveMarker(node) {
+  return NODES_CAN_HAVE_MARKER.indexOf(node.nodeName) !== -1;
+}
+
+},{"../../util/GraphicsUtil":205,"min-dash":219,"min-dom":220,"tiny-svg":228}],165:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _PreviewSupport = _interopRequireDefault(require("./PreviewSupport"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['previewSupport'],
+  previewSupport: ['type', _PreviewSupport.default]
+};
+exports.default = _default;
+
+},{"./PreviewSupport":164}],166:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Replace;
+
+var _minDash = require("min-dash");
+
+var round = Math.round;
+/**
+ * Service that allow replacing of elements.
+ */
+
+function Replace(modeling) {
+  this._modeling = modeling;
+}
+
+Replace.$inject = ['modeling'];
+/**
+ * @param {Element} oldElement - Element to be replaced
+ * @param {Object}  newElementData - Containing information about the new element,
+ *                                   for example the new bounds and type.
+ * @param {Object}  options - Custom options that will be attached to the context. It can be used to inject data
+ *                            that is needed in the command chain. For example it could be used in
+ *                            eventbus.on('commandStack.shape.replace.postExecute') to change shape attributes after
+ *                            shape creation.
+ */
+
+Replace.prototype.replaceElement = function (oldElement, newElementData, options) {
+  if (oldElement.waypoints) {
+    // TODO(nikku): we do not replace connections, yet
+    return null;
+  }
+
+  var modeling = this._modeling;
+  var width = newElementData.width || oldElement.width,
+      height = newElementData.height || oldElement.height,
+      x = newElementData.x || oldElement.x,
+      y = newElementData.y || oldElement.y,
+      centerX = round(x + width / 2),
+      centerY = round(y + height / 2); // modeling API requires center coordinates,
+  // account for that when handling shape bounds
+
+  return modeling.replaceShape(oldElement, (0, _minDash.assign)({}, newElementData, {
+    x: centerX,
+    y: centerY,
+    width: width,
+    height: height
+  }), options);
+};
+
+},{"min-dash":219}],167:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Replace = _interopRequireDefault(require("./Replace"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['replace'],
+  replace: ['type', _Replace.default]
+};
+exports.default = _default;
+
+},{"./Replace":166}],168:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.substractTRBL = substractTRBL;
+exports.resizeBounds = resizeBounds;
+exports.resizeTRBL = resizeTRBL;
+exports.reattachPoint = reattachPoint;
+exports.ensureConstraints = ensureConstraints;
+exports.getMinResizeBounds = getMinResizeBounds;
+exports.addPadding = addPadding;
+exports.computeChildrenBBox = computeChildrenBBox;
+
+var _minDash = require("min-dash");
+
+var _Elements = require("../../util/Elements");
+
+var _LayoutUtil = require("../../layout/LayoutUtil");
+
+var max = Math.max,
+    min = Math.min;
+var DEFAULT_CHILD_BOX_PADDING = 20;
+
+/**
+ * Substract a TRBL from another
+ *
+ * @param  {TRBL} trblA
+ * @param  {TRBL} trblB
+ *
+ * @return {TRBL}
+ */
+function substractTRBL(trblA, trblB) {
+  return {
+    top: trblA.top - trblB.top,
+    right: trblA.right - trblB.right,
+    bottom: trblA.bottom - trblB.bottom,
+    left: trblA.left - trblB.left
+  };
+}
+/**
+ * Resize the given bounds by the specified delta from a given anchor point.
+ *
+ * @param {Bounds} bounds the bounding box that should be resized
+ * @param {string} direction in which the element is resized (nw, ne, se, sw)
+ * @param {Point} delta of the resize operation
+ *
+ * @return {Bounds} resized bounding box
+ */
+
+
+function resizeBounds(bounds, direction, delta) {
+  var dx = delta.x,
+      dy = delta.y;
+  var newBounds = {
+    x: bounds.x,
+    y: bounds.y,
+    width: bounds.width,
+    height: bounds.height
+  };
+
+  if (direction.indexOf('n') !== -1) {
+    newBounds.y = bounds.y + dy;
+    newBounds.height = bounds.height - dy;
+  } else if (direction.indexOf('s') !== -1) {
+    newBounds.height = bounds.height + dy;
+  }
+
+  if (direction.indexOf('e') !== -1) {
+    newBounds.width = bounds.width + dx;
+  } else if (direction.indexOf('w') !== -1) {
+    newBounds.x = bounds.x + dx;
+    newBounds.width = bounds.width - dx;
+  }
+
+  return newBounds;
+}
+/**
+ * Resize the given bounds by applying the passed
+ * { top, right, bottom, left } delta.
+ *
+ * @param {Bounds} bounds
+ * @param {TRBL} trblResize
+ *
+ * @return {Bounds}
+ */
+
+
+function resizeTRBL(bounds, resize) {
+  return {
+    x: bounds.x + (resize.left || 0),
+    y: bounds.y + (resize.top || 0),
+    width: bounds.width - (resize.left || 0) + (resize.right || 0),
+    height: bounds.height - (resize.top || 0) + (resize.bottom || 0)
+  };
+}
+
+function reattachPoint(bounds, newBounds, point) {
+  var sx = bounds.width / newBounds.width,
+      sy = bounds.height / newBounds.height;
+  return {
+    x: Math.round(newBounds.x + newBounds.width / 2) - Math.floor((bounds.x + bounds.width / 2 - point.x) / sx),
+    y: Math.round(newBounds.y + newBounds.height / 2) - Math.floor((bounds.y + bounds.height / 2 - point.y) / sy)
+  };
+}
+
+function applyConstraints(attr, trbl, resizeConstraints) {
+  var value = trbl[attr],
+      minValue = resizeConstraints.min && resizeConstraints.min[attr],
+      maxValue = resizeConstraints.max && resizeConstraints.max[attr];
+
+  if ((0, _minDash.isNumber)(minValue)) {
+    value = (/top|left/.test(attr) ? min : max)(value, minValue);
+  }
+
+  if ((0, _minDash.isNumber)(maxValue)) {
+    value = (/top|left/.test(attr) ? max : min)(value, maxValue);
+  }
+
+  return value;
+}
+
+function ensureConstraints(currentBounds, resizeConstraints) {
+  if (!resizeConstraints) {
+    return currentBounds;
+  }
+
+  var currentTrbl = (0, _LayoutUtil.asTRBL)(currentBounds);
+  return (0, _LayoutUtil.asBounds)({
+    top: applyConstraints('top', currentTrbl, resizeConstraints),
+    right: applyConstraints('right', currentTrbl, resizeConstraints),
+    bottom: applyConstraints('bottom', currentTrbl, resizeConstraints),
+    left: applyConstraints('left', currentTrbl, resizeConstraints)
+  });
+}
+
+function getMinResizeBounds(direction, currentBounds, minDimensions, childrenBounds) {
+  var currentBox = (0, _LayoutUtil.asTRBL)(currentBounds);
+  var minBox = {
+    top: /n/.test(direction) ? currentBox.bottom - minDimensions.height : currentBox.top,
+    left: /w/.test(direction) ? currentBox.right - minDimensions.width : currentBox.left,
+    bottom: /s/.test(direction) ? currentBox.top + minDimensions.height : currentBox.bottom,
+    right: /e/.test(direction) ? currentBox.left + minDimensions.width : currentBox.right
+  };
+  var childrenBox = childrenBounds ? (0, _LayoutUtil.asTRBL)(childrenBounds) : minBox;
+  var combinedBox = {
+    top: min(minBox.top, childrenBox.top),
+    left: min(minBox.left, childrenBox.left),
+    bottom: max(minBox.bottom, childrenBox.bottom),
+    right: max(minBox.right, childrenBox.right)
+  };
+  return (0, _LayoutUtil.asBounds)(combinedBox);
+}
+
+function asPadding(mayBePadding, defaultValue) {
+  if (typeof mayBePadding !== 'undefined') {
+    return mayBePadding;
+  } else {
+    return DEFAULT_CHILD_BOX_PADDING;
+  }
+}
+
+function addPadding(bbox, padding) {
+  var left, right, top, bottom;
+
+  if (typeof padding === 'object') {
+    left = asPadding(padding.left);
+    right = asPadding(padding.right);
+    top = asPadding(padding.top);
+    bottom = asPadding(padding.bottom);
+  } else {
+    left = right = top = bottom = asPadding(padding);
+  }
+
+  return {
+    x: bbox.x - left,
+    y: bbox.y - top,
+    width: bbox.width + left + right,
+    height: bbox.height + top + bottom
+  };
+}
+/**
+ * Is the given element part of the resize
+ * targets min boundary box?
+ *
+ * This is the default implementation which excludes
+ * connections and labels.
+ *
+ * @param {djs.model.Base} element
+ */
+
+
+function isBBoxChild(element) {
+  // exclude connections
+  if (element.waypoints) {
+    return false;
+  } // exclude labels
+
+
+  if (element.type === 'label') {
+    return false;
+  }
+
+  return true;
+}
+/**
+ * Return children bounding computed from a shapes children
+ * or a list of prefiltered children.
+ *
+ * @param  {djs.model.Shape|Array<djs.model.Shape>} shapeOrChildren
+ * @param  {number|Object} padding
+ *
+ * @return {Bounds}
+ */
+
+
+function computeChildrenBBox(shapeOrChildren, padding) {
+  var elements; // compute based on shape
+
+  if (shapeOrChildren.length === undefined) {
+    // grab all the children that are part of the
+    // parents children box
+    elements = (0, _minDash.filter)(shapeOrChildren.children, isBBoxChild);
+  } else {
+    elements = shapeOrChildren;
+  }
+
+  if (elements.length) {
+    return addPadding((0, _Elements.getBBox)(elements), padding);
+  }
+}
+
+},{"../../layout/LayoutUtil":188,"../../util/Elements":202,"min-dash":219}],169:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = RuleProvider;
+
+var _inherits = _interopRequireDefault(require("inherits"));
+
+var _CommandInterceptor = _interopRequireDefault(require("../../command/CommandInterceptor"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * A basic provider that may be extended to implement modeling rules.
+ *
+ * Extensions should implement the init method to actually add their custom
+ * modeling checks. Checks may be added via the #addRule(action, fn) method.
+ *
+ * @param {EventBus} eventBus
+ */
+function RuleProvider(eventBus) {
+  _CommandInterceptor.default.call(this, eventBus);
+
+  this.init();
+}
+
+RuleProvider.$inject = ['eventBus'];
+(0, _inherits.default)(RuleProvider, _CommandInterceptor.default);
+/**
+ * Adds a modeling rule for the given action, implemented through
+ * a callback function.
+ *
+ * The function will receive the modeling specific action context
+ * to perform its check. It must return `false` to disallow the
+ * action from happening or `true` to allow the action.
+ *
+ * A rule provider may pass over the evaluation to lower priority
+ * rules by returning return nothing (or <code>undefined</code>).
+ *
+ * @example
+ *
+ * ResizableRules.prototype.init = function() {
+ *
+ *   \/**
+ *    * Return `true`, `false` or nothing to denote
+ *    * _allowed_, _not allowed_ and _continue evaluating_.
+ *    *\/
+ *   this.addRule('shape.resize', function(context) {
+ *
+ *     var shape = context.shape;
+ *
+ *     if (!context.newBounds) {
+ *       // check general resizability
+ *       if (!shape.resizable) {
+ *         return false;
+ *       }
+ *
+ *       // not returning anything (read: undefined)
+ *       // will continue the evaluation of other rules
+ *       // (with lower priority)
+ *       return;
+ *     } else {
+ *       // element must have minimum size of 10*10 points
+ *       return context.newBounds.width > 10 && context.newBounds.height > 10;
+ *     }
+ *   });
+ * };
+ *
+ * @param {string|Array<string>} actions the identifier for the modeling action to check
+ * @param {number} [priority] the priority at which this rule is being applied
+ * @param {Function} fn the callback function that performs the actual check
+ */
+
+RuleProvider.prototype.addRule = function (actions, priority, fn) {
+  var self = this;
+
+  if (typeof actions === 'string') {
+    actions = [actions];
+  }
+
+  actions.forEach(function (action) {
+    self.canExecute(action, priority, function (context, action, event) {
+      return fn(context);
+    }, true);
+  });
+};
+/**
+ * Implement this method to add new rules during provider initialization.
+ */
+
+
+RuleProvider.prototype.init = function () {};
+
+},{"../../command/CommandInterceptor":96,"inherits":218}],170:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Rules;
+
+/**
+ * A service that provides rules for certain diagram actions.
+ *
+ * The default implementation will hook into the {@link CommandStack}
+ * to perform the actual rule evaluation. Make sure to provide the
+ * `commandStack` service with this module if you plan to use it.
+ *
+ * Together with this implementation you may use the {@link RuleProvider}
+ * to implement your own rule checkers.
+ *
+ * This module is ment to be easily replaced, thus the tiny foot print.
+ *
+ * @param {Injector} injector
+ */
+function Rules(injector) {
+  this._commandStack = injector.get('commandStack', false);
+}
+
+Rules.$inject = ['injector'];
+/**
+ * Returns whether or not a given modeling action can be executed
+ * in the specified context.
+ *
+ * This implementation will respond with allow unless anyone
+ * objects.
+ *
+ * @param {string} action the action to be checked
+ * @param {Object} [context] the context to check the action in
+ *
+ * @return {boolean} returns true, false or null depending on whether the
+ *                   operation is allowed, not allowed or should be ignored.
+ */
+
+Rules.prototype.allowed = function (action, context) {
+  var allowed = true;
+  var commandStack = this._commandStack;
+
+  if (commandStack) {
+    allowed = commandStack.canExecute(action, context);
+  } // map undefined to true, i.e. no rules
+
+
+  return allowed === undefined ? true : allowed;
+};
+
+},{}],171:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Rules = _interopRequireDefault(require("./Rules"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['rules'],
+  rules: ['type', _Rules.default]
+};
+exports.default = _default;
+
+},{"./Rules":170}],172:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11344,7 +26235,7 @@ Selection.prototype.select = function (elements, add) {
   });
 };
 
-},{"min-dash":78}],46:[function(require,module,exports){
+},{"min-dash":219}],173:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11443,7 +26334,7 @@ function isShown(element) {
   return !element.hidden;
 }
 
-},{"../../util/Mouse":69,"min-dash":78}],47:[function(require,module,exports){
+},{"../../util/Mouse":209,"min-dash":219}],174:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11511,7 +26402,7 @@ function SelectionVisuals(events, canvas, selection, styles) {
 
 SelectionVisuals.$inject = ['eventBus', 'canvas', 'selection', 'styles'];
 
-},{"min-dash":78}],48:[function(require,module,exports){
+},{"min-dash":219}],175:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11540,7 +26431,1302 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../interaction-events":36,"../outline":42,"./Selection":45,"./SelectionBehavior":46,"./SelectionVisuals":47}],49:[function(require,module,exports){
+},{"../interaction-events":125,"../outline":161,"./Selection":172,"./SelectionBehavior":173,"./SelectionVisuals":174}],176:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SpaceTool;
+
+var _minDash = require("min-dash");
+
+var _LayoutUtil = require("../../layout/LayoutUtil");
+
+var _Elements = require("../../util/Elements");
+
+var _SpaceUtil = require("./SpaceUtil");
+
+var _Mouse = require("../../util/Mouse");
+
+var _Cursor = require("../../util/Cursor");
+
+var abs = Math.abs,
+    round = Math.round;
+var AXIS_TO_DIMENSION = {
+  x: 'width',
+  y: 'height'
+};
+var CURSOR_CROSSHAIR = 'crosshair';
+var DIRECTION_TO_TRBL = {
+  n: 'top',
+  w: 'left',
+  s: 'bottom',
+  e: 'right'
+};
+var HIGH_PRIORITY = 1500;
+var DIRECTION_TO_OPPOSITE = {
+  n: 's',
+  w: 'e',
+  s: 'n',
+  e: 'w'
+};
+var PADDING = 20;
+/**
+ * Add or remove space by moving and resizing elements.
+ *
+ * @param {Canvas} canvas
+ * @param {Dragging} dragging
+ * @param {EventBus} eventBus
+ * @param {Modeling} modeling
+ * @param {Rules} rules
+ * @param {ToolManager} toolManager
+ * @param {Mouse} mouse
+ */
+
+function SpaceTool(canvas, dragging, eventBus, modeling, rules, toolManager, mouse) {
+  this._canvas = canvas;
+  this._dragging = dragging;
+  this._eventBus = eventBus;
+  this._modeling = modeling;
+  this._rules = rules;
+  this._toolManager = toolManager;
+  this._mouse = mouse;
+  var self = this;
+  toolManager.registerTool('space', {
+    tool: 'spaceTool.selection',
+    dragging: 'spaceTool'
+  });
+  eventBus.on('spaceTool.selection.end', function (event) {
+    eventBus.once('spaceTool.selection.ended', function () {
+      self.activateMakeSpace(event.originalEvent);
+    });
+  });
+  eventBus.on('spaceTool.move', HIGH_PRIORITY, function (event) {
+    var context = event.context,
+        initialized = context.initialized;
+
+    if (!initialized) {
+      initialized = context.initialized = self.init(event, context);
+    }
+
+    if (initialized) {
+      ensureConstraints(event);
+    }
+  });
+  eventBus.on('spaceTool.end', function (event) {
+    var context = event.context,
+        axis = context.axis,
+        direction = context.direction,
+        movingShapes = context.movingShapes,
+        resizingShapes = context.resizingShapes,
+        start = context.start;
+
+    if (!context.initialized) {
+      return;
+    }
+
+    ensureConstraints(event);
+    var delta = {
+      x: 0,
+      y: 0
+    };
+    delta[axis] = round(event['d' + axis]);
+    self.makeSpace(movingShapes, resizingShapes, delta, direction, start);
+    eventBus.once('spaceTool.ended', function (event) {
+      // activate space tool selection after make space
+      self.activateSelection(event.originalEvent, true, true);
+    });
+  });
+}
+
+SpaceTool.$inject = ['canvas', 'dragging', 'eventBus', 'modeling', 'rules', 'toolManager', 'mouse'];
+/**
+ * Activate space tool selection.
+ *
+ * @param {Object} event
+ * @param {boolean} autoActivate
+ */
+
+SpaceTool.prototype.activateSelection = function (event, autoActivate, reactivate) {
+  this._dragging.init(event, 'spaceTool.selection', {
+    autoActivate: autoActivate,
+    cursor: CURSOR_CROSSHAIR,
+    data: {
+      context: {
+        reactivate: reactivate
+      }
+    },
+    trapClick: false
+  });
+};
+/**
+ * Activate space tool make space.
+ *
+ * @param  {MouseEvent} event
+ */
+
+
+SpaceTool.prototype.activateMakeSpace = function (event) {
+  this._dragging.init(event, 'spaceTool', {
+    autoActivate: true,
+    cursor: CURSOR_CROSSHAIR,
+    data: {
+      context: {}
+    }
+  });
+};
+/**
+ * Make space.
+ *
+ * @param  {Array<djs.model.Shape>} movingShapes
+ * @param  {Array<djs.model.Shape>} resizingShapes
+ * @param  {Object} delta
+ * @param  {number} delta.x
+ * @param  {number} delta.y
+ * @param  {string} direction
+ * @param  {number} start
+ */
+
+
+SpaceTool.prototype.makeSpace = function (movingShapes, resizingShapes, delta, direction, start) {
+  return this._modeling.createSpace(movingShapes, resizingShapes, delta, direction, start);
+};
+/**
+ * Initialize make space and return true if that was successful.
+ *
+ * @param {Object} event
+ * @param {Object} context
+ *
+ * @return {boolean}
+ */
+
+
+SpaceTool.prototype.init = function (event, context) {
+  var axis = abs(event.dx) > abs(event.dy) ? 'x' : 'y',
+      delta = event['d' + axis],
+      start = event[axis] - delta;
+
+  if (abs(delta) < 5) {
+    return false;
+  } // invert delta to remove space when moving left
+
+
+  if (delta < 0) {
+    delta *= -1;
+  } // invert delta to add/remove space when removing/adding space if modifier key is pressed
+
+
+  if ((0, _Mouse.hasPrimaryModifier)(event)) {
+    delta *= -1;
+  }
+
+  var direction = (0, _SpaceUtil.getDirection)(axis, delta);
+
+  var root = this._canvas.getRootElement();
+
+  var children = (0, _Elements.selfAndAllChildren)(root, true);
+  var elements = this.calculateAdjustments(children, axis, delta, start);
+
+  var minDimensions = this._eventBus.fire('spaceTool.getMinDimensions', {
+    axis: axis,
+    direction: direction,
+    shapes: elements.resizingShapes,
+    start: start
+  });
+
+  var spaceToolConstraints = getSpaceToolConstraints(elements, axis, direction, start, minDimensions);
+  (0, _minDash.assign)(context, elements, {
+    axis: axis,
+    direction: direction,
+    spaceToolConstraints: spaceToolConstraints,
+    start: start
+  });
+  (0, _Cursor.set)('resize-' + (axis === 'x' ? 'ew' : 'ns'));
+  return true;
+};
+/**
+ * Get elements to be moved and resized.
+ *
+ * @param  {Array<djs.model.Shape>} elements
+ * @param  {string} axis
+ * @param  {number} delta
+ * @param  {number} start
+ *
+ * @return {Object}
+ */
+
+
+SpaceTool.prototype.calculateAdjustments = function (elements, axis, delta, start) {
+  var rules = this._rules;
+  var movingShapes = [],
+      resizingShapes = [];
+  (0, _minDash.forEach)(elements, function (element) {
+    if (!element.parent || isConnection(element)) {
+      return;
+    }
+
+    var shapeStart = element[axis],
+        shapeEnd = shapeStart + element[AXIS_TO_DIMENSION[axis]]; // shape to be moved
+
+    if (delta > 0 && shapeStart > start || delta < 0 && shapeEnd < start) {
+      return movingShapes.push(element);
+    } // shape to be resized
+
+
+    if (shapeStart < start && shapeEnd > start && rules.allowed('shape.resize', {
+      shape: element
+    })) {
+      return resizingShapes.push(element);
+    }
+  });
+  return {
+    movingShapes: movingShapes,
+    resizingShapes: resizingShapes
+  };
+};
+
+SpaceTool.prototype.toggle = function () {
+  if (this.isActive()) {
+    return this._dragging.cancel();
+  }
+
+  var mouseEvent = this._mouse.getLastMoveEvent();
+
+  this.activateSelection(mouseEvent, !!mouseEvent);
+};
+
+SpaceTool.prototype.isActive = function () {
+  var context = this._dragging.context();
+
+  return context && /^spaceTool/.test(context.prefix);
+}; // helpers //////////
+
+
+function addPadding(trbl) {
+  return {
+    top: trbl.top - PADDING,
+    right: trbl.right + PADDING,
+    bottom: trbl.bottom + PADDING,
+    left: trbl.left - PADDING
+  };
+}
+
+function ensureConstraints(event) {
+  var context = event.context,
+      spaceToolConstraints = context.spaceToolConstraints;
+
+  if (!spaceToolConstraints) {
+    return;
+  }
+
+  var x, y;
+
+  if ((0, _minDash.isNumber)(spaceToolConstraints.left)) {
+    x = Math.max(event.x, spaceToolConstraints.left);
+    event.dx = event.dx + x - event.x;
+    event.x = x;
+  }
+
+  if ((0, _minDash.isNumber)(spaceToolConstraints.right)) {
+    x = Math.min(event.x, spaceToolConstraints.right);
+    event.dx = event.dx + x - event.x;
+    event.x = x;
+  }
+
+  if ((0, _minDash.isNumber)(spaceToolConstraints.top)) {
+    y = Math.max(event.y, spaceToolConstraints.top);
+    event.dy = event.dy + y - event.y;
+    event.y = y;
+  }
+
+  if ((0, _minDash.isNumber)(spaceToolConstraints.bottom)) {
+    y = Math.min(event.y, spaceToolConstraints.bottom);
+    event.dy = event.dy + y - event.y;
+    event.y = y;
+  }
+}
+
+function getSpaceToolConstraints(elements, axis, direction, start, minDimensions) {
+  var movingShapes = elements.movingShapes,
+      resizingShapes = elements.resizingShapes;
+
+  if (!resizingShapes.length) {
+    return;
+  }
+
+  var spaceToolConstraints = {},
+      min,
+      max;
+  (0, _minDash.forEach)(resizingShapes, function (resizingShape) {
+    var resizingShapeBBox = (0, _LayoutUtil.asTRBL)(resizingShape); // find children that are not moving or resizing
+
+    var nonMovingResizingChildren = (0, _minDash.filter)(resizingShape.children, function (child) {
+      return !isConnection(child) && !isLabel(child) && !includes(movingShapes, child) && !includes(resizingShapes, child);
+    }); // find children that are moving
+
+    var movingChildren = (0, _minDash.filter)(resizingShape.children, function (child) {
+      return !isConnection(child) && !isLabel(child) && includes(movingShapes, child);
+    });
+    var minOrMax, nonMovingResizingChildrenBBox, movingChildrenBBox;
+
+    if (nonMovingResizingChildren.length) {
+      nonMovingResizingChildrenBBox = addPadding((0, _LayoutUtil.asTRBL)((0, _Elements.getBBox)(nonMovingResizingChildren)));
+      minOrMax = start - resizingShapeBBox[DIRECTION_TO_TRBL[direction]] + nonMovingResizingChildrenBBox[DIRECTION_TO_TRBL[direction]];
+
+      if (direction === 'n') {
+        spaceToolConstraints.bottom = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 'w') {
+        spaceToolConstraints.right = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 's') {
+        spaceToolConstraints.top = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      } else if (direction === 'e') {
+        spaceToolConstraints.left = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      }
+    }
+
+    if (movingChildren.length) {
+      movingChildrenBBox = addPadding((0, _LayoutUtil.asTRBL)((0, _Elements.getBBox)(movingChildren)));
+      minOrMax = start - movingChildrenBBox[DIRECTION_TO_TRBL[DIRECTION_TO_OPPOSITE[direction]]] + resizingShapeBBox[DIRECTION_TO_TRBL[DIRECTION_TO_OPPOSITE[direction]]];
+
+      if (direction === 'n') {
+        spaceToolConstraints.bottom = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 'w') {
+        spaceToolConstraints.right = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 's') {
+        spaceToolConstraints.top = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      } else if (direction === 'e') {
+        spaceToolConstraints.left = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      }
+    }
+
+    var resizingShapeMinDimensions = minDimensions && minDimensions[resizingShape.id];
+
+    if (resizingShapeMinDimensions) {
+      if (direction === 'n') {
+        minOrMax = start + resizingShape[AXIS_TO_DIMENSION[axis]] - resizingShapeMinDimensions[AXIS_TO_DIMENSION[axis]];
+        spaceToolConstraints.bottom = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 'w') {
+        minOrMax = start + resizingShape[AXIS_TO_DIMENSION[axis]] - resizingShapeMinDimensions[AXIS_TO_DIMENSION[axis]];
+        spaceToolConstraints.right = max = (0, _minDash.isNumber)(max) ? Math.min(max, minOrMax) : minOrMax;
+      } else if (direction === 's') {
+        minOrMax = start - resizingShape[AXIS_TO_DIMENSION[axis]] + resizingShapeMinDimensions[AXIS_TO_DIMENSION[axis]];
+        spaceToolConstraints.top = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      } else if (direction === 'e') {
+        minOrMax = start - resizingShape[AXIS_TO_DIMENSION[axis]] + resizingShapeMinDimensions[AXIS_TO_DIMENSION[axis]];
+        spaceToolConstraints.left = min = (0, _minDash.isNumber)(min) ? Math.max(min, minOrMax) : minOrMax;
+      }
+    }
+  });
+  return spaceToolConstraints;
+}
+
+function includes(array, item) {
+  return array.indexOf(item) !== -1;
+}
+
+function isConnection(element) {
+  return !!element.waypoints;
+}
+
+function isLabel(element) {
+  return !!element.labelTarget;
+}
+
+},{"../../layout/LayoutUtil":188,"../../util/Cursor":201,"../../util/Elements":202,"../../util/Mouse":209,"./SpaceUtil":178,"min-dash":219}],177:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = SpaceToolPreview;
+
+var _minDash = require("min-dash");
+
+var _tinySvg = require("tiny-svg");
+
+var _SvgTransformUtil = require("../../util/SvgTransformUtil");
+
+var MARKER_DRAGGING = 'djs-dragging',
+    MARKER_RESIZING = 'djs-resizing';
+var LOW_PRIORITY = 250;
+var max = Math.max;
+/**
+ * Provides previews for selecting/moving/resizing shapes when creating/removing space.
+ *
+ * @param {EventBus} eventBus
+ * @param {ElementRegistry} elementRegistry
+ * @param {Canvas} canvas
+ * @param {Styles} styles
+ */
+
+function SpaceToolPreview(eventBus, elementRegistry, canvas, styles, previewSupport) {
+  function addPreviewGfx(collection, dragGroup) {
+    (0, _minDash.forEach)(collection, function (element) {
+      previewSupport.addDragger(element, dragGroup);
+      canvas.addMarker(element, MARKER_DRAGGING);
+    });
+  } // add crosshair
+
+
+  eventBus.on('spaceTool.selection.start', function (event) {
+    var space = canvas.getLayer('space'),
+        context = event.context;
+    var orientation = {
+      x: 'M 0,-10000 L 0,10000',
+      y: 'M -10000,0 L 10000,0'
+    };
+    var crosshairGroup = (0, _tinySvg.create)('g');
+    (0, _tinySvg.attr)(crosshairGroup, styles.cls('djs-crosshair-group', ['no-events']));
+    (0, _tinySvg.append)(space, crosshairGroup); // horizontal path
+
+    var pathX = (0, _tinySvg.create)('path');
+    (0, _tinySvg.attr)(pathX, 'd', orientation.x);
+    (0, _tinySvg.classes)(pathX).add('djs-crosshair');
+    (0, _tinySvg.append)(crosshairGroup, pathX); // vertical path
+
+    var pathY = (0, _tinySvg.create)('path');
+    (0, _tinySvg.attr)(pathY, 'd', orientation.y);
+    (0, _tinySvg.classes)(pathY).add('djs-crosshair');
+    (0, _tinySvg.append)(crosshairGroup, pathY);
+    context.crosshairGroup = crosshairGroup;
+  }); // update crosshair
+
+  eventBus.on('spaceTool.selection.move', function (event) {
+    var crosshairGroup = event.context.crosshairGroup;
+    (0, _SvgTransformUtil.translate)(crosshairGroup, event.x, event.y);
+  }); // remove crosshair
+
+  eventBus.on('spaceTool.selection.cleanup', function (event) {
+    var context = event.context,
+        crosshairGroup = context.crosshairGroup;
+
+    if (crosshairGroup) {
+      (0, _tinySvg.remove)(crosshairGroup);
+    }
+  }); // add and update move/resize previews
+
+  eventBus.on('spaceTool.move', LOW_PRIORITY, function (event) {
+    var context = event.context,
+        line = context.line,
+        axis = context.axis,
+        movingShapes = context.movingShapes,
+        resizingShapes = context.resizingShapes;
+
+    if (!context.initialized) {
+      return;
+    }
+
+    if (!context.dragGroup) {
+      var spaceLayer = canvas.getLayer('space');
+      line = (0, _tinySvg.create)('path');
+      (0, _tinySvg.attr)(line, 'd', 'M0,0 L0,0');
+      (0, _tinySvg.classes)(line).add('djs-crosshair');
+      (0, _tinySvg.append)(spaceLayer, line);
+      context.line = line;
+      var dragGroup = (0, _tinySvg.create)('g');
+      (0, _tinySvg.attr)(dragGroup, styles.cls('djs-drag-group', ['no-events']));
+      (0, _tinySvg.append)(canvas.getDefaultLayer(), dragGroup); // shapes
+
+      addPreviewGfx(movingShapes, dragGroup); // connections
+
+      var movingConnections = context.movingConnections = elementRegistry.filter(function (element) {
+        var sourceIsMoving = false;
+        (0, _minDash.forEach)(movingShapes, function (shape) {
+          (0, _minDash.forEach)(shape.outgoing, function (connection) {
+            if (element === connection) {
+              sourceIsMoving = true;
+            }
+          });
+        });
+        var targetIsMoving = false;
+        (0, _minDash.forEach)(movingShapes, function (shape) {
+          (0, _minDash.forEach)(shape.incoming, function (connection) {
+            if (element === connection) {
+              targetIsMoving = true;
+            }
+          });
+        });
+        var sourceIsResizing = false;
+        (0, _minDash.forEach)(resizingShapes, function (shape) {
+          (0, _minDash.forEach)(shape.outgoing, function (connection) {
+            if (element === connection) {
+              sourceIsResizing = true;
+            }
+          });
+        });
+        var targetIsResizing = false;
+        (0, _minDash.forEach)(resizingShapes, function (shape) {
+          (0, _minDash.forEach)(shape.incoming, function (connection) {
+            if (element === connection) {
+              targetIsResizing = true;
+            }
+          });
+        });
+        return isConnection(element) && (sourceIsMoving || sourceIsResizing) && (targetIsMoving || targetIsResizing);
+      });
+      addPreviewGfx(movingConnections, dragGroup);
+      context.dragGroup = dragGroup;
+    }
+
+    if (!context.frameGroup) {
+      var frameGroup = (0, _tinySvg.create)('g');
+      (0, _tinySvg.attr)(frameGroup, styles.cls('djs-frame-group', ['no-events']));
+      (0, _tinySvg.append)(canvas.getDefaultLayer(), frameGroup);
+      var frames = [];
+      (0, _minDash.forEach)(resizingShapes, function (shape) {
+        var frame = previewSupport.addFrame(shape, frameGroup);
+        var initialBounds = frame.getBBox();
+        frames.push({
+          element: frame,
+          initialBounds: initialBounds
+        });
+        canvas.addMarker(shape, MARKER_RESIZING);
+      });
+      context.frameGroup = frameGroup;
+      context.frames = frames;
+    }
+
+    var orientation = {
+      x: 'M' + event.x + ', -10000 L' + event.x + ', 10000',
+      y: 'M -10000, ' + event.y + ' L 10000, ' + event.y
+    };
+    (0, _tinySvg.attr)(line, {
+      d: orientation[axis]
+    });
+    var opposite = {
+      x: 'y',
+      y: 'x'
+    };
+    var delta = {
+      x: event.dx,
+      y: event.dy
+    };
+    delta[opposite[context.axis]] = 0; // update move previews
+
+    (0, _SvgTransformUtil.translate)(context.dragGroup, delta.x, delta.y); // update resize previews
+
+    (0, _minDash.forEach)(context.frames, function (frame) {
+      var element = frame.element,
+          initialBounds = frame.initialBounds,
+          width,
+          height;
+
+      if (context.direction === 'e') {
+        (0, _tinySvg.attr)(element, {
+          width: max(initialBounds.width + delta.x, 5)
+        });
+      } else {
+        width = max(initialBounds.width - delta.x, 5);
+        (0, _tinySvg.attr)(element, {
+          width: width,
+          x: initialBounds.x + initialBounds.width - width
+        });
+      }
+
+      if (context.direction === 's') {
+        (0, _tinySvg.attr)(element, {
+          height: max(initialBounds.height + delta.y, 5)
+        });
+      } else {
+        height = max(initialBounds.height - delta.y, 5);
+        (0, _tinySvg.attr)(element, {
+          height: height,
+          y: initialBounds.y + initialBounds.height - height
+        });
+      }
+    });
+  }); // remove move/resize previews
+
+  eventBus.on('spaceTool.cleanup', function (event) {
+    var context = event.context,
+        movingShapes = context.movingShapes,
+        movingConnections = context.movingConnections,
+        resizingShapes = context.resizingShapes,
+        line = context.line,
+        dragGroup = context.dragGroup,
+        frameGroup = context.frameGroup; // moving shapes
+
+    (0, _minDash.forEach)(movingShapes, function (shape) {
+      canvas.removeMarker(shape, MARKER_DRAGGING);
+    }); // moving connections
+
+    (0, _minDash.forEach)(movingConnections, function (connection) {
+      canvas.removeMarker(connection, MARKER_DRAGGING);
+    });
+
+    if (dragGroup) {
+      (0, _tinySvg.remove)(line);
+      (0, _tinySvg.remove)(dragGroup);
+    }
+
+    (0, _minDash.forEach)(resizingShapes, function (shape) {
+      canvas.removeMarker(shape, MARKER_RESIZING);
+    });
+
+    if (frameGroup) {
+      (0, _tinySvg.remove)(frameGroup);
+    }
+  });
+}
+
+SpaceToolPreview.$inject = ['eventBus', 'elementRegistry', 'canvas', 'styles', 'previewSupport']; // helpers //////////////////////
+
+/**
+ * Checks if an element is a connection.
+ */
+
+function isConnection(element) {
+  return element.waypoints;
+}
+
+},{"../../util/SvgTransformUtil":214,"min-dash":219,"tiny-svg":228}],178:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getDirection = getDirection;
+exports.getWaypointsUpdatingConnections = getWaypointsUpdatingConnections;
+exports.resizeBounds = resizeBounds;
+
+var _minDash = require("min-dash");
+
+/**
+ * Return direction given axis and delta.
+ *
+ * @param {string} axis
+ * @param {number} delta
+ *
+ * @return {string}
+ */
+function getDirection(axis, delta) {
+  if (axis === 'x') {
+    if (delta > 0) {
+      return 'e';
+    }
+
+    if (delta < 0) {
+      return 'w';
+    }
+  }
+
+  if (axis === 'y') {
+    if (delta > 0) {
+      return 's';
+    }
+
+    if (delta < 0) {
+      return 'n';
+    }
+  }
+
+  return null;
+}
+/**
+ * Returns connections whose waypoints are to be updated. Waypoints are to be updated if start
+ * or end is to be moved or resized.
+ *
+ * @param {Array<djs.model.Shape} movingShapes
+ * @param {Array<djs.model.Shape} resizingShapes
+ *
+ * @returns {Array<djs.model.Connection>}
+ */
+
+
+function getWaypointsUpdatingConnections(movingShapes, resizingShapes) {
+  var waypointsUpdatingConnections = [];
+  (0, _minDash.forEach)(movingShapes.concat(resizingShapes), function (shape) {
+    var incoming = shape.incoming,
+        outgoing = shape.outgoing;
+    (0, _minDash.forEach)(incoming.concat(outgoing), function (connection) {
+      var source = connection.source,
+          target = connection.target;
+
+      if (includes(movingShapes, source) || includes(movingShapes, target) || includes(resizingShapes, source) || includes(resizingShapes, target)) {
+        if (!includes(waypointsUpdatingConnections, connection)) {
+          waypointsUpdatingConnections.push(connection);
+        }
+      }
+    });
+  });
+  return waypointsUpdatingConnections;
+}
+
+function includes(array, item) {
+  return array.indexOf(item) !== -1;
+}
+/**
+ * Resize bounds.
+ *
+ * @param {Object} bounds
+ * @param {number} bounds.x
+ * @param {number} bounds.y
+ * @param {number} bounds.width
+ * @param {number} bounds.height
+ * @param {string} direction
+ * @param {Object} delta
+ * @param {number} delta.x
+ * @param {number} delta.y
+ *
+ * @return {Object}
+ */
+
+
+function resizeBounds(bounds, direction, delta) {
+  var x = bounds.x,
+      y = bounds.y,
+      width = bounds.width,
+      height = bounds.height,
+      dx = delta.x,
+      dy = delta.y;
+
+  switch (direction) {
+    case 'n':
+      return {
+        x: x,
+        y: y + dy,
+        width: width,
+        height: height - dy
+      };
+
+    case 's':
+      return {
+        x: x,
+        y: y,
+        width: width,
+        height: height + dy
+      };
+
+    case 'w':
+      return {
+        x: x + dx,
+        y: y,
+        width: width - dx,
+        height: height
+      };
+
+    case 'e':
+      return {
+        x: x,
+        y: y,
+        width: width + dx,
+        height: height
+      };
+
+    default:
+      throw new Error('unknown direction: ' + direction);
+  }
+}
+
+},{"min-dash":219}],179:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _dragging = _interopRequireDefault(require("../dragging"));
+
+var _rules = _interopRequireDefault(require("../rules"));
+
+var _toolManager = _interopRequireDefault(require("../tool-manager"));
+
+var _previewSupport = _interopRequireDefault(require("../preview-support"));
+
+var _mouse = _interopRequireDefault(require("../mouse"));
+
+var _SpaceTool = _interopRequireDefault(require("./SpaceTool"));
+
+var _SpaceToolPreview = _interopRequireDefault(require("./SpaceToolPreview"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['spaceToolPreview'],
+  __depends__: [_dragging.default, _rules.default, _toolManager.default, _previewSupport.default, _mouse.default],
+  spaceTool: ['type', _SpaceTool.default],
+  spaceToolPreview: ['type', _SpaceToolPreview.default]
+};
+exports.default = _default;
+
+},{"../dragging":121,"../mouse":158,"../preview-support":165,"../rules":171,"../tool-manager":181,"./SpaceTool":176,"./SpaceToolPreview":177}],180:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ToolManager;
+
+var _minDash = require("min-dash");
+
+var _minDom = require("min-dom");
+
+var LOW_PRIORITY = 250;
+/**
+ * The tool manager acts as middle-man between the available tool's and the Palette,
+ * it takes care of making sure that the correct active state is set.
+ *
+ * @param  {Object}    eventBus
+ * @param  {Object}    dragging
+ */
+
+function ToolManager(eventBus, dragging) {
+  this._eventBus = eventBus;
+  this._dragging = dragging;
+  this._tools = [];
+  this._active = null;
+}
+
+ToolManager.$inject = ['eventBus', 'dragging'];
+
+ToolManager.prototype.registerTool = function (name, events) {
+  var tools = this._tools;
+
+  if (!events) {
+    throw new Error('A tool has to be registered with it\'s "events"');
+  }
+
+  tools.push(name);
+  this.bindEvents(name, events);
+};
+
+ToolManager.prototype.isActive = function (tool) {
+  return tool && this._active === tool;
+};
+
+ToolManager.prototype.length = function (tool) {
+  return this._tools.length;
+};
+
+ToolManager.prototype.setActive = function (tool) {
+  var eventBus = this._eventBus;
+
+  if (this._active !== tool) {
+    this._active = tool;
+    eventBus.fire('tool-manager.update', {
+      tool: tool
+    });
+  }
+};
+
+ToolManager.prototype.bindEvents = function (name, events) {
+  var eventBus = this._eventBus,
+      dragging = this._dragging;
+  var eventsToRegister = [];
+  eventBus.on(events.tool + '.init', function (event) {
+    var context = event.context; // Active tools that want to reactivate themselves must do this explicitly
+
+    if (!context.reactivate && this.isActive(name)) {
+      this.setActive(null);
+      dragging.cancel();
+      return;
+    }
+
+    this.setActive(name);
+  }, this); // Todo[ricardo]: add test cases
+
+  (0, _minDash.forEach)(events, function (event) {
+    eventsToRegister.push(event + '.ended');
+    eventsToRegister.push(event + '.canceled');
+  });
+  eventBus.on(eventsToRegister, LOW_PRIORITY, function (event) {
+    // We defer the de-activation of the tool to the .activate phase,
+    // so we're able to check if we want to toggle off the current
+    // active tool or switch to a new one
+    if (!this._active) {
+      return;
+    }
+
+    if (isPaletteClick(event)) {
+      return;
+    }
+
+    this.setActive(null);
+  }, this);
+}; // helpers ///////////////
+
+/**
+ * Check if a given event is a palette click event.
+ *
+ * @param {EventBus.Event} event
+ *
+ * @return {boolean}
+ */
+
+
+function isPaletteClick(event) {
+  var target = event.originalEvent && event.originalEvent.target;
+  return target && (0, _minDom.closest)(target, '.group[data-group="tools"]');
+}
+
+},{"min-dash":219,"min-dom":220}],181:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _dragging = _interopRequireDefault(require("../dragging"));
+
+var _ToolManager = _interopRequireDefault(require("./ToolManager"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __depends__: [_dragging.default],
+  __init__: ['toolManager'],
+  toolManager: ['type', _ToolManager.default]
+};
+exports.default = _default;
+
+},{"../dragging":121,"./ToolManager":180}],182:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Tooltips;
+
+var _minDash = require("min-dash");
+
+var _minDom = require("min-dom");
+
+var _IdGenerator = _interopRequireDefault(require("../../util/IdGenerator"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// document wide unique tooltip ids
+var ids = new _IdGenerator.default('tt');
+
+function createRoot(parentNode) {
+  var root = (0, _minDom.domify)('<div class="djs-tooltip-container" style="position: absolute; width: 0; height: 0;" />');
+  parentNode.insertBefore(root, parentNode.firstChild);
+  return root;
+}
+
+function setPosition(el, x, y) {
+  (0, _minDash.assign)(el.style, {
+    left: x + 'px',
+    top: y + 'px'
+  });
+}
+
+function setVisible(el, visible) {
+  el.style.display = visible === false ? 'none' : '';
+}
+
+var tooltipClass = 'djs-tooltip',
+    tooltipSelector = '.' + tooltipClass;
+/**
+ * A service that allows users to render tool tips on the diagram.
+ *
+ * The tooltip service will take care of updating the tooltip positioning
+ * during navigation + zooming.
+ *
+ * @example
+ *
+ * ```javascript
+ *
+ * // add a pink badge on the top left of the shape
+ * tooltips.add({
+ *   position: {
+ *     x: 50,
+ *     y: 100
+ *   },
+ *   html: '<div style="width: 10px; background: fuchsia; color: white;">0</div>'
+ * });
+ *
+ * // or with optional life span
+ * tooltips.add({
+ *   position: {
+ *     top: -5,
+ *     left: -5
+ *   },
+ *   html: '<div style="width: 10px; background: fuchsia; color: white;">0</div>',
+ *   ttl: 2000
+ * });
+ *
+ * // remove a tool tip
+ * var id = tooltips.add(...);
+ * tooltips.remove(id);
+ * ```
+ *
+ * @param {EventBus} eventBus
+ * @param {Canvas} canvas
+ */
+
+function Tooltips(eventBus, canvas) {
+  this._eventBus = eventBus;
+  this._canvas = canvas;
+  this._ids = ids;
+  this._tooltipDefaults = {
+    show: {
+      minZoom: 0.7,
+      maxZoom: 5.0
+    }
+  };
+  /**
+   * Mapping tooltipId -> tooltip
+   */
+
+  this._tooltips = {}; // root html element for all tooltips
+
+  this._tooltipRoot = createRoot(canvas.getContainer());
+  var self = this;
+
+  _minDom.delegate.bind(this._tooltipRoot, tooltipSelector, 'mousedown', function (event) {
+    event.stopPropagation();
+  });
+
+  _minDom.delegate.bind(this._tooltipRoot, tooltipSelector, 'mouseover', function (event) {
+    self.trigger('mouseover', event);
+  });
+
+  _minDom.delegate.bind(this._tooltipRoot, tooltipSelector, 'mouseout', function (event) {
+    self.trigger('mouseout', event);
+  });
+
+  this._init();
+}
+
+Tooltips.$inject = ['eventBus', 'canvas'];
+/**
+ * Adds a HTML tooltip to the diagram
+ *
+ * @param {Object}               tooltip   the tooltip configuration
+ *
+ * @param {string|DOMElement}    tooltip.html                 html element to use as an tooltip
+ * @param {Object}               [tooltip.show]               show configuration
+ * @param {number}               [tooltip.show.minZoom]       minimal zoom level to show the tooltip
+ * @param {number}               [tooltip.show.maxZoom]       maximum zoom level to show the tooltip
+ * @param {Object}               tooltip.position             where to attach the tooltip
+ * @param {number}               [tooltip.position.left]      relative to element bbox left attachment
+ * @param {number}               [tooltip.position.top]       relative to element bbox top attachment
+ * @param {number}               [tooltip.position.bottom]    relative to element bbox bottom attachment
+ * @param {number}               [tooltip.position.right]     relative to element bbox right attachment
+ * @param {number}               [tooltip.timeout=-1]
+ *
+ * @return {string}              id that may be used to reference the tooltip for update or removal
+ */
+
+Tooltips.prototype.add = function (tooltip) {
+  if (!tooltip.position) {
+    throw new Error('must specifiy tooltip position');
+  }
+
+  if (!tooltip.html) {
+    throw new Error('must specifiy tooltip html');
+  }
+
+  var id = this._ids.next();
+
+  tooltip = (0, _minDash.assign)({}, this._tooltipDefaults, tooltip, {
+    id: id
+  });
+
+  this._addTooltip(tooltip);
+
+  if (tooltip.timeout) {
+    this.setTimeout(tooltip);
+  }
+
+  return id;
+};
+
+Tooltips.prototype.trigger = function (action, event) {
+  var node = event.delegateTarget || event.target;
+  var tooltip = this.get((0, _minDom.attr)(node, 'data-tooltip-id'));
+
+  if (!tooltip) {
+    return;
+  }
+
+  if (action === 'mouseover' && tooltip.timeout) {
+    this.clearTimeout(tooltip);
+  }
+
+  if (action === 'mouseout' && tooltip.timeout) {
+    // cut timeout after mouse out
+    tooltip.timeout = 1000;
+    this.setTimeout(tooltip);
+  }
+};
+/**
+ * Get a tooltip with the given id
+ *
+ * @param {string} id
+ */
+
+
+Tooltips.prototype.get = function (id) {
+  if (typeof id !== 'string') {
+    id = id.id;
+  }
+
+  return this._tooltips[id];
+};
+
+Tooltips.prototype.clearTimeout = function (tooltip) {
+  tooltip = this.get(tooltip);
+
+  if (!tooltip) {
+    return;
+  }
+
+  var removeTimer = tooltip.removeTimer;
+
+  if (removeTimer) {
+    clearTimeout(removeTimer);
+    tooltip.removeTimer = null;
+  }
+};
+
+Tooltips.prototype.setTimeout = function (tooltip) {
+  tooltip = this.get(tooltip);
+
+  if (!tooltip) {
+    return;
+  }
+
+  this.clearTimeout(tooltip);
+  var self = this;
+  tooltip.removeTimer = setTimeout(function () {
+    self.remove(tooltip);
+  }, tooltip.timeout);
+};
+/**
+ * Remove an tooltip with the given id
+ *
+ * @param {string} id
+ */
+
+
+Tooltips.prototype.remove = function (id) {
+  var tooltip = this.get(id);
+
+  if (tooltip) {
+    (0, _minDom.remove)(tooltip.html);
+    (0, _minDom.remove)(tooltip.htmlContainer);
+    delete tooltip.htmlContainer;
+    delete this._tooltips[tooltip.id];
+  }
+};
+
+Tooltips.prototype.show = function () {
+  setVisible(this._tooltipRoot);
+};
+
+Tooltips.prototype.hide = function () {
+  setVisible(this._tooltipRoot, false);
+};
+
+Tooltips.prototype._updateRoot = function (viewbox) {
+  var a = viewbox.scale || 1;
+  var d = viewbox.scale || 1;
+  var matrix = 'matrix(' + a + ',0,0,' + d + ',' + -1 * viewbox.x * a + ',' + -1 * viewbox.y * d + ')';
+  this._tooltipRoot.style.transform = matrix;
+  this._tooltipRoot.style['-ms-transform'] = matrix;
+};
+
+Tooltips.prototype._addTooltip = function (tooltip) {
+  var id = tooltip.id,
+      html = tooltip.html,
+      htmlContainer,
+      tooltipRoot = this._tooltipRoot; // unwrap jquery (for those who need it)
+
+  if (html.get && html.constructor.prototype.jquery) {
+    html = html.get(0);
+  } // create proper html elements from
+  // tooltip HTML strings
+
+
+  if ((0, _minDash.isString)(html)) {
+    html = (0, _minDom.domify)(html);
+  }
+
+  htmlContainer = (0, _minDom.domify)('<div data-tooltip-id="' + id + '" class="' + tooltipClass + '" style="position: absolute">');
+  htmlContainer.appendChild(html);
+
+  if (tooltip.type) {
+    (0, _minDom.classes)(htmlContainer).add('djs-tooltip-' + tooltip.type);
+  }
+
+  if (tooltip.className) {
+    (0, _minDom.classes)(htmlContainer).add(tooltip.className);
+  }
+
+  tooltip.htmlContainer = htmlContainer;
+  tooltipRoot.appendChild(htmlContainer);
+  this._tooltips[id] = tooltip;
+
+  this._updateTooltip(tooltip);
+};
+
+Tooltips.prototype._updateTooltip = function (tooltip) {
+  var position = tooltip.position,
+      htmlContainer = tooltip.htmlContainer; // update overlay html based on tooltip x, y
+
+  setPosition(htmlContainer, position.x, position.y);
+};
+
+Tooltips.prototype._updateTooltipVisibilty = function (viewbox) {
+  (0, _minDash.forEach)(this._tooltips, function (tooltip) {
+    var show = tooltip.show,
+        htmlContainer = tooltip.htmlContainer,
+        visible = true;
+
+    if (show) {
+      if (show.minZoom > viewbox.scale || show.maxZoom < viewbox.scale) {
+        visible = false;
+      }
+
+      setVisible(htmlContainer, visible);
+    }
+  });
+};
+
+Tooltips.prototype._init = function () {
+  var self = this; // scroll/zoom integration
+
+  function updateViewbox(viewbox) {
+    self._updateRoot(viewbox);
+
+    self._updateTooltipVisibilty(viewbox);
+
+    self.show();
+  }
+
+  this._eventBus.on('canvas.viewbox.changing', function (event) {
+    self.hide();
+  });
+
+  this._eventBus.on('canvas.viewbox.changed', function (event) {
+    updateViewbox(event.viewbox);
+  });
+};
+
+},{"../../util/IdGenerator":206,"min-dash":219,"min-dom":220}],183:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _Tooltips = _interopRequireDefault(require("./Tooltips"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  __init__: ['tooltips'],
+  tooltips: ['type', _Tooltips.default]
+};
+exports.default = _default;
+
+},{"./Tooltips":182}],184:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11557,7 +27743,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./translate":50}],50:[function(require,module,exports){
+},{"./translate":185}],185:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11590,7 +27776,134 @@ function translate(template, replacements) {
   });
 }
 
-},{}],51:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = BaseLayouter;
+
+var _LayoutUtil = require("./LayoutUtil");
+
+/**
+ * A base connection layouter implementation
+ * that layouts the connection by directly connecting
+ * mid(source) + mid(target).
+ */
+function BaseLayouter() {}
+/**
+ * Return the new layouted waypoints for the given connection.
+ *
+ * The connection passed is still unchanged; you may figure out about
+ * the new connection start / end via the layout hints provided.
+ *
+ * @param {djs.model.Connection} connection
+ * @param {Object} [hints]
+ * @param {Point} [hints.connectionStart]
+ * @param {Point} [hints.connectionEnd]
+ * @param {Point} [hints.source]
+ * @param {Point} [hints.target]
+ *
+ * @return {Array<Point>} the layouted connection waypoints
+ */
+
+
+BaseLayouter.prototype.layoutConnection = function (connection, hints) {
+  hints = hints || {};
+  return [hints.connectionStart || (0, _LayoutUtil.getMid)(hints.source || connection.source), hints.connectionEnd || (0, _LayoutUtil.getMid)(hints.target || connection.target)];
+};
+
+},{"./LayoutUtil":188}],187:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = CroppingConnectionDocking;
+
+var _minDash = require("min-dash");
+
+var _LayoutUtil = require("./LayoutUtil");
+
+function dockingToPoint(docking) {
+  // use the dockings actual point and
+  // retain the original docking
+  return (0, _minDash.assign)({
+    original: docking.point.original || docking.point
+  }, docking.actual);
+}
+/**
+ * A {@link ConnectionDocking} that crops connection waypoints based on
+ * the path(s) of the connection source and target.
+ *
+ * @param {djs.core.ElementRegistry} elementRegistry
+ */
+
+
+function CroppingConnectionDocking(elementRegistry, graphicsFactory) {
+  this._elementRegistry = elementRegistry;
+  this._graphicsFactory = graphicsFactory;
+}
+
+CroppingConnectionDocking.$inject = ['elementRegistry', 'graphicsFactory'];
+/**
+ * @inheritDoc ConnectionDocking#getCroppedWaypoints
+ */
+
+CroppingConnectionDocking.prototype.getCroppedWaypoints = function (connection, source, target) {
+  source = source || connection.source;
+  target = target || connection.target;
+  var sourceDocking = this.getDockingPoint(connection, source, true),
+      targetDocking = this.getDockingPoint(connection, target);
+  var croppedWaypoints = connection.waypoints.slice(sourceDocking.idx + 1, targetDocking.idx);
+  croppedWaypoints.unshift(dockingToPoint(sourceDocking));
+  croppedWaypoints.push(dockingToPoint(targetDocking));
+  return croppedWaypoints;
+};
+/**
+ * Return the connection docking point on the specified shape
+ *
+ * @inheritDoc ConnectionDocking#getDockingPoint
+ */
+
+
+CroppingConnectionDocking.prototype.getDockingPoint = function (connection, shape, dockStart) {
+  var waypoints = connection.waypoints,
+      dockingIdx,
+      dockingPoint,
+      croppedPoint;
+  dockingIdx = dockStart ? 0 : waypoints.length - 1;
+  dockingPoint = waypoints[dockingIdx];
+  croppedPoint = this._getIntersection(shape, connection, dockStart);
+  return {
+    point: dockingPoint,
+    actual: croppedPoint || dockingPoint,
+    idx: dockingIdx
+  };
+}; // helpers //////////////////////
+
+
+CroppingConnectionDocking.prototype._getIntersection = function (shape, connection, takeFirst) {
+  var shapePath = this._getShapePath(shape),
+      connectionPath = this._getConnectionPath(connection);
+
+  return (0, _LayoutUtil.getElementLineIntersection)(shapePath, connectionPath, takeFirst);
+};
+
+CroppingConnectionDocking.prototype._getConnectionPath = function (connection) {
+  return this._graphicsFactory.getConnectionPath(connection);
+};
+
+CroppingConnectionDocking.prototype._getShapePath = function (shape) {
+  return this._graphicsFactory.getShapePath(shape);
+};
+
+CroppingConnectionDocking.prototype._getGfx = function (element) {
+  return this._elementRegistry.getGraphics(element);
+};
+
+},{"./LayoutUtil":188,"min-dash":219}],188:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11790,7 +28103,721 @@ function filterRedundantWaypoints(waypoints) {
   return waypoints;
 }
 
-},{"../util/Geometry":65,"min-dash":78,"path-intersection":85}],52:[function(require,module,exports){
+},{"../util/Geometry":204,"min-dash":219,"path-intersection":226}],189:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.connectPoints = connectPoints;
+exports.connectRectangles = connectRectangles;
+exports.repairConnection = repairConnection;
+exports.tryLayoutStraight = tryLayoutStraight;
+exports.withoutRedundantPoints = withoutRedundantPoints;
+
+var _minDash = require("min-dash");
+
+var _LayoutUtil = require("./LayoutUtil");
+
+var _Geometry = require("../util/Geometry");
+
+var MIN_SEGMENT_LENGTH = 20,
+    POINT_ORIENTATION_PADDING = 5;
+var round = Math.round;
+var INTERSECTION_THRESHOLD = 20,
+    ORIENTATION_THRESHOLD = {
+  'h:h': 20,
+  'v:v': 20,
+  'h:v': -10,
+  'v:h': -10
+};
+
+function needsTurn(orientation, startDirection) {
+  return !{
+    t: /top/,
+    r: /right/,
+    b: /bottom/,
+    l: /left/,
+    h: /./,
+    v: /./
+  }[startDirection].test(orientation);
+}
+
+function canLayoutStraight(direction, targetOrientation) {
+  return {
+    t: /top/,
+    r: /right/,
+    b: /bottom/,
+    l: /left/,
+    h: /left|right/,
+    v: /top|bottom/
+  }[direction].test(targetOrientation);
+}
+
+function getSegmentBendpoints(a, b, directions) {
+  var orientation = (0, _LayoutUtil.getOrientation)(b, a, POINT_ORIENTATION_PADDING);
+  var startDirection = directions.split(':')[0];
+  var xmid = round((b.x - a.x) / 2 + a.x),
+      ymid = round((b.y - a.y) / 2 + a.y);
+  var segmentEnd, segmentDirections;
+  var layoutStraight = canLayoutStraight(startDirection, orientation),
+      layoutHorizontal = /h|r|l/.test(startDirection),
+      layoutTurn = false;
+  var turnNextDirections = false;
+
+  if (layoutStraight) {
+    segmentEnd = layoutHorizontal ? {
+      x: xmid,
+      y: a.y
+    } : {
+      x: a.x,
+      y: ymid
+    };
+    segmentDirections = layoutHorizontal ? 'h:h' : 'v:v';
+  } else {
+    layoutTurn = needsTurn(orientation, startDirection);
+    segmentDirections = layoutHorizontal ? 'h:v' : 'v:h';
+
+    if (layoutTurn) {
+      if (layoutHorizontal) {
+        turnNextDirections = ymid === a.y;
+        segmentEnd = {
+          x: a.x + MIN_SEGMENT_LENGTH * (/l/.test(startDirection) ? -1 : 1),
+          y: turnNextDirections ? ymid + MIN_SEGMENT_LENGTH : ymid
+        };
+      } else {
+        turnNextDirections = xmid === a.x;
+        segmentEnd = {
+          x: turnNextDirections ? xmid + MIN_SEGMENT_LENGTH : xmid,
+          y: a.y + MIN_SEGMENT_LENGTH * (/t/.test(startDirection) ? -1 : 1)
+        };
+      }
+    } else {
+      segmentEnd = {
+        x: xmid,
+        y: ymid
+      };
+    }
+  }
+
+  return {
+    waypoints: getBendpoints(a, segmentEnd, segmentDirections).concat(segmentEnd),
+    directions: segmentDirections,
+    turnNextDirections: turnNextDirections
+  };
+}
+
+function getStartSegment(a, b, directions) {
+  return getSegmentBendpoints(a, b, directions);
+}
+
+function getEndSegment(a, b, directions) {
+  var invertedSegment = getSegmentBendpoints(b, a, invertDirections(directions));
+  return {
+    waypoints: invertedSegment.waypoints.slice().reverse(),
+    directions: invertDirections(invertedSegment.directions),
+    turnNextDirections: invertedSegment.turnNextDirections
+  };
+}
+
+function getMidSegment(startSegment, endSegment) {
+  var startDirection = startSegment.directions.split(':')[1],
+      endDirection = endSegment.directions.split(':')[0];
+
+  if (startSegment.turnNextDirections) {
+    startDirection = startDirection == 'h' ? 'v' : 'h';
+  }
+
+  if (endSegment.turnNextDirections) {
+    endDirection = endDirection == 'h' ? 'v' : 'h';
+  }
+
+  var directions = startDirection + ':' + endDirection;
+  var bendpoints = getBendpoints(startSegment.waypoints[startSegment.waypoints.length - 1], endSegment.waypoints[0], directions);
+  return {
+    waypoints: bendpoints,
+    directions: directions
+  };
+}
+
+function invertDirections(directions) {
+  return directions.split(':').reverse().join(':');
+}
+/**
+ * Handle simple layouts with maximum two bendpoints.
+ */
+
+
+function getSimpleBendpoints(a, b, directions) {
+  var xmid = round((b.x - a.x) / 2 + a.x),
+      ymid = round((b.y - a.y) / 2 + a.y); // one point, right or left from a
+
+  if (directions === 'h:v') {
+    return [{
+      x: b.x,
+      y: a.y
+    }];
+  } // one point, above or below a
+
+
+  if (directions === 'v:h') {
+    return [{
+      x: a.x,
+      y: b.y
+    }];
+  } // vertical segment between a and b
+
+
+  if (directions === 'h:h') {
+    return [{
+      x: xmid,
+      y: a.y
+    }, {
+      x: xmid,
+      y: b.y
+    }];
+  } // horizontal segment between a and b
+
+
+  if (directions === 'v:v') {
+    return [{
+      x: a.x,
+      y: ymid
+    }, {
+      x: b.x,
+      y: ymid
+    }];
+  }
+
+  throw new Error('invalid directions: can only handle varians of [hv]:[hv]');
+}
+/**
+ * Returns the mid points for a manhattan connection between two points.
+ *
+ * @example h:h (horizontal:horizontal)
+ *
+ * [a]----[x]
+ *         |
+ *        [x]----[b]
+ *
+ * @example h:v (horizontal:vertical)
+ *
+ * [a]----[x]
+ *         |
+ *        [b]
+ *
+ * @example h:r (horizontal:right)
+ *
+ * [a]----[x]
+ *         |
+ *    [b]-[x]
+ *
+ * @param  {Point} a
+ * @param  {Point} b
+ * @param  {string} directions
+ *
+ * @return {Array<Point>}
+ */
+
+
+function getBendpoints(a, b, directions) {
+  directions = directions || 'h:h';
+
+  if (!isValidDirections(directions)) {
+    throw new Error('unknown directions: <' + directions + '>: ' + 'must be specified as <start>:<end> ' + 'with start/end in { h,v,t,r,b,l }');
+  } // compute explicit directions, involving trbl dockings
+  // using a three segmented layouting algorithm
+
+
+  if (isExplicitDirections(directions)) {
+    var startSegment = getStartSegment(a, b, directions),
+        endSegment = getEndSegment(a, b, directions),
+        midSegment = getMidSegment(startSegment, endSegment);
+    return [].concat(startSegment.waypoints, midSegment.waypoints, endSegment.waypoints);
+  } // handle simple [hv]:[hv] cases that can be easily computed
+
+
+  return getSimpleBendpoints(a, b, directions);
+}
+/**
+ * Create a connection between the two points according
+ * to the manhattan layout (only horizontal and vertical) edges.
+ *
+ * @param {Point} a
+ * @param {Point} b
+ *
+ * @param {string} [directions='h:h'] specifies manhattan directions for each point as {adirection}:{bdirection}.
+                   A directionfor a point is either `h` (horizontal) or `v` (vertical)
+ *
+ * @return {Array<Point>}
+ */
+
+
+function connectPoints(a, b, directions) {
+  var points = getBendpoints(a, b, directions);
+  points.unshift(a);
+  points.push(b);
+  return withoutRedundantPoints(points);
+}
+/**
+ * Connect two rectangles using a manhattan layouted connection.
+ *
+ * @param {Bounds} source source rectangle
+ * @param {Bounds} target target rectangle
+ * @param {Point} [start] source docking
+ * @param {Point} [end] target docking
+ *
+ * @param {Object} [hints]
+ * @param {string} [hints.preserveDocking=source] preserve docking on selected side
+ * @param {Array<string>} [hints.preferredLayouts]
+ * @param {Point|boolean} [hints.connectionStart] whether the start changed
+ * @param {Point|boolean} [hints.connectionEnd] whether the end changed
+ *
+ * @return {Array<Point>} connection points
+ */
+
+
+function connectRectangles(source, target, start, end, hints) {
+  var preferredLayouts = hints && hints.preferredLayouts || [];
+  var preferredLayout = (0, _minDash.without)(preferredLayouts, 'straight')[0] || 'h:h';
+  var threshold = ORIENTATION_THRESHOLD[preferredLayout] || 0;
+  var orientation = (0, _LayoutUtil.getOrientation)(source, target, threshold);
+  var directions = getDirections(orientation, preferredLayout);
+  start = start || (0, _LayoutUtil.getMid)(source);
+  end = end || (0, _LayoutUtil.getMid)(target);
+  var directionSplit = directions.split(':'); // compute actual docking points for start / end
+  // this ensures we properly layout only parts of the
+  // connection that lies in between the two rectangles
+
+  var startDocking = getDockingPoint(start, source, directionSplit[0], invertOrientation(orientation)),
+      endDocking = getDockingPoint(end, target, directionSplit[1], orientation);
+  return connectPoints(startDocking, endDocking, directions);
+}
+/**
+ * Repair the connection between two rectangles, of which one has been updated.
+ *
+ * @param {Bounds} source
+ * @param {Bounds} target
+ * @param {Point} [start]
+ * @param {Point} [end]
+ * @param {Array<Point>} [waypoints]
+ * @param {Object} [hints]
+ * @param {Array<string>} [hints.preferredLayouts] list of preferred layouts
+ * @param {boolean} [hints.connectionStart]
+ * @param {boolean} [hints.connectionEnd]
+ *
+ * @return {Array<Point>} repaired waypoints
+ */
+
+
+function repairConnection(source, target, start, end, waypoints, hints) {
+  if ((0, _minDash.isArray)(start)) {
+    waypoints = start;
+    hints = end;
+    start = (0, _LayoutUtil.getMid)(source);
+    end = (0, _LayoutUtil.getMid)(target);
+  }
+
+  hints = (0, _minDash.assign)({
+    preferredLayouts: []
+  }, hints);
+  waypoints = waypoints || [];
+  var preferredLayouts = hints.preferredLayouts,
+      preferStraight = preferredLayouts.indexOf('straight') !== -1,
+      repairedWaypoints; // just layout non-existing or simple connections
+  // attempt to render straight lines, if required
+  // attempt to layout a straight line
+
+  repairedWaypoints = preferStraight && tryLayoutStraight(source, target, start, end, hints);
+
+  if (repairedWaypoints) {
+    return repairedWaypoints;
+  } // try to layout from end
+
+
+  repairedWaypoints = hints.connectionEnd && tryRepairConnectionEnd(target, source, end, waypoints);
+
+  if (repairedWaypoints) {
+    return repairedWaypoints;
+  } // try to layout from start
+
+
+  repairedWaypoints = hints.connectionStart && tryRepairConnectionStart(source, target, start, waypoints);
+
+  if (repairedWaypoints) {
+    return repairedWaypoints;
+  } // or whether nothing seems to have changed
+
+
+  if (!hints.connectionStart && !hints.connectionEnd && waypoints && waypoints.length) {
+    return waypoints;
+  } // simply reconnect if nothing else worked
+
+
+  return connectRectangles(source, target, start, end, hints);
+}
+
+function inRange(a, start, end) {
+  return a >= start && a <= end;
+}
+
+function isInRange(axis, a, b) {
+  var size = {
+    x: 'width',
+    y: 'height'
+  };
+  return inRange(a[axis], b[axis], b[axis] + b[size[axis]]);
+}
+/**
+ * Layout a straight connection
+ *
+ * @param {Bounds} source
+ * @param {Bounds} target
+ * @param {Point} start
+ * @param {Point} end
+ * @param {Object} [hints]
+ *
+ * @return {Array<Point>|null} waypoints if straight layout worked
+ */
+
+
+function tryLayoutStraight(source, target, start, end, hints) {
+  var axis = {},
+      primaryAxis,
+      orientation;
+  orientation = (0, _LayoutUtil.getOrientation)(source, target); // only layout a straight connection if shapes are
+  // horizontally or vertically aligned
+
+  if (!/^(top|bottom|left|right)$/.test(orientation)) {
+    return null;
+  }
+
+  if (/top|bottom/.test(orientation)) {
+    primaryAxis = 'x';
+  }
+
+  if (/left|right/.test(orientation)) {
+    primaryAxis = 'y';
+  }
+
+  if (hints.preserveDocking === 'target') {
+    if (!isInRange(primaryAxis, end, source)) {
+      return null;
+    }
+
+    axis[primaryAxis] = end[primaryAxis];
+    return [{
+      x: axis.x !== undefined ? axis.x : start.x,
+      y: axis.y !== undefined ? axis.y : start.y,
+      original: {
+        x: axis.x !== undefined ? axis.x : start.x,
+        y: axis.y !== undefined ? axis.y : start.y
+      }
+    }, {
+      x: end.x,
+      y: end.y
+    }];
+  } else {
+    if (!isInRange(primaryAxis, start, target)) {
+      return null;
+    }
+
+    axis[primaryAxis] = start[primaryAxis];
+    return [{
+      x: start.x,
+      y: start.y
+    }, {
+      x: axis.x !== undefined ? axis.x : end.x,
+      y: axis.y !== undefined ? axis.y : end.y,
+      original: {
+        x: axis.x !== undefined ? axis.x : end.x,
+        y: axis.y !== undefined ? axis.y : end.y
+      }
+    }];
+  }
+}
+/**
+ * Repair a connection from start.
+ *
+ * @param {Bounds} moved
+ * @param {Bounds} other
+ * @param {Point} newDocking
+ * @param {Array<Point>} points originalPoints from moved to other
+ *
+ * @return {Array<Point>|null} the repaired points between the two rectangles
+ */
+
+
+function tryRepairConnectionStart(moved, other, newDocking, points) {
+  return _tryRepairConnectionSide(moved, other, newDocking, points);
+}
+/**
+ * Repair a connection from end.
+ *
+ * @param {Bounds} moved
+ * @param {Bounds} other
+ * @param {Point} newDocking
+ * @param {Array<Point>} points originalPoints from moved to other
+ *
+ * @return {Array<Point>|null} the repaired points between the two rectangles
+ */
+
+
+function tryRepairConnectionEnd(moved, other, newDocking, points) {
+  var waypoints = points.slice().reverse();
+  waypoints = _tryRepairConnectionSide(moved, other, newDocking, waypoints);
+  return waypoints ? waypoints.reverse() : null;
+}
+/**
+ * Repair a connection from one side that moved.
+ *
+ * @param {Bounds} moved
+ * @param {Bounds} other
+ * @param {Point} newDocking
+ * @param {Array<Point>} points originalPoints from moved to other
+ *
+ * @return {Array<Point>} the repaired points between the two rectangles
+ */
+
+
+function _tryRepairConnectionSide(moved, other, newDocking, points) {
+  function needsRelayout(points) {
+    if (points.length < 3) {
+      return true;
+    }
+
+    if (points.length > 4) {
+      return false;
+    } // relayout if two points overlap
+    // this is most likely due to
+
+
+    return !!(0, _minDash.find)(points, function (p, idx) {
+      var q = points[idx - 1];
+      return q && (0, _Geometry.pointDistance)(p, q) < 3;
+    });
+  }
+
+  function repairBendpoint(candidate, oldPeer, newPeer) {
+    var alignment = (0, _Geometry.pointsAligned)(oldPeer, candidate);
+
+    switch (alignment) {
+      case 'v':
+        // repair horizontal alignment
+        return {
+          x: newPeer.x,
+          y: candidate.y
+        };
+
+      case 'h':
+        // repair vertical alignment
+        return {
+          x: candidate.x,
+          y: newPeer.y
+        };
+    }
+
+    return {
+      x: candidate.x,
+      y: candidate.y
+    };
+  }
+
+  function removeOverlapping(points, a, b) {
+    var i;
+
+    for (i = points.length - 2; i !== 0; i--) {
+      // intersects (?) break, remove all bendpoints up to this one and relayout
+      if ((0, _Geometry.pointInRect)(points[i], a, INTERSECTION_THRESHOLD) || (0, _Geometry.pointInRect)(points[i], b, INTERSECTION_THRESHOLD)) {
+        // return sliced old connection
+        return points.slice(i);
+      }
+    }
+
+    return points;
+  } // (0) only repair what has layoutable bendpoints
+  // (1) if only one bendpoint and on shape moved onto other shapes axis
+  //     (horizontally / vertically), relayout
+
+
+  if (needsRelayout(points)) {
+    return null;
+  }
+
+  var oldDocking = points[0],
+      newPoints = points.slice(),
+      slicedPoints; // (2) repair only last line segment and only if it was layouted before
+
+  newPoints[0] = newDocking;
+  newPoints[1] = repairBendpoint(newPoints[1], oldDocking, newDocking); // (3) if shape intersects with any bendpoint after repair,
+  //     remove all segments up to this bendpoint and repair from there
+
+  slicedPoints = removeOverlapping(newPoints, moved, other);
+
+  if (slicedPoints !== newPoints) {
+    newPoints = _tryRepairConnectionSide(moved, other, newDocking, slicedPoints);
+  } // (4) do NOT repair if repaired bendpoints are aligned
+
+
+  if (newPoints && (0, _Geometry.pointsAligned)(newPoints)) {
+    return null;
+  }
+
+  return newPoints;
+}
+/**
+ * Returns the manhattan directions connecting two rectangles
+ * with the given orientation.
+ *
+ * Will always return the default layout, if it is specific
+ * regarding sides already (trbl).
+ *
+ * @example
+ *
+ * getDirections('top'); // -> 'v:v'
+ * getDirections('intersect'); // -> 't:t'
+ *
+ * getDirections('top-right', 'v:h'); // -> 'v:h'
+ * getDirections('top-right', 'h:h'); // -> 'h:h'
+ *
+ *
+ * @param {string} orientation
+ * @param {string} defaultLayout
+ *
+ * @return {string}
+ */
+
+
+function getDirections(orientation, defaultLayout) {
+  // don't override specific trbl directions
+  if (isExplicitDirections(defaultLayout)) {
+    return defaultLayout;
+  }
+
+  switch (orientation) {
+    case 'intersect':
+      return 't:t';
+
+    case 'top':
+    case 'bottom':
+      return 'v:v';
+
+    case 'left':
+    case 'right':
+      return 'h:h';
+    // 'top-left'
+    // 'top-right'
+    // 'bottom-left'
+    // 'bottom-right'
+
+    default:
+      return defaultLayout;
+  }
+}
+
+function isValidDirections(directions) {
+  return directions && /^h|v|t|r|b|l:h|v|t|r|b|l$/.test(directions);
+}
+
+function isExplicitDirections(directions) {
+  return directions && /t|r|b|l/.test(directions);
+}
+
+function invertOrientation(orientation) {
+  return {
+    'top': 'bottom',
+    'bottom': 'top',
+    'left': 'right',
+    'right': 'left',
+    'top-left': 'bottom-right',
+    'bottom-right': 'top-left',
+    'top-right': 'bottom-left',
+    'bottom-left': 'top-right'
+  }[orientation];
+}
+
+function getDockingPoint(point, rectangle, dockingDirection, targetOrientation) {
+  // ensure we end up with a specific docking direction
+  // based on the targetOrientation, if <h|v> is being passed
+  if (dockingDirection === 'h') {
+    dockingDirection = /left/.test(targetOrientation) ? 'l' : 'r';
+  }
+
+  if (dockingDirection === 'v') {
+    dockingDirection = /top/.test(targetOrientation) ? 't' : 'b';
+  }
+
+  if (dockingDirection === 't') {
+    return {
+      original: point,
+      x: point.x,
+      y: rectangle.y
+    };
+  }
+
+  if (dockingDirection === 'r') {
+    return {
+      original: point,
+      x: rectangle.x + rectangle.width,
+      y: point.y
+    };
+  }
+
+  if (dockingDirection === 'b') {
+    return {
+      original: point,
+      x: point.x,
+      y: rectangle.y + rectangle.height
+    };
+  }
+
+  if (dockingDirection === 'l') {
+    return {
+      original: point,
+      x: rectangle.x,
+      y: point.y
+    };
+  }
+
+  throw new Error('unexpected dockingDirection: <' + dockingDirection + '>');
+}
+/**
+ * Return list of waypoints with redundant ones filtered out.
+ *
+ * @example
+ *
+ * Original points:
+ *
+ *   [x] ----- [x] ------ [x]
+ *                         |
+ *                        [x] ----- [x] - [x]
+ *
+ * Filtered:
+ *
+ *   [x] ---------------- [x]
+ *                         |
+ *                        [x] ----------- [x]
+ *
+ * @param  {Array<Point>} waypoints
+ *
+ * @return {Array<Point>}
+ */
+
+
+function withoutRedundantPoints(waypoints) {
+  return waypoints.reduce(function (points, p, idx) {
+    var previous = points[points.length - 1],
+        next = waypoints[idx + 1];
+
+    if (!(0, _Geometry.pointsOnLine)(previous, next, p, 0)) {
+      points.push(p);
+    }
+
+    return points;
+  }, []);
+}
+
+},{"../util/Geometry":204,"./LayoutUtil":188,"min-dash":219}],190:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12066,7 +29093,7 @@ function create(type, attrs) {
   return (0, _minDash.assign)(new Type(), attrs);
 }
 
-},{"inherits":77,"min-dash":78,"object-refs":82}],53:[function(require,module,exports){
+},{"inherits":218,"min-dash":219,"object-refs":223}],191:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12174,7 +29201,7 @@ function KeyboardMove(config, keyboard, canvas) {
 
 KeyboardMove.$inject = ['config.keyboardMove', 'keyboard', 'canvas'];
 
-},{"min-dash":78}],54:[function(require,module,exports){
+},{"min-dash":219}],192:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12195,7 +29222,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"../../features/keyboard":40,"./KeyboardMove":53}],55:[function(require,module,exports){
+},{"../../features/keyboard":129,"./KeyboardMove":191}],193:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12305,7 +29332,7 @@ function length(point) {
   return Math.sqrt(Math.pow(point.x, 2) + Math.pow(point.y, 2));
 }
 
-},{"../../util/ClickTrap":60,"../../util/Cursor":62,"../../util/Event":64,"../../util/PositionUtil":71,"min-dom":79}],56:[function(require,module,exports){
+},{"../../util/ClickTrap":199,"../../util/Cursor":201,"../../util/Event":203,"../../util/PositionUtil":211,"min-dom":220}],194:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12323,7 +29350,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./MoveCanvas":55}],57:[function(require,module,exports){
+},{"./MoveCanvas":193}],195:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12521,7 +29548,7 @@ ZoomScroll.prototype._init = function (newEnabled) {
   this.toggle(newEnabled);
 };
 
-},{"../../util/Math":68,"./ZoomUtil":58,"min-dash":78,"min-dom":79}],58:[function(require,module,exports){
+},{"../../util/Math":208,"./ZoomUtil":196,"min-dash":219,"min-dom":220}],196:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12550,7 +29577,7 @@ function cap(range, scale) {
   return Math.max(range.min, Math.min(range.max, scale));
 }
 
-},{"../../util/Math":68}],59:[function(require,module,exports){
+},{"../../util/Math":208}],197:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12568,7 +29595,144 @@ var _default = {
 };
 exports.default = _default;
 
-},{"./ZoomScroll":57}],60:[function(require,module,exports){
+},{"./ZoomScroll":195}],198:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getNewAttachPoint = getNewAttachPoint;
+exports.getNewAttachShapeDelta = getNewAttachShapeDelta;
+
+var _LayoutUtil = require("../layout/LayoutUtil");
+
+var _PositionUtil = require("./PositionUtil");
+
+/**
+ * Calculates the absolute point relative to the new element's position
+ *
+ * @param {point} point [absolute]
+ * @param {bounds} oldBounds
+ * @param {bounds} newBounds
+ *
+ * @return {point} point [absolute]
+ */
+function getNewAttachPoint(point, oldBounds, newBounds) {
+  var oldCenter = (0, _PositionUtil.center)(oldBounds),
+      newCenter = (0, _PositionUtil.center)(newBounds),
+      oldDelta = (0, _PositionUtil.delta)(point, oldCenter);
+  var newDelta = {
+    x: oldDelta.x * (newBounds.width / oldBounds.width),
+    y: oldDelta.y * (newBounds.height / oldBounds.height)
+  };
+  return (0, _LayoutUtil.roundPoint)({
+    x: newCenter.x + newDelta.x,
+    y: newCenter.y + newDelta.y
+  });
+}
+/**
+ * Calculates the shape's delta relative to a new position
+ * of a certain element's bounds
+ *
+ * @param {djs.model.Shape} point [absolute]
+ * @param {bounds} oldBounds
+ * @param {bounds} newBounds
+ *
+ * @return {delta} delta
+ */
+
+
+function getNewAttachShapeDelta(shape, oldBounds, newBounds) {
+  var shapeCenter = (0, _PositionUtil.center)(shape),
+      oldCenter = (0, _PositionUtil.center)(oldBounds),
+      newCenter = (0, _PositionUtil.center)(newBounds),
+      shapeDelta = (0, _PositionUtil.delta)(shape, shapeCenter),
+      oldCenterDelta = (0, _PositionUtil.delta)(shapeCenter, oldCenter),
+      stickyPositionDelta = getStickyPositionDelta(shapeCenter, oldBounds, newBounds);
+
+  if (stickyPositionDelta) {
+    return stickyPositionDelta;
+  }
+
+  var newCenterDelta = {
+    x: oldCenterDelta.x * (newBounds.width / oldBounds.width),
+    y: oldCenterDelta.y * (newBounds.height / oldBounds.height)
+  };
+  var newShapeCenter = {
+    x: newCenter.x + newCenterDelta.x,
+    y: newCenter.y + newCenterDelta.y
+  };
+  return (0, _LayoutUtil.roundPoint)({
+    x: newShapeCenter.x + shapeDelta.x - shape.x,
+    y: newShapeCenter.y + shapeDelta.y - shape.y
+  });
+}
+
+function getStickyPositionDelta(oldShapeCenter, oldBounds, newBounds) {
+  var oldTRBL = (0, _LayoutUtil.asTRBL)(oldBounds),
+      newTRBL = (0, _LayoutUtil.asTRBL)(newBounds);
+
+  if (isMoved(oldTRBL, newTRBL)) {
+    return null;
+  }
+
+  var oldOrientation = (0, _LayoutUtil.getOrientation)(oldBounds, oldShapeCenter),
+      stickyPositionDelta,
+      newShapeCenter,
+      newOrientation;
+
+  if (oldOrientation === 'top') {
+    stickyPositionDelta = {
+      x: 0,
+      y: newTRBL.bottom - oldTRBL.bottom
+    };
+  } else if (oldOrientation === 'bottom') {
+    stickyPositionDelta = {
+      x: 0,
+      y: newTRBL.top - oldTRBL.top
+    };
+  } else if (oldOrientation === 'right') {
+    stickyPositionDelta = {
+      x: newTRBL.left - oldTRBL.left,
+      y: 0
+    };
+  } else if (oldOrientation === 'left') {
+    stickyPositionDelta = {
+      x: newTRBL.right - oldTRBL.right,
+      y: 0
+    };
+  } else {
+    // fallback to proportional movement for corner-placed attachments
+    return null;
+  }
+
+  newShapeCenter = {
+    x: oldShapeCenter.x + stickyPositionDelta.x,
+    y: oldShapeCenter.y + stickyPositionDelta.y
+  };
+  newOrientation = (0, _LayoutUtil.getOrientation)(newBounds, newShapeCenter);
+
+  if (newOrientation !== oldOrientation) {
+    // fallback to proportional movement if orientation would otherwise change
+    return null;
+  }
+
+  return stickyPositionDelta;
+}
+
+function isMoved(oldTRBL, newTRBL) {
+  return isHorizontallyMoved(oldTRBL, newTRBL) || isVerticallyMoved(oldTRBL, newTRBL);
+}
+
+function isHorizontallyMoved(oldTRBL, newTRBL) {
+  return oldTRBL.right !== newTRBL.right && oldTRBL.left !== newTRBL.left;
+}
+
+function isVerticallyMoved(oldTRBL, newTRBL) {
+  return oldTRBL.top !== newTRBL.top && oldTRBL.bottom !== newTRBL.bottom;
+}
+
+},{"../layout/LayoutUtil":188,"./PositionUtil":211}],199:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12595,7 +29759,7 @@ function install(eventBus, eventName) {
   };
 }
 
-},{}],61:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12689,7 +29853,7 @@ function indexOf(collection, element) {
   return collection.indexOf(element);
 }
 
-},{}],62:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12721,7 +29885,7 @@ function has(mode) {
   return classes.has('djs-cursor-' + mode);
 }
 
-},{"min-dom":79}],63:[function(require,module,exports){
+},{"min-dom":220}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13059,7 +30223,7 @@ function copyObject(src1, src2) {
   return (0, _minDash.assign)({}, src1 || {}, src2 || {});
 }
 
-},{"min-dash":78}],64:[function(require,module,exports){
+},{"min-dash":219}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13102,7 +30266,7 @@ function toPoint(event) {
   } : null;
 }
 
-},{}],65:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13251,7 +30415,7 @@ function getMidPoint(p, q) {
   };
 }
 
-},{"min-dash":78}],66:[function(require,module,exports){
+},{"min-dash":219}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13289,7 +30453,7 @@ function getChildren(gfx) {
   return gfx.parentNode.childNodes[1];
 }
 
-},{}],67:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13325,7 +30489,110 @@ IdGenerator.prototype.next = function () {
   return this._prefix + ++this._counter;
 };
 
-},{}],68:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getApproxIntersection = getApproxIntersection;
+
+var _Geometry = require("./Geometry");
+
+var _pathIntersection = _interopRequireDefault(require("path-intersection"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var round = Math.round,
+    max = Math.max;
+
+function circlePath(center, r) {
+  var x = center.x,
+      y = center.y;
+  return [['M', x, y], ['m', 0, -r], ['a', r, r, 0, 1, 1, 0, 2 * r], ['a', r, r, 0, 1, 1, 0, -2 * r], ['z']];
+}
+
+function linePath(points) {
+  var segments = [];
+  points.forEach(function (p, idx) {
+    segments.push([idx === 0 ? 'M' : 'L', p.x, p.y]);
+  });
+  return segments;
+}
+
+var INTERSECTION_THRESHOLD = 10;
+
+function getBendpointIntersection(waypoints, reference) {
+  var i, w;
+
+  for (i = 0; w = waypoints[i]; i++) {
+    if ((0, _Geometry.pointDistance)(w, reference) <= INTERSECTION_THRESHOLD) {
+      return {
+        point: waypoints[i],
+        bendpoint: true,
+        index: i
+      };
+    }
+  }
+
+  return null;
+}
+
+function getPathIntersection(waypoints, reference) {
+  var intersections = (0, _pathIntersection.default)(circlePath(reference, INTERSECTION_THRESHOLD), linePath(waypoints));
+  var a = intersections[0],
+      b = intersections[intersections.length - 1],
+      idx;
+
+  if (!a) {
+    // no intersection
+    return null;
+  }
+
+  if (a !== b) {
+    if (a.segment2 !== b.segment2) {
+      // we use the bendpoint in between both segments
+      // as the intersection point
+      idx = max(a.segment2, b.segment2) - 1;
+      return {
+        point: waypoints[idx],
+        bendpoint: true,
+        index: idx
+      };
+    }
+
+    return {
+      point: {
+        x: round(a.x + b.x) / 2,
+        y: round(a.y + b.y) / 2
+      },
+      index: a.segment2
+    };
+  }
+
+  return {
+    point: {
+      x: round(a.x),
+      y: round(a.y)
+    },
+    index: a.segment2
+  };
+}
+/**
+ * Returns the closest point on the connection towards a given reference point.
+ *
+ * @param  {Array<Point>} waypoints
+ * @param  {Point} reference
+ *
+ * @return {Object} intersection data (segment, point)
+ */
+
+
+function getApproxIntersection(waypoints, reference) {
+  return getBendpointIntersection(waypoints, reference) || getPathIntersection(waypoints, reference);
+}
+
+},{"./Geometry":204,"path-intersection":226}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13349,7 +30616,7 @@ function log10(x) {
   return Math.log(x) / Math.log(10);
 }
 
-},{"./PositionUtil":71}],69:[function(require,module,exports){
+},{"./PositionUtil":211}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13411,7 +30678,7 @@ function hasSecondaryModifier(event) {
   return isPrimaryButton(event) && originalEvent.shiftKey;
 }
 
-},{"./Event":64,"./Platform":70}],70:[function(require,module,exports){
+},{"./Event":203,"./Platform":210}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13423,7 +30690,7 @@ function isMac() {
   return /mac/i.test(navigator.platform);
 }
 
-},{}],71:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13446,7 +30713,49 @@ function delta(a, b) {
   };
 }
 
-},{}],72:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.saveClear = saveClear;
+
+/**
+ * Remove from the beginning of a collection until it is empty.
+ *
+ * This is a null-safe operation that ensures elements
+ * are being removed from the given collection until the
+ * collection is empty.
+ *
+ * The implementation deals with the fact that a remove operation
+ * may touch, i.e. remove multiple elements in the collection
+ * at a time.
+ *
+ * @param {Array<Object>} [collection]
+ * @param {Function} removeFn
+ *
+ * @return {Array<Object>} the cleared collection
+ */
+function saveClear(collection, removeFn) {
+  if (typeof removeFn !== 'function') {
+    throw new Error('removeFn iterator must be a function');
+  }
+
+  if (!collection) {
+    return;
+  }
+
+  var e;
+
+  while (e = collection[0]) {
+    removeFn(e);
+  }
+
+  return collection;
+}
+
+},{}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13493,7 +30802,7 @@ function updateLine(gfx, points) {
   return gfx;
 }
 
-},{"tiny-svg":87}],73:[function(require,module,exports){
+},{"tiny-svg":228}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13557,7 +30866,7 @@ function scale(gfx, amount) {
   (0, _tinySvg.transform)(gfx, scale);
 }
 
-},{"tiny-svg":87}],74:[function(require,module,exports){
+},{"tiny-svg":228}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13897,7 +31206,7 @@ function getLineHeight(style) {
   }
 }
 
-},{"min-dash":78,"tiny-svg":87}],75:[function(require,module,exports){
+},{"min-dash":219,"tiny-svg":228}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14221,7 +31530,7 @@ function Injector(modules, parent) {
   this.createChild = createChild;
 }
 
-},{}],76:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14397,7 +31706,7 @@ Ids.prototype.clear = function () {
 var _default = Ids;
 exports.default = _default;
 
-},{}],77:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -14426,7 +31735,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],78:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15090,7 +32399,7 @@ function merge(target) {
   return target;
 }
 
-},{}],79:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15597,7 +32906,7 @@ function remove(el) {
   el.parentNode && el.parentNode.removeChild(el);
 }
 
-},{}],80:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17210,7 +34519,7 @@ function Writer(options) {
   };
 }
 
-},{"min-dash":78,"moddle":81,"saxen":86}],81:[function(require,module,exports){
+},{"min-dash":219,"moddle":222,"saxen":227}],222:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18055,11 +35364,11 @@ Moddle.prototype.getTypeDescriptor = function (type) {
   return this.registry.typeMap[type];
 };
 
-},{"min-dash":78}],82:[function(require,module,exports){
+},{"min-dash":219}],223:[function(require,module,exports){
 module.exports = require('./lib/refs');
 
 module.exports.Collection = require('./lib/collection');
-},{"./lib/collection":83,"./lib/refs":84}],83:[function(require,module,exports){
+},{"./lib/collection":224,"./lib/refs":225}],224:[function(require,module,exports){
 'use strict';
 
 /**
@@ -18180,7 +35489,7 @@ function isExtended(collection) {
 module.exports.extend = extend;
 
 module.exports.isExtended = isExtended;
-},{}],84:[function(require,module,exports){
+},{}],225:[function(require,module,exports){
 'use strict';
 
 var Collection = require('./collection');
@@ -18383,7 +35692,7 @@ module.exports = Refs;
  * @property {boolean} [collection=false]
  * @property {boolean} [enumerable=false]
  */
-},{"./collection":83}],85:[function(require,module,exports){
+},{"./collection":224}],226:[function(require,module,exports){
 'use strict';
 
 /**
@@ -19304,7 +36613,7 @@ function pathToCurve(path) {
 
 module.exports = findPathIntersections;
 
-},{}],86:[function(require,module,exports){
+},{}],227:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20380,7 +37689,7 @@ function Parser(options) {
 
 }
 
-},{}],87:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

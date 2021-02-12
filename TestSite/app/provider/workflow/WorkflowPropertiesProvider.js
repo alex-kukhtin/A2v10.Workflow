@@ -13,6 +13,7 @@ import eventProps from '../workflow/parts/bpmn/eventProps';
 import scriptProps from './parts/scriptProps';
 import variablesProps from './parts/variablesProps';
 import variablesDetailProps from './parts/variablesDetailProps';
+import globalScriptGroup from './parts/globalScriptProps';
 
 import extensionElementsImpl from './parts/impl/extensionElements';
 
@@ -51,6 +52,20 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, elementRegistry, t
 		generalGroup,
 		detailsGroup,
 		documentationGroup
+	];
+}
+
+function createGlobalTabGroup(element, bpmnFactory, translate) {
+	let scriptGroup = {
+		id: 'script',
+		label: 'Scripts',
+		entries: []
+	};
+
+	globalScriptGroup(scriptGroup, element, bpmnFactory, translate);
+
+	return [
+		scriptGroup
 	];
 }
 
@@ -101,10 +116,18 @@ export default function WorkflowPropertiesProvider(
 			groups: createVariablesTabGroups(element, bpmnFactory, translate)
 		};
 
+
+		var globalTab = {
+			id: 'global',
+			label: translate('Global'),
+			groups: createGlobalTabGroup(element, bpmnFactory, translate)
+		};
+
 		// Show "general" + "variables" tab
 		return [
 			generalTab,
-			variablesTab
+			variablesTab,
+			globalTab
 		];
 	};
 }

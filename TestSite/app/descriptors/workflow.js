@@ -65,6 +65,19 @@ export default {
 					"isBody": true
 				}
 			]
+		},
+		{
+			"name": "GlobalScript",
+			"superClass": [
+				"Element"
+			],
+			"properties": [
+				{
+					"name": "text",
+					"type": "String",
+					"isBody": true
+				}
+			]
 		}
 	]
 };

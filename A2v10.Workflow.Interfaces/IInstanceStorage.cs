@@ -9,5 +9,7 @@ namespace A2v10.Workflow.Interfaces
 
 		Task Create(IInstance instance);
 		Task Save(IInstance instance);
+
+		Task WriteException(Guid id, Exception ex);
 	}
 }

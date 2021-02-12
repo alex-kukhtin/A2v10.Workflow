@@ -18,6 +18,8 @@ namespace A2v10.Workflow
 	{
 
 		public List<IVariable> Variables { get; set; }
+		public String GlobalScript { get; set; }
+
 		public List<IActivity> Branches { get; set; }
 
 		public CompletionCondition CompletionCondition { get; set; }

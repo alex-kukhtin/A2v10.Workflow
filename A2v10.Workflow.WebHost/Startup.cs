@@ -31,9 +31,14 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<ISerializer, Serializer>();
+			services.AddSingleton<IScriptNativeObjectProvider, ScriptNativeObjects>();
 
-			services.AddScoped<IWorkflowEngine, WorkflowEngine>();
-			services.AddScoped<IWorkflowApi, WorkflowEngine>();
+			services.AddScoped<IDeferredTarget, WorkflowDeferred>();
+
+			services.AddScoped<WorkflowEngine>();
+			services.AddScoped<IWorkflowEngine>(s => s.GetService<WorkflowEngine>());
+			services.AddScoped<IWorkflowApi>(s => s.GetService<WorkflowEngine>());
+
 			services.AddScoped<ITracker, InstanceTracker>();
 		}
 

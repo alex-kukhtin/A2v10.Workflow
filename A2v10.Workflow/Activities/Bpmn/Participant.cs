@@ -15,6 +15,7 @@ namespace A2v10.Workflow.Bpmn
 
 		#region IScoped
 		public List<IVariable> Variables => Elem<ExtensionElements>()?.GetVariables();
+		public String GlobalScript => Elem<ExtensionElements>()?.GetGlobalScript();
 
 		public void BuildScript(IScriptBuilder builder)
 		{

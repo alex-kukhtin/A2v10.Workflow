@@ -11,6 +11,7 @@ namespace A2v10.Workflow
 	{
 		public List<FlowNode> Nodes { get; set; }
 		public List<IVariable> Variables { get; set; }
+		public String GlobalScript { get; set; }
 
 		public override IEnumerable<IActivity> EnumChildren()
 		{

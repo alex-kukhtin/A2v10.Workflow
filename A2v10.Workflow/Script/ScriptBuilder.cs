@@ -173,11 +173,14 @@ namespace A2v10.Workflow
 
 		public void Start(IActivity activity)
 		{
-			if (activity is IScoped)
+			if (activity is IScoped scopedActivity)
 			{
 				var ascript = new ActivityScript(this, activity);
 				_stack.Push(ascript);
 				_textBuilder.AppendLine("(function() {");
+				var globalScript = scopedActivity.GlobalScript;
+				if (!String.IsNullOrEmpty(globalScript))
+					_textBuilder.AppendLine(globalScript);
 			}
 		}
 

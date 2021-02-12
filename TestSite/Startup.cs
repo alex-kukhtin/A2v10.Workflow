@@ -43,6 +43,7 @@ namespace TestSite
 
 			services.AddSingleton<ISerializer, Serializer>();
 
+			services.AddScoped<IDeferredTarget, WorkflowDeferred>();
 			services.AddScoped<ITracker, InstanceTracker>();
 			services.AddScoped<IWorkflowEngine, WorkflowEngine>();
 		}

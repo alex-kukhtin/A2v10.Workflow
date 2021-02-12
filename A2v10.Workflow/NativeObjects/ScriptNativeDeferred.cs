@@ -13,14 +13,14 @@ namespace A2v10.Workflow
 
 		public void Inject(IServiceProvider serviceProvider)
 		{
-			_deferredTarget = serviceProvider.GetService<IDeferredTarget>();
+			_deferredTarget = serviceProvider.GetService<IDeferredTarget>() ?? throw new NullReferenceException("IDeferredTarget");
 		}
 
 #pragma warning disable IDE1006 // Naming Styles
 		public void executeSql(String procedure, ExpandoObject prms = null)
 #pragma warning restore IDE1006 // Naming Styles
 		{
-			_deferredTarget.AddDefferd(new DeferredElement(DeferredElementType.Sql, procedure, prms));
+			_deferredTarget.AddDeffered(new DeferredElement(DeferredElementType.Sql, procedure, prms));
 		}
 	}
 }
