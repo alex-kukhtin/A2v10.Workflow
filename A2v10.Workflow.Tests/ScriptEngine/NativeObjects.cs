@@ -35,6 +35,7 @@ namespace A2v10.Workflow.Tests
 		public IEnumerable<NativeType> NativeTypes()
 		{
 			yield return new NativeType() { Name = "Database", Type = typeof(ScriptDatabase) };
+			yield return new NativeType() { Name = "Deferred", Type = typeof(ScriptNativeDeferred) };
 		}
 	}
 }

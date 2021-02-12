@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,12 +10,14 @@ using A2v10.Workflow.Interfaces.Api;
 
 namespace A2v10.Workflow
 {
-	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi
+	public class WorkflowEngine : IWorkflowEngine, IWorkflowApi, IDeferredTarget
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly IWorkflowStorage _workflowStorage;
 		private readonly IInstanceStorage _instanceStorage;
 		private readonly ITracker _tracker;
+
+		private readonly Lazy<List<DeferredElement>> _deferred = new Lazy<List<DeferredElement>>();
 
 		public WorkflowEngine(IServiceProvider serviceProvider, ITracker tracker)
 		{
@@ -77,7 +80,7 @@ namespace A2v10.Workflow
 			return inst;
 		}
 
-		static void SetInstanceState(IInstance inst, ExecutionContext context)
+		void SetInstanceState(IInstance inst, ExecutionContext context)
 		{
 			inst.Result = context.GetResult();
 			inst.State = context.GetState();
@@ -86,7 +89,8 @@ namespace A2v10.Workflow
 			{
 				ExternalVariables = context.GetExternalVariables(inst.State),
 				ExternalBookmarks = context.GetExternalBookmarks(),
-				TrackRecords = context.GetTrackRecords()
+				TrackRecords = context.GetTrackRecords(),
+				Deferred = _deferred.IsValueCreated ? _deferred.Value : null
 			};
 			inst.InstanceData = instData;
 		}
@@ -122,5 +126,12 @@ namespace A2v10.Workflow
 			await RunAsync(prm.InstanceId, prm.Parameters);
 			return new ResumeProcessResponse();
 		}
+
+		#region IDeferredTarget
+		public void AddDefferd(DeferredElement elem)
+		{
+			_deferred.Value.Add(elem);
+		}
+		#endregion
 	}
 }

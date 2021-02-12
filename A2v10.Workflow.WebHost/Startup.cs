@@ -33,8 +33,8 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<ISerializer, Serializer>();
 
 			services.AddScoped<IWorkflowEngine, WorkflowEngine>();
-			services.AddScoped<ITracker, InstanceTracker>();
 			services.AddScoped<IWorkflowApi, WorkflowEngine>();
+			services.AddScoped<ITracker, InstanceTracker>();
 		}
 
 		private static void ConfigureMvc(MvcOptions opt)

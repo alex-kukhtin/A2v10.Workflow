@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
 
@@ -84,7 +86,14 @@ namespace A2v10.Workflow.SqlServer
 				{"Instance", ieo }
 			};
 
-			_ = await _dbContext.SaveModelAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root);
+			List<BatchProcedure> batches = null;
+			if (instanceData.Deferred != null) {
+				batches = new List<BatchProcedure>();
+				foreach (var defer in instanceData.Deferred.Where(d => d.Type == DeferredElementType.Sql))
+					batches.Add(new BatchProcedure(defer.Name, defer.Parameters));
+			}
+
+			_ = await _dbContext.SaveModelBatchAsync(null, $"{Definitions.SqlSchema}.[Instance.Update]", root, null, batches);
 		}
 
 		#endregion
