@@ -8,10 +8,17 @@ using System.Windows.Markup;
 
 namespace A2v10.System.Xaml.Tests.Mock
 {
-	[DefaultProperty("Name")]
+	public enum CommandType
+	{
+		None,
+		Execute,
+		Run
+	}
+
+	[DefaultProperty("Command")]
 	public class BindCmd : BindBase
 	{
-		public String Name { get; set; }
+		public CommandType Command { get; set; }
 		public String Argument { get; set; }
 
 		public BindCmd()
@@ -21,7 +28,6 @@ namespace A2v10.System.Xaml.Tests.Mock
 
 		public BindCmd(String name)
 		{
-			Name = name;
 		}
 	}
 }

@@ -23,7 +23,7 @@ namespace A2v10.System.Xaml.Tests
 
 			var cmd = btn.GetBindingCommand("Command");
 			Assert.AreEqual(typeof(BindCmd), cmd.GetType());
-			//Assert.AreEqual("Execute", cmd.Name);
+			Assert.AreEqual("Execute", cmd.Command.ToString());
 		}
 	}
 }

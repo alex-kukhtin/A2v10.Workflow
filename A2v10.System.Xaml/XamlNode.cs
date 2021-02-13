@@ -24,8 +24,6 @@ namespace A2v10.System.Xaml
 
 		public Object GetPropertyValue(String propName, Type propType, NodeDefinition nodeDef)
 		{
-			if (propName == nodeDef.DefaultProperty)
-				return _ctorArgument;
 			if (Properties.TryGetValue(propName, out Object val))
 			{
 				if (val == null)
@@ -33,6 +31,16 @@ namespace A2v10.System.Xaml
 				if (val.GetType() == (Nullable.GetUnderlyingType(propType) ?? propType))
 					return val;
 				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
+			}
+			if (_ctorArgument != null && propName == nodeDef.DefaultProperty)
+			{
+				if (propType.IsEnum)
+				{
+					if (Enum.TryParse(propType, _ctorArgument, out object result))
+						return result;
+					throw new XamlReadException($"Unable to convert '{_ctorArgument.ToString()}' to type '{propType.Name}'");
+				}
+				return Convert.ChangeType(_ctorArgument, propType);
 			}
 			if (propType.IsEnum)
 				return 0; // default value for enum
