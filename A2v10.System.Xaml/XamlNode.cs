@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using System.Windows.Markup;
 
 namespace A2v10.System.Xaml
 {
@@ -38,7 +37,7 @@ namespace A2v10.System.Xaml
 				{
 					if (Enum.TryParse(propType, _ctorArgument, out object result))
 						return result;
-					throw new XamlReadException($"Unable to convert '{_ctorArgument.ToString()}' to type '{propType.Name}'");
+					throw new XamlReadException($"Unable to convert '{_ctorArgument}' to type '{propType.Name}'");
 				}
 				return Convert.ChangeType(_ctorArgument, propType);
 			}

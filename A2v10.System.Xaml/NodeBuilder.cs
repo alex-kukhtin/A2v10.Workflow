@@ -7,8 +7,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-using System.Windows.Markup;
-
 namespace A2v10.System.Xaml
 {
 
@@ -24,7 +22,7 @@ namespace A2v10.System.Xaml
 	}
 
 
-	public class NamespaceDefinition
+	public record NamespaceDefinition
 	{
 		public String Namespace { get; init; }
 		public Assembly Assembly { get; init; }

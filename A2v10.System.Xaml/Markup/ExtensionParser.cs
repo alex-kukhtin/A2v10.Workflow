@@ -135,7 +135,7 @@ namespace A2v10.System.Xaml
 			while (Char.IsWhiteSpace(_ch) && _ch != NULL_CHAR)
 				NextChar();
 			Int32 tokPos = _pos;
-			Int32 cbc = 0;
+			Int32 cbc;
 			switch (_ch)
 			{
 				case ',':

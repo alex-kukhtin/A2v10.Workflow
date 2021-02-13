@@ -25,4 +25,4 @@ Xaml
 10. Attached properties
 11. x: namespace
 12. Dictionary collections
-13. 
+13. ??? TypeCache static ????

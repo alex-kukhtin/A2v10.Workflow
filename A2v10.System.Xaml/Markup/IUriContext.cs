@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System.Windows.Markup
+namespace A2v10.System.Xaml
 {
 	public interface IUriContext
 	{
