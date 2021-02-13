@@ -7,12 +7,49 @@ namespace A2v10.System.Xaml.Tests
 	[TestCategory("Xaml.Extensions.Simple")]
 	public class ReadExtensions
 	{
+
 		[TestMethod]
-		public void SimpleExtension()
+		public void Simple()
 		{
 			string xaml = @"
 <Button xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"" 
-	Content=""Text"" Command=""{BindCmd Execute, Argument={Bind Text}}"">
+	Content=""Text"" Icon=""File"">
+</Button>
+";
+			var obj = XamlServices.Parse(xaml, null);
+
+			Assert.AreEqual(typeof(Button), obj.GetType());
+			var btn = obj as Button;
+			Assert.AreEqual("Text", btn.Content);
+			Assert.AreEqual(Icon.File, btn.Icon);
+		}
+
+		[TestMethod]
+		public void Binding()
+		{
+			string xaml = @"
+<Button xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"" 
+	Content=""Text"" Command=""{BindCmd Execute, CommandName='File'}"">
+</Button>
+";
+			var obj = XamlServices.Parse(xaml, null);
+
+			Assert.AreEqual(typeof(Button), obj.GetType());
+			var btn = obj as Button;
+			Assert.AreEqual("Text", btn.Content);
+
+			var cmd = btn.GetBindingCommand("Command");
+			Assert.AreEqual(typeof(BindCmd), cmd.GetType());
+			Assert.AreEqual("Execute", cmd.Command.ToString());
+			Assert.AreEqual("File", cmd.CommandName);
+		}
+
+		[TestMethod]
+		public void Full()
+		{
+			string xaml = @"
+<Button xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"" 
+	Content=""Text"" Icon=""{Bind Icon}"" Command=""{BindCmd Execute, CommandName='File', Argument={Bind Path='Text'}}"">
 </Button>
 ";
 			var obj = XamlServices.Parse(xaml, null);
@@ -21,9 +58,18 @@ namespace A2v10.System.Xaml.Tests
 			var btn= obj as Button;
 			Assert.AreEqual("Text", btn.Content);
 
+			var icon = btn.GetBinding("Icon");
+			Assert.AreEqual(typeof(Bind), icon.GetType());
+			Assert.AreEqual("Icon", icon.Path);
+
 			var cmd = btn.GetBindingCommand("Command");
 			Assert.AreEqual(typeof(BindCmd), cmd.GetType());
 			Assert.AreEqual("Execute", cmd.Command.ToString());
+			Assert.AreEqual("File", cmd.CommandName);
+
+			var arg = cmd.GetBinding("Argument");
+			Assert.AreEqual(typeof(Bind), arg.GetType());
+			Assert.AreEqual("Text", arg.Path);
 		}
 	}
 }

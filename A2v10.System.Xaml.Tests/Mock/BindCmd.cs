@@ -20,6 +20,7 @@ namespace A2v10.System.Xaml.Tests.Mock
 	{
 		public CommandType Command { get; set; }
 		public String Argument { get; set; }
+		public String CommandName { get; set; }
 
 		public BindCmd()
 		{

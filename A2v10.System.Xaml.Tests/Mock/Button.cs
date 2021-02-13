@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace A2v10.System.Xaml.Tests.Mock
 {
+	public enum Icon
+	{
+		Undefined,
+		File,
+		Folder
+	}
+
 	public class Button : ISupportBinding, ISupportInitialize
 	{
 		public String Content { get; set; }
@@ -20,6 +27,8 @@ namespace A2v10.System.Xaml.Tests.Mock
 		{
 			return _bindImpl?.GetBinding(name);
 		}
+
+		public Icon Icon { get; set; }
 
 		public BindCmd GetBindingCommand(string name)
 		{

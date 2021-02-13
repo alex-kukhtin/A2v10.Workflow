@@ -20,6 +20,5 @@
 Xaml
 ----
 2. TypeConverters
-4. MarkupExtension - реальный парсинг
 8. IUriContext
 9. 
