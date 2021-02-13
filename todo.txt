@@ -20,4 +20,6 @@
 Xaml
 ----
 2. TypeConverters
-3. MarkupExtensions (disable for bpmn)
+4. MarkupExtension - реальный парсинг
+5. MarkupExtension - попробовать вложенные.
+7.

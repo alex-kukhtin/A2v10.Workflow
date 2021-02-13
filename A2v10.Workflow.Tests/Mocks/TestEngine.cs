@@ -33,6 +33,7 @@ namespace A2v10.Workflow.Tests
 			collection.AddSingleton<ISerializer, Serializer>();
 			collection.AddScoped<IWorkflowEngine, WorkflowEngine>();
 			collection.AddScoped<ITracker, ConsoleTracker>();
+			collection.AddScoped<IDeferredTarget, WorkflowDeferred>();
 
 			_provider = collection.BuildServiceProvider();
 

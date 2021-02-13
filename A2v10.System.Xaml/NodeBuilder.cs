@@ -7,11 +7,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+using System.Windows.Markup;
+
 namespace A2v10.System.Xaml
 {
 
 	public record PropDefinition
 	{
+		public PropertyInfo PropertyInfo { get; init; }
 		public Type Type { get; init; }
 		public Func<Object> Constructor { get; init; }
 		public Action<Object, Object> AddMethod { get; init; }
@@ -19,85 +22,6 @@ namespace A2v10.System.Xaml
 		public Func<String, Object> ScalarConvert { get; init; }
 	}
 
-	public record NodeDefinition
-	{
-		public String ClassName { get; init; }
-		public Func<XamlNode, NodeDefinition, Object> Lambda { get; init; }
-		public Dictionary<String, PropDefinition> Properties { get; init; }
-		public String ContentProperty { get; init; }
-		public Func<XamlNode, Object> BuildNode { get; init; }
-		public Type NodeType { get; init; }
-		public Boolean IsCamelCase { get; init; }
-
-		public Object BuildProperty(String name, Object value)
-		{
-			name = MakeName(name);
-			if (!Properties.TryGetValue(name, out PropDefinition propDef))
-				throw new XamlReadException($"Property {name} not found in type {ClassName}");
-			if (value == null)
-				return null;
-			if (value.GetType() == propDef.Type)
-				return value;
-			if (propDef.EnumConvert != null)
-				return propDef.EnumConvert(value.ToString());
-			if (propDef.ScalarConvert != null)
-				return propDef.ScalarConvert(value.ToString());
-			throw new NotImplementedException($"Property {name}");
-		}
-
-		public Object BuildPropertyNode(NodeBuilder builder, String name, XamlNode node)
-		{
-			if (!Properties.TryGetValue(name, out PropDefinition propDef))
-				throw new XamlReadException($"Property {name} not found");
-			if (node == null)
-				return null;
-			if (propDef.Constructor != null)
-			{
-				var obj = propDef.Constructor();
-				if (propDef.AddMethod != null)
-				{
-					if (node.HasChildren)
-						foreach (var nd in node.Children.Value)
-							propDef.AddMethod(obj, builder.BuildNode(nd));
-				}
-				return obj;
-			}
-			else if (propDef.EnumConvert != null)
-				return propDef.EnumConvert(node.TextContent);
-			else if (propDef.ScalarConvert != null)
-			{
-				var nval = GetNodeValue(builder, node);
-				if (nval.GetType() == propDef.Type)
-					return nval;
-				return propDef.ScalarConvert(nval?.ToString());
-			}
-			else
-				return GetNodeValue(builder, node);
-		}
-
-		static Object GetNodeValue(NodeBuilder builder, XamlNode node)
-		{
-			if (!node.HasChildren)
-				return node.TextContent;
-			if (node.Name.Contains('.'))
-			{
-				var ch = node.Children.Value[0];
-				return builder.BuildNode(ch);
-			}
-			return node.TextContent;
-		}
-
-		public String MakeName(String name)
-		{
-			if (IsCamelCase)
-			{
-				// source: camelCase
-				// code: PascalCase
-				return name.ToPascalCase();
-			}
-			return name;
-		}
-	}
 
 	public class NamespaceDefinition
 	{
@@ -118,6 +42,8 @@ namespace A2v10.System.Xaml
 	{
 		private static readonly MethodInfo _getNodePropertyValue =
 			typeof(XamlNode).GetMethod("GetPropertyValue", BindingFlags.Public | BindingFlags.Instance);
+		private static readonly MethodInfo _initCreatedElement =
+			typeof(XamlNode).GetMethod("InitCreatedElement", BindingFlags.Public | BindingFlags.Instance);
 		private static readonly MethodInfo _enumParse =
 			typeof(Enum).GetMethod("Parse", new Type[] { typeof(Type), typeof(String) });
 		private static readonly MethodInfo _convertChangeType =
@@ -141,6 +67,8 @@ namespace A2v10.System.Xaml
 			value = value.ToLowerInvariant();
 			return _options.Namespaces.FirstOrDefault(x => x.Name == value);
 		}
+
+		public Boolean EnableMarkupExtensions => _options == null || !_options.DisableMarkupExtensions;
 
 		private static readonly Regex _namespaceRegEx = new Regex(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
 
@@ -177,8 +105,15 @@ namespace A2v10.System.Xaml
 			}
 		}
 
-		private static PropDefinition BuildPropertyDefinition(Type propType)
+		public MarkupExtension ParseExtension(String value)
 		{
+			var node = ExtensionParser.Parse(this, value);
+			return BuildNode(node) as MarkupExtension;
+		}
+
+		private static PropDefinition BuildPropertyDefinition(PropertyInfo propInfo)
+		{
+			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
 			Action<Object, Object> addMethod = null;
 			Func<String, Object> enumConvert = null;
@@ -240,6 +175,7 @@ namespace A2v10.System.Xaml
 
 			return new PropDefinition()
 			{
+				PropertyInfo = propInfo,
 				Type = propType,
 				Constructor = ctor,
 				AddMethod = addMethod,
@@ -269,7 +205,7 @@ namespace A2v10.System.Xaml
 			var propDefs = new Dictionary<String, PropDefinition>();
 			foreach (var prop in props.Where(p => p.CanWrite))
 			{
-				propDefs.Add(prop.Name, BuildPropertyDefinition(prop.PropertyType));
+				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
 
 				// (T) GetPropertyValue(propName, propType, nodeDef) ?? default<T>
 				inits.Add(Expression.Bind(prop,
@@ -293,9 +229,10 @@ namespace A2v10.System.Xaml
 			{
 				var newExpr = Expression.New(ctor);
 				var expr = Expression.MemberInit(newExpr, inits);
+				var init = Expression.Call(param, _initCreatedElement, expr);
 
 				// lambda
-				lambda = Expression.Lambda<Func<XamlNode, NodeDefinition, Object>>(expr, param, nodeDef).Compile();
+				lambda = Expression.Lambda<Func<XamlNode, NodeDefinition, Object>>(init/*expr*/, param, nodeDef).Compile();
 			}
 
 			return new NodeDefinition()
@@ -304,6 +241,7 @@ namespace A2v10.System.Xaml
 				Lambda = lambda,
 				Properties = propDefs,
 				ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
+				DefaultProperty = nodeType.GetCustomAttribute<DefaultPropertyAttribute>()?.Name,
 				BuildNode = this.BuildNode,
 				NodeType = nodeType,
 				IsCamelCase = namePair.IsCamelCase

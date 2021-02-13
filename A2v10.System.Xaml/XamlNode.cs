@@ -1,21 +1,31 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
+using System.Windows.Markup;
 
 namespace A2v10.System.Xaml
 {
+	public record XamlExtenesionElem(PropertyInfo PropertyInfo, MarkupExtension Element);
+
 	public class XamlNode
 	{
 		public String Name { get; init; }
 		public String TextContent { get; set; }
 
+		private String _ctorArgument;
+
 		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
 		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
+		public readonly List<XamlExtenesionElem> Extensions = new List<XamlExtenesionElem>();
 
 		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
 
 		public Object GetPropertyValue(String propName, Type propType, NodeDefinition nodeDef)
 		{
+			if (propName == nodeDef.DefaultProperty)
+				return _ctorArgument;
 			if (Properties.TryGetValue(propName, out Object val))
 			{
 				if (val == null)
@@ -30,6 +40,29 @@ namespace A2v10.System.Xaml
 			if (nodeDef.ContentProperty == propName)
 				return GetContentProperty(nodeDef);
 			return null;
+		}
+
+		public Object InitCreatedElement(Object elem)
+		{
+			if (Extensions.Count > 0)
+			{
+				var provider = new XamlServiceProvider();
+				var valueTarget = new XamlProvideValueTarget();
+				provider.AddService<IProvideValueTarget>(valueTarget);
+
+				valueTarget.TargetObject = elem;
+				foreach (var ext in Extensions)
+				{
+					valueTarget.TargetProperty = ext.PropertyInfo;
+					ext.Element.ProvideValue(provider);
+				}
+			}
+			if (elem is ISupportInitialize init)
+			{
+				init.BeginInit();
+				init.EndInit();
+			}
+			return elem;
 		}
 
 		public Object GetContentProperty(NodeDefinition nodeDef)
@@ -102,7 +135,15 @@ namespace A2v10.System.Xaml
 		{
 			var propName = builder.QualifyPropertyName(name);
 			var nd = builder.GetNodeDefinition(Name);
-			Properties.Add(nd.MakeName(name), nd.BuildProperty(propName, value));
+			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
+				Extensions.Add(new XamlExtenesionElem(nd.GetPropertyInfo(nd.MakeName(name)), builder.ParseExtension(value)));
+			else
+				Properties.Add(nd.MakeName(name), nd.BuildProperty(propName, value));
+		}
+
+		public void AddConstructorArgument(String value)
+		{
+			_ctorArgument = value;
 		}
 	}
 }
