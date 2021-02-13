@@ -13,7 +13,13 @@ namespace A2v10.System.Xaml
 			return Load(xmlrdr, options);
 		}
 
-		static Object Load(XmlReader rdr, XamlServicesOptions options = null)
+		public static Object Load(Stream stream, XamlServicesOptions options = null)
+		{
+			var xaml = new XamlReader(XmlReader.Create(stream), options);
+			return xaml.Read();
+		}
+
+		public static Object Load(XmlReader rdr, XamlServicesOptions options = null)
 		{
 			var xaml = new XamlReader(rdr, options);
 			return xaml.Read();

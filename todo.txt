@@ -19,6 +19,10 @@
 
 Xaml
 ----
-2. TypeConverters
-8. IUriContext
-9. 
+2.  TypeConverters
+8.  IUriContext
+9.  Binding as Nested objects <Button.Command><BindCmd />
+10. Attached properties
+11. x: namespace
+12. Dictionary collections
+13. 

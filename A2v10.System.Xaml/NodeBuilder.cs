@@ -18,6 +18,7 @@ namespace A2v10.System.Xaml
 		public Type Type { get; init; }
 		public Func<Object> Constructor { get; init; }
 		public Action<Object, Object> AddMethod { get; init; }
+		public Action<Object, String, Object> AddDictionaryMethod { get; init; }
 		public Func<String, Object> EnumConvert { get; init; }
 		public Func<String, Object> ScalarConvert { get; init; }
 	}
@@ -116,6 +117,7 @@ namespace A2v10.System.Xaml
 			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
 			Action<Object, Object> addMethod = null;
+			Action<Object, String, Object> addDictionaryMethod = null;
 			Func<String, Object> enumConvert = null;
 			Func<String, Object> scalarConvert = null;
 			if (propType.IsEnum)
@@ -146,31 +148,56 @@ namespace A2v10.System.Xaml
 			else if (propType != typeof(String))
 			{
 				var propCtor = propType.GetConstructor(Array.Empty<Type>());
-				ctor = Expression.Lambda<Func<Object>>(Expression.New(propCtor)).Compile();
+				if (propCtor != null)
+					ctor = Expression.Lambda<Func<Object>>(Expression.New(propCtor)).Compile();
 			}
 			var mtdAdd = propType.GetMethod("Add");
 			if (mtdAdd != null)
 			{
 				var args = mtdAdd.GetParameters();
-				if (args.Length != 1)
-					throw new XamlReadException("Invalid argument count for Add parameter");
-				var argType = args[0].ParameterType;
+				if (args.Length == 1)
+				{
+					var argType = args[0].ParameterType;
 
-				var argPrm = Expression.Parameter(typeof(Object));
-				var inst = Expression.Parameter(typeof(Object));
+					var argPrm = Expression.Parameter(typeof(Object));
+					var inst = Expression.Parameter(typeof(Object));
 
-				addMethod = Expression.Lambda<Action<Object, Object>>(
-					Expression.Call(
-						Expression.Convert(inst, propType),
-						mtdAdd,
-						Expression.Convert(
-							argPrm,
-							argType
-						)
-					),
-					inst,
-					argPrm
-				).Compile();
+					addMethod = Expression.Lambda<Action<Object, Object>>(
+						Expression.Call(
+							Expression.Convert(inst, propType),
+							mtdAdd,
+							Expression.Convert(
+								argPrm,
+								argType
+							)
+						),
+						inst,
+						argPrm
+					).Compile();
+				}
+				else if (args.Length == 2)
+				{
+					// dictionary
+					var argType = args[1].ParameterType;
+					var argPrm = Expression.Parameter(typeof(Object));
+					var inst = Expression.Parameter(typeof(Object));
+					var argKey = Expression.Parameter(typeof(String));
+
+					addDictionaryMethod = Expression.Lambda<Action<Object, String, Object>>(
+						Expression.Call(
+							Expression.Convert(inst, propType),
+							mtdAdd,
+							argKey,
+							Expression.Convert(
+								argPrm,
+								argType
+							)
+						),
+						inst,
+						argKey,
+						argPrm
+					).Compile();
+				}
 			}
 
 			return new PropDefinition()
@@ -179,6 +206,7 @@ namespace A2v10.System.Xaml
 				Type = propType,
 				Constructor = ctor,
 				AddMethod = addMethod,
+				AddDictionaryMethod = addDictionaryMethod,
 				EnumConvert = enumConvert,
 				ScalarConvert = scalarConvert
 			};

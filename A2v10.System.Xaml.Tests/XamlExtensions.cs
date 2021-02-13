@@ -71,5 +71,31 @@ namespace A2v10.System.Xaml.Tests
 			Assert.AreEqual(typeof(Bind), arg.GetType());
 			Assert.AreEqual("Text", arg.Path);
 		}
+
+		[TestMethod]
+		public void NestedObjectBinding()
+		{
+			string xaml = @"
+<Button xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"" 
+	Content=""Text"">
+	<Button.Command>
+		<BindCmd Command=""Execute"" CommandName=""File""/>
+	</Button.Command>
+</Button>
+";
+			var obj = XamlServices.Parse(xaml, null);
+
+			Assert.AreEqual(typeof(Button), obj.GetType());
+			var btn = obj as Button;
+			Assert.AreEqual("Text", btn.Content);
+
+			var cmd = btn.GetBindingCommand("Command");
+			/*
+			Assert.AreEqual(typeof(BindCmd), cmd.GetType());
+			Assert.AreEqual("Execute", cmd.Command.ToString());
+			Assert.AreEqual("File", cmd.CommandName);
+			*/
+		}
+
 	}
 }

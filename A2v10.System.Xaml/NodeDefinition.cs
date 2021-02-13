@@ -29,7 +29,7 @@ namespace A2v10.System.Xaml
 				return propDef.EnumConvert(value.ToString());
 			if (propDef.ScalarConvert != null)
 				return propDef.ScalarConvert(value.ToString());
-			throw new NotImplementedException($"Property {name}");
+			throw new NotImplementedException($"Property {name} not implemented");
 		}
 
 		public Object BuildPropertyNode(NodeBuilder builder, String name, XamlNode node)
