@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 
 namespace A2v10.System.Xaml
@@ -14,6 +16,7 @@ namespace A2v10.System.Xaml
 		public Func<XamlNode, Object> BuildNode { get; init; }
 		public Type NodeType { get; init; }
 		public Boolean IsCamelCase { get; init; }
+		public object CulutureInfo { get; private set; }
 
 		public Object BuildProperty(String name, Object value)
 		{
@@ -22,13 +25,25 @@ namespace A2v10.System.Xaml
 				throw new XamlReadException($"Property {name} not found in type {ClassName}");
 			if (value == null)
 				return null;
-			if (value.GetType() == propDef.Type)
+			if (value.GetType() == propDef.Type || propDef.Type == typeof(Object))
 				return value;
 			if (propDef.EnumConvert != null)
 				return propDef.EnumConvert(value.ToString());
 			if (propDef.ScalarConvert != null)
 				return propDef.ScalarConvert(value.ToString());
+			if (propDef.TypeConverter != null)
+			{
+				var conv = propDef.TypeConverter();
+				return TryConvertValue(conv, value);
+			}
 			throw new NotImplementedException($"Property {name} not implemented");
+		}
+
+		private Object TryConvertValue(TypeConverter conv, Object value)
+		{
+			if (conv.CanConvertFrom(value.GetType()))
+				return conv.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+			throw new InvalidCastException($"Unable to convert {value} by {conv.GetType()}");
 		}
 
 		public Object BuildPropertyNode(NodeBuilder builder, String name, XamlNode node)

@@ -29,6 +29,8 @@ namespace A2v10.System.Xaml
 					return null;
 				if (val.GetType() == (Nullable.GetUnderlyingType(propType) ?? propType))
 					return val;
+				if (propType == typeof(Object))
+					return val;
 				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
 			}
 			if (_ctorArgument != null && propName == nodeDef.DefaultProperty)
@@ -144,6 +146,11 @@ namespace A2v10.System.Xaml
 			var nd = builder.GetNodeDefinition(Name);
 			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
 				Extensions.Add(new XamlExtenesionElem(nd.GetPropertyInfo(nd.MakeName(name)), builder.ParseExtension(value)));
+			else if (propName.Contains('.'))
+			{
+				; // attached properties
+				int z = 55;
+			} 
 			else
 				Properties.Add(nd.MakeName(name), nd.BuildProperty(propName, value));
 		}

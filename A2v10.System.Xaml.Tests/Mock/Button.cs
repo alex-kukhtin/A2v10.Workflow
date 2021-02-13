@@ -28,6 +28,8 @@ namespace A2v10.System.Xaml.Tests.Mock
 			return _bindImpl?.GetBinding(name);
 		}
 
+		public Thickness Padding { get; set; }
+
 		public Icon Icon { get; set; }
 
 		public BindCmd GetBindingCommand(string name)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -19,6 +20,7 @@ namespace A2v10.System.Xaml
 		public Action<Object, String, Object> AddDictionaryMethod { get; init; }
 		public Func<String, Object> EnumConvert { get; init; }
 		public Func<String, Object> ScalarConvert { get; init; }
+		public Func<TypeConverter> TypeConverter { get; init; }
 	}
 
 
@@ -76,6 +78,9 @@ namespace A2v10.System.Xaml
 			if (value == "http://schemas.microsoft.com/winfx/2006/xaml")
 			{
 				// xaml namespace for x:Key, etc
+				_namespaces.Add(prefix, new NamespaceDefinition()
+				{
+				});
 				return;
 			}
 			var nsddef = IsCustomNamespace(value);
@@ -118,6 +123,8 @@ namespace A2v10.System.Xaml
 			Action<Object, String, Object> addDictionaryMethod = null;
 			Func<String, Object> enumConvert = null;
 			Func<String, Object> scalarConvert = null;
+			Func<TypeConverter> typeConverter = null;
+
 			if (propType.IsEnum)
 			{
 				var parsePrm = Expression.Parameter(typeof(String));
@@ -148,6 +155,11 @@ namespace A2v10.System.Xaml
 				var propCtor = propType.GetConstructor(Array.Empty<Type>());
 				if (propCtor != null)
 					ctor = Expression.Lambda<Func<Object>>(Expression.New(propCtor)).Compile();
+				var conv = propType.GetCustomAttribute<TypeConverterAttribute>();
+				if (conv != null) {
+					var convCtor = Type.GetType(conv.ConverterTypeName).GetConstructor(Array.Empty<Type>());
+					typeConverter = Expression.Lambda<Func<TypeConverter>>(Expression.New(convCtor)).Compile();
+				}
 			}
 			var mtdAdd = propType.GetMethod("Add");
 			if (mtdAdd != null)
@@ -203,6 +215,7 @@ namespace A2v10.System.Xaml
 				PropertyInfo = propInfo,
 				Type = propType,
 				Constructor = ctor,
+				TypeConverter = typeConverter,
 				AddMethod = addMethod,
 				AddDictionaryMethod = addDictionaryMethod,
 				EnumConvert = enumConvert,

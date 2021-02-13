@@ -185,7 +185,7 @@ namespace A2v10.System.Xaml
 					break;
 				default:
 					_tokenType = TokenType.Ider;
-					while (Char.IsLetterOrDigit(_ch) && _ch != NULL_CHAR)
+					while (!Char.IsWhiteSpace(_ch) && _ch != ',' && _ch != '=' && _ch != '}' && _ch != '{' && _ch != NULL_CHAR)
 						NextChar();
 					_tokenStart = tokPos;
 					_tokenLen = _pos - tokPos;
