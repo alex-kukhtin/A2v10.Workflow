@@ -19,6 +19,11 @@ namespace A2v10.System.Xaml
 				return value;
 			if (value.GetType() == (Nullable.GetUnderlyingType(type) ?? type))
 				return value;
+			
+			type = Nullable.GetUnderlyingType(type) ?? type;
+
+			if (type.IsEnum)
+				return Enum.Parse(type, value.ToString());
 			var conv = type.GetCustomAttribute<TypeConverterAttribute>();
 			if (conv != null)
 			{
@@ -27,7 +32,7 @@ namespace A2v10.System.Xaml
 				if (typeConverter.CanConvertFrom(value.GetType()))
 					return typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
 			}
-			return Convert.ChangeType(value, type);
+			return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
 		}
 	}
 }

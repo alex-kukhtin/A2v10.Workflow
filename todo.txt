@@ -26,7 +26,6 @@ Xaml
 11. x: namespace
 12. Dictionary collections
 13. ??? TypeCache static ????
-14. Elements with [ContentProperty("Children")] as collection
 15. Multiply OnEndInit???
-16. Try Expression.NewArrayInit
-17. Try Expression.ElementInit for dictionary
+20. Merge NodeDefinition & NodeDescriptor
+21. 

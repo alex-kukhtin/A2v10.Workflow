@@ -101,7 +101,6 @@ namespace A2v10.System.Xaml.Tests.Mock
 		}
 	}
 
-	[DefaultProperty("Path")]
 	public class Bind : BindBase, ISupportInitialize
 	{
 		public String Path { get; set; }

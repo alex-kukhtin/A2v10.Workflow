@@ -8,15 +8,32 @@ namespace A2v10.System.Xaml
 	public class TypeDescriptor
 	{
 		public String TypeName {get; init;}
+		public Type NodeType { get; init; }
+
 		public Func<Object> Constructor { get; init; }
 		public Func<String, Object> ConstructorString { get; init; }
+
 		public Dictionary<String, PropertyInfo> Properties { get; init; }
 
 		public String ContentProperty { get; init; }
-		public String DefaultProperty { get; init; }
 
 		public MethodInfo AddCollection1 { get; init; }
-		public MethodInfo AddCollection2 { get; init; }
+		public Boolean IsCamelCase { get; init; }
+
+		public Func<XamlNode, Object> BuildNode { get; init; }
+
+		//public MethodInfo AddCollection2 { get; init; }
+
+		public String MakeName(String name)
+		{
+			if (IsCamelCase)
+			{
+				// source: camelCase
+				// code: PascalCase
+				return name.ToPascalCase();
+			}
+			return name;
+		}
 
 		public void SetPropertyValue(Object instance, String name, Object value)
 		{
@@ -33,7 +50,11 @@ namespace A2v10.System.Xaml
 			if (String.IsNullOrEmpty(content))
 				return;
 			if (!Properties.TryGetValue(ContentProperty, out PropertyInfo contProp))
+			{
+				// May be readonly collection?
 				throw new XamlException($"Property {ContentProperty} not found in type {TypeName}");
+			}
+			// TODO: GetTypeDescriptor for contProp.PropertyType. May be collection?
 			var val = PropertyConvertor.ConvertValue(content, contProp.PropertyType);
 			contProp.SetValue(instance, val);
 		}
@@ -42,6 +63,11 @@ namespace A2v10.System.Xaml
 		{
 			if (!Properties.TryGetValue(ContentProperty, out PropertyInfo contProp))
 				return;
+			if (contProp.PropertyType.IsPrimitive || contProp.PropertyType == typeof(Object))
+			{
+				contProp.SetValue(instance, elem);
+				return;
+			}
 			var contObj = contProp.GetValue(instance);
 			if (contObj == null)
 			{
@@ -51,12 +77,6 @@ namespace A2v10.System.Xaml
 			}
 			if (AddCollection1 != null)
 				AddCollection1.Invoke(contObj, new Object[] { elem });
-		}
-
-		public void AddExtension(Object instance, XamlExtensionElem ext)
-		{
-			//IProvideValueTarget
-			//int z = 55;
 		}
 	}
 }

@@ -14,7 +14,6 @@ namespace A2v10.System.Xaml.Tests.Mock
 		Run
 	}
 
-	[DefaultProperty("Command")]
 	public class BindCmd : BindBase
 	{
 		public CommandType Command { get; set; }

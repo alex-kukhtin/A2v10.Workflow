@@ -23,48 +23,6 @@ namespace A2v10.System.Xaml
 
 		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
 
-		public Object GetContentProperty(NodeDefinition nodeDef)
-		{
-			// set children as content
-			if (!nodeDef.Properties.TryGetValue(nodeDef.ContentProperty, out PropDefinition propDef))
-				throw new XamlReadException($"Property definition for property '{nodeDef.ContentProperty}' not found.");
-			return GetPropertyValue(nodeDef, propDef);
-		}
-
-		private Object GetPropertyValue(NodeDefinition nodeDef, PropDefinition propDef)
-		{ 
-			if (propDef.Constructor == null)
-			{
-				// ContentProperty for text
-				return TextContent;
-			}
-
-			if (!HasChildren)
-			{
-				if (String.IsNullOrEmpty(TextContent))
-					return null;
-
-				// TextContent as Property
-				if (propDef.TypeConverter != null) {
-					var conv = propDef.TypeConverter();
-					if (conv.CanConvertFrom(typeof(String)))
-						return conv.ConvertFrom(null, CultureInfo.InvariantCulture, TextContent);
-				}
-				return null;
-			}
-			if (propDef.AddMethod == null)
-			{
-				foreach (var c in Children.Value)
-					return nodeDef.BuildNode(c); // return first chilren
-			}
-			var propObj = propDef.Constructor();
-			foreach (var c in Children.Value)
-			{
-				propDef.AddMethod(propObj, nodeDef.BuildNode(c));
-			}
-			return propObj;
-		}
-
 		public void SetContent(String text)
 		{
 			TextContent = text;
@@ -94,9 +52,23 @@ namespace A2v10.System.Xaml
 			}
 		}
 
+		public static Object GetNodeValue(NodeBuilder builder, XamlNode node)
+		{
+			if (!node.HasChildren)
+				return node.TextContent;
+			if (node.Name.Contains('.'))
+			{
+				var ch = node.Children.Value[0];
+				return builder.BuildNode(ch);
+			}
+			return node.TextContent;
+		}
+
+
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			var nd = builder.GetNodeDefinition(Name);
+			//var td = builder.GetNodeDescriptor(Name);
 			Properties.Add(nd.MakeName(name), nd.BuildPropertyNode(builder, name, node));
 		}
 
@@ -105,14 +77,14 @@ namespace A2v10.System.Xaml
 			var propName = builder.QualifyPropertyName(name);
 			var nd = builder.GetNodeDefinition(Name);
 			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
-				Extensions.Add(new XamlExtensionElem(nd.GetPropertyInfo(nd.MakeName(name)), builder.ParseExtension(value)));
+				Extensions.Add(new XamlExtensionElem(nd.GetPropertyInfo(nd.MakeName(propName)), builder.ParseExtension(value)));
 			else if (propName.Contains('.'))
 			{
 				; // attached properties
 				int z = 55;
-			} 
+			}
 			else
-				Properties.Add(nd.MakeName(name), nd.BuildProperty(propName, value));
+				Properties.Add(nd.MakeName(propName), value); // nd.BuildProperty(propName, value));
 		}
 
 		public void AddConstructorArgument(String value)

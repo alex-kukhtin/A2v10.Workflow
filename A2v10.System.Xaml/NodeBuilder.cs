@@ -18,8 +18,6 @@ namespace A2v10.System.Xaml
 		public Func<Object> Constructor { get; init; }
 		public Action<Object, Object> AddMethod { get; init; }
 		public Action<Object, String, Object> AddDictionaryMethod { get; init; }
-		public Func<String, Object> EnumConvert { get; init; }
-		public Func<String, Object> ScalarConvert { get; init; }
 		public Func<TypeConverter> TypeConverter { get; init; }
 	}
 
@@ -118,37 +116,9 @@ namespace A2v10.System.Xaml
 			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
 			Action<Object, Object> addMethod = null;
-			Action<Object, String, Object> addDictionaryMethod = null;
-			Func<String, Object> enumConvert = null;
-			Func<String, Object> scalarConvert = null;
 			Func<TypeConverter> typeConverter = null;
 
-			if (propType.IsEnum)
-			{
-				var parsePrm = Expression.Parameter(typeof(String));
-				enumConvert = Expression.Lambda<Func<String, Object>>(
-					Expression.Call(_enumParse,
-						Expression.Constant(propType),
-						parsePrm
-					),
-					parsePrm
-				).Compile();
-			}
-			else if (propType.IsPrimitive || propType.IsValueType)
-			{
-				var invCulture = typeof(CultureInfo).GetProperty("InvariantCulture");
-				var convertPrm = Expression.Parameter(typeof(Object));
-				var convertType = Nullable.GetUnderlyingType(propType) ?? propType;
-				scalarConvert = Expression.Lambda<Func<String, Object>>(
-					Expression.Call(_convertChangeType,
-						convertPrm,
-						Expression.Constant(convertType),
-						Expression.Property(null, invCulture)
-					),
-					convertPrm
-				).Compile();
-			}
-			else if (propType != typeof(String))
+			if (propType != typeof(String))
 			{
 				var propCtor = propType.GetConstructor(Array.Empty<Type>());
 				if (propCtor != null)
@@ -183,41 +153,16 @@ namespace A2v10.System.Xaml
 						argPrm
 					).Compile();
 				}
-				else if (args.Length == 2)
-				{
-					// dictionary
-					var argType = args[1].ParameterType;
-					var argPrm = Expression.Parameter(typeof(Object));
-					var inst = Expression.Parameter(typeof(Object));
-					var argKey = Expression.Parameter(typeof(String));
-
-					addDictionaryMethod = Expression.Lambda<Action<Object, String, Object>>(
-						Expression.Call(
-							Expression.Convert(inst, propType),
-							mtdAdd,
-							argKey,
-							Expression.Convert(
-								argPrm,
-								argType
-							)
-						),
-						inst,
-						argKey,
-						argPrm
-					).Compile();
-				}
 			}
 
 			return new PropDefinition()
 			{
 				PropertyInfo = propInfo,
-				Type = propType,
+				//Type = propType,
 				Constructor = ctor,
 				TypeConverter = typeConverter,
 				AddMethod = addMethod,
-				AddDictionaryMethod = addDictionaryMethod,
-				EnumConvert = enumConvert,
-				ScalarConvert = scalarConvert
+				//AddDictionaryMethod = addDictionaryMethod,
 			};
 		}
 
@@ -229,9 +174,11 @@ namespace A2v10.System.Xaml
 			var nodeType = nsd.Assembly.GetType(typeName);
 			if (nodeType == null)
 				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
-
-			var constructor = Expression.Lambda<Func<Object>>(Expression.New(nodeType)).Compile();
+			Func<Object> constructor = null;
 			Func<String, Object> constructorStr = null;
+			var ctor0 = nodeType.GetConstructor(Array.Empty<Type>());
+			if (ctor0 != null)
+				constructor = Expression.Lambda<Func<Object>>(Expression.New(nodeType)).Compile();
 			var ctorStr = nodeType.GetConstructor(new Type[] { typeof(String) });
 			if (ctorStr != null)
 			{
@@ -266,14 +213,16 @@ namespace A2v10.System.Xaml
 
 			return new TypeDescriptor()
 			{
+				NodeType = nodeType,
 				TypeName = typeName,
+				IsCamelCase = namePair.IsCamelCase,
+				BuildNode = this.BuildNode,
 				Constructor = constructor,
 				ConstructorString = constructorStr,
 				Properties = props.Where(p => p.CanWrite).ToDictionary(p => p.Name),
 				ContentProperty = contentProperty,
-				DefaultProperty = nodeType.GetCustomAttribute<DefaultPropertyAttribute>()?.Name,
 				AddCollection1 = addCollection1,
-				AddCollection2 = addCollection2
+				//AddCollection2 = addCollection2
 			};
 		}
 
@@ -298,12 +247,10 @@ namespace A2v10.System.Xaml
 
 			return new NodeDefinition()
 			{
-				ClassName = namePair.ClassName,
+				//ClassName = namePair.ClassName,
 				Properties = propDefs,
-				ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
-				DefaultProperty = nodeType.GetCustomAttribute<DefaultPropertyAttribute>()?.Name,
-				BuildNode = this.BuildNode,
-				NodeType = nodeType,
+				//ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
+				//BuildNode = this.BuildNode,
 				IsCamelCase = namePair.IsCamelCase
 			};
 		}
@@ -400,10 +347,14 @@ namespace A2v10.System.Xaml
 			Object obj = null;
 			if (node.ConstructorArgument != null)
 				obj = nd.ConstructorString(node.ConstructorArgument);
-			else
+			else if (nd.Constructor != null)
 				obj = nd.Constructor();
+			else
+				return Convert.ChangeType(node.TextContent, nd.NodeType); // Simple string ????
+
 			if (!String.IsNullOrEmpty(node.TextContent))
 				nd.SetTextContent(obj, node.TextContent);
+
 			foreach (var (propKey, propValue) in node.Properties)
 			{
 				nd.SetPropertyValue(obj, propKey, propValue);
@@ -418,30 +369,22 @@ namespace A2v10.System.Xaml
 			}
 			if (node.Extensions != null)
 			{
-				foreach (var n in node.Extensions)
+				var provider = new XamlServiceProvider();
+				var valueTarget = new XamlProvideValueTarget();
+				provider.AddService<IProvideValueTarget>(valueTarget);
+				valueTarget.TargetObject = obj;
+				foreach (var ext in node.Extensions)
 				{
-					nd.AddExtension(obj, n);
+					valueTarget.TargetProperty = ext.PropertyInfo;
+					ext.Element.ProvideValue(provider);
 				}
 			}
-			/*
-			//var nd = GetNodeDefinition(node.Name);
-			if (nd.Lambda != null)
-				return nd.Lambda(node, nd);
-			else
-				return GetSimpleTypeValue(nd, node);
-			*/
+
+			if (obj is ISupportInitialize init) {
+				init.BeginInit();
+				init.EndInit();
+			}
 			return obj;
-		}
-
-		static Object GetSimpleTypeValue(NodeDefinition nd, XamlNode node)
-		{
-			if (nd.NodeType == typeof(String))
-				return node.TextContent;
-			else if (nd.NodeType == typeof(Int32))
-				return Int32.Parse(node.TextContent, CultureInfo.InvariantCulture);
-			else
-				throw new XamlReadException($"Unsupported simple type '{nd.NodeType.Name}'");
-
 		}
 	}
 }
