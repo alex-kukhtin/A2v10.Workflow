@@ -13,7 +13,7 @@ namespace A2v10.System.Xaml
 		public Func<Object> Constructor { get; init; }
 		public Func<String, Object> ConstructorString { get; init; }
 
-		public Dictionary<String, PropertyInfo> Properties { get; init; }
+		public Dictionary<String, PropDefinition> Properties { get; init; }
 
 		public String ContentProperty { get; init; }
 
@@ -37,8 +37,9 @@ namespace A2v10.System.Xaml
 
 		public void SetPropertyValue(Object instance, String name, Object value)
 		{
-			if (!Properties.TryGetValue(name, out PropertyInfo propInfo))
+			if (!Properties.TryGetValue(name, out PropDefinition propDef))
 				throw new XamlException($"Property {name} not found in type {TypeName}");
+			var propInfo = propDef.PropertyInfo;
 			var val = PropertyConvertor.ConvertValue(value, propInfo.PropertyType);
 			propInfo.SetValue(instance, val);
 		}
@@ -49,11 +50,12 @@ namespace A2v10.System.Xaml
 				throw new XamlException($"ContentProperty not found in type {TypeName}");
 			if (String.IsNullOrEmpty(content))
 				return;
-			if (!Properties.TryGetValue(ContentProperty, out PropertyInfo contProp))
+			if (!Properties.TryGetValue(ContentProperty, out PropDefinition countDef))
 			{
 				// May be readonly collection?
 				throw new XamlException($"Property {ContentProperty} not found in type {TypeName}");
 			}
+			var contProp = countDef.PropertyInfo;
 			// TODO: GetTypeDescriptor for contProp.PropertyType. May be collection?
 			var val = PropertyConvertor.ConvertValue(content, contProp.PropertyType);
 			contProp.SetValue(instance, val);
@@ -61,8 +63,9 @@ namespace A2v10.System.Xaml
 
 		public void AddChildren(Object instance, Object elem)
 		{
-			if (!Properties.TryGetValue(ContentProperty, out PropertyInfo contProp))
+			if (!Properties.TryGetValue(ContentProperty, out PropDefinition contDef))
 				return;
+			var contProp = contDef.PropertyInfo;
 			if (contProp.PropertyType.IsPrimitive || contProp.PropertyType == typeof(Object))
 			{
 				contProp.SetValue(instance, elem);
@@ -77,6 +80,34 @@ namespace A2v10.System.Xaml
 			}
 			if (AddCollection1 != null)
 				AddCollection1.Invoke(contObj, new Object[] { elem });
+		}
+
+		public Object BuildPropertyNode(NodeBuilder builder, String name, XamlNode node)
+		{
+			if (!Properties.TryGetValue(name, out PropDefinition propDef))
+				throw new XamlReadException($"Property {name} not found");
+			if (node == null)
+				return null;
+			if (propDef.Constructor != null)
+			{
+				var obj = propDef.Constructor();
+				if (propDef.AddMethod != null)
+				{
+					if (node.HasChildren)
+						foreach (var nd in node.Children.Value)
+							propDef.AddMethod(obj, builder.BuildNode(nd));
+				}
+				return obj;
+			}
+			else
+				return XamlNode.GetNodeValue(builder, node);
+		}
+
+		public PropertyInfo GetPropertyInfo(String name)
+		{
+			if (Properties.TryGetValue(name, out PropDefinition propDef))
+				return propDef.PropertyInfo;
+			throw new XamlReadException($"Property {name} not found");
 		}
 	}
 }

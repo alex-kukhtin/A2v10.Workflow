@@ -1,10 +1,11 @@
-﻿using System;
+﻿
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -39,14 +40,8 @@ namespace A2v10.System.Xaml
 
 	public class NodeBuilder
 	{
-		private static readonly MethodInfo _enumParse =
-			typeof(Enum).GetMethod("Parse", new Type[] { typeof(Type), typeof(String) });
-		private static readonly MethodInfo _convertChangeType =
-			typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(Object), typeof(Type), typeof(CultureInfo) });
-
 
 		// STATIC????? diff namespaces???
-		private readonly ConcurrentDictionary<ClassNamePair, NodeDefinition> _typeCache = new ConcurrentDictionary<ClassNamePair, NodeDefinition>();
 		private readonly ConcurrentDictionary<ClassNamePair, TypeDescriptor> _descriptorCache = new ConcurrentDictionary<ClassNamePair, TypeDescriptor>();
 
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
@@ -211,6 +206,12 @@ namespace A2v10.System.Xaml
 				}
 			}
 
+			var propDefs = new Dictionary<String, PropDefinition>();
+			foreach (var prop in props.Where(p => p.CanWrite))
+			{
+				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
+			}
+
 			return new TypeDescriptor()
 			{
 				NodeType = nodeType,
@@ -219,39 +220,10 @@ namespace A2v10.System.Xaml
 				BuildNode = this.BuildNode,
 				Constructor = constructor,
 				ConstructorString = constructorStr,
-				Properties = props.Where(p => p.CanWrite).ToDictionary(p => p.Name),
+				Properties = propDefs,
 				ContentProperty = contentProperty,
 				AddCollection1 = addCollection1,
 				//AddCollection2 = addCollection2
-			};
-		}
-
-		/* Returns:
-			Func<XamlNode, Object> Lambda = (node, nodeDef) => new NodeClass() {
-				Prop1 = node.GetPropertyValue("Prop1", propType, nodeDef), 
-				Prop2 = node.GetPropertyValue("Prop2", propType, nodeDef)
-			};
-		*/
-		private NodeDefinition BuildNodeDefinition(ClassNamePair namePair)
-		{
-			if (!_namespaces.TryGetValue(namePair.Prefix, out NamespaceDefinition nsd))
-				throw new XamlReadException($"Namespace {namePair.Namespace} not found");
-			var nodeType = nsd.Assembly.GetType($"{namePair.Namespace}.{namePair.ClassName}");
-			if (nodeType == null)
-				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
-			var props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-			var propDefs = new Dictionary<String, PropDefinition>();
-			foreach (var prop in props.Where(p => p.CanWrite))
-				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
-
-			return new NodeDefinition()
-			{
-				//ClassName = namePair.ClassName,
-				Properties = propDefs,
-				//ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
-				//BuildNode = this.BuildNode,
-				IsCamelCase = namePair.IsCamelCase
 			};
 		}
 
@@ -294,38 +266,6 @@ namespace A2v10.System.Xaml
 					IsCamelCase = nsd.IsCamelCase
 				};
 				return _descriptorCache.GetOrAdd(className, BuildTypeDescriptor);
-			}
-			else
-				throw new XamlReadException($"Namespace '{nsKey}' not found");
-		}
-
-		public NodeDefinition GetNodeDefinition(String typeName)
-		{
-			//GetNode
-			String nsKey = String.Empty;
-			if (typeName.Contains(":"))
-			{
-				// type with namespace
-				var pair = typeName.Split(':');
-				nsKey = pair[0];
-				typeName = pair[1];
-			}
-			if (_namespaces.TryGetValue(nsKey, out NamespaceDefinition nsd))
-			{
-				if (nsd.IsCamelCase)
-				{
-					// file: camelCase
-					// code: PascalCase
-					typeName = typeName.ToPascalCase();
-				}
-				var className = new ClassNamePair()
-				{
-					Prefix = nsKey,
-					Namespace = nsd.Namespace,
-					ClassName = CheckAlias(typeName),
-					IsCamelCase = nsd.IsCamelCase
-				};
-				return _typeCache.GetOrAdd(className, BuildNodeDefinition);
 			}
 			else
 				throw new XamlReadException($"Namespace '{nsKey}' not found");

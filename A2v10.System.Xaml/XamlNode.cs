@@ -1,8 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
 using System.Reflection;
 
 namespace A2v10.System.Xaml
@@ -67,24 +65,24 @@ namespace A2v10.System.Xaml
 
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
-			var nd = builder.GetNodeDefinition(Name);
-			//var td = builder.GetNodeDescriptor(Name);
-			Properties.Add(nd.MakeName(name), nd.BuildPropertyNode(builder, name, node));
+			//var nd = builder.GetNodeDefinition(Name);
+			var td = builder.GetNodeDescriptor(Name);
+			Properties.Add(td.MakeName(name), td.BuildPropertyNode(builder, name, node));
 		}
 
 		public void AddProperty(NodeBuilder builder, String name, String value)
 		{
 			var propName = builder.QualifyPropertyName(name);
-			var nd = builder.GetNodeDefinition(Name);
+			var td = builder.GetNodeDescriptor(Name);
 			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
-				Extensions.Add(new XamlExtensionElem(nd.GetPropertyInfo(nd.MakeName(propName)), builder.ParseExtension(value)));
+				Extensions.Add(new XamlExtensionElem(td.GetPropertyInfo(td.MakeName(propName)), builder.ParseExtension(value)));
 			else if (propName.Contains('.'))
 			{
 				; // attached properties
 				int z = 55;
 			}
 			else
-				Properties.Add(nd.MakeName(propName), value); // nd.BuildProperty(propName, value));
+				Properties.Add(td.MakeName(propName), value); // nd.BuildProperty(propName, value));
 		}
 
 		public void AddConstructorArgument(String value)

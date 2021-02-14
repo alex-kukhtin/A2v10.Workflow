@@ -27,5 +27,4 @@ Xaml
 12. Dictionary collections
 13. ??? TypeCache static ????
 15. Multiply OnEndInit???
-20. Merge NodeDefinition & NodeDescriptor
 21. 
