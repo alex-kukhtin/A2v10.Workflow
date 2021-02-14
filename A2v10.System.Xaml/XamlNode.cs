@@ -65,7 +65,6 @@ namespace A2v10.System.Xaml
 
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
-			//var nd = builder.GetNodeDefinition(Name);
 			var td = builder.GetNodeDescriptor(Name);
 			Properties.Add(td.MakeName(name), td.BuildPropertyNode(builder, name, node));
 		}

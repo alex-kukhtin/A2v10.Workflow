@@ -11,18 +11,6 @@ using System.Text.RegularExpressions;
 
 namespace A2v10.System.Xaml
 {
-
-	public record PropDefinition
-	{
-		public PropertyInfo PropertyInfo { get; init; }
-		public Type Type { get; init; }
-		public Func<Object> Constructor { get; init; }
-		public Action<Object, Object> AddMethod { get; init; }
-		public Action<Object, String, Object> AddDictionaryMethod { get; init; }
-		public Func<TypeConverter> TypeConverter { get; init; }
-	}
-
-
 	public record NamespaceDefinition
 	{
 		public String Namespace { get; init; }
@@ -106,7 +94,7 @@ namespace A2v10.System.Xaml
 			return BuildNode(node) as MarkupExtension;
 		}
 
-		private static PropDefinition BuildPropertyDefinition(PropertyInfo propInfo)
+		private static PropertyDescriptor BuildPropertyDefinition(PropertyInfo propInfo)
 		{
 			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
@@ -150,7 +138,7 @@ namespace A2v10.System.Xaml
 				}
 			}
 
-			return new PropDefinition()
+			return new PropertyDescriptor()
 			{
 				PropertyInfo = propInfo,
 				//Type = propType,
@@ -206,7 +194,7 @@ namespace A2v10.System.Xaml
 				}
 			}
 
-			var propDefs = new Dictionary<String, PropDefinition>();
+			var propDefs = new Dictionary<String, PropertyDescriptor>();
 			foreach (var prop in props.Where(p => p.CanWrite))
 			{
 				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
