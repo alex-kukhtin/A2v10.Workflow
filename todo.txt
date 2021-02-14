@@ -27,4 +27,4 @@ Xaml
 12. Dictionary collections
 13. ??? TypeCache static ????
 15. Multiply OnEndInit???
-21. 
+21. Resources for A2v10. x:Key

@@ -114,7 +114,7 @@ namespace A2v10.System.Xaml
 					}
 					break;
 				case State.Value:
-					if (_tokenType == TokenType.String)
+					if (_tokenType == TokenType.String || _tokenType == TokenType.Ider)
 						_node.AddProperty(_builder, _propertyName, TokenValue);
 					_state = State.Continue;
 					break;

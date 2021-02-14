@@ -9,6 +9,7 @@ namespace A2v10.System.Xaml
 		private readonly XamlNode _root = new XamlNode() { Name = "Root" };
 		private readonly XmlReader _rdr;
 		private readonly XamlServicesOptions _options;
+		private readonly XamlServiceProvider _xamlServiceProvider;
 
 		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
 
@@ -17,11 +18,12 @@ namespace A2v10.System.Xaml
 			_rdr = rdr;
 			_options = options;
 			_elemStack.Push(_root);
+			_xamlServiceProvider = new XamlServiceProvider();
 		}
 
 		public Object Read()
 		{
-			var nodeBuilder = new NodeBuilder(_options);
+			var nodeBuilder = new NodeBuilder(_xamlServiceProvider, _options);
 			while (_rdr.Read())
 			{
 				if (_rdr.NodeType == XmlNodeType.Comment || _rdr.NodeType == XmlNodeType.Whitespace)
@@ -35,7 +37,9 @@ namespace A2v10.System.Xaml
 			else if (_root.Children.Value.Count > 1)
 				throw new XamlReadException("Invalid Xaml structure");
 			var r = _root.Children.Value[0];
-			return nodeBuilder.BuildNode(r);
+			var result = nodeBuilder.BuildNode(r);
+			_xamlServiceProvider.SetRoot(result);
+			return result;
 		}
 
 		void ReadNode(NodeBuilder builder)

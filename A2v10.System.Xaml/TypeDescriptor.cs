@@ -41,7 +41,13 @@ namespace A2v10.System.Xaml
 				throw new XamlException($"Property {name} not found in type {TypeName}");
 			var propInfo = propDef.PropertyInfo;
 			var val = PropertyConvertor.ConvertValue(value, propInfo.PropertyType);
-			propInfo.SetValue(instance, val);
+			if (propDef.AddMethod != null && !propInfo.CanWrite)
+			{
+				var coll = propInfo.GetValue(instance);
+				int z = 55;
+			}
+			else
+				propInfo.SetValue(instance, val);
 		}
 
 		public void SetTextContent(Object instance, String content)
@@ -74,9 +80,14 @@ namespace A2v10.System.Xaml
 			var contObj = contProp.GetValue(instance);
 			if (contObj == null)
 			{
-				var ctor = contProp.PropertyType.GetConstructor(Array.Empty<Type>());
-				contObj = ctor.Invoke(Array.Empty<Object>());
-				contProp.SetValue(instance, contObj);
+				if (contProp.CanWrite && contProp.PropertyType.IsAssignableFrom(elem.GetType()))
+					contProp.SetValue(instance, elem);
+				else
+				{
+					var ctor = contProp.PropertyType.GetConstructor(Array.Empty<Type>());
+					contObj = ctor.Invoke(Array.Empty<Object>());
+					contProp.SetValue(instance, contObj);
+				}
 			}
 			if (AddCollection1 != null)
 				AddCollection1.Invoke(contObj, new Object[] { elem });

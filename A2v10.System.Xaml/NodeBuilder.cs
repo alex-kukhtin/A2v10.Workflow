@@ -34,9 +34,11 @@ namespace A2v10.System.Xaml
 
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 		private readonly XamlServicesOptions _options;
+		private readonly XamlServiceProvider _serviceProvider;
 
-		public NodeBuilder(XamlServicesOptions options)
+		public NodeBuilder(XamlServiceProvider serviceProvider, XamlServicesOptions options)
 		{
+			_serviceProvider = serviceProvider;
 			_options = options;
 		}
 
@@ -195,7 +197,7 @@ namespace A2v10.System.Xaml
 			}
 
 			var propDefs = new Dictionary<String, PropertyDescriptor>();
-			foreach (var prop in props.Where(p => p.CanWrite))
+			foreach (var prop in props)
 			{
 				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
 			}
@@ -297,14 +299,12 @@ namespace A2v10.System.Xaml
 			}
 			if (node.Extensions != null)
 			{
-				var provider = new XamlServiceProvider();
-				var valueTarget = new XamlProvideValueTarget();
-				provider.AddService<IProvideValueTarget>(valueTarget);
+				var valueTarget = _serviceProvider.ProvideValueTarget;
 				valueTarget.TargetObject = obj;
 				foreach (var ext in node.Extensions)
 				{
 					valueTarget.TargetProperty = ext.PropertyInfo;
-					ext.Element.ProvideValue(provider);
+					ext.Element.ProvideValue(_serviceProvider);
 				}
 			}
 
