@@ -4,8 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace A2v10.System.Xaml.Tests
 {
 	[TestClass]
-	[TestCategory("Xaml.TypeConvertors")]
-	public class TypeConvertors
+	[TestCategory("Xaml.TypeConverters")]
+	public class TypeConverters
 	{
 
 		[TestMethod]

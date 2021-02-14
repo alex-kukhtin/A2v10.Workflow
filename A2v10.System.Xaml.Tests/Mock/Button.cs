@@ -14,28 +14,13 @@ namespace A2v10.System.Xaml.Tests.Mock
 		Folder
 	}
 
-	public class Button : ISupportBinding, ISupportInitialize
+	public class Button :  UIElementBase, ISupportInitialize
 	{
 		public String Content { get; set; }
 		public Object Command { get; set; }
 
-		readonly BindImpl _bindImpl = new BindImpl();
-
-		public BindImpl BindImpl => _bindImpl;
-
-		public Bind GetBinding(string name)
-		{
-			return _bindImpl?.GetBinding(name);
-		}
-
-		public Thickness Padding { get; set; }
-
 		public Icon Icon { get; set; }
 
-		public BindCmd GetBindingCommand(string name)
-		{
-			return _bindImpl?.GetBindingCommand(name);
-		}
 
 		public void BeginInit()
 		{

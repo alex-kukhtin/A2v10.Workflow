@@ -2,77 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 
 namespace A2v10.System.Xaml
 {
-	public record XamlExtenesionElem(PropertyInfo PropertyInfo, MarkupExtension Element);
+	public record XamlExtensionElem(PropertyInfo PropertyInfo, MarkupExtension Element);
 
 	public class XamlNode
 	{
 		public String Name { get; init; }
 		public String TextContent { get; set; }
+		public String ConstructorArgument => _ctorArgument;
 
 		private String _ctorArgument;
 
 		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
 		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
-		public readonly List<XamlExtenesionElem> Extensions = new List<XamlExtenesionElem>();
+		public readonly List<XamlExtensionElem> Extensions = new List<XamlExtensionElem>();
 
 		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
-
-		public Object GetPropertyValue(String propName, Type propType, NodeDefinition nodeDef)
-		{
-			if (Properties.TryGetValue(propName, out Object val))
-			{
-				if (val == null)
-					return null;
-				if (val.GetType() == (Nullable.GetUnderlyingType(propType) ?? propType))
-					return val;
-				if (propType == typeof(Object))
-					return val;
-				throw new XamlReadException($"Invalid property type for '{propName}'. Expected: '{propType.Name}', actual: {val.GetType().Name}");
-			}
-			if (_ctorArgument != null && propName == nodeDef.DefaultProperty)
-			{
-				if (propType.IsEnum)
-				{
-					if (Enum.TryParse(propType, _ctorArgument, out object result))
-						return result;
-					throw new XamlReadException($"Unable to convert '{_ctorArgument}' to type '{propType.Name}'");
-				}
-				return Convert.ChangeType(_ctorArgument, propType);
-			}
-			if (propType.IsEnum)
-				return 0; // default value for enum
-						  // try to get ContentProperty
-			if (nodeDef.ContentProperty == propName)
-				return GetContentProperty(nodeDef);
-			return null;
-		}
-
-		public Object InitCreatedElement(Object elem)
-		{
-			if (Extensions.Count > 0)
-			{
-				var provider = new XamlServiceProvider();
-				var valueTarget = new XamlProvideValueTarget();
-				provider.AddService<IProvideValueTarget>(valueTarget);
-
-				valueTarget.TargetObject = elem;
-				foreach (var ext in Extensions)
-				{
-					valueTarget.TargetProperty = ext.PropertyInfo;
-					ext.Element.ProvideValue(provider);
-				}
-			}
-			if (elem is ISupportInitialize init)
-			{
-				init.BeginInit();
-				init.EndInit();
-			}
-			return elem;
-		}
 
 		public Object GetContentProperty(NodeDefinition nodeDef)
 		{
@@ -91,7 +40,18 @@ namespace A2v10.System.Xaml
 			}
 
 			if (!HasChildren)
+			{
+				if (String.IsNullOrEmpty(TextContent))
+					return null;
+
+				// TextContent as Property
+				if (propDef.TypeConverter != null) {
+					var conv = propDef.TypeConverter();
+					if (conv.CanConvertFrom(typeof(String)))
+						return conv.ConvertFrom(null, CultureInfo.InvariantCulture, TextContent);
+				}
 				return null;
+			}
 			if (propDef.AddMethod == null)
 			{
 				foreach (var c in Children.Value)
@@ -145,7 +105,7 @@ namespace A2v10.System.Xaml
 			var propName = builder.QualifyPropertyName(name);
 			var nd = builder.GetNodeDefinition(Name);
 			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
-				Extensions.Add(new XamlExtenesionElem(nd.GetPropertyInfo(nd.MakeName(name)), builder.ParseExtension(value)));
+				Extensions.Add(new XamlExtensionElem(nd.GetPropertyInfo(nd.MakeName(name)), builder.ParseExtension(value)));
 			else if (propName.Contains('.'))
 			{
 				; // attached properties

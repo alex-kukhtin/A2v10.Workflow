@@ -22,7 +22,11 @@ Xaml
 2.  TypeConverters
 8.  IUriContext
 9.  Binding as Nested objects <Button.Command><BindCmd />
-10. Attached properties
+10. Attached properties Grid.Row, Grid.Col?
 11. x: namespace
 12. Dictionary collections
 13. ??? TypeCache static ????
+14. Elements with [ContentProperty("Children")] as collection
+15. Multiply OnEndInit???
+16. Try Expression.NewArrayInit
+17. Try Expression.ElementInit for dictionary

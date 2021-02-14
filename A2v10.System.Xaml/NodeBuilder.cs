@@ -41,17 +41,15 @@ namespace A2v10.System.Xaml
 
 	public class NodeBuilder
 	{
-		private static readonly MethodInfo _getNodePropertyValue =
-			typeof(XamlNode).GetMethod("GetPropertyValue", BindingFlags.Public | BindingFlags.Instance);
-		private static readonly MethodInfo _initCreatedElement =
-			typeof(XamlNode).GetMethod("InitCreatedElement", BindingFlags.Public | BindingFlags.Instance);
 		private static readonly MethodInfo _enumParse =
 			typeof(Enum).GetMethod("Parse", new Type[] { typeof(Type), typeof(String) });
 		private static readonly MethodInfo _convertChangeType =
 			typeof(Convert).GetMethod("ChangeType", new Type[] { typeof(Object), typeof(Type), typeof(CultureInfo) });
 
+
 		// STATIC????? diff namespaces???
 		private readonly ConcurrentDictionary<ClassNamePair, NodeDefinition> _typeCache = new ConcurrentDictionary<ClassNamePair, NodeDefinition>();
+		private readonly ConcurrentDictionary<ClassNamePair, TypeDescriptor> _descriptorCache = new ConcurrentDictionary<ClassNamePair, TypeDescriptor>();
 
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 		private readonly XamlServicesOptions _options;
@@ -223,6 +221,62 @@ namespace A2v10.System.Xaml
 			};
 		}
 
+		TypeDescriptor BuildTypeDescriptor(ClassNamePair namePair)
+		{
+			if (!_namespaces.TryGetValue(namePair.Prefix, out NamespaceDefinition nsd))
+				throw new XamlReadException($"Namespace {namePair.Namespace} not found");
+			var typeName = $"{namePair.Namespace}.{namePair.ClassName}";
+			var nodeType = nsd.Assembly.GetType(typeName);
+			if (nodeType == null)
+				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
+
+			var constructor = Expression.Lambda<Func<Object>>(Expression.New(nodeType)).Compile();
+			Func<String, Object> constructorStr = null;
+			var ctorStr = nodeType.GetConstructor(new Type[] { typeof(String) });
+			if (ctorStr != null)
+			{
+				var prm = Expression.Parameter(typeof(String));
+				constructorStr = Expression.Lambda<Func<String, Object>>(
+					Expression.New(ctorStr, prm), 
+					prm
+				).Compile();
+			}
+			var props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+			MethodInfo addCollection1 = null;
+			MethodInfo addCollection2 = null;
+
+			var contentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name;
+
+			if (contentProperty != null)
+			{
+				var contProp = props.Where(x => x.Name == contentProperty).FirstOrDefault();
+				if (contProp == null)
+					throw new XamlException($"Property {contentProperty} not found in type {typeName}");
+				var mtdAdd = contProp.PropertyType.GetMethod("Add");
+				if (mtdAdd != null)
+				{
+					var mtdAddPraramCount = mtdAdd.GetParameters().Length;
+					if (mtdAddPraramCount == 1)
+						addCollection1 = mtdAdd;
+					else if (mtdAddPraramCount == 2)
+						addCollection2 = mtdAdd;
+				}
+			}
+
+			return new TypeDescriptor()
+			{
+				TypeName = typeName,
+				Constructor = constructor,
+				ConstructorString = constructorStr,
+				Properties = props.Where(p => p.CanWrite).ToDictionary(p => p.Name),
+				ContentProperty = contentProperty,
+				DefaultProperty = nodeType.GetCustomAttribute<DefaultPropertyAttribute>()?.Name,
+				AddCollection1 = addCollection1,
+				AddCollection2 = addCollection2
+			};
+		}
+
 		/* Returns:
 			Func<XamlNode, Object> Lambda = (node, nodeDef) => new NodeClass() {
 				Prop1 = node.GetPropertyValue("Prop1", propType, nodeDef), 
@@ -236,48 +290,15 @@ namespace A2v10.System.Xaml
 			var nodeType = nsd.Assembly.GetType($"{namePair.Namespace}.{namePair.ClassName}");
 			if (nodeType == null)
 				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
-			var param = Expression.Parameter(typeof(XamlNode));
-			var nodeDef = Expression.Parameter(typeof(NodeDefinition));
-			var ctor = nodeType.GetConstructor(Array.Empty<Type>());
 			var props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-			var inits = new List<MemberAssignment>();
+
 			var propDefs = new Dictionary<String, PropDefinition>();
 			foreach (var prop in props.Where(p => p.CanWrite))
-			{
 				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
-
-				// (T) GetPropertyValue(propName, propType, nodeDef) ?? default<T>
-				inits.Add(Expression.Bind(prop,
-					Expression.Convert(
-						Expression.Coalesce(
-							Expression.Call(
-								param,
-								_getNodePropertyValue,
-								Expression.Constant(prop.Name),
-								Expression.Constant(prop.PropertyType),
-								nodeDef
-							),
-							Expression.Default(prop.PropertyType)
-						),
-						prop.PropertyType)
-				));
-			}
-
-			Func<XamlNode, NodeDefinition, Object> lambda = null;
-			if (ctor != null)
-			{
-				var newExpr = Expression.New(ctor);
-				var expr = Expression.MemberInit(newExpr, inits);
-				var init = Expression.Call(param, _initCreatedElement, expr);
-
-				// lambda
-				lambda = Expression.Lambda<Func<XamlNode, NodeDefinition, Object>>(init/*expr*/, param, nodeDef).Compile();
-			}
 
 			return new NodeDefinition()
 			{
 				ClassName = namePair.ClassName,
-				Lambda = lambda,
 				Properties = propDefs,
 				ContentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name,
 				DefaultProperty = nodeType.GetCustomAttribute<DefaultPropertyAttribute>()?.Name,
@@ -297,6 +318,38 @@ namespace A2v10.System.Xaml
 			if (def.IsCamelCase)
 				return name2[1].ToPascalCase();
 			return name2[1];
+		}
+
+		public TypeDescriptor GetNodeDescriptor(String typeName)
+		{
+			//GetNode
+			String nsKey = String.Empty;
+			if (typeName.Contains(":"))
+			{
+				// type with namespace
+				var pair = typeName.Split(':');
+				nsKey = pair[0];
+				typeName = pair[1];
+			}
+			if (_namespaces.TryGetValue(nsKey, out NamespaceDefinition nsd))
+			{
+				if (nsd.IsCamelCase)
+				{
+					// file: camelCase
+					// code: PascalCase
+					typeName = typeName.ToPascalCase();
+				}
+				var className = new ClassNamePair()
+				{
+					Prefix = nsKey,
+					Namespace = nsd.Namespace,
+					ClassName = CheckAlias(typeName),
+					IsCamelCase = nsd.IsCamelCase
+				};
+				return _descriptorCache.GetOrAdd(className, BuildTypeDescriptor);
+			}
+			else
+				throw new XamlReadException($"Namespace '{nsKey}' not found");
 		}
 
 		public NodeDefinition GetNodeDefinition(String typeName)
@@ -343,11 +396,41 @@ namespace A2v10.System.Xaml
 
 		public Object BuildNode(XamlNode node)
 		{
-			var nd = GetNodeDefinition(node.Name);
+			var nd = GetNodeDescriptor(node.Name);
+			Object obj = null;
+			if (node.ConstructorArgument != null)
+				obj = nd.ConstructorString(node.ConstructorArgument);
+			else
+				obj = nd.Constructor();
+			if (!String.IsNullOrEmpty(node.TextContent))
+				nd.SetTextContent(obj, node.TextContent);
+			foreach (var (propKey, propValue) in node.Properties)
+			{
+				nd.SetPropertyValue(obj, propKey, propValue);
+			}
+			if (node.HasChildren)
+			{
+				foreach (var ch in node.Children.Value)
+				{
+					var chObj = BuildNode(ch);
+					nd.AddChildren(obj, chObj);
+				}
+			}
+			if (node.Extensions != null)
+			{
+				foreach (var n in node.Extensions)
+				{
+					nd.AddExtension(obj, n);
+				}
+			}
+			/*
+			//var nd = GetNodeDefinition(node.Name);
 			if (nd.Lambda != null)
 				return nd.Lambda(node, nd);
 			else
 				return GetSimpleTypeValue(nd, node);
+			*/
+			return obj;
 		}
 
 		static Object GetSimpleTypeValue(NodeDefinition nd, XamlNode node)

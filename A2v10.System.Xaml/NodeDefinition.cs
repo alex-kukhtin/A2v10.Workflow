@@ -9,7 +9,7 @@ namespace A2v10.System.Xaml
 	public record NodeDefinition
 	{
 		public String ClassName { get; init; }
-		public Func<XamlNode, NodeDefinition, Object> Lambda { get; init; }
+		//public Func<XamlNode, NodeDefinition, Object> Lambda { get; init; }
 		public Dictionary<String, PropDefinition> Properties { get; init; }
 		public String ContentProperty { get; init; }
 		public String DefaultProperty { get; init; }
