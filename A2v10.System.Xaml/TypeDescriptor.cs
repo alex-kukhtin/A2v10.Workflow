@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -18,6 +20,8 @@ namespace A2v10.System.Xaml
 		public String ContentProperty { get; init; }
 
 		public MethodInfo AddCollection1 { get; init; }
+		public Dictionary<String, AttachedPropertyDescriptor> AttachedProperties { get; init; }
+
 		public Boolean IsCamelCase { get; init; }
 
 		public Func<XamlNode, Object> BuildNode { get; init; }
@@ -43,9 +47,16 @@ namespace A2v10.System.Xaml
 			var val = PropertyConvertor.ConvertValue(value, propInfo.PropertyType);
 			if (propDef.AddMethod != null && !propInfo.CanWrite)
 			{
-				var coll = propInfo.GetValue(instance);
-				int z = 55;
+				if (value is ICollection collSource)
+				{
+					// copy from source value
+					var target = propInfo.GetValue(instance);
+					foreach (var elem in collSource)
+						propDef.AddMethod(target, elem);
+				}
 			}
+			else if (!propInfo.CanWrite)
+				throw new XamlException($"Property {propInfo.PropertyType} is read only");
 			else
 				propInfo.SetValue(instance, val);
 		}
@@ -69,6 +80,12 @@ namespace A2v10.System.Xaml
 
 		public void AddChildren(Object instance, Object elem)
 		{
+			if (ContentProperty == null)
+			{
+				if (AddCollection1 != null)
+					AddCollection1.Invoke(instance, new Object[] { elem });
+				return;
+			}
 			if (!Properties.TryGetValue(ContentProperty, out PropertyDescriptor contDef))
 				return;
 			var contProp = contDef.PropertyInfo;
@@ -93,26 +110,15 @@ namespace A2v10.System.Xaml
 				AddCollection1.Invoke(contObj, new Object[] { elem });
 		}
 
-		public Object BuildPropertyNode(NodeBuilder builder, String name, XamlNode node)
+		public Object BuildNestedProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			if (!Properties.TryGetValue(name, out PropertyDescriptor propDef))
 				throw new XamlReadException($"Property {name} not found");
 			if (node == null)
 				return null;
-			if (propDef.Constructor != null)
-			{
-				var obj = propDef.Constructor();
-				if (propDef.AddMethod != null)
-				{
-					if (node.HasChildren)
-						foreach (var nd in node.Children.Value)
-							propDef.AddMethod(obj, builder.BuildNode(nd));
-				}
-				return obj;
-			}
-			else
-				return XamlNode.GetNodeValue(builder, node);
+			return propDef.BuildElement(builder, node);
 		}
+
 
 		public PropertyInfo GetPropertyInfo(String name)
 		{
@@ -120,5 +126,25 @@ namespace A2v10.System.Xaml
 				return propDef.PropertyInfo;
 			throw new XamlReadException($"Property {name} not found");
 		}
+
+		public void SetAttachedPropertyValue(String prop, Object target, Object value)
+		{
+			if (AttachedProperties == null || value == null)
+				return;
+			if (AttachedProperties.TryGetValue(prop, out AttachedPropertyDescriptor descr))
+			{
+				if (descr.PropertyType.IsEnum)
+					value = Enum.Parse(descr.PropertyType, value.ToString());
+				else if (descr.TypeConverter != null)
+				{
+					var tc = descr.TypeConverter();
+					value = tc.ConvertFromString(value.ToString());
+				}
+				else
+					value = Convert.ChangeType(value, descr.PropertyType);
+				descr.Lambda(target, value);
+			}
+		}
+
 	}
 }

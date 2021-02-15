@@ -36,5 +36,31 @@ namespace A2v10.System.Xaml.Tests
 			Assert.AreEqual(true, b1.Show);
 			Assert.AreEqual(false, b1.If);
 		}
+
+		[TestMethod]
+		public void AddOns()
+		{
+			string xaml = @"
+<Button xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"">
+	<Button.AddOns>
+		<Span Content=""1""/>
+		<Span Content=""2""/>
+	</Button.AddOns>
+</Button>
+";
+			var obj = XamlServices.Parse(xaml, null);
+
+			Assert.AreEqual(typeof(Button), obj.GetType());
+			var p = obj as Button;
+
+			var c = p.AddOns;
+			Assert.AreEqual(2, c.Count);
+
+			var c1 = p.AddOns[0];
+			Assert.AreEqual(typeof(Span), c1.GetType());
+
+			var c2 = p.AddOns[1];
+			Assert.AreEqual(typeof(Span), c2.GetType());
+		}
 	}
 }

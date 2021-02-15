@@ -1,11 +1,13 @@
 ﻿
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace A2v10.System.Xaml
 {
 	public record XamlExtensionElem(PropertyInfo PropertyInfo, MarkupExtension Element);
+	public record XamlAttachedElem(String Name, Object Value);
 
 	public class XamlNode
 	{
@@ -18,8 +20,11 @@ namespace A2v10.System.Xaml
 		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
 		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
 		public readonly List<XamlExtensionElem> Extensions = new List<XamlExtensionElem>();
+		public readonly Lazy<List<XamlAttachedElem>> AttachedProperties = new Lazy<List<XamlAttachedElem>>();
 
 		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
+		public Boolean HasExtensions => Extensions!= null && Extensions.Count > 0;
+
 
 		public void SetContent(String text)
 		{
@@ -38,10 +43,6 @@ namespace A2v10.System.Xaml
 				{
 					// nested property
 					AddProperty(builder, parts[1], node);
-				}
-				else
-				{
-					throw new NotImplementedException("Attached property yet not implemented");
 				}
 			}
 			else
@@ -66,27 +67,50 @@ namespace A2v10.System.Xaml
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			var td = builder.GetNodeDescriptor(Name);
-			Properties.Add(td.MakeName(name), td.BuildPropertyNode(builder, name, node));
+			Object propValue = null;
+			if (node.Name == $"{Name}.{name}")
+				propValue = td.BuildNestedProperty(builder, td.MakeName(name), node);
+			else
+				propValue = builder.BuildNode(node);
+			if (propValue != null)
+				Properties.Add(td.MakeName(name), propValue);
 		}
 
 		public void AddProperty(NodeBuilder builder, String name, String value)
 		{
-			var propName = builder.QualifyPropertyName(name);
-			var td = builder.GetNodeDescriptor(Name);
-			if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
-				Extensions.Add(new XamlExtensionElem(td.GetPropertyInfo(td.MakeName(propName)), builder.ParseExtension(value)));
-			else if (propName.Contains('.'))
-			{
-				; // attached properties
-				int z = 55;
-			}
+			var prop = builder.QualifyPropertyName(name);
+			if (prop.Special)
+				Properties.Add(prop.Name, new SpecialPropertyDescriptor(value));
+			else if (name.Contains('.'))
+				AttachedProperties.Value.Add(new XamlAttachedElem(name, value));
 			else
-				Properties.Add(td.MakeName(propName), value); // nd.BuildProperty(propName, value));
+			{
+				var td = builder.GetNodeDescriptor(Name);
+				if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
+					Extensions.Add(new XamlExtensionElem(td.GetPropertyInfo(td.MakeName(prop.Name)), builder.ParseExtension(value)));
+				else
+					Properties.Add(td.MakeName(prop.Name), value); // nd.BuildProperty(propName, value));
+			}
 		}
 
 		public void AddConstructorArgument(String value)
 		{
 			_ctorArgument = value;
 		}
+
+		public void ProcessAttachedProperties(NodeBuilder builder, Object target)
+		{
+			if (!AttachedProperties.IsValueCreated)
+				return;
+			foreach (var ap in AttachedProperties.Value)
+			{
+				var aps = ap.Name.Split('.');
+				if (aps.Length != 2)
+					continue;
+				var elemDescr = builder.GetNodeDescriptor(aps[0]);
+				elemDescr.SetAttachedPropertyValue(aps[1], target, ap.Value);
+			}
+		}
+
 	}
 }

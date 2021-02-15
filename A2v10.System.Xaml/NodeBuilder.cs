@@ -16,6 +16,7 @@ namespace A2v10.System.Xaml
 		public String Namespace { get; init; }
 		public Assembly Assembly { get; init; }
 		public Boolean IsCamelCase { get; init; }
+		public Boolean IsSpecial { get; init; }
 	}
 
 	public record ClassNamePair
@@ -35,6 +36,8 @@ namespace A2v10.System.Xaml
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 		private readonly XamlServicesOptions _options;
 		private readonly XamlServiceProvider _serviceProvider;
+
+		private readonly Lazy<List<Action>> _deferExec = new Lazy<List<Action>>();
 
 		public NodeBuilder(XamlServiceProvider serviceProvider, XamlServicesOptions options)
 		{
@@ -61,6 +64,7 @@ namespace A2v10.System.Xaml
 				// xaml namespace for x:Key, etc
 				_namespaces.Add(prefix, new NamespaceDefinition()
 				{
+					IsSpecial = true
 				});
 				return;
 			}
@@ -101,6 +105,7 @@ namespace A2v10.System.Xaml
 			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
 			Action<Object, Object> addMethod = null;
+			Action<Object, String, Object> addDictionaryMethod = null;
 			Func<TypeConverter> typeConverter = null;
 
 			if (propType != typeof(String))
@@ -137,17 +142,39 @@ namespace A2v10.System.Xaml
 						inst,
 						argPrm
 					).Compile();
+				} 
+				else if (args.Length == 2)
+				{
+					var argType = args[1].ParameterType; // value
+
+					var argPrm = Expression.Parameter(typeof(Object));
+					var argKey = Expression.Parameter(typeof(String));
+					var inst = Expression.Parameter(typeof(Object));
+
+					addDictionaryMethod = Expression.Lambda<Action<Object, String, Object>>(
+						Expression.Call(
+							Expression.Convert(inst, propType),
+							mtdAdd,
+							argKey,
+							Expression.Convert(
+								argPrm,
+								argType
+							)
+						),
+						inst,
+						argKey,
+						argPrm
+					).Compile();
 				}
 			}
 
 			return new PropertyDescriptor()
 			{
 				PropertyInfo = propInfo,
-				//Type = propType,
 				Constructor = ctor,
 				TypeConverter = typeConverter,
 				AddMethod = addMethod,
-				//AddDictionaryMethod = addDictionaryMethod,
+				AddDictionaryMethod = addDictionaryMethod
 			};
 		}
 
@@ -213,20 +240,73 @@ namespace A2v10.System.Xaml
 				Properties = propDefs,
 				ContentProperty = contentProperty,
 				AddCollection1 = addCollection1,
+				AttachedProperties = BuildAttachedProperties(nodeType)
 				//AddCollection2 = addCollection2
 			};
 		}
 
-		public String QualifyPropertyName(String name)
+
+		private Dictionary<String, AttachedPropertyDescriptor> BuildAttachedProperties(Type nodeType)
+		{
+			var propList = nodeType.GetCustomAttribute<AttachedPropertiesAttribute>()?.List;
+			if (propList == null)
+				return null;
+			var lst = new Dictionary<String, AttachedPropertyDescriptor>();
+			foreach (var prop in propList.Split(','))
+			{
+				var pName = prop.Trim();
+				var elem = Expression.Parameter(typeof(Object));
+				var val = Expression.Parameter(typeof(Object));
+				var mtd = nodeType.GetMethod($"Set{pName}", BindingFlags.Static | BindingFlags.Public);
+				if (mtd == null)
+					throw new XamlException($"Invalid attached property {prop} for type {nodeType}");
+				var args = mtd.GetParameters();
+				var propValueType = args[1].ParameterType;
+				Func<TypeConverter> typeConverter = null;
+
+				var lambda = Expression.Lambda<Action<Object, Object>>(
+					Expression.Call(mtd,
+						elem,
+						Expression.Convert(
+							val,
+							propValueType
+						)
+					),
+					elem,
+					val
+				).Compile();
+
+				var tcAttr = propValueType.GetCustomAttribute<TypeConverterAttribute>();
+				if (tcAttr != null)
+				{
+					var convType = Type.GetType(tcAttr.ConverterTypeName);
+					typeConverter = Expression.Lambda<Func<TypeConverter>>(
+						Expression.New(convType)
+					).Compile();
+				}
+
+				lst.Add(pName, new AttachedPropertyDescriptor()
+				{
+					Lambda = lambda,
+					PropertyType = propValueType,
+					TypeConverter = typeConverter
+				});
+			}
+			return lst;
+		}
+
+		public (String Name, Boolean Special) QualifyPropertyName(String name)
 		{
 			if (!name.Contains(':'))
-				return name;
+				return (name, false);
 			var name2 = name.Split(':');
 			if (!_namespaces.TryGetValue(name2[0], out NamespaceDefinition def))
 				throw new XamlReadException($"Namespace '{name2[0]}' not found");
 			if (def.IsCamelCase)
-				return name2[1].ToPascalCase();
-			return name2[1];
+				return (name2[1].ToPascalCase(), false);
+			if (def.IsSpecial)
+				return (name2[1], true);
+			return (name2[1], false);
 		}
 
 		public TypeDescriptor GetNodeDescriptor(String typeName)
@@ -287,6 +367,8 @@ namespace A2v10.System.Xaml
 
 			foreach (var (propKey, propValue) in node.Properties)
 			{
+				if (propValue is SpecialPropertyDescriptor)
+					continue;
 				nd.SetPropertyValue(obj, propKey, propValue);
 			}
 			if (node.HasChildren)
@@ -297,22 +379,41 @@ namespace A2v10.System.Xaml
 					nd.AddChildren(obj, chObj);
 				}
 			}
-			if (node.Extensions != null)
-			{
-				var valueTarget = _serviceProvider.ProvideValueTarget;
-				valueTarget.TargetObject = obj;
-				foreach (var ext in node.Extensions)
-				{
-					valueTarget.TargetProperty = ext.PropertyInfo;
-					ext.Element.ProvideValue(_serviceProvider);
-				}
-			}
+
+			ProcessExtensions(node.Extensions, obj);
+			node.ProcessAttachedProperties(this, obj);
 
 			if (obj is ISupportInitialize init) {
 				init.BeginInit();
 				init.EndInit();
 			}
 			return obj;
+		}
+
+		public void ExecuteDeferred()
+		{
+			if (!_deferExec.IsValueCreated)
+				return;
+			foreach (var a in _deferExec.Value)
+				a();
+		}
+
+		public void ProcessExtensions(List<XamlExtensionElem> elems, Object target)
+		{
+			if (elems == null || elems.Count == 0)
+				return;
+			var valueTarget = _serviceProvider.ProvideValueTarget;
+			foreach (var ext in elems)
+			{
+				_deferExec.Value.Add(() =>
+				{
+					valueTarget.TargetObject = target;
+					valueTarget.TargetProperty = ext.PropertyInfo;
+					var val = ext.Element.ProvideValue(_serviceProvider);
+					if (val != null)
+						ext.PropertyInfo.SetValue(target, val);
+				});
+			}
 		}
 	}
 }

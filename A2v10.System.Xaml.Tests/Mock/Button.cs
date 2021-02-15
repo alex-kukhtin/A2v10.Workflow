@@ -21,6 +21,9 @@ namespace A2v10.System.Xaml.Tests.Mock
 
 		public Icon Icon { get; set; }
 
+		Lazy<UIElementCollection> _addOns = new Lazy<UIElementCollection>();
+
+		public UIElementCollection AddOns { get { return _addOns.Value; } }
 
 		public void BeginInit()
 		{

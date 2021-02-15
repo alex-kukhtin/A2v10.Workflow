@@ -55,7 +55,7 @@ namespace A2v10.System.Xaml.Tests
 			var obj = XamlServices.Parse(xaml, null);
 
 			Assert.AreEqual(typeof(Button), obj.GetType());
-			var btn= obj as Button;
+			var btn = obj as Button;
 			Assert.AreEqual("Text", btn.Content);
 
 			var icon = btn.GetBinding("Icon");
@@ -97,5 +97,25 @@ namespace A2v10.System.Xaml.Tests
 			*/
 		}
 
+
+		[TestMethod]
+		public void QualifiedProperty()
+		{
+			string xaml = @"
+<Page xmlns=""clr-namespace:A2v10.System.Xaml.Tests.Mock;assembly=A2v10.System.Xaml.Tests"">
+	<Page.Toolbar>
+		<Button Content=""{Bind Parent.Pager}""/>
+	</Page.Toolbar>
+</Page>
+";
+			var obj = XamlServices.Parse(xaml, null);
+
+			Assert.AreEqual(typeof(Page), obj.GetType());
+			var page = obj as Page;
+			var tb = page.Toolbar as Button;
+			Assert.AreEqual(typeof(Button), tb.GetType());
+			var bind = tb.GetBinding("Content");
+			Assert.AreEqual("Parent.Pager", bind.Path);
+		}
 	}
 }

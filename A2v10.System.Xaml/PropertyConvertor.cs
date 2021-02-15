@@ -28,6 +28,7 @@ namespace A2v10.System.Xaml
 			var conv = type.GetCustomAttribute<TypeConverterAttribute>();
 			if (conv != null)
 			{
+				// TODO:::: лишнее преобразование. Переделать на Lambda
 				var convCtor = Type.GetType(conv.ConverterTypeName).GetConstructor(Array.Empty<Type>());
 				var typeConverter = convCtor.Invoke(Array.Empty<Object>()) as TypeConverter;
 				if (typeConverter.CanConvertFrom(valueType))

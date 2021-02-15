@@ -37,9 +37,10 @@ namespace A2v10.System.Xaml
 			else if (_root.Children.Value.Count > 1)
 				throw new XamlReadException("Invalid Xaml structure");
 			var r = _root.Children.Value[0];
-			var result = nodeBuilder.BuildNode(r);
-			_xamlServiceProvider.SetRoot(result);
-			return result;
+			var node = nodeBuilder.BuildNode(r);
+			_xamlServiceProvider.SetRoot(node);
+			nodeBuilder.ExecuteDeferred();
+			return node;
 		}
 
 		void ReadNode(NodeBuilder builder)
