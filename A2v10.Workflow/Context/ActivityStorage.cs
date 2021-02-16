@@ -49,7 +49,7 @@ namespace A2v10.Workflow
 				return null;
 			var cb = CallbackItem.FromExpando(itm);
 			if (!_activities.TryGetValue(cb.Ref, out IActivity activity))
-				throw new WorkflowExecption($"Activity {cb.Ref} not found");
+				throw new WorkflowException($"Activity {cb.Ref} not found");
 			return cb.ToCallback(activity);
 		}
 

@@ -34,7 +34,7 @@ namespace A2v10.Workflow.Bpmn
 				return new ValueTask();
 			var start = Elems<Event>().FirstOrDefault(ev => ev.IsStart);
 			if (start == null)
-				throw new WorkflowExecption($"Process (Id={Id}). Start event not found");
+				throw new WorkflowException($"Process (Id={Id}). Start event not found");
 			context.Schedule(start, OnElemComplete, token);
 			return new ValueTask();
 		}
@@ -66,10 +66,10 @@ namespace A2v10.Workflow.Bpmn
 		{
 			var elem = Activities.FirstOrDefault(e => e.Id == id);
 			if (elem == null)
-				throw new WorkflowExecption($"BPMN. Element (Id = {id}) not found");
+				throw new WorkflowException($"BPMN. Element (Id = {id}) not found");
 			if (elem is T elemT)
 				return elemT;
-			throw new WorkflowExecption($"BPMN. Invalid type for element (Id = {id}). Expected: '{typeof(T).Name}', Actual: '{elem.GetType().Name}'");
+			throw new WorkflowException($"BPMN. Invalid type for element (Id = {id}). Expected: '{typeof(T).Name}', Actual: '{elem.GetType().Name}'");
 		}
 
 		public IEnumerable<T> FindAll<T>(Predicate<T> predicate) where T : BpmnActivity

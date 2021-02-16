@@ -19,7 +19,7 @@ namespace A2v10.Workflow.Bpmn
 			{
 				var flowElem = Parent.FindElement<SequenceFlow>(flow.Text);
 				if (flowElem.SourceRef != Id)
-					throw new WorkflowExecption($"BPMN. Invalid SequenceFlow (Id={Id}. SourceRef does not match");
+					throw new WorkflowException($"BPMN. Invalid SequenceFlow (Id={Id}. SourceRef does not match");
 				// generate new token for every outogoing flow!
 				context.Schedule(flowElem, onComplete, Parent.NewToken());
 			}

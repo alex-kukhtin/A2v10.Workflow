@@ -51,7 +51,7 @@ namespace A2v10.Workflow
 		public async ValueTask<IInstance> RunAsync(IInstance instance, Object args = null)
 		{
 			if (instance.ExecutionStatus != WorkflowExecutionStatus.Init)
-				throw new WorkflowExecption($"Instance (id={instance.Id}) is already running");
+				throw new WorkflowException($"Instance (id={instance.Id}) is already running");
 			var context = new ExecutionContext(_serviceProvider, _tracker, instance.Workflow.Root, args);
 			context.Schedule(instance.Workflow.Root, null, null);
 			await context.RunAsync();

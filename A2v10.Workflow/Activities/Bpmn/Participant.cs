@@ -40,7 +40,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			var process = Children.OfType<Process>().FirstOrDefault(itm => itm.Id == ProcessRef);
 			if (process == null)
-				throw new WorkflowExecption($"Process '{ProcessRef}' not found");
+				throw new WorkflowException($"Process '{ProcessRef}' not found");
 			return process.ExecuteAsync(context, token, onComplete);
 		}
 	}

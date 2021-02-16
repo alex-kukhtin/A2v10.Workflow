@@ -475,7 +475,7 @@ begin
 end
 go
 ------------------------------------------------
-create or alter procedure a2wf.[Instance.Execption]
+create or alter procedure a2wf.[Instance.Exception]
 @UserId bigint = null,
 @InstanceId uniqueidentifier,
 @Action int,

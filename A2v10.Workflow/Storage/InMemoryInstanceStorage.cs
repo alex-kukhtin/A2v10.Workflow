@@ -37,7 +37,7 @@ namespace A2v10.Workflow.Storage
 		public Task Create(IInstance instance)
 		{
 			if (_memory.ContainsKey(instance.Id))
-				throw new WorkflowExecption($"Instance storage. Instance with id = {instance.Id} has been already created");
+				throw new WorkflowException($"Instance storage. Instance with id = {instance.Id} has been already created");
 			var si = new SavedInstance(instance.Workflow.Root, _serializer.Serialize(instance.State));
 			_memory.Add(instance.Id, si);
 			return Task.CompletedTask;
@@ -51,7 +51,7 @@ namespace A2v10.Workflow.Storage
 				_memory[instance.Id] = si;
 			}
 			else
-				throw new WorkflowExecption($"Instance storage. Instance with id = {instance.Id} not found");
+				throw new WorkflowException($"Instance storage. Instance with id = {instance.Id} not found");
 			return Task.CompletedTask;
 		}
 

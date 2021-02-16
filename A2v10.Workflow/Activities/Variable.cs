@@ -35,19 +35,19 @@ namespace A2v10.Workflow
 				case VariableType.BigInt:
 					if (Int64.TryParse(Value, out Int64 intVal))
 						return intVal.ToString();
-					throw new WorkflowExecption($"Unable to convert '{Value}' to BigInt");
+					throw new WorkflowException($"Unable to convert '{Value}' to BigInt");
 				case VariableType.Guid:
 					if (Guid.TryParse(Value, out Guid guidVal))
 						return $"'{guidVal}'";
-					throw new WorkflowExecption($"Unable to convert '{Value}' to Guid");
+					throw new WorkflowException($"Unable to convert '{Value}' to Guid");
 				case VariableType.Number:
 					if (Double.TryParse(Value, out Double dblVal))
 						return dblVal.ToString(CultureInfo.InvariantCulture);
-					throw new WorkflowExecption($"Unable to convert '{Value}' to Number");
+					throw new WorkflowException($"Unable to convert '{Value}' to Number");
 				case VariableType.Boolean:
 					if (Value == "true" || Value == "false")
 						return Value;
-					throw new WorkflowExecption($"Unable to convert '{Value}' to Boolean");
+					throw new WorkflowException($"Unable to convert '{Value}' to Boolean");
 				case VariableType.Object:
 					return Value; // TODO: Is the value an JS object?
 			}

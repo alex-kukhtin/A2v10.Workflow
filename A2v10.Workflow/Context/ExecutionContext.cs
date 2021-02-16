@@ -128,7 +128,7 @@ namespace A2v10.Workflow
 				return action(this, bookmark, result);
 			} 
 			else
-				throw new WorkflowExecption($"Bookmark '{bookmark}' not found");
+				throw new WorkflowException($"Bookmark '{bookmark}' not found");
 		}
 	}
 }

@@ -73,7 +73,7 @@ namespace A2v10.Workflow
 					}
 				}
 			}
-			throw new WorkflowExecption($"Method '{CallbackName}' for activity '{Ref}' not found");
+			throw new WorkflowException($"Method '{CallbackName}' for activity '{Ref}' not found");
 		}
 
 		public ExecutingAction ToCallback(IActivity activity)

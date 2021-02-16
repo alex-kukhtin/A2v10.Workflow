@@ -41,7 +41,7 @@ namespace A2v10.Workflow
 			}
 			var start = Nodes.Find(n => n.IsStart);
 			if (start == null)
-				throw new WorkflowExecption($"Flowchart (Ref={Id}. Start node not found");
+				throw new WorkflowException($"Flowchart (Ref={Id}. Start node not found");
 			context.Schedule(start, onComplete, token);
 			return new ValueTask();
 		}

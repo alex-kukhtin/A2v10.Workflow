@@ -91,7 +91,7 @@ namespace A2v10.Workflow
 				if (_activities.TryGetValue(cb.Ref, out IActivity activity))
 					_bookmarks.Add(k, cb.ToBookmark(activity));
 				else
-					throw new WorkflowExecption($"Activity {cb.Ref} for bookmark callback not found");
+					throw new WorkflowException($"Activity {cb.Ref} for bookmark callback not found");
 			}
 
 		}

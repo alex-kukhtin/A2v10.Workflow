@@ -110,7 +110,7 @@ namespace A2v10.Workflow.SqlServer
 				InstanceId = id,
 				Message = ex.ToString()
 			};
-			return _dbContext.ExecuteAsync<SqlTrackRecord>(null, $"{Definitions.SqlSchema}.[Instance.Execption]", tr);
+			return _dbContext.ExecuteAsync<SqlTrackRecord>(null, $"{Definitions.SqlSchema}.[Instance.Exception]", tr);
 		}
 
 		#endregion

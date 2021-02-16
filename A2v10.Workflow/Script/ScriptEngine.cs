@@ -54,7 +54,7 @@ namespace A2v10.Workflow
 		{
 			var func = GetFunc(_root.Id, "Arguments");
 			if (func == null)
-				throw new WorkflowExecption($"Script element {_root.Id}.Arguments not found");
+				throw new WorkflowException($"Script element {_root.Id}.Arguments not found");
 			func(JsValue.Undefined, new JsValue[] { JsValue.FromObject(_engine, args) });
 		}
 
@@ -111,7 +111,7 @@ namespace A2v10.Workflow
 			//_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Execute, refer, name));
 			var func = GetFunc(refer, name);
 			if (func == null)
-				throw new WorkflowExecption($"Script element {refer}.{name} not found");
+				throw new WorkflowException($"Script element {refer}.{name} not found");
 			func(JsValue.Undefined, null);
 		}
 
@@ -120,7 +120,7 @@ namespace A2v10.Workflow
 			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.ExecuteResult, refer, name, result));
 			var func = GetFunc(refer, name);
 			if (func == null)
-				throw new WorkflowExecption($"Script element {refer}.{name} not found");
+				throw new WorkflowException($"Script element {refer}.{name} not found");
 			// result must be not null
 			var arg = JsValue.FromObject(_engine, result ?? new ExpandoObject());
 			func(JsValue.Undefined, new JsValue[] { arg });

@@ -62,7 +62,7 @@ namespace A2v10.Workflow.Bpmn
 			{
 				var prc = processes.FirstOrDefault(p => p.Id == participant.ProcessRef);
 				if (prc == null)
-					throw new WorkflowExecption($"Process '{participant.ProcessRef}' not found");
+					throw new WorkflowException($"Process '{participant.ProcessRef}' not found");
 				participant.EnsureChildren();
 				participant.Children.Add(prc);
 			}
@@ -72,9 +72,9 @@ namespace A2v10.Workflow.Bpmn
 		{
 			var parts = Children.OfType<Participant>();
 			if (parts == null)
-				throw new WorkflowExecption("No participants in the Collaboration");
+				throw new WorkflowException("No participants in the Collaboration");
 			if (parts.Count() != 1)
-				throw new WorkflowExecption("Collaboration has multiply participants. Yet not implemented");
+				throw new WorkflowException("Collaboration has multiply participants. Yet not implemented");
 			return parts.First().ExecuteAsync(context, token, onComplete);
 		}
 	}

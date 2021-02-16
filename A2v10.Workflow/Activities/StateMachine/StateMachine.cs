@@ -50,7 +50,7 @@ namespace A2v10.Workflow
 			_onComplete = onComplete;
 			var startNode = States.Find(s => s.IsStart);
 			if (startNode == null)
-				throw new WorkflowExecption("Flowchart. Start node not found");
+				throw new WorkflowException("Flowchart. Start node not found");
 			_currentState = startNode.Id;
 			context.Schedule(startNode, OnNextState, token);
 			return new ValueTask();
