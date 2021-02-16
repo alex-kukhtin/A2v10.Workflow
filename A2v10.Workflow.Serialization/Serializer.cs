@@ -18,7 +18,7 @@ namespace A2v10.Workflow.Serialization
 
 	public class Serializer : ISerializer
 	{
-		IXamlReaderService _xamlCodeProvider;
+		private readonly IXamlReaderService _xamlCodeProvider;
 
 		public Serializer(IXamlReaderService xamlCodeProvider)
 		{

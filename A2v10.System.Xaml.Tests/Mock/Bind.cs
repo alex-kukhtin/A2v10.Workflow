@@ -90,10 +90,12 @@ namespace A2v10.System.Xaml.Tests.Mock
 			return _bindImpl?.GetBinding(name);
 		}
 
+		/*
 		void SetBinding(String name, BindBase bind)
 		{
 			_bindImpl.SetBinding(name, bind);
 		}
+		*/
 
 		public BindCmd GetBindingCommand(String name)
 		{

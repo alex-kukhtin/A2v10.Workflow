@@ -243,7 +243,7 @@ namespace A2v10.System.Xaml
 		}
 
 
-		private Dictionary<String, AttachedPropertyDescriptor> BuildAttachedProperties(Type nodeType)
+		private static Dictionary<String, AttachedPropertyDescriptor> BuildAttachedProperties(Type nodeType)
 		{
 			var propList = nodeType.GetCustomAttribute<AttachedPropertiesAttribute>()?.List;
 			if (propList == null)

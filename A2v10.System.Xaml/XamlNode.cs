@@ -67,7 +67,7 @@ namespace A2v10.System.Xaml
 		public void AddProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			var td = builder.GetNodeDescriptor(Name);
-			Object propValue = null;
+			Object propValue;
 			if (node.Name == $"{Name}.{name}")
 				propValue = td.BuildNestedProperty(builder, td.MakeName(name), node);
 			else

@@ -21,4 +21,5 @@ Xaml
 ----
 8.  IUriContext
 15. Multiply OnEndInit???
-25.
+26. Тест NestedObjectBinding() не проходит
+
