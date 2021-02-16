@@ -10,20 +10,23 @@ namespace A2v10.System.Xaml
 		private readonly XmlReader _rdr;
 		private readonly XamlServicesOptions _options;
 		private readonly XamlServiceProvider _xamlServiceProvider;
+		private readonly TypeDescriptorCache _typeCache;
 
 		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
 
-		public XamlReader(XmlReader rdr, XamlServicesOptions options)
+		public XamlReader(XmlReader rdr, TypeDescriptorCache typeCache, XamlServicesOptions options)
 		{
 			_rdr = rdr;
+			_typeCache = typeCache;
 			_options = options;
+
 			_elemStack.Push(_root);
 			_xamlServiceProvider = new XamlServiceProvider();
 		}
 
 		public Object Read()
 		{
-			var nodeBuilder = new NodeBuilder(_xamlServiceProvider, _options);
+			var nodeBuilder = new NodeBuilder(_xamlServiceProvider, _typeCache, _options);
 			while (_rdr.Read())
 			{
 				if (_rdr.NodeType == XmlNodeType.Comment || _rdr.NodeType == XmlNodeType.Whitespace)

@@ -15,6 +15,7 @@ using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.SqlServer;
 using A2v10.Workflow.Serialization;
 using A2v10.Workflow.Interfaces.Api;
+using A2v10.System.Xaml;
 
 namespace A2v10.Workflow.WebHost
 {
@@ -32,6 +33,7 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<ISerializer, Serializer>();
 			services.AddSingleton<IScriptNativeObjectProvider, ScriptNativeObjects>();
+			services.AddSingleton<IXamlReaderService, XamlReaderService>();
 
 			services.AddScoped<IDeferredTarget, WorkflowDeferred>();
 

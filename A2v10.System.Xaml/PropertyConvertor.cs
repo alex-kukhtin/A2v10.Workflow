@@ -1,14 +1,13 @@
 ﻿
 using System;
 using System.ComponentModel;
-using System.Reflection;
 using System.Globalization;
 
 namespace A2v10.System.Xaml
 {
 	public static class PropertyConvertor
 	{
-		public static Object ConvertValue(Object value, Type type)
+		public static Object ConvertValue(Object value, Type type, TypeConverter typeConverter)
 		{
 			if (value == null)
 				return null;
@@ -25,12 +24,9 @@ namespace A2v10.System.Xaml
 			
 			if (type.IsEnum)
 				return Enum.Parse(type, value.ToString());
-			var conv = type.GetCustomAttribute<TypeConverterAttribute>();
-			if (conv != null)
+
+			if (typeConverter != null)
 			{
-				// TODO:::: лишнее преобразование. Переделать на Lambda
-				var convCtor = Type.GetType(conv.ConverterTypeName).GetConstructor(Array.Empty<Type>());
-				var typeConverter = convCtor.Invoke(Array.Empty<Object>()) as TypeConverter;
 				if (typeConverter.CanConvertFrom(valueType))
 					return typeConverter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
 			}

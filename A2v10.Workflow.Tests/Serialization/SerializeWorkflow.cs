@@ -46,7 +46,7 @@ namespace A2v10.Workflow.Tests.Serialization
 				}
 			};
 
-			var s = new Serializer();
+			var s = new Serializer(null);
 			var json = s.SerializeActitity(p, "json");
 
 			var sp = TestEngine.ServiceProvider();
@@ -84,7 +84,7 @@ namespace A2v10.Workflow.Tests.Serialization
 				}
 			};
 
-			var ser = new Serializer();
+			var ser = new Serializer(null);
 			var json = ser.SerializeActitity(s, "json");
 
 			var sp = TestEngine.ServiceProvider();
@@ -146,7 +146,7 @@ namespace A2v10.Workflow.Tests.Serialization
 				}
 			};
 
-			var ser = new Serializer();
+			var ser = new Serializer(null);
 			var json = ser.SerializeActitity(fc, "json");
 
 			var sp = TestEngine.ServiceProvider();

@@ -18,6 +18,13 @@ namespace A2v10.Workflow.Serialization
 
 	public class Serializer : ISerializer
 	{
+		IXamlReaderService _xamlCodeProvider;
+
+		public Serializer(IXamlReaderService xamlCodeProvider)
+		{
+			_xamlCodeProvider = xamlCodeProvider;
+		}
+
 		private static readonly JsonConverter[] _jsonConverters = new JsonConverter[]
 		{
 			new DoubleConverter(),
@@ -83,10 +90,9 @@ namespace A2v10.Workflow.Serialization
 			};
 		}
 
-
-		static IActivity DeserializeXaml(String text)
+		IActivity DeserializeXaml(String text)
 		{
-			var obj = XamlServices.Parse(text, XamlServicesOptions.BpmnXamlOptions);
+			var obj = _xamlCodeProvider.ParseXml(text, XamlServicesOptions.BpmnXamlOptions);
 			return obj switch
 			{
 				IActivityWrapper activityWrapper => activityWrapper.Root(),

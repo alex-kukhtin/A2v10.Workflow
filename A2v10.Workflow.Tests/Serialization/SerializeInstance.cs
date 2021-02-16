@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using A2v10.Workflow.Bpmn;
 using A2v10.Workflow.Serialization;
 using A2v10.Workflow.Interfaces;
+using A2v10.System.Xaml;
 
 namespace A2v10.Workflow.Tests.Serialization
 {
@@ -44,7 +45,7 @@ namespace A2v10.Workflow.Tests.Serialization
 				}
 			};
 
-			var s = new Serializer();
+			var s = new Serializer(new XamlReaderService());
 			var json = s.SerializeActitity(p, "json");
 
 			var r = s.DeserializeActitity(json, "json") as Process;
@@ -78,7 +79,7 @@ namespace A2v10.Workflow.Tests.Serialization
 				}
 			};
 
-			var ser = new Serializer();
+			var ser = new Serializer(null);
 			var json = ser.SerializeActitity(s, "json");
 
 			var r = ser.DeserializeActitity(json, "json") as Sequence;

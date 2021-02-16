@@ -20,7 +20,5 @@
 Xaml
 ----
 8.  IUriContext
-13. ??? TypeCache static ????
 15. Multiply OnEndInit???
-24. PropertyConvertor.ChangeType разобраться с CustomAttributes. Похоже там конвертор уже есть.
 25.

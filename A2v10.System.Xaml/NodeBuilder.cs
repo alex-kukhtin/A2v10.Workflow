@@ -30,18 +30,17 @@ namespace A2v10.System.Xaml
 	public class NodeBuilder
 	{
 
-		// STATIC????? diff namespaces???
-		private readonly ConcurrentDictionary<ClassNamePair, TypeDescriptor> _descriptorCache = new ConcurrentDictionary<ClassNamePair, TypeDescriptor>();
-
 		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
 		private readonly XamlServicesOptions _options;
 		private readonly XamlServiceProvider _serviceProvider;
+		private readonly TypeDescriptorCache _typeCache;
 
 		private readonly Lazy<List<Action>> _deferExec = new Lazy<List<Action>>();
 
-		public NodeBuilder(XamlServiceProvider serviceProvider, XamlServicesOptions options)
+		public NodeBuilder(XamlServiceProvider serviceProvider, TypeDescriptorCache typeCache, XamlServicesOptions options)
 		{
 			_serviceProvider = serviceProvider;
+			_typeCache = typeCache;
 			_options = options;
 		}
 
@@ -106,7 +105,7 @@ namespace A2v10.System.Xaml
 			Func<Object> ctor = null;
 			Action<Object, Object> addMethod = null;
 			Action<Object, String, Object> addDictionaryMethod = null;
-			Func<TypeConverter> typeConverter = null;
+			TypeConverter typeConverter = null;
 
 			if (propType != typeof(String))
 			{
@@ -114,10 +113,8 @@ namespace A2v10.System.Xaml
 				if (propCtor != null)
 					ctor = Expression.Lambda<Func<Object>>(Expression.New(propCtor)).Compile();
 				var conv = propType.GetCustomAttribute<TypeConverterAttribute>();
-				if (conv != null) {
-					var convCtor = Type.GetType(conv.ConverterTypeName).GetConstructor(Array.Empty<Type>());
-					typeConverter = Expression.Lambda<Func<TypeConverter>>(Expression.New(convCtor)).Compile();
-				}
+				if (conv != null)
+					typeConverter = Activator.CreateInstance(Type.GetType(conv.ConverterTypeName)) as TypeConverter;
 			}
 			var mtdAdd = propType.GetMethod("Add");
 			if (mtdAdd != null)
@@ -262,7 +259,7 @@ namespace A2v10.System.Xaml
 					throw new XamlException($"Invalid attached property {prop} for type {nodeType}");
 				var args = mtd.GetParameters();
 				var propValueType = args[1].ParameterType;
-				Func<TypeConverter> typeConverter = null;
+				TypeConverter typeConverter = null;
 
 				var lambda = Expression.Lambda<Action<Object, Object>>(
 					Expression.Call(mtd,
@@ -280,9 +277,7 @@ namespace A2v10.System.Xaml
 				if (tcAttr != null)
 				{
 					var convType = Type.GetType(tcAttr.ConverterTypeName);
-					typeConverter = Expression.Lambda<Func<TypeConverter>>(
-						Expression.New(convType)
-					).Compile();
+					typeConverter = Activator.CreateInstance(convType) as TypeConverter;
 				}
 
 				lst.Add(pName, new AttachedPropertyDescriptor()
@@ -335,7 +330,7 @@ namespace A2v10.System.Xaml
 					ClassName = CheckAlias(typeName),
 					IsCamelCase = nsd.IsCamelCase
 				};
-				return _descriptorCache.GetOrAdd(className, BuildTypeDescriptor);
+				return _typeCache.GetOrAdd(className, BuildTypeDescriptor);
 			}
 			else
 				throw new XamlReadException($"Namespace '{nsKey}' not found");

@@ -16,6 +16,7 @@ using A2v10.Workflow;
 using A2v10.Workflow.Serialization;
 
 using TestSite.Config;
+using A2v10.System.Xaml;
 
 namespace TestSite
 {
@@ -40,6 +41,7 @@ namespace TestSite
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();
+			services.AddSingleton<IXamlReaderService, XamlReaderService>();
 
 			services.AddSingleton<ISerializer, Serializer>();
 

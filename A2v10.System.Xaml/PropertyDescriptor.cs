@@ -14,7 +14,7 @@ namespace A2v10.System.Xaml
 		public Func<Object> Constructor { get; init; }
 		public Action<Object, Object> AddMethod { get; init; }
 		public Action<Object, String, Object> AddDictionaryMethod { get; init; }
-		public Func<TypeConverter> TypeConverter { get; init; }
+		public TypeConverter TypeConverter { get; init; }
 
 		public Boolean IsPlain => AddMethod == null && AddDictionaryMethod == null;
 		public Boolean IsArray => AddMethod != null && Constructor != null;

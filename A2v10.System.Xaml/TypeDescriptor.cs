@@ -44,7 +44,7 @@ namespace A2v10.System.Xaml
 			if (!Properties.TryGetValue(name, out PropertyDescriptor propDef))
 				throw new XamlException($"Property {name} not found in type {TypeName}");
 			var propInfo = propDef.PropertyInfo;
-			var val = PropertyConvertor.ConvertValue(value, propInfo.PropertyType);
+			var val = PropertyConvertor.ConvertValue(value, propInfo.PropertyType, propDef.TypeConverter);
 			if (propDef.AddMethod != null && !propInfo.CanWrite)
 			{
 				if (value is ICollection collSource)
@@ -67,14 +67,14 @@ namespace A2v10.System.Xaml
 				throw new XamlException($"ContentProperty not found in type {TypeName}");
 			if (String.IsNullOrEmpty(content))
 				return;
-			if (!Properties.TryGetValue(ContentProperty, out PropertyDescriptor countDef))
+			if (!Properties.TryGetValue(ContentProperty, out PropertyDescriptor contDef))
 			{
 				// May be readonly collection?
 				throw new XamlException($"Property {ContentProperty} not found in type {TypeName}");
 			}
-			var contProp = countDef.PropertyInfo;
+			var contProp = contDef.PropertyInfo;
 			// TODO: GetTypeDescriptor for contProp.PropertyType. May be collection?
-			var val = PropertyConvertor.ConvertValue(content, contProp.PropertyType);
+			var val = PropertyConvertor.ConvertValue(content, contProp.PropertyType, contDef.TypeConverter);
 			contProp.SetValue(instance, val);
 		}
 
@@ -136,10 +136,7 @@ namespace A2v10.System.Xaml
 				if (descr.PropertyType.IsEnum)
 					value = Enum.Parse(descr.PropertyType, value.ToString());
 				else if (descr.TypeConverter != null)
-				{
-					var tc = descr.TypeConverter();
-					value = tc.ConvertFromString(value.ToString());
-				}
+					value = descr.TypeConverter.ConvertFromString(value.ToString());
 				else
 					value = Convert.ChangeType(value, descr.PropertyType);
 				descr.Lambda(target, value);

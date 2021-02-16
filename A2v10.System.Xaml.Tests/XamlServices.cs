@@ -8,21 +8,17 @@ namespace A2v10.System.Xaml
 	{
 		public static Object Parse(String xaml, XamlServicesOptions options = null)
 		{
-			using var stringReader = new StringReader(xaml);
-			using var xmlrdr = XmlReader.Create(stringReader);
-			return Load(xmlrdr, options);
+			return (new XamlReaderService()).ParseXml(xaml, options);
 		}
 
 		public static Object Load(Stream stream, XamlServicesOptions options = null)
 		{
-			var xaml = new XamlReader(XmlReader.Create(stream), options);
-			return xaml.Read();
+			return (new XamlReaderService()).Load(stream, options);
 		}
 
 		public static Object Load(XmlReader rdr, XamlServicesOptions options = null)
 		{
-			var xaml = new XamlReader(rdr, options);
-			return xaml.Read();
+			return (new XamlReaderService()).Load(rdr, options);
 		}
 	}
 }
