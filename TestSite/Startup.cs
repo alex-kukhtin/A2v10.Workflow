@@ -33,7 +33,10 @@ namespace TestSite
 		{
 			services.AddControllersWithViews();
 			services.UseSimpleDbContext();
-			services.AddSingleton<IWorkflowCatalog, SqlServerWorkflowCatalog>();
+			if (FilesystemCatalog.IsConfigured(Configuration))
+				services.AddSingleton<IWorkflowCatalog, FilesystemCatalog>();
+			else
+				services.AddSingleton<IWorkflowCatalog, SqlServerWorkflowCatalog>();
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();

@@ -60,3 +60,47 @@ begin
 	order by DateCreated desc
 end
 go
+drop procedure if exists a2wfui.[WorkflowList.Update];
+go
+
+
+
+------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wfui' and DOMAIN_NAME = N'WorkflowList.TableType')
+	drop type a2wfui.[WorkflowList.TableType]
+go
+------------------------------------------------
+create type a2wfui.[WorkflowList.TableType] as table
+(
+	RowNumber int,
+	[DateCreated] datetime,
+	[Format] nvarchar(255),
+	Id nvarchar(255)
+)
+go
+create or alter procedure a2wfui.[WorkflowList.Metadata]
+as
+begin
+	declare @List a2wfui.[WorkflowList.TableType];
+	select [List!Workflows!Metadata] = null, * from @List;
+end
+go
+------------------------------------------------
+create or alter procedure a2wfui.[WorkflowList.Update]
+@UserId bigint = null,
+@List a2wfui.[WorkflowList.TableType] readonly
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+
+	select [Workflows!TWorkflow!Array] = null,
+		[Id!!Id] = c.Id,
+		c.[DateCreated], c.[Format],
+		InstanceCount = (select count(*) from a2wf.Instances i 
+			where WorkflowId = c.Id),
+		[Version] = (select max([Version]) from a2wf.Workflows w where w.Id = c.Id)
+	from @List c
+	order by c.RowNumber
+end
+go

@@ -41,7 +41,7 @@
 				<td>@wf.DateCreated.ToString()</td>
 				<td>@wf.InstanceCount</td>
 				<td style="width:0;white-space:nowrap">
-					<a class="btn btn-secondary btn-sm" asp-action="Index" asp-controller="Editor" asp-route-id="@wf.Id">Edit</a>
+					<a class="btn btn-secondary btn-sm" target="_blank" asp-action="Index" asp-controller="Editor" asp-route-id="@wf.Id">Edit</a>
 					<form style="display:inline" asp-action="PublishCatalog" asp-controller="workflow" method="post">
 						<input type="hidden" name="id" value="@wf.Id" />
 						<button class="btn btn-warning btn-sm" type="submit">Publish</button>
@@ -59,7 +59,7 @@
 					{
 						<button class="btn btn-info btn-sm">Instances</button>
 					}
-					<a class="btn btn-secondary btn-sm" asp-action="Viewer" asp-controller="Editor" asp-route-id="@wf.Id">View</a>
+					<a class="btn btn-secondary btn-sm" target="_blank" asp-action="Viewer" asp-controller="Editor" asp-route-id="@wf.Id">View</a>
 				</td>
 			</tr>
 			}
