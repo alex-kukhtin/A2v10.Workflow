@@ -180,6 +180,12 @@ namespace A2v10.System.Xaml
 				addCollection = collMethods.AddCollection;
 				addDictionary = collMethods.AddDictionary;
 			}
+			else
+			{
+				var collMethods = LambdaHelper.AddCollectionMethods(nodeType);
+				addCollection = collMethods.AddCollection;
+				addDictionary = collMethods.AddDictionary;
+			}
 
 			var propDefs = new Dictionary<String, PropertyDescriptor>();
 			foreach (var prop in props)
@@ -339,7 +345,7 @@ namespace A2v10.System.Xaml
 				{
 					var chObj = BuildNode(ch);
 					if(chObj != null)
-						nd.AddChildren(obj, chObj);
+						nd.AddChildren(obj, chObj, ch);
 				}
 			}
 

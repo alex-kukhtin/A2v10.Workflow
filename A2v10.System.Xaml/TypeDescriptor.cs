@@ -81,11 +81,19 @@ namespace A2v10.System.Xaml
 			contProp.SetValue(instance, val);
 		}
 
-		public void AddChildren(Object instance, Object elem)
+		public void AddChildren(Object instance, Object elem, XamlNode node)
 		{
 			if (ContentProperty == null)
 			{
-				AddCollection?.Invoke(instance, elem); // Invoke(instance, new Object[] { elem });
+				if (AddCollection != null)
+					AddCollection(instance, elem);
+				else if (AddDictionary != null)
+				{
+					var keyProp = node.Properties.Where(x => x.Key == "Key").FirstOrDefault().Value as SpecialPropertyDescriptor;
+					if (keyProp == null)
+						throw new XamlException($"Property Key not found in type {node.Name}");
+					AddDictionary(instance, keyProp.Name, elem);
+				}
 				return;
 			}
 			if (!Properties.TryGetValue(ContentProperty, out PropertyDescriptor contDef))
