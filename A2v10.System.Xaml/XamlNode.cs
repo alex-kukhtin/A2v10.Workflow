@@ -38,7 +38,7 @@ namespace A2v10.System.Xaml
 				// inner or attached
 				var parts = node.Name.Split(".");
 				if (parts.Length != 2)
-					throw new XamlReadException($"Invalid attribute name '{node.Name}'");
+					throw new XamlException($"Invalid attribute name '{node.Name}'");
 				if (parts[0] == this.Name)
 				{
 					// nested property
@@ -88,7 +88,7 @@ namespace A2v10.System.Xaml
 				var td = builder.GetNodeDescriptor(Name);
 				if (value != null && value.StartsWith("{") && value.EndsWith("}") && builder.EnableMarkupExtensions)
 					Extensions.Add(new XamlExtensionElem(td.GetPropertyInfo(td.MakeName(prop.Name)), builder.ParseExtension(value)));
-				else
+				else if (td != null)
 					Properties.Add(td.MakeName(prop.Name), value); // nd.BuildProperty(propName, value));
 			}
 		}

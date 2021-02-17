@@ -62,7 +62,7 @@ namespace A2v10.System.Xaml
 		XamlNode Parse()
 		{
 			if (_ch != '{')
-				throw new XamlReadException($"Invalid Xaml extension '{_text}'");
+				throw new XamlException($"Invalid Xaml extension '{_text}'");
 			NextChar();
 			Read();
 			return _node;
@@ -91,7 +91,7 @@ namespace A2v10.System.Xaml
 						_state = State.Name;
 					} 
 					else
-						throw new XamlReadException($"Invalid token type for State 'Start'. Expected: 'Ider', actual: '{_tokenType}', value: {TokenValue}");
+						throw new XamlException($"Invalid token type for State 'Start'. Expected: 'Ider', actual: '{_tokenType}', value: {TokenValue}");
 					break;
 				case State.Name:
 					if (_tokenType == TokenType.Ider)

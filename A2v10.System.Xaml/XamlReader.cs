@@ -38,9 +38,11 @@ namespace A2v10.System.Xaml
 			if (_root.Children.Value.Count == 0)
 				return 0;
 			else if (_root.Children.Value.Count > 1)
-				throw new XamlReadException("Invalid Xaml structure");
+				throw new XamlException("Invalid Xaml structure");
 			var r = _root.Children.Value[0];
 			var node = nodeBuilder.BuildNode(r);
+			if (node == null)
+				throw new XamlException("Root node not found");
 			_xamlServiceProvider.SetRoot(node);
 			nodeBuilder.ExecuteDeferred();
 			return node;

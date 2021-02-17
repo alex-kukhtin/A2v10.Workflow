@@ -17,6 +17,7 @@ namespace A2v10.System.Xaml
 		public Assembly Assembly { get; init; }
 		public Boolean IsCamelCase { get; init; }
 		public Boolean IsSpecial { get; init; }
+		public Boolean IsSkip { get; set; }
 	}
 
 	public record ClassNamePair
@@ -74,7 +75,8 @@ namespace A2v10.System.Xaml
 				{
 					Namespace = nsddef.Namespace,
 					Assembly = Assembly.Load(nsddef.Assembly),
-					IsCamelCase = nsddef.IsCamelCase
+					IsCamelCase = nsddef.IsCamelCase,
+					IsSkip = nsddef.IsSkip
 				};
 				_namespaces.Add(prefix, nsd);
 				return;
@@ -103,88 +105,43 @@ namespace A2v10.System.Xaml
 		{
 			Type propType = propInfo.PropertyType;
 			Func<Object> ctor = null;
-			Action<Object, Object> addMethod = null;
-			Action<Object, String, Object> addDictionaryMethod = null;
 			TypeConverter typeConverter = null;
 
 			if (propType != typeof(String))
 			{
 				var propCtor = propType.GetConstructor(Array.Empty<Type>());
 				if (propCtor != null)
-					ctor = Expression.Lambda<Func<Object>>(Expression.New(propCtor)).Compile();
+					ctor = Expression.Lambda<Func<Object>>(
+						Expression.New(propCtor)
+					).Compile();
 				var conv = propType.GetCustomAttribute<TypeConverterAttribute>();
 				if (conv != null)
 					typeConverter = Activator.CreateInstance(Type.GetType(conv.ConverterTypeName)) as TypeConverter;
 			}
-			var mtdAdd = propType.GetMethod("Add");
-			if (mtdAdd != null)
-			{
-				var args = mtdAdd.GetParameters();
-				if (args.Length == 1)
-				{
-					var argType = args[0].ParameterType;
 
-					var argPrm = Expression.Parameter(typeof(Object));
-					var inst = Expression.Parameter(typeof(Object));
-
-					addMethod = Expression.Lambda<Action<Object, Object>>(
-						Expression.Call(
-							Expression.Convert(inst, propType),
-							mtdAdd,
-							Expression.Convert(
-								argPrm,
-								argType
-							)
-						),
-						inst,
-						argPrm
-					).Compile();
-				} 
-				else if (args.Length == 2)
-				{
-					var argType = args[1].ParameterType; // value
-
-					var argPrm = Expression.Parameter(typeof(Object));
-					var argKey = Expression.Parameter(typeof(String));
-					var inst = Expression.Parameter(typeof(Object));
-
-					addDictionaryMethod = Expression.Lambda<Action<Object, String, Object>>(
-						Expression.Call(
-							Expression.Convert(inst, propType),
-							mtdAdd,
-							argKey,
-							Expression.Convert(
-								argPrm,
-								argType
-							)
-						),
-						inst,
-						argKey,
-						argPrm
-					).Compile();
-				}
-			}
+			var collLambdas = LambdaHelper.AddCollectionMethods(propType);
 
 			return new PropertyDescriptor()
 			{
 				PropertyInfo = propInfo,
 				Constructor = ctor,
 				TypeConverter = typeConverter,
-				AddMethod = addMethod,
-				AddDictionaryMethod = addDictionaryMethod
+				AddMethod = collLambdas.AddCollection,
+				AddDictionaryMethod = collLambdas.AddDictionary
 			};
 		}
 
 		TypeDescriptor BuildTypeDescriptor(ClassNamePair namePair)
 		{
 			if (!_namespaces.TryGetValue(namePair.Prefix, out NamespaceDefinition nsd))
-				throw new XamlReadException($"Namespace {namePair.Namespace} not found");
+				throw new XamlException($"Namespace {namePair.Namespace} not found");
 			var typeName = $"{namePair.Namespace}.{namePair.ClassName}";
 			var nodeType = nsd.Assembly.GetType(typeName);
 			if (nodeType == null)
-				throw new XamlReadException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
+				throw new XamlException($"Class {namePair.Namespace}.{namePair.ClassName} not found");
 			Func<Object> constructor = null;
 			Func<String, Object> constructorStr = null;
+			Func<IServiceProvider, Object> constructorService = null;
 			var ctor0 = nodeType.GetConstructor(Array.Empty<Type>());
 			if (ctor0 != null)
 				constructor = Expression.Lambda<Func<Object>>(Expression.New(nodeType)).Compile();
@@ -197,10 +154,20 @@ namespace A2v10.System.Xaml
 					prm
 				).Compile();
 			}
+			var ctorService = nodeType.GetConstructor(new Type[] { typeof(IServiceProvider) });
+			if (ctorService != null)
+			{
+				var prm = Expression.Parameter(typeof(IServiceProvider));
+				constructorService = Expression.Lambda<Func<IServiceProvider, Object>>(
+					Expression.New(ctorService, prm),
+					prm
+				).Compile();
+			}
+
 			var props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-			MethodInfo addCollection1 = null;
-			MethodInfo addCollection2 = null;
+			Action<Object,Object> addCollection = null;
+			Action<Object, String, Object> addDictionary = null;
 
 			var contentProperty = nodeType.GetCustomAttribute<ContentPropertyAttribute>()?.Name;
 
@@ -209,22 +176,14 @@ namespace A2v10.System.Xaml
 				var contProp = props.Where(x => x.Name == contentProperty).FirstOrDefault();
 				if (contProp == null)
 					throw new XamlException($"Property {contentProperty} not found in type {typeName}");
-				var mtdAdd = contProp.PropertyType.GetMethod("Add");
-				if (mtdAdd != null)
-				{
-					var mtdAddPraramCount = mtdAdd.GetParameters().Length;
-					if (mtdAddPraramCount == 1)
-						addCollection1 = mtdAdd;
-					else if (mtdAddPraramCount == 2)
-						addCollection2 = mtdAdd;
-				}
+				var collMethods = LambdaHelper.AddCollectionMethods(contProp.PropertyType);
+				addCollection = collMethods.AddCollection;
+				addDictionary = collMethods.AddDictionary;
 			}
 
 			var propDefs = new Dictionary<String, PropertyDescriptor>();
 			foreach (var prop in props)
-			{
 				propDefs.Add(prop.Name, BuildPropertyDefinition(prop));
-			}
 
 			return new TypeDescriptor()
 			{
@@ -234,11 +193,12 @@ namespace A2v10.System.Xaml
 				BuildNode = this.BuildNode,
 				Constructor = constructor,
 				ConstructorString = constructorStr,
+				ConstructorService = constructorService,
 				Properties = propDefs,
 				ContentProperty = contentProperty,
-				AddCollection1 = addCollection1,
+				AddCollection = addCollection,
+				AddDictionary = addDictionary,
 				AttachedProperties = BuildAttachedProperties(nodeType)
-				//AddCollection2 = addCollection2
 			};
 		}
 
@@ -257,6 +217,7 @@ namespace A2v10.System.Xaml
 				var mtd = nodeType.GetMethod($"Set{pName}", BindingFlags.Static | BindingFlags.Public);
 				if (mtd == null)
 					throw new XamlException($"Invalid attached property {prop} for type {nodeType}");
+				
 				var args = mtd.GetParameters();
 				var propValueType = args[1].ParameterType;
 				TypeConverter typeConverter = null;
@@ -296,7 +257,7 @@ namespace A2v10.System.Xaml
 				return (name, false);
 			var name2 = name.Split(':');
 			if (!_namespaces.TryGetValue(name2[0], out NamespaceDefinition def))
-				throw new XamlReadException($"Namespace '{name2[0]}' not found");
+				throw new XamlException($"Namespace '{name2[0]}' not found");
 			if (def.IsCamelCase)
 				return (name2[1].ToPascalCase(), false);
 			if (def.IsSpecial)
@@ -317,6 +278,8 @@ namespace A2v10.System.Xaml
 			}
 			if (_namespaces.TryGetValue(nsKey, out NamespaceDefinition nsd))
 			{
+				if (nsd.IsSkip)
+					return null;
 				if (nsd.IsCamelCase)
 				{
 					// file: camelCase
@@ -333,7 +296,7 @@ namespace A2v10.System.Xaml
 				return _typeCache.GetOrAdd(className, BuildTypeDescriptor);
 			}
 			else
-				throw new XamlReadException($"Namespace '{nsKey}' not found");
+				throw new XamlException($"Namespace '{nsKey}' not found");
 		}
 
 		String CheckAlias(String name)
@@ -349,9 +312,13 @@ namespace A2v10.System.Xaml
 		public Object BuildNode(XamlNode node)
 		{
 			var nd = GetNodeDescriptor(node.Name);
+			if (nd == null)
+				return null;
 			Object obj = null;
 			if (node.ConstructorArgument != null)
 				obj = nd.ConstructorString(node.ConstructorArgument);
+			else if (nd.ConstructorService != null)
+				obj = nd.ConstructorService(_serviceProvider);
 			else if (nd.Constructor != null)
 				obj = nd.Constructor();
 			else
@@ -371,7 +338,8 @@ namespace A2v10.System.Xaml
 				foreach (var ch in node.Children.Value)
 				{
 					var chObj = BuildNode(ch);
-					nd.AddChildren(obj, chObj);
+					if(chObj != null)
+						nd.AddChildren(obj, chObj);
 				}
 			}
 

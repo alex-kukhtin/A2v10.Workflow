@@ -28,7 +28,7 @@ namespace A2v10.System.Xaml
 				if (PropertyInfo.CanWrite)
 					return XamlNode.GetNodeValue(builder, node);
 				else
-					throw new XamlReadException($"Property {PropertyInfo.PropertyType} is read only");
+					throw new XamlException($"Property {PropertyInfo.PropertyType} is read only");
 			}
 			else if (IsDictionary && node.HasChildren)
 			{
@@ -41,7 +41,8 @@ namespace A2v10.System.Xaml
 					if (key is SpecialPropertyDescriptor spec)
 					{
 						var dVal = builder.BuildNode(nd);
-						AddDictionaryMethod(dict, spec.Name, dVal);
+						if (dVal != null)
+							AddDictionaryMethod(dict, spec.Name, dVal);
 					}
 				}
 				return dict;

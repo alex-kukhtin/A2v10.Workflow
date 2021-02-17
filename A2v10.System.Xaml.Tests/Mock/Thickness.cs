@@ -81,7 +81,7 @@ namespace A2v10.System.Xaml.Tests.Mock
 				String strVal = value.ToString();
 				return Thickness.FromString(strVal);
 			}
-			throw new XamlReadException($"Invalid Thickness value '{value}'");
+			throw new XamlException($"Invalid Thickness value '{value}'");
 		}
 	}
 }

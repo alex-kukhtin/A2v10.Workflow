@@ -14,12 +14,15 @@ namespace A2v10.System.Xaml
 
 		public Func<Object> Constructor { get; init; }
 		public Func<String, Object> ConstructorString { get; init; }
+		public Func<XamlServiceProvider, Object> ConstructorService { get; init; }
 
 		public Dictionary<String, PropertyDescriptor> Properties { get; init; }
 
 		public String ContentProperty { get; init; }
 
-		public MethodInfo AddCollection1 { get; init; }
+		public Action<Object,Object> AddCollection { get; init; }
+		public Action<Object, String, Object> AddDictionary { get; init; }
+
 		public Dictionary<String, AttachedPropertyDescriptor> AttachedProperties { get; init; }
 
 		public Boolean IsCamelCase { get; init; }
@@ -82,8 +85,7 @@ namespace A2v10.System.Xaml
 		{
 			if (ContentProperty == null)
 			{
-				if (AddCollection1 != null)
-					AddCollection1.Invoke(instance, new Object[] { elem });
+				AddCollection?.Invoke(instance, elem); // Invoke(instance, new Object[] { elem });
 				return;
 			}
 			if (!Properties.TryGetValue(ContentProperty, out PropertyDescriptor contDef))
@@ -106,14 +108,13 @@ namespace A2v10.System.Xaml
 					contProp.SetValue(instance, contObj);
 				}
 			}
-			if (AddCollection1 != null)
-				AddCollection1.Invoke(contObj, new Object[] { elem });
+			AddCollection?.Invoke(contObj, elem); //.Invoke(contObj, new Object[] { elem });
 		}
 
 		public Object BuildNestedProperty(NodeBuilder builder, String name, XamlNode node)
 		{
 			if (!Properties.TryGetValue(name, out PropertyDescriptor propDef))
-				throw new XamlReadException($"Property {name} not found");
+				throw new XamlException($"Property {name} not found");
 			if (node == null)
 				return null;
 			return propDef.BuildElement(builder, node);
@@ -124,7 +125,7 @@ namespace A2v10.System.Xaml
 		{
 			if (Properties.TryGetValue(name, out PropertyDescriptor propDef))
 				return propDef.PropertyInfo;
-			throw new XamlReadException($"Property {name} not found");
+			throw new XamlException($"Property {name} not found");
 		}
 
 		public void SetAttachedPropertyValue(String prop, Object target, Object value)

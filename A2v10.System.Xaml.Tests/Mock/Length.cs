@@ -48,7 +48,6 @@ namespace A2v10.System.Xaml.Tests.Mock
 		public static Length FromString(String strVal)
 		{
 			strVal = strVal.Trim();
-			Double dblVal = 0;
 			if (strVal == "Auto")
 				return new Length() { Value = "auto" };
 			if (strVal == "Fit")
@@ -59,9 +58,9 @@ namespace A2v10.System.Xaml.Tests.Mock
 				return new Length() { Value = strVal };
 			else if (IsValidLength(strVal))
 				return new Length() { Value = strVal };
-			else if (Double.TryParse(strVal, out dblVal))
-				return new Length() { Value = strVal + "px" };
-			throw new XamlReadException($"Invalid length value '{strVal}'");
+			else if (Double.TryParse(strVal, out Double dblVal))
+				return new Length() { Value = $"{dblVal}px" };
+			throw new XamlException($"Invalid length value '{strVal}'");
 		}
 	}
 
@@ -85,7 +84,7 @@ namespace A2v10.System.Xaml.Tests.Mock
 				String strVal = value.ToString();
 				return Length.FromString(strVal);
 			}
-			throw new XamlReadException($"Invalid length value '{value}'");
+			throw new XamlException($"Invalid length value '{value}'");
 		}
 	}
 }
