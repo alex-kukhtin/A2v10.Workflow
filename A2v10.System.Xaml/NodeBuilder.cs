@@ -273,7 +273,6 @@ namespace A2v10.System.Xaml
 
 		public TypeDescriptor GetNodeDescriptor(String typeName)
 		{
-			//GetNode
 			String nsKey = String.Empty;
 			if (typeName.Contains(":"))
 			{
@@ -337,7 +336,14 @@ namespace A2v10.System.Xaml
 			{
 				if (propValue is SpecialPropertyDescriptor)
 					continue;
-				nd.SetPropertyValue(obj, propKey, propValue);
+				if (propValue is MarkupExtension markup)
+				{
+					// deferred!
+					var propInfo = nd.GetPropertyInfo(propKey);
+					node.Extensions.Add(new XamlExtensionElem(propInfo, markup));
+				}
+				else
+					nd.SetPropertyValue(obj, propKey, propValue);
 			}
 			if (node.HasChildren)
 			{

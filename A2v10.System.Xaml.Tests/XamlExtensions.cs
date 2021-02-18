@@ -89,12 +89,10 @@ namespace A2v10.System.Xaml.Tests
 			var btn = obj as Button;
 			Assert.AreEqual("Text", btn.Content);
 
-			/*
 			var cmd = btn.GetBindingCommand("Command");
 			Assert.AreEqual(typeof(BindCmd), cmd.GetType());
 			Assert.AreEqual("Execute", cmd.Command.ToString());
 			Assert.AreEqual("File", cmd.CommandName);
-			*/
 		}
 
 

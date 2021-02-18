@@ -21,8 +21,7 @@ Xaml
 ----
 8.  IUriContext
 15. Multiply OnEndInit???
-26. Тест NestedObjectBinding() не проходит
 28. AttachedProperties через IServiceProvider. Убрать ThreadSafe static.
-(если есть свойство, то все-же вызывать )
+(если есть свойство, то все-же вызывать)
 
 

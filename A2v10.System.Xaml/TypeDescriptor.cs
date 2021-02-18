@@ -111,12 +111,11 @@ namespace A2v10.System.Xaml
 					contProp.SetValue(instance, elem);
 				else
 				{
-					var ctor = contProp.PropertyType.GetConstructor(Array.Empty<Type>());
-					contObj = ctor.Invoke(Array.Empty<Object>());
+					contObj = contDef.Constructor();
 					contProp.SetValue(instance, contObj);
 				}
 			}
-			AddCollection?.Invoke(contObj, elem); //.Invoke(contObj, new Object[] { elem });
+			AddCollection?.Invoke(contObj, elem);
 		}
 
 		public Object BuildNestedProperty(NodeBuilder builder, String name, XamlNode node)
