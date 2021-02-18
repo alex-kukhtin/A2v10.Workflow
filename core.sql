@@ -21,6 +21,11 @@ begin
 	);
 end
 go
+if not exists(select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Workflows' and COLUMN_NAME=N'SubVersion')
+	alter table a2wf.Workflows
+	add SubVersion int not null
+		constraint DF_Workflows_SubVersion default(0);
+go
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'Catalog')
 begin
@@ -162,17 +167,22 @@ as
 begin
 	set nocount on;
 	set transaction isolation level read committed;
-	
-	insert into a2wf.Workflows (Id, [Format], [Text], [Version])
-	output inserted.Id, inserted.[Version]
-	select v.Id, v.[Format], v.[Text], coalesce(cs.[Version], 0) + 1
-	from (values (@Id, @Format, @Text)) v (Id, [Format], [Text])
-	left join (
-		select c.Id, c.[Version], c.[Format], c.[Text], c.DateCreated,
-			RN=row_number() over (partition by c.Id order by c.[Version] desc)
-		from a2wf.Workflows c
-	) cs on cs.Id=v.Id and cs.RN=1
-	where cs.Id is null or not (v.[Format]=cs.[Format] and v.[Text]=cs.[Text]);
+
+	merge into a2wf.Workflows tt
+	using (
+		select v.Id, v.[Format], v.[Text],
+			[Version]=iif(cs.Id is not null and (v.[Format]=cs.[Format] and v.[Text]=cs.[Text]),cs.[Version],coalesce(cs.[Version], 0) + 1)
+		from (values (@Id, @Format, @Text)) v (Id, [Format], [Text])
+		left join (
+			select c.Id, c.[Version], c.[Format], c.[Text], c.DateCreated,
+				RN=row_number() over (partition by c.Id order by c.[Version] desc)
+			from a2wf.Workflows c
+		) cs on cs.Id=v.Id and cs.RN=1
+	) ss on ss.Id=tt.Id and ss.[Version]=tt.[Version]
+	when not matched by target then insert (Id, [Format], [Text], [Version])
+		values (ss.Id, ss.[Format], ss.[Text], ss.[Version])
+	when matched then update set tt.SubVersion=tt.SubVersion+1
+	output ss.Id, ss.[Version];
 
 end
 go

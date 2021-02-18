@@ -51,7 +51,6 @@ namespace A2v10.Workflow.SqlServer
 			return eo.Get<String>("Text");
 		}
 
-		// TODO: remove
 		public async Task<IIdentity> PublishAsync(String id, String text, String format)
 		{
 			var prms = new ExpandoObject();
@@ -69,16 +68,24 @@ namespace A2v10.Workflow.SqlServer
 
 		public async Task<IIdentity> PublishAsync(IWorkflowCatalog catalog, String id)
 		{
-			var prms = new ExpandoObject();
-			prms.Set("Id", id);
-
-			var res = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Catalog.Publish]", prms);
-
-			return new Identity()
+			if (catalog is SqlServerWorkflowCatalog)
 			{
-				Id = res.Get<String>("Id"),
-				Version = res.Get<Int32>("Version")
-			};
+				var prms = new ExpandoObject();
+				prms.Set("Id", id);
+
+				var res = await _dbContext.ReadExpandoAsync(null, $"{Definitions.SqlSchema}.[Catalog.Publish]", prms);
+
+				return new Identity()
+				{
+					Id = res.Get<String>("Id"),
+					Version = res.Get<Int32>("Version")
+				};
+			}
+            else
+            {
+				var wf = await catalog.LoadBodyAsync(id);
+				return await PublishAsync(id, wf.Body, wf.Format);
+			}
 		}
 	}
 }
