@@ -10,8 +10,9 @@ export default function globalScriptProps(group, element, bpmnFactory, translate
 	if (is(element, "bpmn:Collaboration")) {
 		let textBox = entryFactory.textBox(translate, {
 			id: 'script',
-			label: 'Global Script',
+			label: translate('Global Script'),
 			modelProperty: 'text',
+			isScript: true,
 			get(elem, node) {
 				let ee = extensionElementsImpl.getExtensionElement(elem, "wf:GlobalScript");
 				return ee ? { text: ee.text } : {};

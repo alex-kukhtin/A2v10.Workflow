@@ -41,7 +41,6 @@ namespace A2v10.Workflow.SqlServer
 				},
 				Root = _serializer.DeserializeActitity(eo.Get<String>("Text"), eo.Get<String>("Format"))
 			};
-			wf.Root.OnEndInit();
 			return wf;
 		}
 

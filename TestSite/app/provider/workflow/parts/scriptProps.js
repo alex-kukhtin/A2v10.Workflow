@@ -10,16 +10,18 @@ export default function scriptProps(group, element, bpmnFactory, translate) {
 	if (is(element, 'bpmn:ScriptTask')) {
 		let textBox = entryFactory.textBox(translate, {
 			id: 'script',
-			label: 'Script',
-			modelProperty: 'script'
+			label: translate('Script'),
+			modelProperty: 'script',
+			isScript: true
 		});
 		group.entries.push(textBox);
 	}
 	else if (is(element, "bpmn:UserTask")) {
 		let textBox = entryFactory.textBox(translate, {
 			id: 'script',
-			label: 'Script',
+			label: translate('Script'),
 			description: 'Executed after task completion',
+			isScript: true,
 			modelProperty: 'text',
 			get(elem, node) {
 				let ee = extensionElementsImpl.getExtensionElement(elem, "wf:Script");

@@ -1233,8 +1233,9 @@ var textBox = function (translate, options, defaultParameters) {
   var resource = defaultParameters,
       label = options.label || resource.id,
       canBeShown = !!options.show && typeof options.show === 'function',
-      description = options.description;
-  resource.html = (0, _minDom.domify)('<label for="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + label + '</label>' + '<div class="bpp-field-wrapper" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + '<div contenteditable="true" id="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + 'name="' + (0, _Utils.escapeHTML)(options.modelProperty) + '" />' + '</div>'); // add description below text box entry field
+      description = options.description,
+      className = options.isScript ? 'class="js-text" ' : '';
+  resource.html = (0, _minDom.domify)('<label for="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + label + '</label>' + '<div class="bpp-field-wrapper" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + '<div contenteditable="true" id="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + className + 'name="' + (0, _Utils.escapeHTML)(options.modelProperty) + '" />' + '</div>'); // add description below text box entry field
 
   if (description) {
     resource.html.appendChild((0, _EntryFieldDescription.default)(translate, description, {
@@ -2814,8 +2815,9 @@ function globalScriptProps(group, element, bpmnFactory, translate) {
   if ((0, _ModelUtil.is)(element, "bpmn:Collaboration")) {
     let textBox = _EntryFactory.default.textBox(translate, {
       id: 'script',
-      label: 'Global Script',
+      label: translate('Global Script'),
       modelProperty: 'text',
+      isScript: true,
 
       get(elem, node) {
         let ee = _extensionElements.default.getExtensionElement(elem, "wf:GlobalScript");
@@ -2956,16 +2958,18 @@ function scriptProps(group, element, bpmnFactory, translate) {
   if ((0, _ModelUtil.is)(element, 'bpmn:ScriptTask')) {
     let textBox = _EntryFactory.default.textBox(translate, {
       id: 'script',
-      label: 'Script',
-      modelProperty: 'script'
+      label: translate('Script'),
+      modelProperty: 'script',
+      isScript: true
     });
 
     group.entries.push(textBox);
   } else if ((0, _ModelUtil.is)(element, "bpmn:UserTask")) {
     let textBox = _EntryFactory.default.textBox(translate, {
       id: 'script',
-      label: 'Script',
+      label: translate('Script'),
       description: 'Executed after task completion',
+      isScript: true,
       modelProperty: 'text',
 
       get(elem, node) {

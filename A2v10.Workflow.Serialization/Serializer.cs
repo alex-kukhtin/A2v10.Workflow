@@ -71,13 +71,15 @@ namespace A2v10.Workflow.Serialization
 
 		public IActivity DeserializeActitity(String text, String format)
 		{
-			return format switch
+			var activitiy = format switch
 			{
 				"json" => JsonConvert.DeserializeObject<ActivityWrapper>(text, _actititySettings).Root,
 				"xaml" => DeserializeXaml(text),
 				"text/xml" => DeserializeXaml(text),
 				_ => throw new NotImplementedException($"Deserialize for format '{format}' is not supported"),
 			};
+			activitiy.OnEndInit();
+			return activitiy;
 		}
 
 

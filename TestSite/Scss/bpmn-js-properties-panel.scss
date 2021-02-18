@@ -2,6 +2,8 @@
 
 
 $background-color: #faf9f8;
+$mono-space-font-family: Consolas, Courier New, Courier, monospace;
+
 
 @font-face {
   font-family: 'bpmn-js-pp';
@@ -21,6 +23,12 @@ $background-color: #faf9f8;
 
 	label, input {
 		vertical-align: middle;
+	}
+
+	.js-text {
+		font-family: $mono-space-font-family;
+		font-size:13px;
+		color:darkblue;
 	}
 }
 .bpp-properties-panel button,

@@ -10,7 +10,8 @@ var textBox = function (translate, options, defaultParameters) {
 	var resource = defaultParameters,
 		label = options.label || resource.id,
 		canBeShown = !!options.show && typeof options.show === 'function',
-		description = options.description;
+		description = options.description,
+		className = options.isScript ? 'class="js-text" ' : '';
 
 	resource.html =
 		domify('<label for="wf-' + escapeHTML(resource.id) + '" ' +
@@ -19,7 +20,7 @@ var textBox = function (translate, options, defaultParameters) {
 			'<div class="bpp-field-wrapper" ' +
 			(canBeShown ? 'data-show="isShown"' : '') +
 			'>' +
-			'<div contenteditable="true" id="wf-' + escapeHTML(resource.id) + '" ' +
+			'<div contenteditable="true" id="wf-' + escapeHTML(resource.id) + '" ' + className +
 			'name="' + escapeHTML(options.modelProperty) + '" />' +
 			'</div>');
 

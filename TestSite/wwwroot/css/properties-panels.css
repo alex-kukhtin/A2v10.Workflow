@@ -12,6 +12,10 @@
     display: none; }
   .bpp-properties-panel label, .bpp-properties-panel input {
     vertical-align: middle; }
+  .bpp-properties-panel .js-text {
+    font-family: Consolas, Courier New, Courier, monospace;
+    font-size: 13px;
+    color: darkblue; }
 
 .bpp-properties-panel button,
 .bpp-properties-panel input,
