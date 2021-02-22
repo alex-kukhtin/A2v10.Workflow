@@ -11,7 +11,6 @@
 23. BPMN. Task parallel, sequence, loop
 
 24. Unlock instance after EXCEPTION
-26. BpmnViwer - подсветка посещенных элементов
 27. Workflow.Publish - Save generated script
 28. Process:GlobalScript
 29. JS editor
@@ -19,9 +18,7 @@
 
 Xaml
 ----
-8.  IUriContext
 15. Multiply OnEndInit???
-28. AttachedProperties через IServiceProvider. Убрать ThreadSafe static.
-(если есть свойство, то все-же вызывать)
+16. 
 
 

@@ -14,7 +14,7 @@ namespace A2v10.System.Xaml
 
 		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
 
-		public XamlReader(XmlReader rdr, TypeDescriptorCache typeCache, XamlServicesOptions options)
+		public XamlReader(XmlReader rdr, Uri baseUri, TypeDescriptorCache typeCache, XamlServicesOptions options)
 		{
 			_rdr = rdr;
 			_typeCache = typeCache;
@@ -22,6 +22,12 @@ namespace A2v10.System.Xaml
 
 			_elemStack.Push(_root);
 			_xamlServiceProvider = new XamlServiceProvider();
+			if (baseUri != null)
+			{
+				var uriContext = _xamlServiceProvider.GetService<IUriContext>();
+				if (uriContext != null)
+					uriContext.BaseUri = baseUri;
+			}
 		}
 
 		public Object Read()
@@ -115,6 +121,11 @@ namespace A2v10.System.Xaml
 
 		static void AddDeclaration()
 		{
+		}
+
+		public void InjectService<T>(T service)
+		{
+			_xamlServiceProvider.AddService<T>(service);
 		}
 
 	}

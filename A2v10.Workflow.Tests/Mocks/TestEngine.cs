@@ -30,7 +30,7 @@ namespace A2v10.Workflow.Tests
 			collection.AddSingleton<IWorkflowStorage, InMemoryWorkflowStorage>();
 			collection.AddSingleton<IInstanceStorage, InMemoryInstanceStorage>();
 			collection.AddSingleton<IWorkflowCatalog, InMemoryWorkflowCatalog>();
-			collection.AddSingleton<IXamlReaderService, XamlReaderService>();
+			collection.AddSingleton<IXamlReaderService, WorkflowXamlReaderService>();
 
 			collection.AddSingleton<ISerializer, Serializer>();
 			collection.AddScoped<IWorkflowEngine, WorkflowEngine>();

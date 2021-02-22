@@ -12,6 +12,7 @@ namespace A2v10.System.Xaml
 		public Dictionary<String, String> Aliases { get; init; }
 		public Boolean DisableMarkupExtensions { get; init; }
 
+		public Action<XamlReader> OnCreateReader { get; init; }
 
 		private static readonly NamespaceDef[] BPMNNamespaces = new NamespaceDef[] {
 			new NamespaceDef("http://www.omg.org/spec/bpmn/20100524/model", true, "A2v10.Workflow.Bpmn", "A2v10.Workflow", false),

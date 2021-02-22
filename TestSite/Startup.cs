@@ -41,7 +41,7 @@ namespace TestSite
 			services.AddSingleton<IWorkflowStorage, SqlServerWorkflowStorage>();
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<IScriptNativeObjectProvider, AppScriptNativeObjects>();
-			services.AddSingleton<IXamlReaderService, XamlReaderService>();
+			services.AddSingleton<IXamlReaderService, WorkflowXamlReaderService>();
 
 			services.AddSingleton<ISerializer, Serializer>();
 

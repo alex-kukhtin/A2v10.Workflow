@@ -102,15 +102,23 @@ namespace A2v10.System.Xaml
 		{
 			if (!AttachedProperties.IsValueCreated)
 				return;
-			foreach (var ap in AttachedProperties.Value)
+			var propManager = builder.AttachedPropertyManager;
+			if (propManager != null)
 			{
-				var aps = ap.Name.Split('.');
-				if (aps.Length != 2)
-					continue;
-				var elemDescr = builder.GetNodeDescriptor(aps[0]);
-				elemDescr.SetAttachedPropertyValue(aps[1], target, ap.Value);
+				foreach (var ap in AttachedProperties.Value)
+					propManager.SetProperty(ap.Name, target, ap.Value);
+			} 
+			else
+			{
+				foreach (var ap in AttachedProperties.Value)
+				{
+					var aps = ap.Name.Split('.');
+					if (aps.Length != 2)
+						continue;
+					var elemDescr = builder.GetNodeDescriptor(aps[0]);
+					elemDescr.SetAttachedPropertyValue(aps[1], target, ap.Value);
+				}
 			}
 		}
-
 	}
 }

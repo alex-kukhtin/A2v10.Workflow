@@ -2,8 +2,6 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -47,13 +45,15 @@ namespace A2v10.System.Xaml
 
 		NamespaceDef IsCustomNamespace(String value)
 		{
-			if (_options == null)
+			if (_options == null || _options.Namespaces == null)
 				return null;
 			value = value.ToLowerInvariant();
 			return _options.Namespaces.FirstOrDefault(x => x.Name == value);
 		}
 
 		public Boolean EnableMarkupExtensions => _options == null || !_options.DisableMarkupExtensions;
+
+		public IAttachedPropertyManager AttachedPropertyManager => _serviceProvider.GetService<IAttachedPropertyManager>();
 
 		private static readonly Regex _namespaceRegEx = new Regex(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
 
@@ -209,8 +209,10 @@ namespace A2v10.System.Xaml
 		}
 
 
-		private static Dictionary<String, AttachedPropertyDescriptor> BuildAttachedProperties(Type nodeType)
+		private Dictionary<String, AttachedPropertyDescriptor> BuildAttachedProperties(Type nodeType)
 		{
+			if (AttachedPropertyManager != null)
+				return null;
 			var propList = nodeType.GetCustomAttribute<AttachedPropertiesAttribute>()?.List;
 			if (propList == null)
 				return null;

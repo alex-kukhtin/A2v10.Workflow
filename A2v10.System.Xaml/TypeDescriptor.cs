@@ -89,8 +89,7 @@ namespace A2v10.System.Xaml
 					AddCollection(instance, elem);
 				else if (AddDictionary != null)
 				{
-					var keyProp = node.Properties.Where(x => x.Key == "Key").FirstOrDefault().Value as SpecialPropertyDescriptor;
-					if (keyProp == null)
+					if (node.Properties.Where(x => x.Key == "Key").FirstOrDefault().Value is not SpecialPropertyDescriptor keyProp)
 						throw new XamlException($"Property Key not found in type {node.Name}");
 					AddDictionary(instance, keyProp.Name, elem);
 				}

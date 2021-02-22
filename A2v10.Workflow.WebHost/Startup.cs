@@ -33,7 +33,7 @@ namespace A2v10.Workflow.WebHost
 			services.AddSingleton<IInstanceStorage, SqlServerInstanceStorage>();
 			services.AddSingleton<ISerializer, Serializer>();
 			services.AddSingleton<IScriptNativeObjectProvider, ScriptNativeObjects>();
-			services.AddSingleton<IXamlReaderService, XamlReaderService>();
+			services.AddSingleton<IXamlReaderService, WorkflowXamlReaderService>();
 
 			services.AddScoped<IDeferredTarget, WorkflowDeferred>();
 

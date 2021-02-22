@@ -12,22 +12,27 @@ namespace A2v10.System.Xaml
 	{
 		private readonly TypeDescriptorCache _typeDescriptorCache = new TypeDescriptorCache();
 
-		public Object ParseXml(String xml, XamlServicesOptions options = null)
+		public virtual XamlServicesOptions Options { get; set; }
+
+
+		public Object ParseXml(String xml)
 		{
 			using var stringReader = new StringReader(xml);
 			using var xmlrdr = XmlReader.Create(stringReader);
-			return Load(xmlrdr, options);
+			return Load(xmlrdr);
 		}
 
-		public Object Load(Stream stream, XamlServicesOptions options = null)
+		public Object Load(Stream stream, Uri baseUri = null)
 		{
-			var xaml = new XamlReader(XmlReader.Create(stream), _typeDescriptorCache, options);
+			var xaml = new XamlReader(XmlReader.Create(stream), baseUri, _typeDescriptorCache, Options);
+			Options?.OnCreateReader?.Invoke(xaml);
 			return xaml.Read();
 		}
 
-		public Object Load(XmlReader rdr, XamlServicesOptions options = null)
+		public Object Load(XmlReader rdr, Uri baseUri = null)
 		{
-			var xaml = new XamlReader(rdr, _typeDescriptorCache, options);
+			var xaml = new XamlReader(rdr, baseUri, _typeDescriptorCache, Options);
+			Options?.OnCreateReader?.Invoke(xaml);
 			return xaml.Read();
 		}
 	}

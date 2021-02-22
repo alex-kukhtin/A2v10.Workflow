@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace A2v10.System.Xaml
 {
@@ -11,12 +8,16 @@ namespace A2v10.System.Xaml
 		private readonly Dictionary<Type, Object> _services = new Dictionary<Type, Object>();
 		private readonly XamlProvideValueTarget _provideValueTarget = new XamlProvideValueTarget();
 		private readonly XamlRootObjectProvider _rootObjectProvider = new XamlRootObjectProvider();
+		private readonly XamlAttachedPropertyManager _attachedPropertyManager = new XamlAttachedPropertyManager();
+		private readonly XamlUriContext _uriContext = new XamlUriContext();
 
 
 		public XamlServiceProvider()
 		{
 			AddService<IProvideValueTarget>(_provideValueTarget);
 			AddService<IRootObjectProvider>(_rootObjectProvider);
+			AddService<IAttachedPropertyManager>(_attachedPropertyManager);
+			AddService<IUriContext>(_uriContext);
 		}
 
 		public void AddService<T>(Object service)
@@ -35,6 +36,13 @@ namespace A2v10.System.Xaml
 			if (_services.TryGetValue(serviceType, out Object service))
 				return service;
 			return null;
+		}
+
+		public T GetService<T>()
+		{
+			if (_services.TryGetValue(typeof(T), out Object service))
+				return (T) service;
+			return default;
 		}
 
 		public XamlProvideValueTarget ProvideValueTarget => _provideValueTarget;

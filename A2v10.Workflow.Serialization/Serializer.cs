@@ -94,7 +94,7 @@ namespace A2v10.Workflow.Serialization
 
 		IActivity DeserializeXaml(String text)
 		{
-			var obj = _xamlCodeProvider.ParseXml(text, XamlServicesOptions.BpmnXamlOptions);
+			var obj = _xamlCodeProvider.ParseXml(text);
 			return obj switch
 			{
 				IActivityWrapper activityWrapper => activityWrapper.Root(),
