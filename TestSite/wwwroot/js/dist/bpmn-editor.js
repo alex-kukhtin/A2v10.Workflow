@@ -1235,7 +1235,7 @@ var textBox = function (translate, options, defaultParameters) {
       canBeShown = !!options.show && typeof options.show === 'function',
       description = options.description,
       className = options.isScript ? 'class="js-text" ' : '';
-  resource.html = (0, _minDom.domify)('<label for="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + label + '</label>' + '<div class="bpp-field-wrapper" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + '<div contenteditable="true" id="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + className + 'name="' + (0, _Utils.escapeHTML)(options.modelProperty) + '" />' + '</div>'); // add description below text box entry field
+  resource.html = (0, _minDom.domify)('<label for="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + label + '</label>' + '<div class="bpp-field-wrapper" ' + (canBeShown ? 'data-show="isShown"' : '') + '>' + '<div contenteditable=true spellcheck=false id="wf-' + (0, _Utils.escapeHTML)(resource.id) + '" ' + className + 'name="' + (0, _Utils.escapeHTML)(options.modelProperty) + '" />' + '</div>'); // add description below text box entry field
 
   if (description) {
     resource.html.appendChild((0, _EntryFieldDescription.default)(translate, description, {
@@ -3027,6 +3027,9 @@ const VAR_TYPE_OPTIONS = [{
 }, {
   name: 'Number',
   value: 'Number'
+}, {
+  name: 'Boolean',
+  value: 'Boolean'
 }, {
   name: 'Object',
   value: 'Object'

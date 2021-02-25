@@ -75,5 +75,24 @@ namespace A2v10.Workflow.Tests
 			Assert.AreEqual("value", eo.Get<String>("prop"));
 			Assert.AreEqual("first", eo.Get<String>("procedure"));
 		}
+
+		[TestMethod]
+		public void ScriptDatabase2()
+		{
+			var eng = new Engine(opts =>
+			{
+				opts.Strict(true);
+				opts.SetWrapObjectHandler((e, o) =>
+				{
+					if (o is IInjectable injectable)
+						injectable.Inject(null);
+					return new ObjectWrapper(e, o);
+				});
+			});
+			eng.AddNativeObjects(new ScriptNativeObjects());
+
+			var val = eng.Execute("var x = (new Database()).loadModel('first'); let ix=''; for(let p in x) ix+=p; return ix;").GetCompletionValue().ToObject();
+			// keys?
+		}
 	}
 }

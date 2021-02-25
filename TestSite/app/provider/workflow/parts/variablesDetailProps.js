@@ -11,6 +11,7 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 const VAR_TYPE_OPTIONS = [
 	{ name: 'String', value: 'String' },
 	{ name: 'Number', value: 'Number' },
+	{ name: 'Boolean', value: 'Boolean' },
 	{ name: 'Object', value: 'Object' },
 	{ name: 'BigInt', value: 'BigInt' },
 	{ name: 'Guid',   value: 'Guid' }

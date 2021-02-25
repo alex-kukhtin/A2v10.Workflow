@@ -11,6 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.Workflow.Tests", "A2v
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F0B8E0D1-7934-456A-A8FD-E0221BCA36D4}"
 	ProjectSection(SolutionItems) = preProject
+		documentation.txt = documentation.txt
 		sample_workflow.xml = sample_workflow.xml
 		todo.txt = todo.txt
 	EndProjectSection
@@ -23,11 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.System.Xaml.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.Workflow.Serialization", "A2v10.Workflow.Serialization\A2v10.Workflow.Serialization.csproj", "{5BDE3288-86E3-4377-90F8-F67CFB038359}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSite", "TestSite\TestSite.csproj", "{3A9A6FA5-A359-4B85-9DE9-4CC6B2EBB565}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSite", "TestSite\TestSite.csproj", "{3A9A6FA5-A359-4B85-9DE9-4CC6B2EBB565}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.Workflow.WebHost", "A2v10.Workflow.WebHost\A2v10.Workflow.WebHost.csproj", "{B7567B7B-4162-495E-A112-01578B28E736}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.Workflow.WebHost", "A2v10.Workflow.WebHost\A2v10.Workflow.WebHost.csproj", "{B7567B7B-4162-495E-A112-01578B28E736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2v10.Workflow.WebApi", "A2v10.Workflow.WebApi\A2v10.Workflow.WebApi.csproj", "{9B2099E6-0FFA-445C-99C4-478C87EA32AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "A2v10.Workflow.WebApi", "A2v10.Workflow.WebApi\A2v10.Workflow.WebApi.csproj", "{9B2099E6-0FFA-445C-99C4-478C87EA32AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

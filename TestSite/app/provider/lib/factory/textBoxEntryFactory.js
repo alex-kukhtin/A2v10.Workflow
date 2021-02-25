@@ -20,7 +20,7 @@ var textBox = function (translate, options, defaultParameters) {
 			'<div class="bpp-field-wrapper" ' +
 			(canBeShown ? 'data-show="isShown"' : '') +
 			'>' +
-			'<div contenteditable="true" id="wf-' + escapeHTML(resource.id) + '" ' + className +
+			'<div contenteditable=true spellcheck=false id="wf-' + escapeHTML(resource.id) + '" ' + className +
 			'name="' + escapeHTML(options.modelProperty) + '" />' +
 			'</div>');
 
