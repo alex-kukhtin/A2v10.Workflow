@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Tracker;
@@ -124,7 +125,8 @@ namespace A2v10.Workflow
 		{
 			if (_bookmarks.TryGetValue(bookmark, out ResumeAction action))
 			{
-				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, $"{{bookmark:'{bookmark}'}}"));
+				String strResult = result != null ? $", result:{JsonSerializer.Serialize(result)}" : String.Empty;
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, $"{{bookmark:'{bookmark}'{strResult}}}"));
 				return action(this, bookmark, result);
 			} 
 			else

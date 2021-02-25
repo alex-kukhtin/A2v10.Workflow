@@ -63,9 +63,17 @@ namespace TestSite.Controllers
 			var bk = stateObj.Eval<ExpandoObject>("Bookmarks") as IDictionary<String, Object>;
 			foreach (var (k, _) in bk)
 			{
-				var exp = JsonConvert.DeserializeObject<ExpandoObject>("{Answer:'Success'}");
+				var exp = JsonConvert.DeserializeObject<ExpandoObject>("{Answer:'Success', UserId: 1234}");
 				await _engine.ResumeAsync(id, k, exp);
 			}
+			return LocalRedirect("/instance/index");
+		}
+
+		public async Task<IActionResult> Unlock(Guid id)
+		{
+			var prms = new ExpandoObject();
+			prms.TryAdd("Id", id);
+			await _dbContext.ExecuteExpandoAsync(null, "a2wfui.[Instance.Unlock]", prms);
 			return LocalRedirect("/instance/index");
 		}
 	}

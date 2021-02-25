@@ -1,7 +1,7 @@
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'a2wf')
 begin
-	exec sp_executesql N'create schema a2wf';
+	exec sp_executesql N'create schema a2wf authorization dbo';
 end
 go
 ------------------------------------------------

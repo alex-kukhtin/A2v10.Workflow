@@ -10,7 +10,7 @@ namespace A2v10.Workflow.Interfaces
 		Sql
 	}
 
-	public record DeferredElement(DeferredElementType Type, String Name, ExpandoObject Parameters);
+	public record DeferredElement(DeferredElementType Type, String Name, ExpandoObject Parameters, String Refer);
 
 	public interface IInstanceData
 	{

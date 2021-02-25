@@ -20,7 +20,7 @@ namespace A2v10.Workflow
 		public void executeSql(String procedure, ExpandoObject prms = null)
 #pragma warning restore IDE1006 // Naming Styles
 		{
-			_deferredTarget.AddDeffered(new DeferredElement(DeferredElementType.Sql, procedure, prms));
+			_deferredTarget.AddDeffered(new DeferredElement(DeferredElementType.Sql, procedure, prms, _deferredTarget.Refer));
 		}
 	}
 }

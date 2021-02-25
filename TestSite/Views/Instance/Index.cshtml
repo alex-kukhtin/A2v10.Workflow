@@ -41,6 +41,10 @@
 					{
 						<a class="btn btn-info btn-sm" href="/instance/resume/@inst.Id">Resume</a>
 					}
+					@if (inst.Lock != null && inst.Lock != Guid.Empty)
+					{
+						<a class="btn btn-danger btn-sm" href="/instance/unlock/@inst.Id">Unlock</a>
+					}
 				</td>
 			</tr>
 			}

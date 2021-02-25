@@ -93,6 +93,7 @@ namespace A2v10.Workflow.SqlServer
 				{
 					var epxParam = defer.Parameters.Clone();
 					epxParam.Add("InstanceId", instance.Id);
+					epxParam.Add("Activity", defer.Refer);
 					batches.Add(new BatchProcedure(defer.Name, epxParam));
 				}
 			}

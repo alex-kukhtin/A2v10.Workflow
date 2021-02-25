@@ -1,7 +1,7 @@
 ------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.SCHEMATA where SCHEMA_NAME=N'a2wfui')
 begin
-	exec sp_executesql N'create schema a2wfui';
+	exec sp_executesql N'create schema a2wfui authorization dbo';
 end
 go
 ------------------------------------------------
@@ -36,8 +36,9 @@ begin
 	from a2wf.Instances i
 	where i.Id=@Id;
 
-	select [!TTrack!Array] = null, [!TInstance.Track!ParentId] = InstanceId, t.RecordNumber, [EventTime!!Utc] = t.EventTime,
-	t.[Message]
+	select [!TTrack!Array] = null, [!TInstance.Track!ParentId] = InstanceId, 
+		t.Activity, t.[Action],
+		t.RecordNumber, [EventTime!!Utc] = t.EventTime, t.[Message]
 	from a2wf.InstanceTrack t
 	where InstanceId=@Id
 	order by t.EventTime;
@@ -102,5 +103,17 @@ begin
 		[Version] = (select max([Version]) from a2wf.Workflows w where w.Id = c.Id)
 	from @List c
 	order by c.RowNumber
+end
+go
+------------------------------------------------
+create or alter procedure a2wfui.[Instance.Unlock]
+@UserId bigint = null,
+@Id uniqueidentifier
+as
+begin
+	set nocount on;
+	set transaction isolation level read committed;
+
+	update a2wf.Instances set Lock = null, LockDate= null where Id=@Id;
 end
 go

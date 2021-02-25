@@ -1,6 +1,7 @@
 ﻿
 import {is} from 'bpmn-js/lib/util/ModelUtil';
 import extensionElementsImpl from './impl/extensionElements';
+import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 import entryFactory from '../../lib/factory/EntryFactory';
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
@@ -16,11 +17,11 @@ export default function scriptProps(group, element, bpmnFactory, translate) {
 		});
 		group.entries.push(textBox);
 	}
-	else if (is(element, "bpmn:UserTask")) {
+	else if (isAny(element, ["bpmn:UserTask", "bpmn:StartEvent", "bpmn:EndEvent"])) {
 		let textBox = entryFactory.textBox(translate, {
 			id: 'script',
 			label: translate('Script'),
-			description: 'Executed after task completion',
+			description: translate('Executed after completion'),
 			isScript: true,
 			modelProperty: 'text',
 			get(elem, node) {

@@ -1,7 +1,8 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
@@ -13,8 +14,11 @@ namespace A2v10.Workflow.Bpmn
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
+			context.Execute(Id, nameof(Script));
+
 			if (Children == null)
 				return onComplete(context, this);
+
 			foreach (var flow in Outgoing)
 			{
 				var flowElem = Parent.FindElement<SequenceFlow>(flow.Text);

@@ -2948,6 +2948,8 @@ var _ModelUtil = require("bpmn-js/lib/util/ModelUtil");
 
 var _extensionElements = _interopRequireDefault(require("./impl/extensionElements"));
 
+var _ModelingUtil = require("bpmn-js/lib/features/modeling/util/ModelingUtil");
+
 var _EntryFactory = _interopRequireDefault(require("../../lib/factory/EntryFactory"));
 
 var _CmdHelper = _interopRequireDefault(require("bpmn-js-properties-panel/lib/helper/CmdHelper"));
@@ -2964,11 +2966,11 @@ function scriptProps(group, element, bpmnFactory, translate) {
     });
 
     group.entries.push(textBox);
-  } else if ((0, _ModelUtil.is)(element, "bpmn:UserTask")) {
+  } else if ((0, _ModelingUtil.isAny)(element, ["bpmn:UserTask", "bpmn:StartEvent", "bpmn:EndEvent"])) {
     let textBox = _EntryFactory.default.textBox(translate, {
       id: 'script',
       label: translate('Script'),
-      description: 'Executed after task completion',
+      description: translate('Executed after completion'),
       isScript: true,
       modelProperty: 'text',
 
@@ -2997,7 +2999,7 @@ function scriptProps(group, element, bpmnFactory, translate) {
 
 ;
 
-},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/util/ModelUtil":187}],36:[function(require,module,exports){
+},{"../../lib/factory/EntryFactory":4,"./impl/extensionElements":34,"bpmn-js-properties-panel/lib/helper/CmdHelper":53,"bpmn-js/lib/features/modeling/util/ModelingUtil":158,"bpmn-js/lib/util/ModelUtil":187}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

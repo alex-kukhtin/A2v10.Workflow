@@ -18,6 +18,7 @@ namespace A2v10.Workflow
 		private readonly IActivity _root;
 		private readonly IServiceProvider _serviceProvider;
 		private readonly ITracker _tracker;
+		private readonly IDeferredTarget _deferredTarget;
 
 		private IDictionary<String, Object> ScriptData => _scriptData;
 
@@ -27,6 +28,7 @@ namespace A2v10.Workflow
 			_serviceProvider = serviceProvider;
 			_tracker = tracker;
 			_engine = new Engine(EngineOptions);
+			_deferredTarget = _serviceProvider.GetService<IDeferredTarget>();
 
 
 			var _nativeObjects = _serviceProvider.GetService<IScriptNativeObjectProvider>();
@@ -76,6 +78,7 @@ namespace A2v10.Workflow
 
 		public T Evaluate<T>(String refer, String name)
 		{
+			_deferredTarget.Refer = refer;
 			//_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Evaluate, refer, name));
 			var func = GetFunc(refer, name);
 			T res = default;
@@ -108,6 +111,7 @@ namespace A2v10.Workflow
 
 		public void Execute(String refer, String name)
 		{
+			_deferredTarget.Refer = refer;
 			//_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.Execute, refer, name));
 			var func = GetFunc(refer, name);
 			if (func == null)
@@ -117,6 +121,7 @@ namespace A2v10.Workflow
 
 		public void ExecuteResult(String refer, String name, Object result)
 		{
+			_deferredTarget.Refer = refer;
 			_tracker.Track(new ScriptTrackRecord(ScriptTrackAction.ExecuteResult, refer, name, result));
 			var func = GetFunc(refer, name);
 			if (func == null)

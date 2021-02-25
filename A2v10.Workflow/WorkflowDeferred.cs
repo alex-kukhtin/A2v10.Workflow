@@ -12,6 +12,7 @@ namespace A2v10.Workflow
 		#region IDeferredTarget
 
 		public List<DeferredElement> Deferred => _deferred.IsValueCreated ? _deferred.Value : null;
+		public String Refer { get; set; }
 
 		public void AddDeffered(DeferredElement elem)
 		{

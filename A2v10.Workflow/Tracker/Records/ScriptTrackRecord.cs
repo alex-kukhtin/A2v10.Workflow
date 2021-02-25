@@ -1,7 +1,8 @@
 ﻿
-using A2v10.Workflow.Interfaces;
 using System;
 using System.Dynamic;
+using System.Text.Json;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Tracker
 {
@@ -22,9 +23,7 @@ namespace A2v10.Workflow.Tracker
 			: base()
 		{
 			_action = action;
-			if (result is ExpandoObject exp)
-				result = exp.SerializeSimple();
-			String strResult = result != null ? $", result:{result}" : String.Empty;
+			String strResult = result != null ? $", result:{JsonSerializer.Serialize(result)}" : String.Empty;
 			Message = $"Script:{action}: {{id: {refer}, name: '{name}'{strResult}}}";
 		}
 

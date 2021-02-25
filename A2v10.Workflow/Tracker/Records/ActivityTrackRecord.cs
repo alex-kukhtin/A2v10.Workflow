@@ -1,6 +1,8 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
 using System.Dynamic;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Tracker
 {
@@ -15,13 +17,13 @@ namespace A2v10.Workflow.Tracker
 			_action = action;
 			_id = activity.Id;
 			String strToken = token != null ? $", token:'{token}'" : null;
-			Message = $"Activity:{action}: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
+			Message = $"{action}: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
 		}
 
 		public ActivityTrackRecord(ActivityTrackAction action, String msg)
 		{
 			_action = action;
-			Message = $"Activity:{action}: {msg}";
+			Message = $"{action}: {msg}";
 		}
 
 		public override ExpandoObject ToExpandoObject(int no)

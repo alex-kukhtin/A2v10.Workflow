@@ -20,8 +20,8 @@ let bpmnViewer = new BpmnViewer({
 });
 */
 window.BpmnViewer = {
-  create: function (canvasId) {
-    let canvas = document.getElementById(canvasId);
+  create: function (canvas) {
+    if (typeof canvas === 'string') canvas = document.getElementById(canvas);
     return new _NavigatedViewer.default({
       container: canvas,
       keyboard: {
