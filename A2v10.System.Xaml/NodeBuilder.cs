@@ -29,12 +29,12 @@ namespace A2v10.System.Xaml
 	public class NodeBuilder
 	{
 
-		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new Dictionary<String, NamespaceDefinition>();
+		private readonly Dictionary<String, NamespaceDefinition> _namespaces = new();
 		private readonly XamlServicesOptions _options;
 		private readonly XamlServiceProvider _serviceProvider;
 		private readonly TypeDescriptorCache _typeCache;
 
-		private readonly Lazy<List<Action>> _deferExec = new Lazy<List<Action>>();
+		private readonly Lazy<List<Action>> _deferExec = new();
 
 		public NodeBuilder(XamlServiceProvider serviceProvider, TypeDescriptorCache typeCache, XamlServicesOptions options)
 		{
@@ -55,7 +55,7 @@ namespace A2v10.System.Xaml
 
 		public IAttachedPropertyManager AttachedPropertyManager => _serviceProvider.GetService<IAttachedPropertyManager>();
 
-		private static readonly Regex _namespaceRegEx = new Regex(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
+		private static readonly Regex _namespaceRegEx = new(@"^\s*clr-namespace\s*:\s*([\w\.]+)\s*;\s*assembly\s*=\s*([\w\.]+)\s*$", RegexOptions.Compiled);
 
 		public void AddNamespace(String prefix, String value)
 		{
