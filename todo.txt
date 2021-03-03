@@ -15,7 +15,8 @@
 29. JS editor
 30. StartScript, EndScript - для Collaboration?
 
-
+31. Designer. Add/Remove buttons css (wrapper & remove position:absolute)
+32.
 
 Xaml
 ----
