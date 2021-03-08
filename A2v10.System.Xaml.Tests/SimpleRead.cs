@@ -62,7 +62,7 @@ namespace A2v10.System.Xaml.Tests
 			Assert.AreEqual(typeof(Code), obj.GetType());
 			var code0 = obj as Code;
 			Assert.AreEqual("Ref0", code0.Ref);
-			Assert.AreEqual("Code Text 1", code0.Script);
+			Assert.AreEqual("\n\tCode Text 1\n", code0.Script);
 		}
 
 		[TestMethod]

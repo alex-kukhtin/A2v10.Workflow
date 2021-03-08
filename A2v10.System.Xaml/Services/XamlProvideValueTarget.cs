@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
+using System;
 
 namespace A2v10.System.Xaml
 {
 	public class XamlProvideValueTarget : IProvideValueTarget
 	{
-		public object TargetObject { get; set; }
+		public Object TargetObject { get; set; }
 
-		public object TargetProperty { get; set; }
+		public Object TargetProperty { get; set; }
 	}
 }

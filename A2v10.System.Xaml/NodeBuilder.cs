@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -98,7 +99,10 @@ namespace A2v10.System.Xaml
 		public MarkupExtension ParseExtension(String value)
 		{
 			var node = ExtensionParser.Parse(this, value);
-			return BuildNode(node) as MarkupExtension;
+			var ext = BuildNode(node);
+			if (ext is MarkupExtension markExt)
+				return markExt;
+			throw new XamlException($"Element '{value}' is not MarkupExtension");
 		}
 
 		private static PropertyDescriptor BuildPropertyDefinition(PropertyInfo propInfo)

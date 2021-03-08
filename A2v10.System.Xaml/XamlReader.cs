@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -6,13 +8,13 @@ namespace A2v10.System.Xaml
 {
 	public class XamlReader
 	{
-		private readonly XamlNode _root = new XamlNode() { Name = "Root" };
+		private readonly XamlNode _root = new() { Name = "Root" };
 		private readonly XmlReader _rdr;
 		private readonly XamlServicesOptions _options;
 		private readonly XamlServiceProvider _xamlServiceProvider;
 		private readonly TypeDescriptorCache _typeCache;
 
-		private readonly Stack<XamlNode> _elemStack = new Stack<XamlNode>();
+		private readonly Stack<XamlNode> _elemStack = new();
 
 		public XamlReader(XmlReader rdr, Uri baseUri, TypeDescriptorCache typeCache, XamlServicesOptions options)
 		{
@@ -109,7 +111,7 @@ namespace A2v10.System.Xaml
 		void AddContent()
 		{
 			var node = _elemStack.Peek();
-			node.SetContent(_rdr.Value?.Trim());
+			node.SetContent(_rdr.Value); // preserve whitespace
 		}
 
 		void EndNode(NodeBuilder builder)

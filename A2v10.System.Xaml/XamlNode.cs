@@ -1,6 +1,6 @@
-﻿
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -17,10 +17,10 @@ namespace A2v10.System.Xaml
 
 		private String _ctorArgument;
 
-		public Lazy<List<XamlNode>> Children = new Lazy<List<XamlNode>>();
-		public readonly Dictionary<String, Object> Properties = new Dictionary<String, Object>();
-		public readonly List<XamlExtensionElem> Extensions = new List<XamlExtensionElem>();
-		public readonly Lazy<List<XamlAttachedElem>> AttachedProperties = new Lazy<List<XamlAttachedElem>>();
+		public Lazy<List<XamlNode>> Children = new();
+		public readonly Dictionary<String, Object> Properties = new();
+		public readonly List<XamlExtensionElem> Extensions = new();
+		public readonly Lazy<List<XamlAttachedElem>> AttachedProperties = new();
 
 		public Boolean HasChildren => Children.IsValueCreated && Children.Value.Count > 0;
 		public Boolean HasExtensions => Extensions!= null && Extensions.Count > 0;

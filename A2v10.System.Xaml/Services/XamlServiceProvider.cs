@@ -1,15 +1,17 @@
-﻿using System;
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 
 namespace A2v10.System.Xaml
 {
 	public class XamlServiceProvider : IServiceProvider
 	{
-		private readonly Dictionary<Type, Object> _services = new Dictionary<Type, Object>();
-		private readonly XamlProvideValueTarget _provideValueTarget = new XamlProvideValueTarget();
-		private readonly XamlRootObjectProvider _rootObjectProvider = new XamlRootObjectProvider();
-		private readonly XamlAttachedPropertyManager _attachedPropertyManager = new XamlAttachedPropertyManager();
-		private readonly XamlUriContext _uriContext = new XamlUriContext();
+		private readonly Dictionary<Type, Object> _services = new ();
+		private readonly XamlProvideValueTarget _provideValueTarget = new();
+		private readonly XamlRootObjectProvider _rootObjectProvider = new();
+		private readonly XamlAttachedPropertyManager _attachedPropertyManager = new();
+		private readonly XamlUriContext _uriContext = new();
 
 
 		public XamlServiceProvider()

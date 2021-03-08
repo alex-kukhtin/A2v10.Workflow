@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
 using System;
 using System.Collections.Generic;
 
@@ -23,7 +24,7 @@ namespace A2v10.System.Xaml
 		};
 
 		public static XamlServicesOptions BpmnXamlOptions =>
-			new XamlServicesOptions()
+			new()
 			{
 				Namespaces = BPMNNamespaces,
 				Aliases = new Dictionary<String, String>() {

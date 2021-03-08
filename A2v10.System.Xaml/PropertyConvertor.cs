@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -23,7 +24,7 @@ namespace A2v10.System.Xaml
 				return value;
 			
 			if (type.IsEnum)
-				return Enum.Parse(type, value.ToString());
+				return Enum.Parse(type, value.ToString(), true);
 
 			if (typeConverter != null)
 			{

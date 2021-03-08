@@ -43,7 +43,7 @@ namespace A2v10.System.Xaml.Tests
 			var c = p.Content;
 			Assert.AreEqual(typeof(String), c.GetType());
 
-			Assert.AreEqual("I am the text", p.Content);
+			Assert.AreEqual("\n\tI am the text\n", p.Content);
 		}
 	}
 }

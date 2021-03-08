@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 
 namespace A2v10.System.Xaml
@@ -9,7 +11,7 @@ namespace A2v10.System.Xaml
 
 		public record PropertyDef(String Name, Object Value);
 
-		private readonly Dictionary<PropertyDef, Object> _map = new Dictionary<PropertyDef, Object>();
+		private readonly Dictionary<PropertyDef, Object> _map = new();
 
 		public void SetProperty(String propName, Object obj, Object value)
 		{

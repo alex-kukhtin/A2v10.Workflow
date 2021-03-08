@@ -1,30 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright © 2021 Alex Kukhtin. All rights reserved.
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace A2v10.System.Xaml
 {
 	public class XamlReaderService : IXamlReaderService
 	{
-		private readonly TypeDescriptorCache _typeDescriptorCache = new TypeDescriptorCache();
+		private readonly TypeDescriptorCache _typeDescriptorCache = new();
 
 		public virtual XamlServicesOptions Options { get; set; }
 
+		private static readonly XmlReaderSettings _settings = new()
+		{
+			IgnoreComments = true,
+			IgnoreWhitespace = false
+		};
 
 		public Object ParseXml(String xml)
 		{
 			using var stringReader = new StringReader(xml);
-			using var xmlrdr = XmlReader.Create(stringReader);
+			using var xmlrdr = XmlReader.Create(stringReader, _settings);
 			return Load(xmlrdr);
 		}
 
 		public Object Load(Stream stream, Uri baseUri = null)
 		{
-			var xaml = new XamlReader(XmlReader.Create(stream), baseUri, _typeDescriptorCache, Options);
+			var xaml = new XamlReader(XmlReader.Create(stream, _settings), baseUri, _typeDescriptorCache, Options);
 			Options?.OnCreateReader?.Invoke(xaml);
 			return xaml.Read();
 		}
