@@ -1,8 +1,9 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Storage
 {
@@ -11,7 +12,7 @@ namespace A2v10.Workflow.Storage
 	public class InMemoryInstanceStorage : IInstanceStorage
 	{
 
-		private readonly Dictionary<Guid, SavedInstance> _memory = new Dictionary<Guid, SavedInstance>();
+		private readonly Dictionary<Guid, SavedInstance> _memory = new();
 
 		private readonly ISerializer _serializer;
 		public InMemoryInstanceStorage(ISerializer serializer)
@@ -60,5 +61,9 @@ namespace A2v10.Workflow.Storage
 			return Task.CompletedTask;
 		}
 
+		public Task<IEnumerable<IPendingInstance>> GetPendingAsync()
+		{
+			return Task.FromResult(Enumerable.Empty<IPendingInstance>());
+		}
 	}
 }

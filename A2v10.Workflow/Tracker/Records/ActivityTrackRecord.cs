@@ -16,14 +16,14 @@ namespace A2v10.Workflow.Tracker
 		{
 			_action = action;
 			_id = activity.Id;
-			String strToken = token != null ? $", token:'{token}'" : null;
-			Message = $"{action}: {activity.GetType().Name} {{id: '{activity.Id}'{strToken}}}";
+			Message = token != null ? $"{{token:'{token}'}}" : null;
 		}
 
-		public ActivityTrackRecord(ActivityTrackAction action, String msg)
+		public ActivityTrackRecord(ActivityTrackAction action, IActivity activity, String msg)
 		{
 			_action = action;
-			Message = $"{action}: {msg}";
+			_id = activity?.Id;
+			Message = msg;
 		}
 
 		public override ExpandoObject ToExpandoObject(int no)

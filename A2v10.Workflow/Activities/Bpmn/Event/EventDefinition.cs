@@ -1,17 +1,15 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow.Bpmn
 {
 	public class EventDefinition : BaseElement
 	{
-		public virtual ValueTask ExecuteAsync(IExecutionContext context)
+		public virtual IWorkflowEvent CreateEvent(String id)
 		{
-			return ValueTask.CompletedTask;
+			return null;
 		}
+
+		public virtual Boolean CanRepeat { get; }
 	}
 }

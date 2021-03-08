@@ -14,7 +14,7 @@ namespace A2v10.Workflow.Bpmn
 
 		protected ExecutingAction _onComplete;
 		protected IToken _token;
-		private readonly List<IToken> _tokens = new List<IToken>();
+		private readonly List<IToken> _tokens = new();
 
 		#region IScoped
 		public List<IVariable> Variables => Elem<ExtensionElements>()?.GetVariables();
@@ -55,7 +55,8 @@ namespace A2v10.Workflow.Bpmn
 
 		public void KillToken(IToken token)
 		{
-			_tokens.Remove(token);
+			if (token != null)
+				_tokens.Remove(token);
 		}
 	}
 }

@@ -12,6 +12,7 @@ namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
+	using EventAction = Func<IExecutionContext, IWorkflowEvent, Object, ValueTask>;
 
 	public record QueueItem
 	(
@@ -21,12 +22,20 @@ namespace A2v10.Workflow
 		IToken Token
 	);
 
+	public record EventItem
+	(
+		EventAction Action,
+		IWorkflowEvent Event
+	);
+
 
 	public partial class ExecutionContext : IExecutionContext
 	{
-		private readonly Queue<QueueItem> _commandQueue = new Queue<QueueItem>();
-		private readonly Dictionary<String, IActivity> _activities = new Dictionary<String, IActivity>();
-		private readonly Dictionary<String, ResumeAction> _bookmarks = new Dictionary<String, ResumeAction>();
+		private readonly Queue<QueueItem> _commandQueue = new();
+		private readonly Dictionary<String, IActivity> _activities = new();
+		private readonly Dictionary<String, ResumeAction> _bookmarks = new();
+		private readonly Dictionary<String, EventItem> _events = new();
+		
 		private readonly IActivity _root;
 
 		private readonly ScriptEngine _script;
@@ -81,9 +90,9 @@ namespace A2v10.Workflow
 			_commandQueue.Enqueue(new QueueItem(activity.ExecuteAsync, activity, onComplete, token));
 		}
 
-		public void SetBookmark(String bookmark, ResumeAction onComplete)
+		public void SetBookmark(String bookmark, IActivity activity, ResumeAction onComplete)
 		{
-			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Bookmark, $"{{bookmark:'{bookmark}'}}"));
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Bookmark, activity, $"{{bookmark:'{bookmark}'}}"));
 			_bookmarks.Add(bookmark, onComplete);
 		}
 
@@ -91,6 +100,18 @@ namespace A2v10.Workflow
 		{
 			if (_bookmarks.ContainsKey(bookmark))
 				_bookmarks.Remove(bookmark);
+		}
+
+		public void AddEvent(IWorkflowEvent wfEvent, IActivity activity, EventAction onTrigger)
+		{
+			_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Event, activity, wfEvent.ToString()));
+			_events.Add(wfEvent.Key, new EventItem(onTrigger, wfEvent));
+		}
+
+		public void RemoveEvent(String eventKey)
+		{
+			if (_events.ContainsKey(eventKey))
+				_events.Remove(eventKey);
 		}
 
 		public T Evaluate<T>(String refer, String name)
@@ -107,7 +128,6 @@ namespace A2v10.Workflow
 		{
 			_script.ExecuteResult(refer, name, result);
 		}
-
 		#endregion
 
 		public async ValueTask RunAsync()
@@ -126,11 +146,23 @@ namespace A2v10.Workflow
 			if (_bookmarks.TryGetValue(bookmark, out ResumeAction action))
 			{
 				String strResult = result != null ? $", result:{JsonSerializer.Serialize(result)}" : String.Empty;
-				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, $"{{bookmark:'{bookmark}'{strResult}}}"));
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.Resume, null, $"{{bookmark:'{bookmark}'{strResult}}}"));
 				return action(this, bookmark, result);
 			} 
 			else
 				throw new WorkflowException($"Bookmark '{bookmark}' not found");
+		}
+
+		public ValueTask HandleEventAsync(String eventKey, Object result)
+		{
+			if (_events.TryGetValue(eventKey, out EventItem eventItem))
+			{
+				String strResult = result != null ? $", result:{JsonSerializer.Serialize(result)}" : String.Empty;
+				_tracker.Track(new ActivityTrackRecord(ActivityTrackAction.HandleEvent, null, $"{{event:'{eventKey}'{strResult}}}"));
+				return eventItem.Action(this, eventItem.Event, result);
+			}
+			else
+				throw new WorkflowException($"Event '{eventKey}' not found");
 		}
 	}
 }

@@ -78,6 +78,7 @@ namespace A2v10.Workflow.SqlServer
 				{ "State", _serializer.Serialize(instance.State) },
 				{ "Variables", instanceData.ExternalVariables },
 				{ "Bookmarks", instanceData.ExternalBookmarks},
+				{ "Events", instanceData.ExternalEvents},
 				{ "TrackRecords", instanceData.TrackRecords }
 			};
 
@@ -112,6 +113,12 @@ namespace A2v10.Workflow.SqlServer
 				Message = ex.ToString()
 			};
 			return _dbContext.ExecuteAsync<SqlTrackRecord>(null, $"{Definitions.SqlSchema}.[Instance.Exception]", tr);
+		}
+
+
+		public async Task<IEnumerable<IPendingInstance>> GetPendingAsync()
+		{
+			return await _dbContext.LoadListAsync<SqlPendingInstance>(null, $"{Definitions.SqlSchema}.[Instance.Pending.Load]", null);
 		}
 
 		#endregion

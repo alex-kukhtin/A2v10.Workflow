@@ -132,6 +132,24 @@ begin
 end
 go
 ------------------------------------------------
+if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceEvents')
+begin
+	create table a2wf.InstanceEvents
+	(
+		InstanceId uniqueidentifier not null,
+		Kind nchar(1) not null,
+		[Event] nvarchar(255) not null,
+			constraint PK_InstanceEvents primary key clustered (InstanceId, Kind, [Event]) with (fillfactor = 70),
+		[WorkflowId] nvarchar(255) not null,
+		Pending datetime null,
+		[Name] nvarchar(255) null, 
+		[Text] nvarchar(255) null,
+		constraint FK_InstanceEvents_PK foreign key (WorkflowId, InstanceId) references a2wf.Instances (WorkflowId, Id),
+	);
+	create index IDX_InstanceEvents_WB on a2wf.InstanceEvents (WorkflowId, [Kind], [Event]) with (fillfactor = 70);
+end
+go
+------------------------------------------------
 if not exists(select * from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=N'a2wf' and TABLE_NAME=N'InstanceTrack')
 begin
 	create table a2wf.InstanceTrack
@@ -332,6 +350,21 @@ create type a2wf.[InstanceTrack.TableType] as table
 )
 go
 ------------------------------------------------
+if exists(select * from INFORMATION_SCHEMA.DOMAINS where DOMAIN_SCHEMA = N'a2wf' and DOMAIN_NAME = N'InstanceEvent.TableType')
+	drop type a2wf.[InstanceEvent.TableType]
+go
+------------------------------------------------
+create type a2wf.[InstanceEvent.TableType] as table
+(
+	ParentGUID uniqueidentifier,
+	[Event] nvarchar(255),
+	Kind nchar(1), /*T(imer)/M(essage)/S(ignal)/E(rror)/esc(A)lation/C(ancel)*/
+	Pending datetime,
+	[Name] nvarchar(255),
+	[Text] nvarchar(255)
+)
+go
+------------------------------------------------
 create or alter procedure a2wf.[Instance.Metadata]
 as
 begin
@@ -342,6 +375,7 @@ begin
 	declare @VariableString a2wf.[VariableString.TableType];
 	declare @Bookmarks a2wf.[InstanceBookmarks.TableType];
 	declare @TrackRecords a2wf.[InstanceTrack.TableType];
+	declare @Events a2wf.[InstanceEvent.TableType];
 
 	select [Instance!Instance!Metadata] = null, * from @Instance;
 	select [Variables!Instance.Variables!Metadata] = null, * from @Variables;
@@ -350,6 +384,7 @@ begin
 	select [StringVariables!Instance.Variables.String!Metadata] = null, * from @VariableString;
 	select [Bookmarks!Instance.Bookmarks!Metadata] = null, * from @Bookmarks;
 	select [TrackRecords!Instance.TrackRecords!Metadata] = null, * from @TrackRecords;
+	select [Events!Instance.Events!Metadata] = null, * from @Events;
 end
 go
 ------------------------------------------------
@@ -361,7 +396,8 @@ create or alter procedure a2wf.[Instance.Update]
 @GuidVariables a2wf.[VariableGuid.TableType] readonly,
 @StringVariables a2wf.[VariableString.TableType] readonly,
 @Bookmarks a2wf.[InstanceBookmarks.TableType] readonly,
-@TrackRecords a2wf.[InstanceTrack.TableType] readonly
+@TrackRecords a2wf.[InstanceTrack.TableType] readonly,
+@Events a2wf.[InstanceEvent.TableType] readonly
 as
 begin
 	set nocount on;
@@ -477,6 +513,24 @@ begin
 		(s.InstanceId, s.[Bookmark], s.WorkflowId)
 	when not matched by source then delete;
 
+
+	with t as (
+		select tt.*
+		from a2wf.InstanceEvents tt
+		inner join @Instance si on si.Id=tt.InstanceId
+	)
+	merge t
+	using (
+		select si.WorkflowId, InstanceId=si.Id, sib.*
+		from @Instance si
+		inner join @Events sib on sib.ParentGUID=si.[GUID]
+	) as s
+	on t.[Event] = s.[Event] and t.InstanceId = s.InstanceId and t.WorkflowId = s.WorkflowId and t.Kind = s.Kind
+	when not matched by target then insert
+		(InstanceId, [Kind], [Event], WorkflowId, Pending, [Name], [Text]) values
+		(s.InstanceId, s.[Kind], s.[Event], s.WorkflowId, Pending, [Name], [Text])
+	when not matched by source then delete;
+
 	insert into a2wf.InstanceTrack(InstanceId, RecordNumber, EventTime, [Kind], [Action], [Activity], [Message])
 	select i.Id, RecordNumber, EventTime, [Kind], [Action], [Activity], [Message] from 
 	@TrackRecords r inner join @Instance i on r.ParentGUID = i.[GUID];
@@ -544,5 +598,17 @@ begin
 	from a2wf.[Catalog] where Id=@Id;
 
 	select Id, [Version] from @retval;
+end
+go
+------------------------------------------------
+create or alter procedure a2wf.[Instance.Pending.Load]
+as
+begin
+	set nocount on;
+	set transaction isolation level read uncommitted;
+	-- timers
+	select InstanceId, EventKey = [Event] , Kind
+	from a2wf.InstanceEvents
+	where Pending <= getutcdate() and Kind=N'T' order by Pending;
 end
 go

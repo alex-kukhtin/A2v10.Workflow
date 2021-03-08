@@ -14,7 +14,7 @@ namespace A2v10.Workflow
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
-			context.SetBookmark(Bookmark, OnBookmarkComplete);
+			context.SetBookmark(Bookmark, this, OnBookmarkComplete);
 			return ValueTask.CompletedTask;
 		}
 

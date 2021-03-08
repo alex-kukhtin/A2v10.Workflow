@@ -1,9 +1,10 @@
 ﻿
-using A2v10.Workflow.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+
+using A2v10.Workflow.Interfaces;
 
 namespace A2v10.Workflow
 {
@@ -16,8 +17,8 @@ namespace A2v10.Workflow
 			{
 				if (activity is IStorable storable)
 				{
-					ActivityStorage storage = new ActivityStorage(StorageState.Storing, _activities);
-					if (storage is ICanComplete canComplete && !canComplete.IsComplete)
+					ActivityStorage storage = new(StorageState.Storing, _activities);
+					if (activity is ICanComplete canComplete && !canComplete.IsComplete)
 						storable.Store(storage);
 					if (storage.Value.IsNotEmpty())
 						actState.Set(refer, storage.Value);
@@ -70,6 +71,21 @@ namespace A2v10.Workflow
 			}
 		}
 
+		ExpandoObject GetEvents()
+		{
+			if (_events == null || _events.Count == 0)
+				return null;
+			var res = new ExpandoObject();
+			foreach (var (k, v) in _events)
+			{
+				var eo = new ExpandoObject();
+				eo.Set("Action", CallbackItem.CreateFrom(v.Action));
+				eo.Set("Event", v.Event.ToExpando());
+				res.Set(k, eo);
+			}
+			return res;
+		}
+
 		ExpandoObject GetBookmarks()
 		{
 			if (_bookmarks == null || _bookmarks.Count == 0)
@@ -93,7 +109,22 @@ namespace A2v10.Workflow
 				else
 					throw new WorkflowException($"Activity {cb.Ref} for bookmark callback not found");
 			}
+		}
 
+		void SetEvents(ExpandoObject events)
+		{
+			if (events == null)
+				return;
+			foreach (var k in events.Keys())
+			{
+				var ebm = events.Get<ExpandoObject>(k);
+				var cb = CallbackItem.FromExpando(ebm.Get<ExpandoObject>("Action"));
+				var wfe = WorkflowEventImpl.FromExpando(k, ebm.Get<ExpandoObject>("Event"));
+				if (_activities.TryGetValue(cb.Ref, out IActivity activity))
+					_events.Add(k, new EventItem(cb.ToEvent(activity), wfe));
+				else
+					throw new WorkflowException($"Activity {cb.Ref} for event callback not found");
+			}
 		}
 
 		public ExpandoObject GetState()
@@ -102,6 +133,7 @@ namespace A2v10.Workflow
 			res.SetNotNull("State", GetActivityStates());
 			res.SetNotNull("Variables", GetScriptVariables());
 			res.SetNotNull("Bookmarks", GetBookmarks());
+			res.SetNotNull("Events", GetEvents());
 			return res;
 		}
 
@@ -147,24 +179,34 @@ namespace A2v10.Workflow
 			return result;
 		}
 
+		public List<Object> GetExternalEvents()
+		{
+			if (_events == null || _events.Count == 0)
+				return null;
+			var list = new List<Object>();
+			foreach (var (_, v) in _events)
+				list.Add(v.Event.ToStore());
+			return list;
+		}
+
 		public List<Object> GetExternalBookmarks()
 		{
 			if (_bookmarks == null || _bookmarks.Count == 0)
 				return null;
 			var list = new List<Object>();
 			foreach (var b in _bookmarks)
-			{
-				var be = new ExpandoObject();
-				be.Set("Bookmark", b.Key);
-				list.Add(be);
-			}
+				list.Add(
+					new ExpandoObject() {
+						{ "Bookmark", b.Key }
+					}
+				);
 			return list;
 		}
 
 		public WorkflowExecutionStatus GetExecutionStatus()
 		{
 			WorkflowExecutionStatus status = WorkflowExecutionStatus.Complete;
-			if (_bookmarks.Count > 0)
+			if (_bookmarks.Count > 0 || _events.Count > 0)
 				status = WorkflowExecutionStatus.Idle;
 			return status;
 		}
@@ -174,6 +216,7 @@ namespace A2v10.Workflow
 			SetActivityStates(state.Get<ExpandoObject>("State"));
 			SetScriptVariables(state.Get<ExpandoObject>("Variables"));
 			SetBookmarks(state.Get<ExpandoObject>("Bookmarks"));
+			SetEvents(state.Get<ExpandoObject>("Events"));
 		}
 
 		public List<Object> GetTrackRecords()

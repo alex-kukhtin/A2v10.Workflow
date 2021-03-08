@@ -85,7 +85,7 @@ namespace TestSite.Controllers
 				prms = null;
 			var inst = await _engine.CreateAsync(new Identity() { Id = model.Id });
 			await _engine.RunAsync(inst.Id, prms);
-			return Redirect("/");
+			return LocalRedirect("/");
 		}
 
 		public async Task<IActionResult> Download(String id)
@@ -97,6 +97,12 @@ namespace TestSite.Controllers
 				Content = wfElem.Body,
 				ContentType = "text/xml",
 			};
+		}
+
+		public async Task<IActionResult> Pendings()
+		{
+			await _engine.ProcessPending();
+			return LocalRedirect("/");
 		}
 	}
 }

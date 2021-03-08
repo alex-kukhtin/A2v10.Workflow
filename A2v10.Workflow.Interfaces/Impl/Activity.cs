@@ -19,9 +19,8 @@ namespace A2v10.Workflow.Interfaces
 			return Enumerable.Empty<IActivity>();
 		}
 
-		public ValueTask CancelAsync(IExecutionContext context)
+		public void Cancel(IExecutionContext context)
 		{
-			return this.TraverseAsync(act => act.CancelAsync(context));
 		}
 
 		public virtual void OnEndInit()

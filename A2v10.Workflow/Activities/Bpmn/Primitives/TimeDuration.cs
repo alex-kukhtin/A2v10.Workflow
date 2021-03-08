@@ -1,16 +1,10 @@
-﻿using A2v10.System.Xaml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace A2v10.Workflow.Bpmn
 {
-	[ContentProperty("Expression")]
-	public class TimeDuration : BaseElement
+	public class TimeDuration : TimeBase
 	{
-		public String Type { get; init; }
-		public String Expression { get; init; }
+		public override Boolean CanRepeat => false;
+		public override DateTime NextTriggerTime => DateTime.UtcNow + TimeSpan.Parse(Expression);
 	}
 }

@@ -16,9 +16,10 @@ namespace A2v10.Workflow.Bpmn
 
 		#region IActivity
 
-		public ValueTask CancelAsync(IExecutionContext context)
+		public virtual void Cancel(IExecutionContext context)
 		{
-			return this.TraverseAsync(act => act.CancelAsync(context));
+			foreach (var ch in EnumChildren())
+				ch.Cancel(context);
 		}
 
 		public virtual IEnumerable<IActivity> EnumChildren()

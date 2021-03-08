@@ -12,6 +12,8 @@ namespace A2v10.Workflow
 
 		public List<Object> ExternalBookmarks { get; init; }
 
+		public List<Object> ExternalEvents { get; init; }
+
 		public List<Object> TrackRecords { get; init; }
 
 		public List<DeferredElement> Deferred { get; init; }

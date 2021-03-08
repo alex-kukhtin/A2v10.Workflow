@@ -11,7 +11,7 @@ namespace A2v10.Workflow.Interfaces
 		String Id { get; }
 
 		ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete);
-		ValueTask CancelAsync(IExecutionContext context);
+		void Cancel(IExecutionContext context);
 
 		IEnumerable<IActivity> EnumChildren();
 

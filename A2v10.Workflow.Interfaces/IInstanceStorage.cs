@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace A2v10.Workflow.Interfaces
@@ -11,5 +12,7 @@ namespace A2v10.Workflow.Interfaces
 		Task Save(IInstance instance);
 
 		Task WriteException(Guid id, Exception ex);
+
+		Task<IEnumerable<IPendingInstance>> GetPendingAsync();
 	}
 }

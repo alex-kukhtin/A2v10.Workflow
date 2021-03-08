@@ -75,8 +75,7 @@ namespace A2v10.Workflow
 
 		}
 
-
-		public async ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null)
+		private async ValueTask<IInstance> Handle(Guid id, Func<ExecutionContext, ValueTask> action)
 		{
 			try
 			{
@@ -84,18 +83,30 @@ namespace A2v10.Workflow
 				inst.Workflow.Root.OnEndInit();
 				var context = new ExecutionContext(_serviceProvider, _tracker, inst.Workflow.Root);
 				context.SetState(inst.State);
-				await context.ResumeAsync(bookmark, reply);
+				await action(context);
 				await context.RunAsync();
 				SetInstanceState(inst, context);
 				await _instanceStorage.Save(inst);
 				return inst;
-			} 
+			}
 			catch (Exception ex)
 			{
 				await _instanceStorage.WriteException(id, ex);
 				throw;
 			}
 		}
+
+
+		public ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null)
+		{
+			return Handle(id, context => context.ResumeAsync(bookmark, reply));
+		}
+
+		public ValueTask<IInstance> HandleEventAsync(Guid id, String eventKey, Object reply = null)
+		{
+			return Handle(id, context => context.HandleEventAsync(eventKey, reply));
+		}
+
 
 		void SetInstanceState(IInstance inst, ExecutionContext context)
 		{
@@ -106,6 +117,7 @@ namespace A2v10.Workflow
 			{
 				ExternalVariables = context.GetExternalVariables(inst.State),
 				ExternalBookmarks = context.GetExternalBookmarks(),
+				ExternalEvents = context.GetExternalEvents(),
 				TrackRecords = context.GetTrackRecords(),
 				Deferred = _deferredTarget.Deferred
 			};
@@ -142,6 +154,12 @@ namespace A2v10.Workflow
 		{
 			await RunAsync(prm.InstanceId, prm.Parameters);
 			return new ResumeProcessResponse();
+		}
+
+		public async ValueTask ProcessPending()
+		{
+			foreach (var pi in await _instanceStorage.GetPendingAsync())
+				await HandleEventAsync(pi.InstanceId, pi.EventKey);
 		}
 	}
 }

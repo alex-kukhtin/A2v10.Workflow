@@ -13,5 +13,8 @@ namespace A2v10.Workflow.Interfaces
 		ValueTask<IInstance> RunAsync(IInstance instance, Object args = null);
 
 		ValueTask<IInstance> ResumeAsync(Guid id, String bookmark, Object reply = null);
+		ValueTask<IInstance> HandleEventAsync(Guid id, String eventKey, Object reply = null);
+
+		ValueTask ProcessPending();
 	}
 }

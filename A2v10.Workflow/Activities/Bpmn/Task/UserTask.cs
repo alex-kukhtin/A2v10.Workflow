@@ -17,14 +17,14 @@ namespace A2v10.Workflow.Bpmn
 
 		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
-			context.SetBookmark(Id, OnUserTaskComplete);
+			context.SetBookmark(Id, this, OnUserTaskComplete);
 			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnUserTaskComplete")]
 		ValueTask OnUserTaskComplete(IExecutionContext context, String bookmark, Object result)
 		{
-			IsComplete = true;
+			CompleteTask(context);
 			context.RemoveBookmark(bookmark);
 			context.ExecuteResult(Id, nameof(Script), result);
 			return CompleteBody(context);

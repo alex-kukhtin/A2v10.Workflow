@@ -11,7 +11,7 @@ namespace A2v10.Workflow.Bpmn
 
 	public class ParallelGateway : Gateway
 	{
-		private readonly List<IToken> _tokens = new List<IToken>();
+		private readonly List<IToken> _tokens = new();
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{

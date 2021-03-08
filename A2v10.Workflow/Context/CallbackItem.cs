@@ -1,14 +1,17 @@
-﻿using A2v10.Workflow.Interfaces;
+﻿
 using System;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using A2v10.Workflow.Interfaces;
+
 namespace A2v10.Workflow
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 	using ResumeAction = Func<IExecutionContext, String, Object, ValueTask>;
+	using EventAction = Func<IExecutionContext, IWorkflowEvent, Object, ValueTask>;
 
 	public class CallbackItem
 	{
@@ -86,6 +89,12 @@ namespace A2v10.Workflow
 		{
 			var mi = GetMethod(activity);
 			return Delegate.CreateDelegate(typeof(ResumeAction), activity, mi) as ResumeAction;
+		}
+
+		public EventAction ToEvent(IActivity activity)
+		{
+			var mi = GetMethod(activity);
+			return Delegate.CreateDelegate(typeof(EventAction), activity, mi) as EventAction;
 		}
 	}
 

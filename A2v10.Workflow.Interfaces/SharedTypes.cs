@@ -8,6 +8,8 @@ namespace A2v10.Workflow.Interfaces
 		Execute = 1,
 		Bookmark = 2,
 		Resume = 3,
+		Event = 4,
+		HandleEvent = 5,
 		Exception = 999
 	}
 

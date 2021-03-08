@@ -51,6 +51,13 @@ namespace A2v10.Workflow.Bpmn
 			await ExecuteBody(context);
 		}
 
+		public override void Cancel(IExecutionContext context)
+		{
+			CompleteTask(context);
+			context.RemoveBookmark(Id);
+			base.Cancel(context);
+		}
+
 
 		protected virtual ValueTask CompleteBody(IExecutionContext context)
 		{
@@ -92,9 +99,14 @@ namespace A2v10.Workflow.Bpmn
 		[StoreName("OnEventComplete")]
 		protected virtual ValueTask EventComplete(IExecutionContext context, IActivity activity)
 		{
-
 			return ValueTask.CompletedTask;
 		}
 
+		protected virtual void CompleteTask(IExecutionContext context)
+		{
+			IsComplete = true;
+			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
+				context.RemoveEvent(ev.Id);
+		}
 	}
 }

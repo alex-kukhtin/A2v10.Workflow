@@ -17,6 +17,7 @@ namespace A2v10.Workflow.Interfaces
 		ExpandoObject ExternalVariables { get; }
 		List<Object> ExternalBookmarks { get; }
 		List<Object> TrackRecords { get; }
+		List<Object> ExternalEvents { get; }
 
 		List<DeferredElement> Deferred { get; }
 	}
