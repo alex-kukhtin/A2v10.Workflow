@@ -45,11 +45,11 @@ namespace A2v10.Workflow
 			{
 				if (onComplete != null)
 					return onComplete(context, this);
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			}
 			foreach (var br in Branches)
 				context.Schedule(br, OnBranchComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnBranchComplete")]
@@ -59,7 +59,7 @@ namespace A2v10.Workflow
 			// TODO: cancel
 			if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

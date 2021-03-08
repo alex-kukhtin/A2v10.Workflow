@@ -15,7 +15,7 @@ namespace A2v10.Workflow
 			var node = Parent.FindNode(Next);
 			if (node != null)
 				context.Schedule(node, onComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

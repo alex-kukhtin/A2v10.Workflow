@@ -37,13 +37,13 @@ namespace A2v10.Workflow
 			{
 				if (onComplete != null)
 					return onComplete(context, this);
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			}
 			var start = Nodes.Find(n => n.IsStart);
 			if (start == null)
 				throw new WorkflowException($"Flowchart (Ref={Id}. Start node not found");
 			context.Schedule(start, onComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		#region IScriptable

@@ -63,12 +63,12 @@ namespace A2v10.Workflow
 			{
 				if (onComplete != null)
 					return onComplete(context, this);
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			}
 			_next = 0;
 			var first = Activities[_next++];
 			context.Schedule(first, OnChildComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnChildComplete")]
@@ -84,7 +84,7 @@ namespace A2v10.Workflow
 				var next = Activities[_next++];
 				context.Schedule(next, OnChildComplete, _token);
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace A2v10.Workflow.Bpmn
 		{
 			var target = Parent.FindElement<BpmnActivity>(TargetRef);
 			context.Schedule(target, onComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		#region IScriptable

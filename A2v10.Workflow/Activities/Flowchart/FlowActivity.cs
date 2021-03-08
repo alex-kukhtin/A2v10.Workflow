@@ -35,7 +35,7 @@ namespace A2v10.Workflow
 		{
 			_onComplete = onComplete;
 			context.Schedule(Activity, OnChildComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public override IEnumerable<IActivity> EnumChildren()
@@ -50,7 +50,7 @@ namespace A2v10.Workflow
 				context.Schedule(Parent.FindNode(Next), _onComplete, _token);
 			else if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

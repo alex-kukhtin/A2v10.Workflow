@@ -32,7 +32,7 @@ namespace A2v10.Workflow
 				else if (onComplete != null)
 					return onComplete(context, this);
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public override IEnumerable<IActivity> EnumChildren()

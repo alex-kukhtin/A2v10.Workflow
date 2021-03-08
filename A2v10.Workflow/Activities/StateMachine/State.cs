@@ -53,10 +53,10 @@ namespace A2v10.Workflow
 			if (Entry != null)
 				context.Schedule(Entry, OnEntryComplete, token);
 			else if (ScheduleTransitions(context))
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			else
 				return ScheduleExit(context, Next);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		// Schedule all transitions.
@@ -76,14 +76,14 @@ namespace A2v10.Workflow
 				context.Schedule(Exit, _onComplete, _token);
 			else if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnEntryComplete")]
 		ValueTask OnEntryComplete(IExecutionContext context, IActivity activity)
 		{
 			if (ScheduleTransitions(context))
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			else
 				return ScheduleExit(context, Next);
 		}
@@ -99,7 +99,7 @@ namespace A2v10.Workflow
 				NextState = tr.NextState;
 				return ScheduleExit(context, tr.NextState);
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

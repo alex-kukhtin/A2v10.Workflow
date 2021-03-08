@@ -21,7 +21,7 @@ namespace A2v10.Workflow
 				nextNode = Parent.FindNode(Next);
 			if (nextNode != null)
 				context.Schedule(nextNode, onComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		#region IScriptable

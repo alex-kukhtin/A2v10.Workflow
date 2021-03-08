@@ -16,7 +16,7 @@ namespace A2v10.Workflow.Bpmn
 				context.Schedule(flowToExecute, null, token);
 			if (onComplete != null)
 				return onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		SequenceFlow FindFlowToExecute(IExecutionContext context)

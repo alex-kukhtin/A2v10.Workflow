@@ -18,9 +18,11 @@ namespace A2v10.Workflow.Bpmn
 		{
 			foreach (var ev in Children.OfType<EventDefinition>())
 			{
+				ev.ExecuteAsync(context);
+				int z = 55;
 				//ev.Run();
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public async ValueTask OnTrigger(IExecutionContext context)

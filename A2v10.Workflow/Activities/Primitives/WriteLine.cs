@@ -21,7 +21,7 @@ namespace A2v10.Workflow
 			Console.WriteLine(val);
 			if (onComplete != null)
 				return onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

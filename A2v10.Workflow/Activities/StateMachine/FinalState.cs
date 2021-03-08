@@ -17,7 +17,7 @@ namespace A2v10.Workflow
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			context.Schedule(Entry, onComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public override IEnumerable<IActivity> EnumChildren()

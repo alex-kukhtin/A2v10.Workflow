@@ -31,12 +31,12 @@ namespace A2v10.Workflow.Bpmn
 			_onComplete = onComplete;
 			_token = token;
 			if (!IsExecutable || Children == null)
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			var start = Elems<Event>().FirstOrDefault(ev => ev.IsStart);
 			if (start == null)
 				throw new WorkflowException($"Process (Id={Id}). Start event not found");
 			context.Schedule(start, OnElemComplete, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnElemComplete")]
@@ -44,14 +44,14 @@ namespace A2v10.Workflow.Bpmn
 		{
 			if (activity is EndEvent)
 				return ProcessComplete(context);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		ValueTask ProcessComplete(IExecutionContext context)
 		{
 			if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public override void OnEndInit()

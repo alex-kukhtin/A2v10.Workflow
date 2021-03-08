@@ -39,16 +39,16 @@ namespace A2v10.Workflow.Bpmn
 
 
 
-		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
+		public override async ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
 			_onComplete = onComplete;
 			_token = token;
 			// boundary events
 			foreach (var ev in Parent.FindAll<BoundaryEvent>(ev => ev.AttachedToRef == Id))
-			{
-			}
-			// loop
-			return  ExecuteBody(context);
+				await ev.ExecuteAsync(context, Parent.NewToken(), EventComplete);
+
+			// loop here
+			await ExecuteBody(context);
 		}
 
 
@@ -58,7 +58,7 @@ namespace A2v10.Workflow.Bpmn
 			{
 				if (_onComplete != null)
 					return _onComplete(context, this);
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 			}
 
 			if (Outgoing.Count() == 1)
@@ -81,12 +81,20 @@ namespace A2v10.Workflow.Bpmn
 			}
 			if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public virtual ValueTask ExecuteBody(IExecutionContext context)
 		{
 			return CompleteBody(context);
 		}
+
+		[StoreName("OnEventComplete")]
+		protected virtual ValueTask EventComplete(IExecutionContext context, IActivity activity)
+		{
+
+			return ValueTask.CompletedTask;
+		}
+
 	}
 }

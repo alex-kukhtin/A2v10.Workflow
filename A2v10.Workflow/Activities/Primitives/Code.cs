@@ -15,7 +15,7 @@ namespace A2v10.Workflow
 			context.Execute(Id, nameof(Script));
 			if (onComplete != null)
 				return onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		#region IScriptable

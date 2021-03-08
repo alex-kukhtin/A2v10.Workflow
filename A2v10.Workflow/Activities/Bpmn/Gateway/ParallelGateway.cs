@@ -20,7 +20,7 @@ namespace A2v10.Workflow.Bpmn
 			if (HasIncoming && _tokens.Count == Incoming.Count())
 				return DoOutgoing(context, onComplete);
 			else
-				return new ValueTask();
+				return ValueTask.CompletedTask;
 		}
 
 		public ValueTask DoOutgoing(IExecutionContext context, ExecutingAction onComplete)
@@ -37,7 +37,7 @@ namespace A2v10.Workflow.Bpmn
 			}
 			if (onComplete != null)
 				return onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

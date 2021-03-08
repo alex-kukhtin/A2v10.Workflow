@@ -15,7 +15,7 @@ namespace A2v10.Workflow
 		{
 			_onComplete = onComplete;
 			context.SetBookmark(Bookmark, OnBookmarkComplete);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnBookmarkComplete")]
@@ -24,7 +24,7 @@ namespace A2v10.Workflow
 			context.RemoveBookmark(bookmark);
 			if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 	}

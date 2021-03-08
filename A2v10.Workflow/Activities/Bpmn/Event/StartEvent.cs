@@ -27,7 +27,7 @@ namespace A2v10.Workflow.Bpmn
 				// generate new token for every outogoing flow!
 				context.Schedule(flowElem, onComplete, Parent.NewToken());
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 	}
 }

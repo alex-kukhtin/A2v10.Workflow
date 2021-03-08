@@ -53,7 +53,7 @@ namespace A2v10.Workflow
 				throw new WorkflowException("Flowchart. Start node not found");
 			_currentState = startNode.Id;
 			context.Schedule(startNode, OnNextState, token);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnNextState")]
@@ -69,7 +69,7 @@ namespace A2v10.Workflow
 			}
 			else if (_onComplete != null)
 				return _onComplete(context, this);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		#region IScriptable

@@ -27,7 +27,7 @@ namespace A2v10.Workflow
 				context.Schedule(Trigger, OnTriggerComplete, token);
 			else
 				return ContinueExecute(context);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnTriggerComplete")]
@@ -45,14 +45,14 @@ namespace A2v10.Workflow
 				if (Action != null)
 				{
 					context.Schedule(Action, _onComplete, _token);
-					return new ValueTask();
+					return ValueTask.CompletedTask;
 				}
 			}
 			if (_onComplete != null)
 			{
 				return _onComplete(context, this);
 			}
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		public override IEnumerable<IActivity> EnumChildren()

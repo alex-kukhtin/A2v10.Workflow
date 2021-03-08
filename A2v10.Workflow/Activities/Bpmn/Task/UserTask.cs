@@ -18,7 +18,7 @@ namespace A2v10.Workflow.Bpmn
 		public override ValueTask ExecuteBody(IExecutionContext context)
 		{
 			context.SetBookmark(Id, OnUserTaskComplete);
-			return new ValueTask();
+			return ValueTask.CompletedTask;
 		}
 
 		[StoreName("OnUserTaskComplete")]
