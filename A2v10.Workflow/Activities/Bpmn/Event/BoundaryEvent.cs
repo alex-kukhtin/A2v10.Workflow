@@ -8,34 +8,10 @@ namespace A2v10.Workflow.Bpmn
 {
 	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
 
-	public class BoundaryEvent : Event, IStorable, ICanComplete
+	public class BoundaryEvent : Event
 	{
 		public String AttachedToRef { get; init; }
-		public Boolean? CancelActivity { get; init; } // default is true
-
-		public Boolean IsComplete { get; private set; }
-
-		private ExecutingAction _onComplete;
-		private IToken _token;
-
-		#region IStorable
-		const String ON_COMPLETE = "OnComplete";
-		const String TOKEN = "Token";
-
-		public void Store(IActivityStorage storage)
-		{
-			if (IsComplete)
-				return;
-			storage.SetCallback(ON_COMPLETE, _onComplete);
-			storage.SetToken(TOKEN, _token);
-		}
-
-		public void Restore(IActivityStorage storage)
-		{
-			_onComplete = storage.GetCallback(ON_COMPLETE);
-			_token = storage.GetToken(TOKEN);
-		}
-		#endregion
+		public Boolean? CancelActivity { get; init; } // default is true!
 
 		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
@@ -49,19 +25,10 @@ namespace A2v10.Workflow.Bpmn
 			return ValueTask.CompletedTask;
 		}
 
-		public override void Cancel(IExecutionContext context)
-		{
-			SetComplete(context);
-		}
-
 		[StoreName("OnTrigger")]
 		public ValueTask OnTrigger(IExecutionContext context, IWorkflowEvent wfEvent, Object result)
 		{
-			foreach (var o in Outgoing)
-			{
-				var targetFlow = Parent.FindElement<SequenceFlow>(o.Text);
-				context.Schedule(targetFlow, _onComplete, _token);
-			}
+			ScheduleOutgoing(context);
 			if (CancelActivity == null || CancelActivity.Value)
 			{
 				var task = Parent.FindElement<BpmnTask>(AttachedToRef);
@@ -77,13 +44,6 @@ namespace A2v10.Workflow.Bpmn
 					SetComplete(context);
 			}
 			return ValueTask.CompletedTask;
-		}
-
-		void SetComplete(IExecutionContext context)
-		{
-			IsComplete = true;
-			context.RemoveEvent(Id);
-			Parent.KillToken(_token);
 		}
 	}
 

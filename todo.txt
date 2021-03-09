@@ -17,7 +17,8 @@
 31. Designer. Add/Remove buttons css (wrapper & remove position:absolute)
 32.Properties expressions. f.e: timeDuration = ${Duration}
 33. Separate UserTask. formRef attribute. 
-
+34. IntermediateCatchEvent
+35. 
 
 Xaml
 ----
