@@ -34,5 +34,10 @@ namespace A2v10.Workflow.Tracker
 			eo.Set("Activity", _id);
 			return eo;
 		}
+
+		public override string ToString()
+		{
+			return $"Activity.{_action}: id: {_id}, msg: {Message}";
+		}
 	}
 }

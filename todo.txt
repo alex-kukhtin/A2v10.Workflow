@@ -18,7 +18,7 @@
 32.Properties expressions. f.e: timeDuration = ${Duration}
 33. Separate UserTask. formRef attribute. 
 34. IntermediateCatchEvent
-35. 
+35. Listeners? внутрь каждого элемента?
 
 Xaml
 ----

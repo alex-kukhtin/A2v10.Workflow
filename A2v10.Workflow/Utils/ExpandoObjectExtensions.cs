@@ -9,6 +9,8 @@ namespace A2v10.Workflow
 	{
 		public static T Get<T>(this ExpandoObject expobj, String name)
 		{
+			if (expobj == null)
+				return default;
 			var d = expobj as IDictionary<String, Object>;
 			if (d.TryGetValue(name, out Object res))
 				return (T)Convert.ChangeType(res, typeof(T));

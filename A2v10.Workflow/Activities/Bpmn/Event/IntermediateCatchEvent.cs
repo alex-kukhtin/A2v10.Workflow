@@ -1,17 +1,35 @@
-﻿using A2v10.Workflow.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using A2v10.Workflow.Interfaces;
+
 namespace A2v10.Workflow.Bpmn
 {
+	using ExecutingAction = Func<IExecutionContext, IActivity, ValueTask>;
+
 	public class IntermediateCatchEvent : Event
 	{
-		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, Func<IExecutionContext, IActivity, ValueTask> onComplete)
+		public override ValueTask ExecuteAsync(IExecutionContext context, IToken token, ExecutingAction onComplete)
 		{
-			throw new NotImplementedException();
+			_onComplete = onComplete;
+			_token = token;
+			var eventDef = EventDefinition;
+			if (eventDef != null)
+				context.AddEvent(eventDef.CreateEvent(Id), this, OnTrigger);
+			else
+				SetComplete(context);
+			return ValueTask.CompletedTask;
+		}
+
+		[StoreName("OnTrigger")]
+		public ValueTask OnTrigger(IExecutionContext context, IWorkflowEvent wfEvent, Object result)
+		{
+			SetComplete(context);
+			ScheduleOutgoing(context);
+			return ValueTask.CompletedTask;
 		}
 	}
 }

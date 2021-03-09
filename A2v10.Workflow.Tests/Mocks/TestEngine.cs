@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using A2v10.System.Xaml;
 using A2v10.Workflow.Interfaces;
 using A2v10.Workflow.Serialization;
-using A2v10.Workflow.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace A2v10.Workflow.Tests

@@ -50,5 +50,39 @@ namespace A2v10.Workflow.Tests
 			Assert.AreEqual("Normal", res2.Get<String>("Result"));
 			Assert.AreEqual(WorkflowExecutionStatus.Complete, instResume.ExecutionStatus);
 		}
+
+		[TestMethod]
+		public async Task IntermediateTimer()
+		{
+			var xaml = File.ReadAllText("..\\..\\..\\TestFiles\\intermediate_timer.bpmn");
+
+			var sp = TestEngine.ServiceProvider();
+
+			var wfs = sp.GetService<IWorkflowStorage>();
+			var wfc = sp.GetService<IWorkflowCatalog>();
+			var ins = sp.GetService<IInstanceStorage>();
+
+			String wfId = "BoundarySimple";
+			await wfc.SaveAsync(new WorkflowDescriptor()
+			{
+				Id = wfId,
+				Body = xaml,
+				Format = "xaml"
+			});
+			var ident = await wfs.PublishAsync(wfc, wfId);
+
+			var wfe = sp.GetService<IWorkflowEngine>();
+			var inst = await wfe.CreateAsync(ident);
+			inst = await wfe.RunAsync(inst);
+			var res0 = inst.Result;
+			Assert.AreEqual("Start", res0.Get<String>("Result"));
+			Assert.AreEqual(WorkflowExecutionStatus.Idle, inst.ExecutionStatus);
+
+			await wfe.ProcessPending();
+			var instAfter = await ins.Load(inst.Id);
+			var res1 = instAfter.Result;
+			Assert.AreEqual("AfterTimer", res1.Get<String>("Result"));
+			Assert.AreEqual(WorkflowExecutionStatus.Complete, instAfter.ExecutionStatus);
+		}
 	}
 }

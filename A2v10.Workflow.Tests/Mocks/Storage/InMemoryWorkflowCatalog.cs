@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace A2v10.Workflow.Storage
+namespace A2v10.Workflow.Tests
 {
 
 	public class CatalogWorkflow
@@ -17,7 +17,7 @@ namespace A2v10.Workflow.Storage
 
 	public class InMemoryWorkflowCatalog : IWorkflowCatalog
 	{
-		private readonly Dictionary<String, CatalogWorkflow> _storage = new Dictionary<String, CatalogWorkflow>();
+		private readonly Dictionary<String, CatalogWorkflow> _storage = new ();
 
 		public Task<WorkflowElem> LoadBodyAsync(String id)
 		{

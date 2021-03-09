@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using A2v10.Workflow.Interfaces;
 
-namespace A2v10.Workflow.Storage
+namespace A2v10.Workflow.Tests
 {
 	public record StoredWorkflow
 	{
@@ -17,7 +17,7 @@ namespace A2v10.Workflow.Storage
 
 	public class InMemoryWorkflowStorage : IWorkflowStorage
 	{
-		private readonly List<StoredWorkflow> _storage = new List<StoredWorkflow>();
+		private readonly List<StoredWorkflow> _storage = new ();
 		private readonly ISerializer _serializer;
 
 		public InMemoryWorkflowStorage(ISerializer serializer)
@@ -74,7 +74,7 @@ namespace A2v10.Workflow.Storage
 				else
 					v = all.Max(x => x.Version) + 1;
 			}
-			StoredWorkflow swf = new StoredWorkflow()
+			StoredWorkflow swf = new()
 			{
 				WorkflowId = id,
 				Version = v,
