@@ -60,6 +60,8 @@ namespace A2v10.System.Xaml
 
 		public void AddNamespace(String prefix, String value)
 		{
+			if (_namespaces.ContainsKey(prefix))
+				return;
 			if (value == "http://schemas.microsoft.com/winfx/2006/xaml")
 			{
 				// xaml namespace for x:Key, etc
